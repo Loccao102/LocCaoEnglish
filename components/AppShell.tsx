@@ -1,0 +1,46 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+const nav = [
+  ["/", "⌂", "Home"],
+  ["/#skill-map", "◇", "Skill Map"],
+  ["/games", "✦", "Games"],
+  ["/dictation", "⌨", "Dictation"],
+  ["/speaking", "◉", "Speaking"],
+  ["/ielts", "▤", "IELTS"],
+];
+
+export default function AppShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <Link href="/" className="brand" aria-label="LocCao English home">
+          <span className="brand-mark">L</span>
+          <span><strong>LocCao</strong><small>English</small></span>
+        </Link>
+
+        <nav className="sidebar-nav" aria-label="Primary navigation">
+          {nav.map(([href, icon, label]) => (
+            <Link href={href} key={label} className="nav-item">
+              <span className="nav-icon">{icon}</span>
+              <span>{label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <div className="level-card">
+            <div className="level-row"><span>Level 24</span><strong>4,280 XP</strong></div>
+            <div className="progress"><i style={{ width: "86%" }} /></div>
+            <small>720 XP to level up</small>
+          </div>
+          <div className="profile-mini">
+            <span className="avatar">CL</span>
+            <span><strong>Learner</strong><small>17 day streak 🔥</small></span>
+          </div>
+        </div>
+      </aside>
+      <main className="main-content">{children}</main>
+    </div>
+  );
+}
