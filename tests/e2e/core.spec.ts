@@ -22,10 +22,21 @@ test("Word Link is actually playable", async ({ page }) => {
   await expect(page.getByText(/Connection found/)).toBeVisible();
 });
 
+test("campaign links load world-specific practice packs", async ({ page }) => {
+  await page.goto("/games/word-link?pack=travel-airport");
+  await expect(page.getByText("boarding pass", { exact: true })).toBeVisible();
+  await page.goto("/games/collocation-factory?pack=work-standup");
+  await expect(page.getByText(/WORK · STAND-UP/)).toBeVisible();
+  await expect(page.getByText("fix + ?", { exact: true })).toBeVisible();
+  await page.goto("/listening?pack=work-requirements");
+  await expect(page.getByText(/WORK · REQUIREMENTS/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /play audio/i })).toBeVisible();
+});
+
 test("listening and social production surfaces load", async ({ page }) => {
   await page.goto("/listening");
   await expect(page.getByRole("heading", { name: "Listen & Pick" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /play announcement/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /play audio/i })).toBeVisible();
   await page.goto("/social");
   await expect(page.getByRole("heading", { name: /Compete on practice/i })).toBeVisible();
   await expect(page.getByText(/LIVE CHALLENGES/i)).toBeVisible();
