@@ -1,54 +1,6 @@
 package httpapi
-
-import (
-	"net"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"time"
-
-	"github.com/Loccao102/LocCaoEnglish/backend/internal/realtime"
-)
-
-func (s *Server) security(next http.Handler) http.Handler {
-	platformMux := http.NewServeMux()
-	s.registerPlatformRoutes(platformMux)
-	platform := s.rateLimit(s.corsAllowed(platformMux))
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=(self)")
-		w.Header().Set("Cross-Origin-Resource-Policy", "same-site")
-		if r.Header.Get("X-Forwarded-Proto") == "https" || r.TLS != nil { w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains") }
-		if strings.HasPrefix(r.URL.Path, "/v1/courses") || r.URL.Path == "/v1/admin/analytics" { platform.ServeHTTP(w, r); return }
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (s *Server) rateLimit(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions { next.ServeHTTP(w, r); return }
-		scope, limit := "general", 360
-		if strings.HasPrefix(r.URL.Path, "/v1/auth/") { scope, limit = "auth", 20 }
-		if strings.HasPrefix(r.URL.Path, "/v1/ai/") || strings.HasPrefix(r.URL.Path, "/v1/conversation/") { scope, limit = "ai", 90 }
-		allowed, err := s.social.Allow(r.Context(), realtime.RateKey(scope, clientIP(r)), limit, time.Minute)
-		if err == nil && !allowed { w.Header().Set("Retry-After", "60"); problem(w, http.StatusTooManyRequests, "rate limit exceeded"); return }
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (s *Server) corsAllowed(next http.Handler) http.Handler {
-	allowed := parseOrigins(os.Getenv("CORS_ORIGINS"))
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := strings.TrimSpace(r.Header.Get("Origin")); ok := origin == "" || allowed["*"] || allowed[origin]
-		if origin != "" && ok { if allowed["*"] { w.Header().Set("Access-Control-Allow-Origin", "*") } else { w.Header().Set("Access-Control-Allow-Origin", origin); w.Header().Add("Vary", "Origin") }; w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type"); w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS") }
-		if r.Method == http.MethodOptions { if !ok { problem(w, http.StatusForbidden, "origin is not allowed"); return }; w.WriteHeader(http.StatusNoContent); return }
-		next.ServeHTTP(w, r)
-	})
-}
-
-func parseOrigins(raw string) map[string]bool { if strings.TrimSpace(raw)==""{raw="http://localhost:3000,http://127.0.0.1:3000"};out:=map[string]bool{};for _,item:=range strings.Split(raw,","){if value:=strings.TrimSpace(item);value!=""{out[value]=true}};return out }
-func clientIP(r *http.Request) string { if strings.EqualFold(os.Getenv("TRUST_PROXY"),"true"){if forwarded:=strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"),",")[0]);forwarded!=""{return forwarded}};host,_,err:=net.SplitHostPort(r.RemoteAddr);if err==nil&&host!=""{return host};return r.RemoteAddr }
-func anonymousDemoAllowed() bool { value:=strings.TrimSpace(os.Getenv("ALLOW_ANONYMOUS_DEMO"));if value==""{return true};allowed,err:=strconv.ParseBool(value);return err==nil&&allowed }
+import("net";"net/http";"os";"strconv";"strings";"time";"github.com/Loccao102/LocCaoEnglish/backend/internal/realtime")
+func(s *Server)security(next http.Handler)http.Handler{platformMux:=http.NewServeMux();s.registerPlatformRoutes(platformMux);platform:=s.rateLimit(s.corsAllowed(platformMux));return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("X-Content-Type-Options","nosniff");w.Header().Set("X-Frame-Options","DENY");w.Header().Set("Referrer-Policy","strict-origin-when-cross-origin");w.Header().Set("Permissions-Policy","camera=(), geolocation=(), microphone=(self)");w.Header().Set("Cross-Origin-Resource-Policy","same-site");if r.Header.Get("X-Forwarded-Proto")=="https"||r.TLS!=nil{w.Header().Set("Strict-Transport-Security","max-age=31536000; includeSubDomains")};if strings.HasPrefix(r.URL.Path,"/v1/courses")||r.URL.Path=="/v1/admin/analytics"||r.URL.Path=="/v1/social/events"{platform.ServeHTTP(w,r);return};next.ServeHTTP(w,r)})}
+func(s *Server)rateLimit(next http.Handler)http.Handler{return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){if r.Method==http.MethodOptions{next.ServeHTTP(w,r);return};scope,limit:="general",360;if strings.HasPrefix(r.URL.Path,"/v1/auth/"){scope,limit="auth",20};if strings.HasPrefix(r.URL.Path,"/v1/ai/")||strings.HasPrefix(r.URL.Path,"/v1/conversation/"){scope,limit="ai",90};allowed,err:=s.social.Allow(r.Context(),realtime.RateKey(scope,clientIP(r)),limit,time.Minute);if err==nil&&!allowed{w.Header().Set("Retry-After","60");problem(w,http.StatusTooManyRequests,"rate limit exceeded");return};next.ServeHTTP(w,r)})}
+func(s *Server)corsAllowed(next http.Handler)http.Handler{allowed:=parseOrigins(os.Getenv("CORS_ORIGINS"));return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){origin:=strings.TrimSpace(r.Header.Get("Origin"));ok:=origin==""||allowed["*"]||allowed[origin];if origin!=""&&ok{if allowed["*"]{w.Header().Set("Access-Control-Allow-Origin","*")}else{w.Header().Set("Access-Control-Allow-Origin",origin);w.Header().Add("Vary","Origin")};w.Header().Set("Access-Control-Allow-Headers","Authorization, Content-Type");w.Header().Set("Access-Control-Allow-Methods","GET, POST, PUT, PATCH, DELETE, OPTIONS")};if r.Method==http.MethodOptions{if!ok{problem(w,http.StatusForbidden,"origin is not allowed");return};w.WriteHeader(http.StatusNoContent);return};next.ServeHTTP(w,r)})}
+func parseOrigins(raw string)map[string]bool{if strings.TrimSpace(raw)==""{raw="http://localhost:3000,http://127.0.0.1:3000"};out:=map[string]bool{};for _,item:=range strings.Split(raw,","){if value:=strings.TrimSpace(item);value!=""{out[value]=true}};return out};func clientIP(r *http.Request)string{if strings.EqualFold(os.Getenv("TRUST_PROXY"),"true"){if forwarded:=strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"),",")[0]);forwarded!=""{return forwarded}};host,_,err:=net.SplitHostPort(r.RemoteAddr);if err==nil&&host!=""{return host};return r.RemoteAddr};func anonymousDemoAllowed()bool{value:=strings.TrimSpace(os.Getenv("ALLOW_ANONYMOUS_DEMO"));if value==""{return true};allowed,err:=strconv.ParseBool(value);return err==nil&&allowed}

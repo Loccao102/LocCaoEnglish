@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-loccao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-loccao_english}
+    volumes: ["postgres_prod:/var/lib/postgresql/data"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-loccao} -d ${POSTGRES_DB:-loccao_english}"], interval: 10s, timeout: 5s, retries: 10}
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: ["redis_prod:/data"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 5s, retries: 10}
+  ai:
+    build: {context: ., dockerfile: ai-service/Dockerfile}
+    restart: unless-stopped
+    environment:
+      LLM_CHAT_URL: ${LLM_CHAT_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
+  api:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-loccao}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-loccao_english}?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      AI_SERVICE_URL: http://ai:8090
+      CORS_ORIGINS: https://${DOMAIN}
+      TRUST_PROXY: "true"
+      ALLOW_ANONYMOUS_DEMO: "false"
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      TEACHER_EMAILS: ${TEACHER_EMAILS:-}
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      ai: {condition: service_started}
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: /api
+    restart: unless-stopped
+    depends_on: [api]
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, api]
+volumes:
+  postgres_prod: {}
+  redis_prod: {}
+  caddy_data: {}
+  caddy_config: {}
