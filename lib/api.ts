@@ -7,6 +7,8 @@ export type DailyPlan = { focus: string; totalMins: number; potentialXp: number;
 export type ReviewItem = { itemKey: string; kind: string; prompt: string; answer: string; dueAt: string; intervalDays: number; ease: number; failures: number };
 export type WritingScore = { provider: string; overall: number; criteria: { taskResponse: number; coherenceCohesion: number; lexicalResource: number; grammarRangeAccuracy: number }; strengths: string[]; improvements: string[]; rewriteExample?: string; disclaimer?: string };
 export type SpeakingFeedback = { provider: string; overall: number; scores: { fluency: number; pronunciationProxy: number; vocabulary: number; grammar: number }; match?: number; coaching: string[]; disclaimer?: string };
+export type PronunciationWord = { word?: string; accuracy?: number | null; errorType?: string; phonemes?: { phoneme?: string; accuracy?: number | null }[] };
+export type PronunciationScore = { provider: string; acousticAssessment: boolean; overall: number | null; scores: { accuracy?: number | null; fluency?: number | null; completeness?: number | null; prosody?: number | null; textMatch?: number | null; signalQuality?: number | null }; words: PronunciationWord[]; audio?: { durationSec?: number; sampleRate?: number; rms?: number; silenceRatio?: number; signalQuality?: number }; recognitionText?: string; coaching: string[]; disclaimer?: string };
 export type ConversationReply = { provider: string; reply: string; objective: string; correction?: string | null };
 export type GeneratedExercise = { id: string; type: string; skill: string; topic: string; level: string; instruction: string; focus: string };
 
@@ -26,6 +28,7 @@ export function gradeReview(itemKey: string, quality: number) { return apiFetch<
 export function recordAttempt(input: { skill: string; activity: string; itemKey: string; prompt: string; answer: string; accuracy: number; durationSec?: number }) { return apiFetch<{ xpDelta: number; newConfidence: number; level: number; reviewAdded: boolean }>("/v1/attempts", { method: "POST", body: JSON.stringify({ durationSec: 0, ...input }) }); }
 export function scoreWriting(essay: string, task: string) { return apiFetch<WritingScore>("/v1/ai/writing-score", { method: "POST", body: JSON.stringify({ essay, task, level: "IELTS" }) }); }
 export function getSpeakingFeedback(transcript: string, target: string) { return apiFetch<SpeakingFeedback>("/v1/ai/speaking-feedback", { method: "POST", body: JSON.stringify({ transcript, target, topic: "travel" }) }); }
+export function scorePronunciation(audioBase64: string, referenceText: string, transcript = "") { return apiFetch<PronunciationScore>("/v1/ai/pronunciation-score", { method: "POST", body: JSON.stringify({ audioBase64, referenceText, transcript, locale: "en-US" }) }); }
 export function sendConversation(message: string, history: { role: string; content: string }[] = []) { return apiFetch<ConversationReply>("/v1/conversation/reply", { method: "POST", body: JSON.stringify({ message, scenario: "airport", level: "B1", history }) }); }
 export function generateExercises(skill: string, topic: string, level: string, count = 6) { return apiFetch<{ provider: string; items: GeneratedExercise[] }>("/v1/ai/exercises", { method: "POST", body: JSON.stringify({ skill, topic, level, count, weak_items: [] }) }); }
 

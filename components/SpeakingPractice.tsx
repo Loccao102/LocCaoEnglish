@@ -1,12 +1,88 @@
 "use client";
 
-import { useMemo,useRef,useState } from "react";
-import { getSpeakingFeedback, recordAttempt, SpeakingFeedback } from "@/lib/api";
-const prompts=["Could I have a window seat, please?","I usually prefer travelling by train because it is more comfortable.","One of the main reasons people move to large cities is the availability of better job opportunities."];
-function similarity(target:string,transcript:string){const clean=(v:string)=>v.toLowerCase().replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean);const expected=clean(target);const spoken=new Set(clean(transcript));return Math.round(expected.filter((w)=>spoken.has(w)).length/expected.length*100)}
-export default function SpeakingPractice(){const [index,setIndex]=useState(0);const [listening,setListening]=useState(false);const [transcript,setTranscript]=useState("");const [supported,setSupported]=useState(true);const [coach,setCoach]=useState<SpeakingFeedback|null>(null);const [busy,setBusy]=useState(false);const recognitionRef=useRef<any>(null);const prompt=prompts[index];const score=useMemo(()=>transcript?similarity(prompt,transcript):0,[prompt,transcript]);
- function playPrompt(){if(!("speechSynthesis" in window))return;const u=new SpeechSynthesisUtterance(prompt);u.lang="en-US";u.rate=.9;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}
- function start(){const BrowserRecognition=(window as any).SpeechRecognition||(window as any).webkitSpeechRecognition;if(!BrowserRecognition){setSupported(false);return}const r=new BrowserRecognition();r.lang="en-US";r.interimResults=true;r.continuous=false;r.onstart=()=>setListening(true);r.onend=()=>setListening(false);r.onerror=()=>setListening(false);r.onresult=(event:any)=>{let value="";for(let i=event.resultIndex;i<event.results.length;i+=1)value+=event.results[i][0].transcript;setTranscript(value.trim());setCoach(null)};recognitionRef.current=r;r.start()}
- async function analyze(){if(!transcript)return;setBusy(true);try{const result=await getSpeakingFeedback(transcript,prompt);setCoach(result);await recordAttempt({skill:"Speaking",activity:"shadowing",itemKey:`shadow:${index}`,prompt,answer:prompt,accuracy:(result.match??score)/100})}catch{setCoach({provider:"browser fallback",overall:Math.max(4,Math.round(score/10)/2+4),scores:{fluency:6,pronunciationProxy:Math.max(4,Math.round(score/10)),vocabulary:6,grammar:6},match:score,coaching:["Repeat in thought groups rather than word by word.","Stress the key content words.","Try one more time without reading the sentence."],disclaimer:"Fallback uses transcript matching only."})}finally{setBusy(false)}}
- function next(){setIndex((v)=>(v+1)%prompts.length);setTranscript("");setCoach(null)}
- return <section className="speaking-card"><div className="scene-tag">AIRPORT · SHADOWING</div><div className="speaker-bubble"><span className="npc-avatar">AI</span><div><small>Listen and repeat naturally</small><strong>{prompt}</strong></div><button onClick={playPrompt}>🔊</button></div><div className={`mic-stage ${listening?"live":""}`}><button className="mic-button" onClick={start}>{listening?"■":"●"}</button><strong>{listening?"Listening…":"Tap to speak"}</strong><small>Speech recognition creates a transcript; this mode does not upload raw audio.</small></div>{!supported&&<div className="notice error">Speech recognition is not available in this browser. Try Chromium or connect a server-side STT provider later.</div>}{transcript&&<><div className="speech-result"><div><span>TRANSCRIPT</span><p>“{transcript}”</p></div><div className="speech-score"><strong>{score}</strong><small>text match</small></div></div><div className="practice-actions"><button className="button ghost" onClick={start}>Try again</button><button className="button ghost" disabled={busy} onClick={analyze}>{busy?"Analyzing…":"Coach me"}</button><button className="button primary" onClick={next}>Next prompt →</button></div></>}{coach&&<div className="speaking-coach"><div className="coach-score"><strong>{coach.overall.toFixed(1)}</strong><small>practice band</small></div><div className="coach-metrics">{Object.entries(coach.scores).map(([key,value])=><span key={key}><small>{key.replace("pronunciationProxy","pronunciation proxy")}</small><b>{Number(value).toFixed(1)}</b></span>)}</div><ul>{coach.coaching.map((x)=><li key={x}>{x}</li>)}</ul><p>{coach.disclaimer}</p></div>}</section>}
+import { useMemo, useRef, useState } from "react";
+import { getSpeakingFeedback, PronunciationScore, recordAttempt, scorePronunciation, SpeakingFeedback } from "@/lib/api";
+
+const prompts = [
+  "Could I have a window seat, please?",
+  "I usually prefer travelling by train because it is more comfortable.",
+  "One of the main reasons people move to large cities is the availability of better job opportunities.",
+];
+
+function similarity(target: string, transcript: string) {
+  const clean = (value: string) => value.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter(Boolean);
+  const expected = clean(target); const spoken = new Set(clean(transcript));
+  return Math.round(expected.filter((word) => spoken.has(word)).length / expected.length * 100);
+}
+
+function downsample(input: Float32Array, sourceRate: number, targetRate = 16000) {
+  if (sourceRate === targetRate) return input;
+  const ratio = sourceRate / targetRate;
+  const output = new Float32Array(Math.round(input.length / ratio));
+  for (let i = 0; i < output.length; i += 1) {
+    const start = Math.floor(i * ratio); const end = Math.min(input.length, Math.floor((i + 1) * ratio));
+    let total = 0; for (let j = start; j < end; j += 1) total += input[j];
+    output[i] = total / Math.max(1, end - start);
+  }
+  return output;
+}
+
+function wavBase64(chunks: Float32Array[], sampleRate: number) {
+  const size = chunks.reduce((sum, chunk) => sum + chunk.length, 0); const merged = new Float32Array(size); let offset = 0;
+  chunks.forEach((chunk) => { merged.set(chunk, offset); offset += chunk.length; });
+  const pcm = downsample(merged, sampleRate, 16000); const buffer = new ArrayBuffer(44 + pcm.length * 2); const view = new DataView(buffer);
+  const write = (pos: number, text: string) => { for (let i = 0; i < text.length; i += 1) view.setUint8(pos + i, text.charCodeAt(i)); };
+  write(0, "RIFF"); view.setUint32(4, 36 + pcm.length * 2, true); write(8, "WAVE"); write(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, 16000, true); view.setUint32(28, 32000, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); write(36, "data"); view.setUint32(40, pcm.length * 2, true);
+  let cursor = 44; pcm.forEach((sample) => { const clipped = Math.max(-1, Math.min(1, sample)); view.setInt16(cursor, clipped < 0 ? clipped * 0x8000 : clipped * 0x7fff, true); cursor += 2; });
+  const bytes = new Uint8Array(buffer); let binary = ""; const step = 0x8000; for (let i = 0; i < bytes.length; i += step) binary += String.fromCharCode(...bytes.subarray(i, i + step));
+  return btoa(binary);
+}
+
+type RecorderHandle = { context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode; gain: GainNode; chunks: Float32Array[]; sampleRate: number };
+
+export default function SpeakingPractice() {
+  const [index, setIndex] = useState(0); const [recording, setRecording] = useState(false); const [transcript, setTranscript] = useState(""); const [supported, setSupported] = useState(true); const [coach, setCoach] = useState<SpeakingFeedback | null>(null); const [pronunciation, setPronunciation] = useState<PronunciationScore | null>(null); const [audioBase64, setAudioBase64] = useState(""); const [busy, setBusy] = useState(false);
+  const recognitionRef = useRef<any>(null); const recorderRef = useRef<RecorderHandle | null>(null); const timerRef = useRef<number | null>(null); const prompt = prompts[index]; const score = useMemo(() => transcript ? similarity(prompt, transcript) : 0, [prompt, transcript]);
+
+  function playPrompt() { if (!("speechSynthesis" in window)) return; const utterance = new SpeechSynthesisUtterance(prompt); utterance.lang = "en-US"; utterance.rate = .9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); }
+
+  async function start() {
+    if (recording) { await stop(); return; }
+    if (!navigator.mediaDevices?.getUserMedia) { setSupported(false); return; }
+    setTranscript(""); setCoach(null); setPronunciation(null); setAudioBase64("");
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
+    const context = new AudioContext(); const source = context.createMediaStreamSource(stream); const processor = context.createScriptProcessor(4096, 1, 1); const gain = context.createGain(); gain.gain.value = 0; const chunks: Float32Array[] = [];
+    processor.onaudioprocess = (event) => chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    source.connect(processor); processor.connect(gain); gain.connect(context.destination); recorderRef.current = { context, stream, source, processor, gain, chunks, sampleRate: context.sampleRate }; setRecording(true);
+    const BrowserRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (BrowserRecognition) {
+      const recognition = new BrowserRecognition(); recognition.lang = "en-US"; recognition.interimResults = true; recognition.continuous = true; recognition.onresult = (event: any) => { let value = ""; for (let i = 0; i < event.results.length; i += 1) value += event.results[i][0].transcript + " "; setTranscript(value.trim()); }; recognition.onerror = () => {}; recognitionRef.current = recognition; try { recognition.start(); } catch {}
+    } else setSupported(false);
+    timerRef.current = window.setTimeout(() => { void stop(); }, 10000);
+  }
+
+  async function stop() {
+    const recorder = recorderRef.current; if (!recorder) return; if (timerRef.current) window.clearTimeout(timerRef.current); timerRef.current = null;
+    try { recognitionRef.current?.stop(); } catch {} recognitionRef.current = null; recorder.processor.disconnect(); recorder.source.disconnect(); recorder.gain.disconnect(); recorder.stream.getTracks().forEach((track) => track.stop()); const base64 = wavBase64(recorder.chunks, recorder.sampleRate); setAudioBase64(base64); recorderRef.current = null; setRecording(false); await recorder.context.close();
+  }
+
+  async function analyze() {
+    if (!audioBase64 && !transcript) return; setBusy(true);
+    try {
+      const [speechResult, acousticResult] = await Promise.all([
+        transcript ? getSpeakingFeedback(transcript, prompt) : Promise.resolve(null),
+        audioBase64 ? scorePronunciation(audioBase64, prompt, transcript) : Promise.resolve(null),
+      ]);
+      if (speechResult) setCoach(speechResult); if (acousticResult) setPronunciation(acousticResult);
+      const accuracy = acousticResult?.acousticAssessment && acousticResult.overall != null ? acousticResult.overall / 100 : (speechResult?.match ?? score) / 100;
+      await recordAttempt({ skill: "Speaking", activity: acousticResult?.acousticAssessment ? "pronunciation-assessment" : "shadowing", itemKey: `shadow:${index}`, prompt, answer: prompt, accuracy });
+    } catch { if (transcript) setCoach({ provider: "browser fallback", overall: Math.max(4, Math.round(score / 10) / 2 + 4), scores: { fluency: 6, pronunciationProxy: Math.max(4, Math.round(score / 10)), vocabulary: 6, grammar: 6 }, match: score, coaching: ["Repeat in thought groups rather than word by word.", "Stress the key content words."], disclaimer: "Fallback uses transcript matching only." }); }
+    finally { setBusy(false); }
+  }
+
+  function next() { setIndex((value) => (value + 1) % prompts.length); setTranscript(""); setCoach(null); setPronunciation(null); setAudioBase64(""); }
+
+  return <section className="speaking-card"><div className="scene-tag">SPEAKING · ACOUSTIC SHADOWING</div><div className="speaker-bubble"><span className="npc-avatar">AI</span><div><small>Listen and repeat naturally</small><strong>{prompt}</strong></div><button onClick={playPrompt}>🔊</button></div><div className={`mic-stage ${recording ? "live" : ""}`}><button className="mic-button" onClick={() => void start()}>{recording ? "■" : "●"}</button><strong>{recording ? "Recording PCM audio… tap to stop" : audioBase64 ? "Recording ready" : "Tap to record"}</strong><small>16 kHz mono WAV is created in your browser. Audio is sent only when you request assessment.</small></div>{!supported && <div className="notice error">Live transcript is unavailable in this browser. Acoustic assessment can still work when microphone recording is supported.</div>}{transcript && <div className="speech-result"><div><span>TRANSCRIPT</span><p>“{transcript}”</p></div><div className="speech-score"><strong>{score}</strong><small>text match</small></div></div>}{(audioBase64 || transcript) && <div className="practice-actions"><button className="button ghost" onClick={() => void start()}>Record again</button><button className="button ghost" disabled={busy || recording} onClick={analyze}>{busy ? "Assessing…" : "Assess pronunciation"}</button><button className="button primary" onClick={next}>Next prompt →</button></div>}
+  {pronunciation && <div className="speaking-coach"><div className="coach-score"><strong>{pronunciation.overall == null ? "—" : Math.round(pronunciation.overall)}</strong><small>{pronunciation.acousticAssessment ? "acoustic / 100" : "provider not configured"}</small></div><div className="coach-metrics">{Object.entries(pronunciation.scores).filter(([, value]) => value != null).map(([key, value]) => <span key={key}><small>{key}</small><b>{Math.round(Number(value))}</b></span>)}</div>{pronunciation.words?.length > 0 && <ul>{pronunciation.words.filter((word) => (word.accuracy ?? 100) < 75 || word.errorType !== "None").slice(0, 5).map((word, i) => <li key={`${word.word}-${i}`}>{word.word}: {Math.round(word.accuracy ?? 0)}{word.errorType && word.errorType !== "None" ? ` · ${word.errorType}` : ""}</li>)}</ul>}<p>{pronunciation.disclaimer}</p></div>}
+  {coach && <div className="speaking-coach"><div className="coach-score"><strong>{coach.overall.toFixed(1)}</strong><small>language coach</small></div><div className="coach-metrics">{Object.entries(coach.scores).map(([key, value]) => <span key={key}><small>{key.replace("pronunciationProxy", "pronunciation proxy")}</small><b>{Number(value).toFixed(1)}</b></span>)}</div><ul>{coach.coaching.map((item) => <li key={item}>{item}</li>)}</ul><p>{coach.disclaimer}</p></div>}</section>;
+}

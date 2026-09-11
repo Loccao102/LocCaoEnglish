@@ -59,7 +59,7 @@ jobs:
       - name: Test fallback engines
         run: python -m unittest discover -s tests -v
       - name: Import FastAPI app
-        run: python -c "from app.main import app; print(app.title)"
+        run: python -c "from app.server import app; print(app.title)"
 
   compose:
     runs-on: ubuntu-latest
@@ -93,6 +93,17 @@ jobs:
           curl -fsS -X POST http://localhost:8080/v1/ai/writing-score \
             -H 'Content-Type: application/json' \
             -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
+      - name: Smoke test pronunciation fallback route
+        run: |
+          python - <<'PY' > /tmp/pronunciation.json
+          import base64, io, json, struct, wave
+          frames = b''.join(struct.pack('<h', 3000 if i % 20 < 10 else -3000) for i in range(16000))
+          buf = io.BytesIO()
+          with wave.open(buf, 'wb') as out:
+              out.setnchannels(1); out.setsampwidth(2); out.setframerate(16000); out.writeframes(frames)
+          print(json.dumps({'audioBase64': base64.b64encode(buf.getvalue()).decode(), 'referenceText': 'hello world', 'transcript': 'hello world', 'locale': 'en-US'}))
+          PY
+          curl -fsS -X POST http://localhost:8080/v1/ai/pronunciation-score -H 'Content-Type: application/json' --data-binary @/tmp/pronunciation.json | grep -q 'acousticAssessment'
       - name: Show service status
         run: docker compose ps
       - name: Stop services
