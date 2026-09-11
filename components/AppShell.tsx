@@ -18,7 +18,7 @@ const nav = [
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const immersive = pathname === "/worlds" || pathname.startsWith("/worlds/");
+  const immersive = pathname === "/worlds" || pathname.startsWith("/worlds/") || pathname === "/missions/cafe";
 
   return (
     <div className={`app-shell ${immersive ? "immersive-route" : ""}`}>
