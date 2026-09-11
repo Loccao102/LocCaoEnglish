@@ -72,6 +72,12 @@ jobs:
         run: curl -fsS http://localhost:8080/v1/player/questline | grep -q 'items'
       - name: Player progression
         run: curl -fsS http://localhost:8080/v1/player/progression | grep -q 'worlds'
+      - name: Packed campaign routes
+        run: |
+          curl -fsS http://localhost:8080/v1/player/progression > /tmp/progression.json
+          grep -q 'travel-airport' /tmp/progression.json
+          grep -q 'conversation-cafe' /tmp/progression.json
+          grep -q 'work-standup' /tmp/progression.json
       - name: Player profile
         run: curl -fsS http://localhost:8080/v1/player/profile | grep -q 'dailyMinutes'
       - name: Lesson catalog
