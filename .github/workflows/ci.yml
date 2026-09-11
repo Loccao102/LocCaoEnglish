@@ -68,6 +68,12 @@ jobs:
           exit 1
       - name: Adaptive plan
         run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
+      - name: Goal-aware questline
+        run: curl -fsS http://localhost:8080/v1/player/questline | grep -q 'items'
+      - name: Player progression
+        run: curl -fsS http://localhost:8080/v1/player/progression | grep -q 'worlds'
+      - name: Player profile
+        run: curl -fsS http://localhost:8080/v1/player/profile | grep -q 'dailyMinutes'
       - name: Lesson catalog
         run: curl -fsS http://localhost:8080/v1/lessons | grep -q 'airport-check-in-sprint'
       - name: Social leaderboard
