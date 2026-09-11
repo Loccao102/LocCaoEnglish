@@ -2,4 +2,7 @@ module github.com/Loccao102/LocCaoEnglish/backend
 
 go 1.23
 
-require github.com/lib/pq v1.10.9
+require (
+	github.com/lib/pq v1.10.9
+	github.com/redis/go-redis/v9 v9.7.0
+)
