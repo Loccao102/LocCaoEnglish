@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Cosmetic, equipCosmetic, getProgression, ProgressionState } from "@/lib/api";
 
 type PlayerPoint = { x: number; y: number };
+type Direction = "up" | "down" | "left" | "right";
 type SpotKind = "home" | "cafe" | "store" | "park" | "library" | "station" | "studio";
 
 type TownSpot = {
@@ -14,21 +15,36 @@ type TownSpot = {
   kind: SpotKind;
   x: number;
   y: number;
-  worldIndex: number;
+  worldId?: string;
+  specialRoute?: string;
 };
 
 const TOWN_SPOTS: TownSpot[] = [
-  { id: "home", label: "Home", kind: "home", x: 18, y: 31, worldIndex: -1 },
-  { id: "cafe", label: "Café", kind: "cafe", x: 72, y: 27, worldIndex: 0 },
-  { id: "store", label: "Market", kind: "store", x: 77, y: 65, worldIndex: 1 },
-  { id: "park", label: "Park", kind: "park", x: 19, y: 67, worldIndex: 2 },
-  { id: "library", label: "Library", kind: "library", x: 48, y: 18, worldIndex: 3 },
-  { id: "station", label: "Station", kind: "station", x: 48, y: 77, worldIndex: 4 },
-  { id: "studio", label: "Club", kind: "studio", x: 88, y: 45, worldIndex: 5 },
+  { id: "home", label: "Home", kind: "home", x: 18, y: 31, specialRoute: "/" },
+  { id: "cafe", label: "Café", kind: "cafe", x: 72, y: 27, worldId: "conversation", specialRoute: "/missions/cafe" },
+  { id: "store", label: "Market", kind: "store", x: 77, y: 65, worldId: "words" },
+  { id: "park", label: "Park", kind: "park", x: 19, y: 67, worldId: "arena" },
+  { id: "library", label: "Library", kind: "library", x: 48, y: 18, worldId: "ielts" },
+  { id: "station", label: "Station", kind: "station", x: 48, y: 77, worldId: "travel" },
+  { id: "studio", label: "Club", kind: "studio", x: 88, y: 45, worldId: "work" },
+];
+
+const COLLIDERS = [
+  { x: 18, y: 31, r: 5.2 },
+  { x: 72, y: 27, r: 5.5 },
+  { x: 77, y: 65, r: 5.2 },
+  { x: 48, y: 18, r: 5.4 },
+  { x: 48, y: 77, r: 4.5 },
+  { x: 88, y: 45, r: 5.3 },
+  { x: 35.5, y: 40.5, r: 6.4 },
 ];
 
 function distance(a: PlayerPoint, b: PlayerPoint) {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function hitsCollider(point: PlayerPoint) {
+  return COLLIDERS.some((collider) => Math.hypot(point.x - collider.x, point.y - collider.y) < collider.r);
 }
 
 export default function WorldMap() {
@@ -37,6 +53,9 @@ export default function WorldMap() {
   const [error, setError] = useState("");
   const [equipping, setEquipping] = useState("");
   const [player, setPlayer] = useState<PlayerPoint>({ x: 50, y: 57 });
+  const [direction, setDirection] = useState<Direction>("down");
+  const [walking, setWalking] = useState(false);
+  const walkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = () =>
     getProgression()
@@ -45,6 +64,9 @@ export default function WorldMap() {
 
   useEffect(() => {
     void load();
+    return () => {
+      if (walkTimer.current) clearTimeout(walkTimer.current);
+    };
   }, []);
 
   const playableWorlds = useMemo(
@@ -60,14 +82,17 @@ export default function WorldMap() {
   const locations = useMemo(
     () =>
       TOWN_SPOTS.map((spot) => {
-        const world = spot.worldIndex >= 0 ? playableWorlds[spot.worldIndex] : undefined;
+        const world = spot.worldId ? playableWorlds.find((item) => item.id === spot.worldId) : undefined;
+        const isCafe = spot.id === "cafe";
+        const unlocked = Boolean(spot.specialRoute && !spot.worldId) || isCafe || Boolean(world?.unlocked);
         return {
           ...spot,
           world,
-          unlocked: spot.worldIndex < 0 || Boolean(world?.unlocked),
-          route: spot.worldIndex < 0 ? "/" : world?.route ?? "#",
-          subtitle:
-            spot.worldIndex < 0
+          unlocked,
+          route: spot.specialRoute ?? world?.route ?? "#",
+          subtitle: isCafe
+            ? "Breakfast Run · AI role-play"
+            : spot.id === "home"
               ? "Safe zone"
               : world
                 ? world.unlocked
@@ -92,10 +117,19 @@ export default function WorldMap() {
   }, [currentQuest, locations]);
 
   const move = useCallback((dx: number, dy: number) => {
-    setPlayer((point) => ({
-      x: Math.max(7, Math.min(93, point.x + dx)),
-      y: Math.max(12, Math.min(86, point.y + dy)),
-    }));
+    if (Math.abs(dx) > Math.abs(dy)) setDirection(dx < 0 ? "left" : "right");
+    else if (dy !== 0) setDirection(dy < 0 ? "up" : "down");
+    setWalking(true);
+    if (walkTimer.current) clearTimeout(walkTimer.current);
+    walkTimer.current = setTimeout(() => setWalking(false), 170);
+
+    setPlayer((point) => {
+      const candidate = {
+        x: Math.max(7, Math.min(93, point.x + dx)),
+        y: Math.max(12, Math.min(86, point.y + dy)),
+      };
+      return hitsCollider(candidate) ? point : candidate;
+    });
   }, []);
 
   const interact = useCallback(() => {
@@ -164,8 +198,8 @@ export default function WorldMap() {
 
         <div className="quest-hud">
           <small>CURRENT QUEST</small>
-          <strong>{currentQuest?.title ?? "Explore the neighborhood"}</strong>
-          <span>{currentQuest ? "Walk to the glowing location." : "Free roam · discover a new activity."}</span>
+          <strong>Breakfast Run · Café</strong>
+          <span>Walk to Maya’s café, order breakfast, then practise a real conversation.</span>
         </div>
       </section>
 
@@ -193,7 +227,7 @@ export default function WorldMap() {
         <div className="lamp-prop lamp-b" aria-hidden="true"><i/><b/></div>
 
         {locations.map((location) => {
-          const isQuest = questLocation?.id === location.id;
+          const isQuest = location.id === "cafe" || questLocation?.id === location.id;
           const isNear = nearby?.id === location.id;
           return (
             <button
@@ -235,8 +269,22 @@ export default function WorldMap() {
           );
         })}
 
+        <div className="town-npc town-npc-maya" aria-label="Maya the barista">
+          <span className="town-npc-bubble">☕ Breakfast quest!</span>
+          <i className="town-npc-shadow" />
+          <span className="town-npc-head"><i/></span>
+          <span className="town-npc-body" />
+          <span className="town-npc-apron" />
+          <b>Maya</b>
+        </div>
+        <div className="town-npc town-npc-walker" aria-hidden="true">
+          <i className="town-npc-shadow" />
+          <span className="town-npc-head"><i/></span>
+          <span className="town-npc-body" />
+        </div>
+
         <div
-          className="game-player"
+          className={`game-player direction-${direction} ${walking ? "walking" : ""}`}
           style={{ left: `${player.x}%`, top: `${player.y}%` }}
           aria-label="Your player"
         >
@@ -263,7 +311,7 @@ export default function WorldMap() {
               <span className="keycap">WASD</span>
               <div>
                 <strong>Explore the town</strong>
-                <small>Move close to a place to interact.</small>
+                <small>Buildings and the pond have collision. Walk close to a place to interact.</small>
               </div>
             </>
           )}
