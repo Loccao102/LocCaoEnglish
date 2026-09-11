@@ -1,6 +1,6 @@
 FROM golang:1.23-alpine AS build
 WORKDIR /src
-COPY backend/go.mod backend/go.sum* ./
+COPY backend/go.mod ./
 RUN go mod download
 COPY backend/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /out/api ./cmd/api
