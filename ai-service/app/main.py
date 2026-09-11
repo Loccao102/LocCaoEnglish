@@ -9,7 +9,7 @@ import httpx
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-app = FastAPI(title="LocCaoEnglish AI Service", version="0.2.0")
+app = FastAPI(title="LocCaoEnglish AI Service", version="0.3.0")
 
 LLM_CHAT_URL = os.getenv("LLM_CHAT_URL", "").strip()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
@@ -154,7 +154,8 @@ def local_exercises(req: ExerciseRequest) -> dict[str, Any]:
 
 def local_conversation(req: ConversationRequest) -> dict[str, Any]:
     text = req.message.lower()
-    if req.scenario == "airport":
+    scenario = req.scenario.lower().strip()
+    if scenario == "airport":
         if any(x in text for x in ["missed", "late", "delay", "miss my"]):
             reply = "I’m sorry about that. I can help you rebook. What was your original destination, and do you prefer the earliest available flight or a later one?"
             objective = "Give your destination and state a clear preference."
@@ -167,6 +168,32 @@ def local_conversation(req: ConversationRequest) -> dict[str, Any]:
         else:
             reply = "Good afternoon. How can I help you with your flight today?"
             objective = "Explain that you missed your flight and ask to be rebooked."
+    elif scenario == "hotel":
+        if any(x in text for x in ["reservation", "booking", "booked", "confirmation"]):
+            reply = "I’m sorry, I still can’t see the booking under that name. Do you have the confirmation number or the email address used for the reservation?"
+            objective = "Give one booking detail and politely ask the receptionist to check again."
+        elif any(x in text for x in ["number", "email", "confirm"]):
+            reply = "Thank you. I found it under your middle name. The room is available. Breakfast is optional, and checkout is at eleven. Is there anything you would like to confirm before I issue the key?"
+            objective = "Ask one practical question about the stay."
+        elif any(x in text for x in ["breakfast", "checkout", "wifi", "key", "included"]):
+            reply = "Certainly. I’ve added that note and your room is ready. Here is your key card. The lift is on your left."
+            objective = "Thank the receptionist and confirm one final detail to finish the mission."
+        else:
+            reply = "Good evening. Welcome to the Meridian Hotel. How can I help you?"
+            objective = "Explain that you have a confirmed reservation but the hotel cannot find it."
+    elif scenario == "transit":
+        if any(x in text for x in ["station", "train", "metro", "get to", "go to", "last train"]):
+            reply = "You can still make it. Take the blue line two stops to Central, then change to the green line. Do you need the fastest route or the route with fewer transfers?"
+            objective = "Choose a route preference and ask where to change lines."
+        elif any(x in text for x in ["fastest", "fewer", "transfer", "change", "central"]):
+            reply = "For the fastest route, change at Central on platform four. The last green-line train leaves in eighteen minutes. Do you already have a valid ticket?"
+            objective = "Confirm whether you have a ticket and ask one timing question."
+        elif any(x in text for x in ["ticket", "minutes", "time", "platform four", "platform 4"]):
+            reply = "Great. Go straight through the gates, follow signs for platform four, and you should arrive with several minutes to spare."
+            objective = "Repeat the key route information to finish the mission."
+        else:
+            reply = "Hello. Where are you trying to get to tonight?"
+            objective = "Say where you need to go and ask for the fastest route before the last train."
     else:
         reply = "Tell me a little more so I can respond naturally in this role-play."
         objective = "Continue the conversation with a complete sentence."
