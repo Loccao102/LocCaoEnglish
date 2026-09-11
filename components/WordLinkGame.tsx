@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { recordAttempt } from "@/lib/api";
 
 const rounds = [
   { word: "significant", relation: "Choose the closest synonym", answer: "substantial", options: ["minor", "substantial", "temporary", "ordinary"], note: "Significant and substantial can both describe something large or important in degree." },
@@ -11,55 +12,9 @@ const rounds = [
 ];
 
 export default function WordLinkGame() {
-  const [round, setRound] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const current = rounds[round];
-  const isCorrect = selected === current.answer;
-  const progress = ((round + (selected ? 1 : 0)) / rounds.length) * 100;
-  const completed = round === rounds.length - 1 && selected !== null;
-
-  const shuffled = useMemo(() => current.options, [current]);
-
-  function choose(option: string) {
-    if (selected) return;
-    setSelected(option);
-    if (option === current.answer) {
-      setScore((value) => value + 20 + streak * 2);
-      setStreak((value) => value + 1);
-    } else {
-      setStreak(0);
-    }
-  }
-
-  function next() {
-    if (round >= rounds.length - 1) {
-      setRound(0); setSelected(null); setScore(0); setStreak(0); return;
-    }
-    setRound((value) => value + 1);
-    setSelected(null);
-  }
-
-  return (
-    <div className="play-shell">
-      <div className="play-top"><div><span className="eyebrow">WORD LINK · TRAVEL ROUTE</span><strong>Round {round + 1}/{rounds.length}</strong></div><div className="play-score"><span>🔥 {streak}</span><b>{score} XP</b></div></div>
-      <div className="progress large"><i style={{ width: `${progress}%` }} /></div>
-
-      <section className="word-game-card">
-        <p className="prompt-label">{current.relation}</p>
-        <div className="word-link-arena">
-          <div className="core-word"><small>CORE WORD</small><strong>{current.word}</strong><span>tap the best connection</span></div>
-          <div className="option-grid">
-            {shuffled.map((option) => {
-              const state = selected ? option === current.answer ? "correct" : option === selected ? "wrong" : "muted" : "";
-              return <button key={option} className={`word-option ${state}`} onClick={() => choose(option)}><span className="link-dot">•</span>{option}</button>;
-            })}
-          </div>
-        </div>
-
-        {selected && <div className={`feedback-box ${isCorrect ? "success" : "error"}`}><div><strong>{isCorrect ? "Connection found ✓" : `Not quite — ${current.answer}`}</strong><p>{current.note}</p></div><button className="button primary" onClick={next}>{completed ? "Play again" : "Next link →"}</button></div>}
-      </section>
-    </div>
-  );
+  const [round, setRound] = useState(0); const [selected, setSelected] = useState<string | null>(null); const [score, setScore] = useState(0); const [streak, setStreak] = useState(0); const [synced, setSynced] = useState(false);
+  const current = rounds[round]; const isCorrect = selected === current.answer; const progress = ((round + (selected ? 1 : 0)) / rounds.length) * 100; const completed = round === rounds.length - 1 && selected !== null; const shuffled = useMemo(() => current.options, [current]);
+  function choose(option: string) { if (selected) return; setSelected(option); const correct = option === current.answer; if (correct) { setScore((v) => v + 20 + streak * 2); setStreak((v) => v + 1); } else setStreak(0); recordAttempt({ skill:"Vocabulary",activity:"word-link",itemKey:`word-link:${current.word}`,prompt:`${current.word} — ${current.relation}`,answer:current.answer,accuracy:correct ? 1 : 0 }).then(() => setSynced(true)).catch(() => setSynced(false)); }
+  function next() { if (round >= rounds.length - 1) { setRound(0); setSelected(null); setScore(0); setStreak(0); setSynced(false); return; } setRound((v) => v + 1); setSelected(null); setSynced(false); }
+  return <div className="play-shell"><div className="play-top"><div><span className="eyebrow">WORD LINK · TRAVEL ROUTE</span><strong>Round {round + 1}/{rounds.length}</strong></div><div className="play-score"><span>🔥 {streak}</span><b>{score} XP</b></div></div><div className="progress large"><i style={{ width: `${progress}%` }} /></div><section className="word-game-card"><p className="prompt-label">{current.relation}</p><div className="word-link-arena"><div className="core-word"><small>CORE WORD</small><strong>{current.word}</strong><span>tap the best connection</span></div><div className="option-grid">{shuffled.map((option) => { const state = selected ? option === current.answer ? "correct" : option === selected ? "wrong" : "muted" : ""; return <button key={option} className={`word-option ${state}`} onClick={() => choose(option)}><span className="link-dot">•</span>{option}</button>; })}</div></div>{selected && <div className={`feedback-box ${isCorrect ? "success" : "error"}`}><div><strong>{isCorrect ? "Connection found ✓" : `Not quite — ${current.answer}`}</strong><p>{current.note} {!isCorrect && "This item was added to your adaptive review queue."} {synced && " Progress synced."}</p></div><button className="button primary" onClick={next}>{completed ? "Play again" : "Next link →"}</button></div>}</section></div>;
 }
