@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -19,24 +20,16 @@ func main() {
 	aiURL := env("AI_SERVICE_URL", "http://localhost:8090")
 
 	st, err := store.New(databaseURL)
-	if err != nil {
-		log.Fatalf("initialize store: %v", err)
-	}
+	if err != nil { log.Fatalf("initialize store: %v", err) }
 	defer st.Close()
+	if err := st.EnsureContent(context.Background()); err != nil { log.Fatalf("initialize content store: %v", err) }
 
 	authService := auth.New(jwtSecret, 7*24*time.Hour)
 	aiClient := ai.New(aiURL)
 	server := httpapi.New(st, authService, aiClient)
 
 	log.Printf("LocCaoEnglish API listening on :%s (store=%s)", port, st.Mode())
-	if err := http.ListenAndServe(":"+port, server.Handler()); err != nil {
-		log.Fatal(err)
-	}
+	if err := http.ListenAndServe(":"+port, server.Handler()); err != nil { log.Fatal(err) }
 }
 
-func env(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
-}
+func env(key, fallback string) string { if value := os.Getenv(key); value != "" { return value }; return fallback }

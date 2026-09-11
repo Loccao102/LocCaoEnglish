@@ -1,0 +1,1 @@
+import ContentStudio from "@/components/ContentStudio";export default function ContentPage(){return <div className="page-wrap"><header className="content-header"><div><span className="eyebrow">TEACHER / ADMIN</span><h1>Content Studio</h1><p>Create, edit, draft and publish lessons without touching source code.</p></div></header><ContentStudio/></div>}
