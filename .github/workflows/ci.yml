@@ -12,28 +12,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
+        with:
+          node-version: 22
       - run: npm install
       - run: npm run build
 
   backend:
     runs-on: ubuntu-latest
-    defaults: {run: {working-directory: backend}}
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: {go-version: '1.23.x'}
+        with:
+          go-version: '1.23.x'
       - run: go mod tidy
       - run: go test ./...
       - run: go vet ./...
 
   ai-service:
     runs-on: ubuntu-latest
-    defaults: {run: {working-directory: ai-service}}
+    defaults:
+      run:
+        working-directory: ai-service
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m compileall app
       - run: python -m unittest discover -s tests -v
@@ -53,15 +60,28 @@ jobs:
       - run: docker compose up -d --build postgres redis ai api
       - name: Wait for API
         run: |
-          for i in {1..40}; do if curl -fsS http://localhost:8080/health >/dev/null; then exit 0; fi; sleep 2; done
-          docker compose logs api; exit 1
-      - run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
-      - run: curl -fsS http://localhost:8080/v1/lessons | grep -q 'airport-check-in-sprint'
-      - run: curl -fsS http://localhost:8080/v1/social/leaderboard | grep -q 'items'
+          for i in {1..40}; do
+            if curl -fsS http://localhost:8080/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs api
+          exit 1
+      - name: Adaptive plan
+        run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
+      - name: Lesson catalog
+        run: curl -fsS http://localhost:8080/v1/lessons | grep -q 'airport-check-in-sprint'
+      - name: Social leaderboard
+        run: curl -fsS http://localhost:8080/v1/social/leaderboard | grep -q 'items'
       - name: Writing AI route
-        run: curl -fsS -X POST http://localhost:8080/v1/ai/writing-score -H 'Content-Type: application/json' -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
+        run: |
+          curl -fsS -X POST http://localhost:8080/v1/ai/writing-score \
+            -H 'Content-Type: application/json' \
+            -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
       - name: Neural TTS fallback route
-        run: curl -fsS -X POST http://localhost:8080/v1/ai/tts -H 'Content-Type: application/json' -d '{"text":"The flight now departs from gate twelve.","locale":"en-US","voice":"en-US-JennyNeural","rate":1}' | grep -q 'provider'
+        run: |
+          curl -fsS -X POST http://localhost:8080/v1/ai/tts \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"The flight now departs from gate twelve.","locale":"en-US","voice":"en-US-JennyNeural","rate":1}' | grep -q 'provider'
       - name: Pronunciation route
         run: |
           python - <<'PY' > /tmp/pronunciation.json
@@ -70,7 +90,9 @@ jobs:
           with wave.open(buf,'wb') as out: out.setnchannels(1);out.setsampwidth(2);out.setframerate(16000);out.writeframes(frames)
           print(json.dumps({'audioBase64':base64.b64encode(buf.getvalue()).decode(),'referenceText':'hello world','transcript':'hello world','locale':'en-US'}))
           PY
-          curl -fsS -X POST http://localhost:8080/v1/ai/pronunciation-score -H 'Content-Type: application/json' --data-binary @/tmp/pronunciation.json | grep -q 'acousticAssessment'
+          curl -fsS -X POST http://localhost:8080/v1/ai/pronunciation-score \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/pronunciation.json | grep -q 'acousticAssessment'
       - run: docker compose ps
       - if: always()
         run: docker compose down -v
@@ -81,15 +103,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
+        with:
+          node-version: 22
       - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: docker compose up -d --build
       - name: Wait for web
         run: |
-          for i in {1..60}; do if curl -fsS http://127.0.0.1:3000 >/dev/null; then exit 0; fi; sleep 2; done
-          docker compose logs web api; exit 1
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs web api
+          exit 1
       - run: npm run test:e2e
-        env: {E2E_BASE_URL: "http://127.0.0.1:3000"}
+        env:
+          E2E_BASE_URL: http://127.0.0.1:3000
       - if: always()
         run: docker compose down -v
