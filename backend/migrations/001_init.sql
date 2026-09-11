@@ -1,0 +1,46 @@
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL DEFAULT '',
+  display_name TEXT NOT NULL,
+  xp INTEGER NOT NULL DEFAULT 0,
+  streak INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS user_skills (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  skill TEXT NOT NULL,
+  confidence DOUBLE PRECISION NOT NULL DEFAULT .35,
+  level INTEGER NOT NULL DEFAULT 1,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY(user_id, skill)
+);
+
+CREATE TABLE IF NOT EXISTS attempts (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  skill TEXT NOT NULL,
+  activity TEXT NOT NULL,
+  item_key TEXT NOT NULL,
+  prompt TEXT NOT NULL DEFAULT '',
+  answer TEXT NOT NULL DEFAULT '',
+  accuracy DOUBLE PRECISION NOT NULL,
+  duration_sec INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_attempts_user_created ON attempts(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS review_items (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  item_key TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  prompt TEXT NOT NULL DEFAULT '',
+  answer TEXT NOT NULL DEFAULT '',
+  due_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  interval_days INTEGER NOT NULL DEFAULT 1,
+  ease DOUBLE PRECISION NOT NULL DEFAULT 2.5,
+  failures INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(user_id, item_key)
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_user_due ON review_items(user_id, due_at);
