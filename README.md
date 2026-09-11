@@ -1,24 +1,38 @@
 # LocCao English
 
-A game-first English learning platform that turns every practice attempt into an adaptive learning signal. The product combines vocabulary graphs, mini-games, reading, listening, dictation, speaking, IELTS-style writing feedback, spaced repetition and real-world AI role-play missions.
+Game-first English learning platform with adaptive quests, vocabulary graphs, mini-games, listening, dictation, speaking, IELTS-style practice, spaced repetition, AI role-play missions and progression systems.
 
-> IELTS scores shown in the app are **practice estimates only**, not official IELTS results or examiner scores.
+## Player loop
 
-## What is playable now
+Onboarding → Daily Quest → XP → Level → World Unlock → Evidence Gate → Boss → Trophy/Cosmetic → next chapter.
 
-- **Word Link** — synonym, antonym, meaning, word family and collocation links.
-- **Word Graph** — interactive knowledge graph with relationship-testing mode.
-- **Collocation Factory** — build natural word combinations.
-- **Sentence Builder** — reconstruct natural English syntax.
-- **Grammar Repair** — diagnose and repair broken sentence patterns.
-- **Reading Race** — skim/scan comprehension.
-- **Story Choice** — branching reading + pragmatic language scenario.
-- **Listen & Pick** — browser-TTS listening comprehension.
-- **Dictation Rush** — listen, reconstruct, score accuracy and schedule weak items.
-- **Shadow Me** — browser speech recognition plus transcript-based coach feedback.
-- **IELTS Writing Lab** — four-criterion practice scoring with AI/local fallback.
-- **Airport Boss** — multi-skill mission ending in an AI airline-agent conversation.
-- **Adaptive Review** — wrong answers become spaced-review items automatically.
+## Travel District campaign
+
+Travel District is a sequential campaign rather than a static lesson list:
+
+1. **Airport Crisis — Missed Flight**: Word Link + Listening + Speaking evidence, then an airline-service NPC negotiation.
+2. **Hotel Check-in — Reservation Missing**: after Airport clear, earn fresh Story Choice + Grammar Repair + Speaking evidence, then resolve the booking with a receptionist NPC.
+3. **City Transit — Last Train Transfer**: after Hotel clear, earn fresh Collocation + Listening + Speaking evidence, then navigate the metro with an information-desk NPC.
+
+Later chapters only count evidence created after the previous boss clear. Boss rewards unlock XP, achievements and wearable profile cosmetics.
+
+## Core experiences
+
+- Word Link
+- Word Graph
+- Collocation Factory
+- Sentence Builder
+- Grammar Repair
+- Reading Race
+- Story Choice
+- Listen & Pick
+- Dictation Rush
+- Shadow Me / acoustic pronunciation assessment
+- IELTS Listening / Academic Reading / Writing / Speaking practice
+- Adaptive Recovery queue
+- Daily Quest Chain + reward chest + streak
+- World Map, achievements, loadout and boss progression
+- Realtime Arena challenges / leaderboard
 
 ## Architecture
 
@@ -32,85 +46,26 @@ Go HTTP API :8080
   |       |               |
   |       |               -> optional OpenAI-compatible LLM endpoint
   |       |
-  |       -> adaptive plan + spaced repetition engine
+  |       -> adaptive plan + spaced repetition + progression engine
   |
 PostgreSQL :5432
 
-Redis :6379 is included for the next realtime/queue layer.
+Redis :6379 -> presence, challenges, pub/sub and rate limits
 ```
 
-The Go API falls back to an in-memory demo store if `DATABASE_URL` is not set. The AI service falls back to deterministic scoring/generation if no model endpoint is configured. This keeps the whole learning flow usable during local development.
-
-## Quick start — frontend only
-
-```bash
-npm install
-npm run dev
-```
-
-Open `http://localhost:3000`. Games still work with local fallback behavior if the backend is offline.
-
-## Full stack with Docker
+## Run locally
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-Then open:
-
 - Web: `http://localhost:3000`
-- Go API health: `http://localhost:8080/health`
-- AI service health: `http://localhost:8090/health`
+- API: `http://localhost:8080/health`
+- AI: `http://localhost:8090/health`
 
-No external AI key is required for the fallback mode.
+External LLM configuration is optional. Local deterministic fallback engines keep the learning loop usable without a model API.
 
-## Optional model connection
+## Production boundary
 
-Set these in `.env`:
-
-```env
-LLM_CHAT_URL=https://your-provider.example/v1/chat/completions
-LLM_API_KEY=...
-LLM_MODEL=...
-```
-
-`LLM_CHAT_URL` is intentionally explicit so the AI service is provider-agnostic. It expects an OpenAI-compatible chat-completions request/response shape. When it is blank or fails, the service uses its local engines.
-
-## Adaptive learning loop
-
-```text
-Play / write / speak
-        ↓
-Learning attempt
-        ↓
-Update skill confidence + XP
-        ↓
-Weak answer → review queue
-        ↓
-Spaced repetition schedule
-        ↓
-Daily adaptive route chooses weakest skills
-        ↓
-Boss mission applies skills in context
-```
-
-Core persistence tables: `users`, `user_skills`, `attempts`, and `review_items`.
-
-## Repository layout
-
-```text
-app/                 Next.js routes
-components/          game, coach, graph and mission UI
-lib/api.ts           frontend API client
-backend/             Go API + adaptive engine + PostgreSQL store
-ai-service/          FastAPI AI/fallback service
-docker-compose.yml   local full stack
-.github/workflows/   frontend/backend/AI/Compose CI
-```
-
-## Current product boundary
-
-The current version reaches the planned MVP/product loop: all core English skills have a playable surface, attempts feed an adaptive profile, weak items enter spaced review, Writing/Speaking can call an AI coaching layer, and the Airport Boss combines multiple skills in a scenario.
-
-Production expansion can add acoustic pronunciation scoring, richer content authoring, teacher/admin tools, more knowledge graphs, multiplayer/leaderboards, native audio assets, Redis-backed jobs and additional language packs without replacing the current architecture.
+IELTS Writing/Speaking results are practice estimates, not official examiner scores. Acoustic pronunciation scoring is available when the configured speech provider is present; otherwise the product explicitly falls back to non-acoustic signals. Production deployment also supports the standalone Next.js image, Caddy reverse proxy, PostgreSQL, Redis and isolated API/AI services.
