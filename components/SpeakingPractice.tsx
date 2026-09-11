@@ -1,65 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-
-const prompts = [
-  "Could I have a window seat, please?",
-  "I usually prefer travelling by train because it is more comfortable.",
-  "One of the main reasons people move to large cities is the availability of better job opportunities.",
-];
-
-function similarity(target: string, transcript: string) {
-  const clean = (value: string) => value.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter(Boolean);
-  const expected = clean(target);
-  const spoken = new Set(clean(transcript));
-  return Math.round((expected.filter((word) => spoken.has(word)).length / expected.length) * 100);
-}
-
-export default function SpeakingPractice() {
-  const [index, setIndex] = useState(0);
-  const [listening, setListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [supported, setSupported] = useState(true);
-  const recognitionRef = useRef<any>(null);
-  const prompt = prompts[index];
-  const score = useMemo(() => transcript ? similarity(prompt, transcript) : 0, [prompt, transcript]);
-
-  function playPrompt() {
-    if (!("speechSynthesis" in window)) return;
-    const utterance = new SpeechSynthesisUtterance(prompt);
-    utterance.lang = "en-US"; utterance.rate = 0.9;
-    window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance);
-  }
-
-  function start() {
-    const BrowserRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!BrowserRecognition) { setSupported(false); return; }
-    const recognition = new BrowserRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = true;
-    recognition.continuous = false;
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
-    recognition.onerror = () => setListening(false);
-    recognition.onresult = (event: any) => {
-      let value = "";
-      for (let i = event.resultIndex; i < event.results.length; i += 1) value += event.results[i][0].transcript;
-      setTranscript(value.trim());
-    };
-    recognitionRef.current = recognition;
-    recognition.start();
-  }
-
-  function next() { setIndex((value) => (value + 1) % prompts.length); setTranscript(""); }
-
-  return (
-    <section className="speaking-card">
-      <div className="scene-tag">AIRPORT · SHADOWING</div>
-      <div className="speaker-bubble"><span className="npc-avatar">AI</span><div><small>Listen and repeat naturally</small><strong>{prompt}</strong></div><button onClick={playPrompt}>🔊</button></div>
-      <div className={`mic-stage ${listening ? "live" : ""}`}><button className="mic-button" onClick={start}>{listening ? "■" : "●"}</button><strong>{listening ? "Listening…" : "Tap to speak"}</strong><small>Browser speech recognition · no audio is uploaded in this MVP</small></div>
-      {!supported && <div className="notice error">Speech recognition is not available in this browser. Try a Chromium-based browser or connect the future STT service.</div>}
-      {transcript && <div className="speech-result"><div><span>TRANSCRIPT</span><p>“{transcript}”</p></div><div className="speech-score"><strong>{score}</strong><small>match</small></div></div>}
-      {transcript && <div className="practice-actions"><button className="button ghost" onClick={start}>Try again</button><button className="button primary" onClick={next}>Next prompt →</button></div>}
-    </section>
-  );
-}
+import { useMemo,useRef,useState } from "react";
+import { getSpeakingFeedback, recordAttempt, SpeakingFeedback } from "@/lib/api";
+const prompts=["Could I have a window seat, please?","I usually prefer travelling by train because it is more comfortable.","One of the main reasons people move to large cities is the availability of better job opportunities."];
+function similarity(target:string,transcript:string){const clean=(v:string)=>v.toLowerCase().replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean);const expected=clean(target);const spoken=new Set(clean(transcript));return Math.round(expected.filter((w)=>spoken.has(w)).length/expected.length*100)}
+export default function SpeakingPractice(){const [index,setIndex]=useState(0);const [listening,setListening]=useState(false);const [transcript,setTranscript]=useState("");const [supported,setSupported]=useState(true);const [coach,setCoach]=useState<SpeakingFeedback|null>(null);const [busy,setBusy]=useState(false);const recognitionRef=useRef<any>(null);const prompt=prompts[index];const score=useMemo(()=>transcript?similarity(prompt,transcript):0,[prompt,transcript]);
+ function playPrompt(){if(!("speechSynthesis" in window))return;const u=new SpeechSynthesisUtterance(prompt);u.lang="en-US";u.rate=.9;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}
+ function start(){const BrowserRecognition=(window as any).SpeechRecognition||(window as any).webkitSpeechRecognition;if(!BrowserRecognition){setSupported(false);return}const r=new BrowserRecognition();r.lang="en-US";r.interimResults=true;r.continuous=false;r.onstart=()=>setListening(true);r.onend=()=>setListening(false);r.onerror=()=>setListening(false);r.onresult=(event:any)=>{let value="";for(let i=event.resultIndex;i<event.results.length;i+=1)value+=event.results[i][0].transcript;setTranscript(value.trim());setCoach(null)};recognitionRef.current=r;r.start()}
+ async function analyze(){if(!transcript)return;setBusy(true);try{const result=await getSpeakingFeedback(transcript,prompt);setCoach(result);await recordAttempt({skill:"Speaking",activity:"shadowing",itemKey:`shadow:${index}`,prompt,answer:prompt,accuracy:(result.match??score)/100})}catch{setCoach({provider:"browser fallback",overall:Math.max(4,Math.round(score/10)/2+4),scores:{fluency:6,pronunciationProxy:Math.max(4,Math.round(score/10)),vocabulary:6,grammar:6},match:score,coaching:["Repeat in thought groups rather than word by word.","Stress the key content words.","Try one more time without reading the sentence."],disclaimer:"Fallback uses transcript matching only."})}finally{setBusy(false)}}
+ function next(){setIndex((v)=>(v+1)%prompts.length);setTranscript("");setCoach(null)}
+ return <section className="speaking-card"><div className="scene-tag">AIRPORT · SHADOWING</div><div className="speaker-bubble"><span className="npc-avatar">AI</span><div><small>Listen and repeat naturally</small><strong>{prompt}</strong></div><button onClick={playPrompt}>🔊</button></div><div className={`mic-stage ${listening?"live":""}`}><button className="mic-button" onClick={start}>{listening?"■":"●"}</button><strong>{listening?"Listening…":"Tap to speak"}</strong><small>Speech recognition creates a transcript; this mode does not upload raw audio.</small></div>{!supported&&<div className="notice error">Speech recognition is not available in this browser. Try Chromium or connect a server-side STT provider later.</div>}{transcript&&<><div className="speech-result"><div><span>TRANSCRIPT</span><p>“{transcript}”</p></div><div className="speech-score"><strong>{score}</strong><small>text match</small></div></div><div className="practice-actions"><button className="button ghost" onClick={start}>Try again</button><button className="button ghost" disabled={busy} onClick={analyze}>{busy?"Analyzing…":"Coach me"}</button><button className="button primary" onClick={next}>Next prompt →</button></div></>}{coach&&<div className="speaking-coach"><div className="coach-score"><strong>{coach.overall.toFixed(1)}</strong><small>practice band</small></div><div className="coach-metrics">{Object.entries(coach.scores).map(([key,value])=><span key={key}><small>{key.replace("pronunciationProxy","pronunciation proxy")}</small><b>{Number(value).toFixed(1)}</b></span>)}</div><ul>{coach.coaching.map((x)=><li key={x}>{x}</li>)}</ul><p>{coach.disclaimer}</p></div>}</section>}
