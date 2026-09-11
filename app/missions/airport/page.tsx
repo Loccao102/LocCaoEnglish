@@ -1,3 +1,1 @@
-import AirportMission from "@/components/AirportMission";
-
-export default function AirportMissionPage() { return <div className="page-wrap"><AirportMission /></div>; }
+import TravelMission from"@/components/TravelMission";export default function Page(){return <TravelMission scenario="airport"/>}
