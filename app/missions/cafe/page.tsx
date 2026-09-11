@@ -1,1 +1,1 @@
-import TravelMission from"@/components/TravelMission";export default function Page(){return <TravelMission scenario="cafe"/>}
+import CafeAdventure from"@/components/CafeAdventure";export default function Page(){return <CafeAdventure/>}
