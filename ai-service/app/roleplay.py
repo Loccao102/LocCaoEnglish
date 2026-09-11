@@ -93,6 +93,48 @@ def roleplay_reply(message: str, scenario: str, history: list[dict[str, str]] | 
             reply = "Wait — I thought you said you were cancelling the plan completely. Is that what you meant?"
             objective = "Politely signal the misunderstanding."
 
+    elif scenario == "standup":
+        if any(x in text for x in ["blocker", "blocked", "need help", "dependency", "no blockers", "not blocked"]):
+            reply = "Good — that gives the team enough to act. I know what moved, what you’re doing next, and whether anyone needs to unblock you."
+            objective = "Mission communication complete."
+        elif any(x in text for x in ["today", "next", "i will", "i'll", "plan to"]):
+            reply = "Clear. Before we move on, is anything blocking that plan or do you need a dependency from someone else?"
+            objective = "State a blocker or explicitly say there are no blockers."
+        elif any(x in text for x in ["yesterday", "finished", "completed", "worked on", "done"]):
+            reply = "Thanks. What is the next concrete thing you will work on today?"
+            objective = "State the next action."
+        else:
+            reply = "Morning. Give me your update: what changed since yesterday?"
+            objective = "Report one concrete piece of recent progress."
+
+    elif scenario == "requirements":
+        if any(x in text for x in ["so the requirement", "acceptance", "confirm that", "understood", "so it should", "that means"]):
+            reply = "Yes, that captures it. We now have a testable expectation instead of 'make it better'. You can proceed with that acceptance condition."
+            objective = "Mission communication complete."
+        elif any(x in text for x in ["should", "which", "what happens", "do you mean", "what exactly", "when should", "does this"]):
+            reply = "Good question. For this release, 'faster' means results should appear within one second for the common query set, and ranking should prioritise exact title matches."
+            objective = "Restate and confirm the acceptance condition."
+        elif any(x in text for x in ["not clear", "unclear", "clarify", "understand the requirement", "ambiguous"]):
+            reply = "Fair point. Which part would you like to pin down first: response time, ranking quality, or both?"
+            objective = "Ask one concrete clarifying question."
+        else:
+            reply = "We need the search page to feel faster and show better results. Can you take care of it?"
+            objective = "Identify what is ambiguous before committing."
+
+    elif scenario == "deadline":
+        if any(x in text for x in ["could deliver", "extend", "phase", "phased", "mvp", "option", "instead", "propose"]):
+            reply = "That is a workable proposal. Ship the core path Friday, keep the full regression suite, and move the secondary reporting screen to the next slice."
+            objective = "Mission communication complete."
+        elif any(x in text for x in ["scope", "quality", "testing", "resource", "priority", "trade-off", "tradeoff"]):
+            reply = "Understood. If we refuse to cut testing, what alternative would you propose for Friday — smaller scope, phased delivery, or a later date?"
+            objective = "Propose one concrete alternative."
+        elif any(x in text for x in ["deadline", "timeline", "cannot", "can't", "risk", "not enough time"]):
+            reply = "I hear the constraint. Make the trade-off explicit: what would we have to sacrifice to force the full scope into Friday?"
+            objective = "Explain one trade-off clearly."
+        else:
+            reply = "I need the full feature in production by Friday. Can you commit to that?"
+            objective = "State the delivery constraint without sounding defensive."
+
     else:
         reply = "Tell me a little more so I can respond naturally in this role-play."
         objective = "Continue the conversation with a complete sentence."
