@@ -17,4 +17,10 @@ class FallbackEngineTests(unittest.TestCase):
         result=local_conversation(ConversationRequest(message="How about going to the cinema?",scenario="plans",level="B1"));self.assertIn("when",result["reply"].lower())
     def test_misunderstanding_requests_rephrase(self):
         result=local_conversation(ConversationRequest(message="Sorry, I didn't understand what you mean.",scenario="misunderstanding",level="B1"));self.assertIn("explain",result["reply"].lower())
+    def test_standup_moves_to_next_action(self):
+        result=local_conversation(ConversationRequest(message="Yesterday I finished the auth fix.",scenario="standup",level="B1"));self.assertIn("next concrete",result["reply"].lower())
+    def test_requirements_requests_precision(self):
+        result=local_conversation(ConversationRequest(message="This requirement is unclear.",scenario="requirements",level="B1"));self.assertTrue("which part" in result["reply"].lower() or "pin down" in result["reply"].lower())
+    def test_deadline_surfaces_tradeoff(self):
+        result=local_conversation(ConversationRequest(message="The Friday deadline creates a testing risk.",scenario="deadline",level="B1"));self.assertIn("trade-off",result["reply"].lower())
 if __name__=="__main__":unittest.main()
