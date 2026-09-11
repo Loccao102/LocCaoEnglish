@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"sort"
 	"strings"
 	"sync"
@@ -38,10 +39,7 @@ func (s *Store) ClaimDailyReward(ctx context.Context,userID,date string,reward i
 	key:=userID+":"+date;if _,loaded:=dailyClaims.LoadOrStore(key,true);loaded{return false,nil};s.mu.Lock();defer s.mu.Unlock();acc,ok:=s.mem.users[userID];if !ok{return false,ErrNotFound};acc.user.XP+=reward;acc.user.Streak=memoryClaimStreak(userID);s.mem.users[userID]=acc;return true,nil
 }
 
-func claimStreakTx(ctx context.Context,tx queryer,userID string)(int,error){rows,err:=tx.QueryContext(ctx,`SELECT day FROM daily_claims WHERE user_id=$1 ORDER BY day DESC LIMIT 365`,userID);if err!=nil{return 0,err};defer rows.Close();days:=[]time.Time{};for rows.Next(){var d time.Time;if err:=rows.Scan(&d);err!=nil{return 0,err};days=append(days,d)};if err:=rows.Err();err!=nil{return 0,err};return consecutiveDays(days),nil}
-
-type queryer interface{QueryContext(context.Context,string,...any)(*sql.Rows,error)}
-
+func claimStreakTx(ctx context.Context,tx *sql.Tx,userID string)(int,error){rows,err:=tx.QueryContext(ctx,`SELECT day FROM daily_claims WHERE user_id=$1 ORDER BY day DESC LIMIT 365`,userID);if err!=nil{return 0,err};defer rows.Close();days:=[]time.Time{};for rows.Next(){var d time.Time;if err:=rows.Scan(&d);err!=nil{return 0,err};days=append(days,d)};if err:=rows.Err();err!=nil{return 0,err};return consecutiveDays(days),nil}
 func memoryClaimStreak(userID string)int{prefix:=userID+":";days:=[]time.Time{};dailyClaims.Range(func(key,value any)bool{s,ok:=key.(string);if !ok||!strings.HasPrefix(s,prefix){return true};d,err:=time.Parse("2006-01-02",strings.TrimPrefix(s,prefix));if err==nil{days=append(days,d)};return true});sort.Slice(days,func(i,j int)bool{return days[i].After(days[j])});return consecutiveDays(days)}
 func consecutiveDays(days []time.Time)int{if len(days)==0{return 0};streak:=1;prev:=days[0];for _,d:=range days[1:]{delta:=prev.Sub(d);if delta>=23*time.Hour&&delta<=25*time.Hour{streak++;prev=d;continue};if delta<23*time.Hour{continue};break};return streak}
 func CurrentPlayerDay() string { day,_,_:=playerDayBounds();return day }
