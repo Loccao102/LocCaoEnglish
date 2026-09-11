@@ -10,102 +10,86 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install
-      - name: Build Next.js
-        run: npm run build
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install
+      - run: npm run build
 
   backend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
+    defaults: {run: {working-directory: backend}}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.x'
-      - name: Download modules
-        run: go mod tidy
-      - name: Test
-        run: go test ./...
-      - name: Vet
-        run: go vet ./...
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.23.x'}
+      - run: go mod tidy
+      - run: go test ./...
+      - run: go vet ./...
 
   ai-service:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ai-service
+    defaults: {run: {working-directory: ai-service}}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Compile Python
-        run: python -m compileall app
-      - name: Test fallback engines
-        run: python -m unittest discover -s tests -v
-      - name: Import FastAPI app
-        run: python -c "from app.server import app; print(app.title)"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - run: python -m compileall app
+      - run: python -m unittest discover -s tests -v
+      - run: python -c "from app.server import app; print(app.title)"
 
   compose:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Validate Compose
-        run: docker compose config
+      - uses: actions/checkout@v4
+      - run: docker compose config
 
   integration:
     runs-on: ubuntu-latest
     needs: [backend, ai-service, compose]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build and start core services
-        run: docker compose up -d --build postgres ai api
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build postgres redis ai api
       - name: Wait for API
-        shell: bash
         run: |
-          for i in {1..40}; do
-            if curl -fsS http://localhost:8080/health >/dev/null; then exit 0; fi
-            sleep 2
-          done
-          docker compose logs api
-          exit 1
-      - name: Smoke test adaptive plan
-        run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
-      - name: Smoke test AI writing route
-        run: |
-          curl -fsS -X POST http://localhost:8080/v1/ai/writing-score \
-            -H 'Content-Type: application/json' \
-            -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
-      - name: Smoke test pronunciation fallback route
+          for i in {1..40}; do if curl -fsS http://localhost:8080/health >/dev/null; then exit 0; fi; sleep 2; done
+          docker compose logs api; exit 1
+      - run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
+      - run: curl -fsS http://localhost:8080/v1/lessons | grep -q 'airport-check-in-sprint'
+      - run: curl -fsS http://localhost:8080/v1/social/leaderboard | grep -q 'items'
+      - name: Writing AI route
+        run: curl -fsS -X POST http://localhost:8080/v1/ai/writing-score -H 'Content-Type: application/json' -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
+      - name: Neural TTS fallback route
+        run: curl -fsS -X POST http://localhost:8080/v1/ai/tts -H 'Content-Type: application/json' -d '{"text":"The flight now departs from gate twelve.","locale":"en-US","voice":"en-US-JennyNeural","rate":1}' | grep -q 'provider'
+      - name: Pronunciation route
         run: |
           python - <<'PY' > /tmp/pronunciation.json
           import base64, io, json, struct, wave
-          frames = b''.join(struct.pack('<h', 3000 if i % 20 < 10 else -3000) for i in range(16000))
-          buf = io.BytesIO()
-          with wave.open(buf, 'wb') as out:
-              out.setnchannels(1); out.setsampwidth(2); out.setframerate(16000); out.writeframes(frames)
-          print(json.dumps({'audioBase64': base64.b64encode(buf.getvalue()).decode(), 'referenceText': 'hello world', 'transcript': 'hello world', 'locale': 'en-US'}))
+          frames=b''.join(struct.pack('<h',3000 if i%20<10 else -3000) for i in range(16000));buf=io.BytesIO()
+          with wave.open(buf,'wb') as out: out.setnchannels(1);out.setsampwidth(2);out.setframerate(16000);out.writeframes(frames)
+          print(json.dumps({'audioBase64':base64.b64encode(buf.getvalue()).decode(),'referenceText':'hello world','transcript':'hello world','locale':'en-US'}))
           PY
           curl -fsS -X POST http://localhost:8080/v1/ai/pronunciation-score -H 'Content-Type: application/json' --data-binary @/tmp/pronunciation.json | grep -q 'acousticAssessment'
-      - name: Show service status
-        run: docker compose ps
-      - name: Stop services
-        if: always()
+      - run: docker compose ps
+      - if: always()
+        run: docker compose down -v
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [frontend, backend, ai-service, compose]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: docker compose up -d --build
+      - name: Wait for web
+        run: |
+          for i in {1..60}; do if curl -fsS http://127.0.0.1:3000 >/dev/null; then exit 0; fi; sleep 2; done
+          docker compose logs web api; exit 1
+      - run: npm run test:e2e
+        env: {E2E_BASE_URL: "http://127.0.0.1:3000"}
+      - if: always()
         run: docker compose down -v

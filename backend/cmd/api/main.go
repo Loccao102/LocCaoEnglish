@@ -1,4 +1,47 @@
 package main
-import("context";"log";"net/http";"os";"time";"github.com/Loccao102/LocCaoEnglish/backend/internal/ai";"github.com/Loccao102/LocCaoEnglish/backend/internal/auth";"github.com/Loccao102/LocCaoEnglish/backend/internal/httpapi";"github.com/Loccao102/LocCaoEnglish/backend/internal/realtime";"github.com/Loccao102/LocCaoEnglish/backend/internal/store")
-func main(){port:=env("PORT","8080");databaseURL:=os.Getenv("DATABASE_URL");jwtSecret:=env("JWT_SECRET","dev-only-change-me");aiURL:=env("AI_SERVICE_URL","http://localhost:8090");st,err:=store.New(databaseURL);if err!=nil{log.Fatalf("initialize store: %v",err)};defer st.Close();if err:=st.EnsureContent(context.Background());err!=nil{log.Fatalf("initialize content store: %v",err)};social:=realtime.New(os.Getenv("REDIS_URL"));defer social.Close();server:=httpapi.New(st,auth.New(jwtSecret,7*24*time.Hour),ai.New(aiURL),social);log.Printf("LocCaoEnglish API listening on :%s (store=%s realtime=%s)",port,st.Mode(),social.Mode());if err:=http.ListenAndServe(":"+port,server.Handler());err!=nil{log.Fatal(err)}}
-func env(key,fallback string)string{if value:=os.Getenv(key);value!=""{return value};return fallback}
+
+import (
+	"context"
+	"errors"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/ai"
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/auth"
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/httpapi"
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/realtime"
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/store"
+)
+
+func main() {
+	port := env("PORT", "8080")
+	st, err := store.New(os.Getenv("DATABASE_URL")); if err != nil { log.Fatalf("initialize store: %v", err) }
+	defer st.Close()
+	if err := st.EnsureContent(context.Background()); err != nil { log.Fatalf("initialize content store: %v", err) }
+	social := realtime.New(os.Getenv("REDIS_URL")); defer social.Close()
+	app := httpapi.New(st, auth.New(env("JWT_SECRET", "dev-only-change-me"), 7*24*time.Hour), ai.New(env("AI_SERVICE_URL", "http://localhost:8090")), social)
+
+	httpServer := &http.Server{
+		Addr:              ":" + port,
+		Handler:           app.Handler(),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       20 * time.Second,
+		WriteTimeout:      70 * time.Second,
+		IdleTimeout:       90 * time.Second,
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM); defer stop()
+	errCh := make(chan error, 1)
+	go func() { log.Printf("LocCaoEnglish API listening on :%s (store=%s realtime=%s)", port, st.Mode(), social.Mode()); errCh <- httpServer.ListenAndServe() }()
+	select {
+	case <-ctx.Done(): log.Printf("shutdown signal received")
+	case err := <-errCh: if !errors.Is(err, http.ErrServerClosed) { log.Fatalf("http server: %v", err) }; return
+	}
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second); defer cancel()
+	if err := httpServer.Shutdown(shutdownCtx); err != nil { log.Printf("graceful shutdown: %v", err) }
+}
+
+func env(key, fallback string) string { if value := os.Getenv(key); value != "" { return value }; return fallback }
