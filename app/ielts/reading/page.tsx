@@ -1,0 +1,1 @@
+import IeltsObjectiveMock from"@/components/IeltsObjectiveMock";import{readingSections}from"@/data/ieltsMocks";export default function Page(){return <div className="page-wrap ielts-test-page"><IeltsObjectiveMock kind="reading" sections={readingSections}/></div>}
