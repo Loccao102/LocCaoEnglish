@@ -18,7 +18,7 @@ func playerDayBounds() (string,time.Time,time.Time) {
 func (s *Store) DailyEvidence(ctx context.Context,userID string)(map[string]bool,error){
 	out:=map[string]bool{}; _,start,end:=playerDayBounds()
 	if s.db!=nil { rows,err:=s.db.QueryContext(ctx,`SELECT LOWER(skill),LOWER(activity) FROM attempts WHERE user_id=$1 AND created_at >= $2 AND created_at < $3`,userID,start,end);if err!=nil{return out,err};defer rows.Close();for rows.Next(){var skill,activity string;if err:=rows.Scan(&skill,&activity);err!=nil{return out,err};out["skill:"+skill]=true;out["activity:"+activity]=true};return out,rows.Err() }
-	skills,err:=s.Skills(ctx,userID);if err!=nil{return out,err};for _,sk:=range skills{if diff:=sk.Confidence-initialConfidence(sk.Name);diff>.01||diff<-.01{out["skill:"+strings.ToLower(sk.Name)]=true}};return out,nil
+	skills,err:=s.Skills(ctx,userID);if err!=nil{return out,err};for _,sk:=range skills{if diff:=sk.Confidence-initialConfidence(sk.Name);diff>.01||diff < -.01{out["skill:"+strings.ToLower(sk.Name)]=true}};return out,nil
 }
 
 func (s *Store) DailyClaimed(ctx context.Context,userID,date string)(bool,error){
