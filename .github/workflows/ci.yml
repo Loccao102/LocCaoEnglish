@@ -56,6 +56,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Compile Python
         run: python -m compileall app
+      - name: Test fallback engines
+        run: python -m unittest discover -s tests -v
       - name: Import FastAPI app
         run: python -c "from app.main import app; print(app.title)"
 
@@ -66,3 +68,33 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate Compose
         run: docker compose config
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: [backend, ai-service, compose]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build and start core services
+        run: docker compose up -d --build postgres ai api
+      - name: Wait for API
+        shell: bash
+        run: |
+          for i in {1..40}; do
+            if curl -fsS http://localhost:8080/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs api
+          exit 1
+      - name: Smoke test adaptive plan
+        run: curl -fsS http://localhost:8080/v1/plan/today | grep -q 'items'
+      - name: Smoke test AI writing route
+        run: |
+          curl -fsS -X POST http://localhost:8080/v1/ai/writing-score \
+            -H 'Content-Type: application/json' \
+            -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
+      - name: Show service status
+        run: docker compose ps
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
