@@ -2,6 +2,12 @@
 
 Game-first English learning platform with adaptive quests, vocabulary graphs, mini-games, listening, dictation, speaking, IELTS-style practice, spaced repetition, AI role-play missions and progression systems.
 
+## Sunlit Village art pack
+
+The original **Làng Nắng / Sunlit Village** collection brings 41 reusable assets into Camp, World Map, world selection, profiles, onboarding and rewards. Browse `/art-studio` or download `public/assets/sunlit-village-pack.zip`. The map supports live unlocks and an explicit offline preview.
+
+See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, exact generation prompts, provenance, source files, and validation commands. A complete standalone illustrated SVG map is included.
+
 ## Player loop
 
 Onboarding → Daily Quest → XP → Level → World Unlock → Evidence Gate → Boss → Trophy/Cosmetic → next chapter.

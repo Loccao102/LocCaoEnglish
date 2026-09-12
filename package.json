@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "assets:build": "node scripts/build-sunlit-assets.mjs",
+    "assets:export": "node scripts/export-village-map.mjs",
+    "assets:verify": "node scripts/verify-sunlit-assets.mjs",
+    "test:assets": "playwright test --config=playwright.assets.config.ts",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.3.4",

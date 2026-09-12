@@ -10,15 +10,15 @@ def roleplay_reply(message: str, scenario: str, history: list[dict[str, str]] | 
         if any(x in text for x in ["gate", "boarding", "board"]):
             reply = "Exactly. Your flight boards at gate C12 at 7:05 p.m. You are all set — have a safe trip."
             objective = "Mission communication complete."
-        elif any(x in text for x in ["yes", "book", "take it"]):
-            reply = "Done. Your new boarding pass is ready. Before you go, can you confirm which gate you should head to and when boarding starts?"
-            objective = "Confirm the gate and boarding time."
-        elif any(x in text for x in ["earliest", "next flight", "another flight", "rebook", "prefer"]):
-            reply = "The earliest option leaves at 7:40 p.m. There is one seat left, but it has a short connection. Would you like me to book it?"
-            objective = "Accept or reject the option clearly."
         elif any(x in text for x in ["missed", "late", "delay", "miss my"]):
             reply = "I’m sorry about that. I can help you rebook. Do you prefer the earliest available flight or a later one?"
             objective = "Ask for a replacement and state a preference."
+        elif any(x in text for x in ["earliest", "next flight", "another flight", "rebook", "prefer"]):
+            reply = "The earliest option leaves at 7:40 p.m. There is one seat left, but it has a short connection. Would you like me to book it?"
+            objective = "Accept or reject the option clearly."
+        elif any(x in text for x in ["yes", "book", "take it"]):
+            reply = "Done. Your new boarding pass is ready. Before you go, can you confirm which gate you should head to and when boarding starts?"
+            objective = "Confirm the gate and boarding time."
         else:
             reply = "Good afternoon. How can I help you with your flight today?"
             objective = "Explain the flight problem."
@@ -69,7 +69,7 @@ def roleplay_reply(message: str, scenario: str, history: list[dict[str, str]] | 
         if any(x in text for x in ["sounds good", "see you", "so we meet", "it's a plan", "perfect", "confirmed"]):
             reply = "Perfect — Saturday at three at the cafe near the lake. I’ll see you there."
             objective = "Mission communication complete."
-        elif any(x in text for x in ["saturday", "sunday", "tomorrow", "meet at", "cafe", "park", "cinema", "where should", " at "]):
+        elif any(x in text for x in ["saturday", "sunday", "tomorrow", "meet at", "cafe", "park", "where should", " at "]):
             reply = "Saturday works for me. How about three o’clock at the cafe near the lake?"
             objective = "Confirm the final time and place."
         elif any(x in text for x in ["let's", "how about", "would you like", "we could", "why don't we"]):
@@ -125,12 +125,12 @@ def roleplay_reply(message: str, scenario: str, history: list[dict[str, str]] | 
         if any(x in text for x in ["could deliver", "extend", "phase", "phased", "mvp", "option", "instead", "propose"]):
             reply = "That is a workable proposal. Ship the core path Friday, keep the full regression suite, and move the secondary reporting screen to the next slice."
             objective = "Mission communication complete."
-        elif any(x in text for x in ["scope", "quality", "testing", "resource", "priority", "trade-off", "tradeoff"]):
-            reply = "Understood. If we refuse to cut testing, what alternative would you propose for Friday — smaller scope, phased delivery, or a later date?"
-            objective = "Propose one concrete alternative."
         elif any(x in text for x in ["deadline", "timeline", "cannot", "can't", "risk", "not enough time"]):
             reply = "I hear the constraint. Make the trade-off explicit: what would we have to sacrifice to force the full scope into Friday?"
             objective = "Explain one trade-off clearly."
+        elif any(x in text for x in ["scope", "quality", "testing", "resource", "priority", "trade-off", "tradeoff"]):
+            reply = "Understood. If we refuse to cut testing, what alternative would you propose for Friday — smaller scope, phased delivery, or a later date?"
+            objective = "Propose one concrete alternative."
         else:
             reply = "I need the full feature in production by Friday. Can you commit to that?"
             objective = "State the delivery constraint without sounding defensive."

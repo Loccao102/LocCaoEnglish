@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("world progression is visible to the player", async ({ page }) => {
   await page.goto("/worlds");
   await expect(page.getByRole("heading", { name: /Level \d+/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Training Grounds" })).toBeVisible();
+  await expect(page.locator(".world-path").getByRole("heading", { name: "Training Grounds" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Achievements" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Rewards you can wear" })).toBeVisible();
 });
