@@ -1,0 +1,150 @@
+{
+  "name": "Sunlit Village 3D",
+  "version": "1.0.0",
+  "format": "glTF 2.0 binary",
+  "source": "Original procedural mesh art in lib/game/three. No third-party game art or image textures.",
+  "characterRig": "Rigid articulated joints with six animation clips; front is +Z, up is +Y, feet at Y=0.",
+  "runtime": "The game constructs these same models from source. GLB files are reusable exports, not runtime download dependencies.",
+  "assets": [
+    {
+      "id": "mam",
+      "src": "/assets/sunlit-3d/mam.glb",
+      "bytes": 78564,
+      "sha256": "d00012695071047388a9d2ac219283cf69ce4676da4c918b1cec2ef8f998f5bb",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "nang",
+      "src": "/assets/sunlit-3d/nang.glb",
+      "bytes": 79196,
+      "sha256": "edbd59134c7de8ef76052c2a343f18253a5debb77e73ab4929b3fd1b1583213b",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "may",
+      "src": "/assets/sunlit-3d/may.glb",
+      "bytes": 78696,
+      "sha256": "5d43d75cd099b688c00d36f19662a0380fc4aa964d6812ba9b78be3aa8274101",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "soi",
+      "src": "/assets/sunlit-3d/soi.glb",
+      "bytes": 78876,
+      "sha256": "7bc1af59ec4397b282b3dde02ef28c52bf5354b28c5df9f6d9f74fe56b4bab32",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "village",
+      "src": "/assets/sunlit-3d/village.glb",
+      "bytes": 16738120,
+      "sha256": "320b849f1abc0dd52cd2e6deb4cb2025f91f472e26e5026dccd5fe3555028aac",
+      "animations": []
+    },
+    {
+      "id": "training-school",
+      "src": "/assets/sunlit-3d/training-school.glb",
+      "bytes": 143896,
+      "sha256": "d7b5121049307fa168cf1e7e3f64c31d0a6c9fa5d41c2be8bae57dee2d134335",
+      "animations": []
+    },
+    {
+      "id": "conversation-cafe",
+      "src": "/assets/sunlit-3d/conversation-cafe.glb",
+      "bytes": 84452,
+      "sha256": "b123ff2359babff722f537479ca1c5f823865263a987d41e871e47efe5e2f3a0",
+      "animations": []
+    },
+    {
+      "id": "travel-station",
+      "src": "/assets/sunlit-3d/travel-station.glb",
+      "bytes": 79388,
+      "sha256": "8e5d1a627035d780447baa0f26f08b553cfce5381e4d2d56507b95796d485feb",
+      "animations": []
+    },
+    {
+      "id": "word-greenhouse",
+      "src": "/assets/sunlit-3d/word-greenhouse.glb",
+      "bytes": 178324,
+      "sha256": "9cc1ac8075a410a1fe54bab1e4d86e42738d8999168f2cb89b1cedfa5eee3b91",
+      "animations": []
+    },
+    {
+      "id": "work-studio",
+      "src": "/assets/sunlit-3d/work-studio.glb",
+      "bytes": 91024,
+      "sha256": "874c179786a1a3d80870d1e654bd7fbd0eb411cd8c36f93c9462227939000083",
+      "animations": []
+    },
+    {
+      "id": "arena-amphitheatre",
+      "src": "/assets/sunlit-3d/arena-amphitheatre.glb",
+      "bytes": 90168,
+      "sha256": "bcea1a751b30e623d4e125cdb63f79c068f1649e6e67e447bd74de2e72b8c1be",
+      "animations": []
+    },
+    {
+      "id": "ielts-lighthouse",
+      "src": "/assets/sunlit-3d/ielts-lighthouse.glb",
+      "bytes": 266864,
+      "sha256": "9a15b9e8f56aceb1c314a8fea9de9d5aff64b3affc2a6ae5ae246a10858acc8a",
+      "animations": []
+    },
+    {
+      "id": "bubble-tree",
+      "src": "/assets/sunlit-3d/bubble-tree.glb",
+      "bytes": 210480,
+      "sha256": "4b0192b1b2c0e9d6ae081657c3c777d14447547aba39faa768e9c2a17a43ad9c",
+      "animations": []
+    },
+    {
+      "id": "field-chest",
+      "src": "/assets/sunlit-3d/field-chest.glb",
+      "bytes": 12908,
+      "sha256": "82cda73efc540a55c350d48e81d8ec65f50d24daa76f2ea1a4d4e10ac315a9cf",
+      "animations": []
+    },
+    {
+      "id": "word-seed",
+      "src": "/assets/sunlit-3d/word-seed.glb",
+      "bytes": 23848,
+      "sha256": "60485e25e74a29c8703edf7bb8273be30c1ab9003fde946c8963edb518d18b50",
+      "animations": []
+    },
+    {
+      "id": "butterfly",
+      "src": "/assets/sunlit-3d/butterfly.glb",
+      "bytes": 6120,
+      "sha256": "6ed12e88354ce99e54cd64ca98eab7e0dc5c265ae6aafa3884dcc622a77b36ce",
+      "animations": []
+    }
+  ]
+}

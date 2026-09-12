@@ -1,6 +1,6 @@
 # The Seven Sun Pages
 
-The home screen is now a playable exploration game. The existing study tools are retained in a separate learning journal instead of taking over the game screen.
+The home screen is a 3D exploration game. Three.js renders original mesh characters, buildings, terrain and objects in a perspective world. The existing study tools remain in a separate learning journal.
 
 ## Player journey
 
@@ -14,7 +14,9 @@ The home screen is now a playable exploration game. The existing study tools are
 8. Spend sun coins on companions in the bag. All four companions have the same gameplay abilities.
 9. Restore all seven pages for the story ending, then explore, replay, or open additional practice.
 
-There is no timer or paid energy. Listening uses browser speech synthesis on demand, with a transcript available when audio is unavailable or unwanted. The title, guides, mascots, world illustration and props belong to the original Sunlit Village art direction; no additional third-party game art was introduced.
+There is no timer or paid energy. Listening uses browser speech synthesis on demand, with a transcript available when audio is unavailable or unwanted. The original Sunlit Village art direction carries into the 3D models. The live world does not use flat character or building images; the illustration collection supplies interface portraits, maps and rewards. No third-party game art was introduced.
+
+Optional exploration adds eight word seeds and three chests with hinged lids. Walking near a seed collects a word and its meaning in the bag; opening a chest reveals a village note. Field notes are device-local souvenirs and do not award server XP or coins.
 
 ## Content
 
@@ -35,13 +37,16 @@ The canonical titles, prose, questions, positions, prerequisites and rewards are
 | Action | Control |
 | --- | --- |
 | Move | WASD, arrow keys, touch direction pad |
+| Run | Hold Shift, or toggle Run |
+| Jump | Space or Jump button; solid collision boundaries still apply |
+| Camera | Right-drag to orbit; wheel or buttons to zoom; R to reset |
 | Walk to a point | Click/tap the ground |
 | Walk to a guide | Click the guide/building or choose an open map destination |
-| Talk | E or the nearby interaction button |
+| Talk / open chest | E or the nearby interaction button |
 | Journal / Map / Bag | J / M / B or the toolbar |
 | Pause | Escape or the pause button |
 
-Losing browser focus pauses the game and clears held movement inputs. Modal panels suspend world controls and contain keyboard focus. Speech stops when a challenge is paused or closed. Reduced-motion settings disable decorative animation.
+Losing browser focus pauses the game and clears held movement inputs. Modal panels suspend world controls and contain keyboard focus. Speech stops when a challenge is paused or closed. Reduced-motion settings disable decorative world animation and particles and remove camera easing. Essential movement and interaction animations remain visible. The HUD includes a mute control for synthesized footsteps, jumps, pickups and chest sounds; sound starts only after a player gesture.
 
 | Route | Role |
 | --- | --- |
@@ -56,7 +61,14 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 ## Code structure
 
 - `components/game/AdventureGame.tsx`: title, world, HUD, dialogue, pause and game flow.
-- `components/game/useWorldController.ts`: input state, animation loop, camera, proximity, automatic walking and positional autosave. The frame loop updates world transforms directly rather than rerendering React every frame.
+- `components/game/WorldCanvas.tsx`: client-only lazy renderer loading, WebGL error/retry UI and lifecycle cleanup.
+- `components/game/useWorldController.ts`: camera-relative input, acceleration, braking, jump gravity, movement substeps, proximity, automatic walking and positional autosave. It exposes a simulation step; the renderer owns the single frame loop.
+- `lib/game/three/renderer.ts`: perspective camera, raycast interactions, lighting, shadows, NPC behavior, animation selection, pickups, doors, chests and particles. Scene transforms update outside React.
+- `lib/game/three/characters.ts`: original rigid mesh rigs and six named animation clips per companion; no raster sprites or deformable skin weights.
+- `lib/game/three/environment.ts`: original mesh factories for the island, lagoon, bridge, roads, seven buildings, trees and props.
+- `lib/game/three/primitives.ts`: shared geometry/material ownership, static geometry merging and interface labels.
+- `lib/game/three/audio.ts`: original synthesized effects, unlocked by gesture.
+- `lib/game/discoveries.ts`: word seeds and chest-note content.
 - `lib/game/world.ts`: shoreline, collision movement and A* navigation. Path endpoints connect to visible, walkable grid points and paths avoid diagonal corner cutting.
 - `lib/game/scenery.ts`: decorative placement and collision shapes.
 - `components/game/QuestChallenge.tsx`: question interaction, feedback, completion submission, retry and results.
@@ -68,6 +80,11 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 - `backend/internal/store/adventure.go`: atomic account saves and learning evidence.
 - `backend/internal/httpapi/adventure.go`: authenticated HTTP endpoints.
 - `app/adventure.css`: scoped game presentation and responsive controls.
+- `scripts/export-3d-village.mjs`: reproducible GLB and ZIP production from the runtime model factories, including hashes and provenance.
+
+The bridge is traversable through a narrow channel across the lagoon collider. Jumping is a grounded exploration animation with gravity, not a way to bypass buildings or island boundaries. Building doors respond to proximity, while their guides launch chapter challenges; separate indoor levels are not part of this version.
+
+The 3D pack in `public/assets/sunlit-3d/` contains 16 GLB files: four animated characters, seven buildings, four small environment assets and one complete world. Modular exports are centered at their local origin. The full world is a static scene export; browser labels, game logic and environmental animation remain in source. Runtime factories avoid downloading the large world export. WebGL 2 is required, with an explicit recovery message when unavailable. Pixel ratio and shadow resolution are capped on small screens, but device performance has not been benchmarked.
 
 ## Persistence contract
 
@@ -92,7 +109,7 @@ The server accepts answers and companion IDs, never client-supplied XP, coins or
 
 PostgreSQL stores each account save in `player_adventures`. `EnsureAdventure` applies the table definition at API startup; `backend/migrations/010_adventure.sql` contains the same idempotent DDL. An action holds a row lock and updates the save, first-clear account XP, skill evidence and review items in one transaction. The existing in-memory development store also supports adventure actions, but its data disappears on server restart; the game displays this limitation.
 
-Position and tracked quest are stored locally per account under `loccao.adventure.meta.<playerId>.v1`. Quest progress, XP, coins and companion ownership are server-owned. Current challenge answers survive an in-tab pause, but are deliberately discarded when leaving the challenge or reloading; completed quests are retained.
+Position, tracked quest and field notes are stored locally per account under `loccao.adventure.meta.<playerId>.v1`. Field-note IDs are validated against the authored catalog. Quest progress, XP, coins and companion ownership are server-owned. Current challenge answers survive an in-tab pause, but are deliberately discarded when leaving the challenge or reloading; completed quests are retained.
 
 A signed-in connection error offers retry, sign-in or an explicit separate guest adventure. It does not silently substitute the shared demo player. An action error preserves the submitted answers so the player can retry. Guest saves are not uploaded automatically on sign-in.
 

@@ -1,8 +1,9 @@
 export type Point = { x: number; y: number };
-export type Obstacle = { x: number; y: number; rx: number; ry: number };
+export type Obstacle = { x: number; y: number; rx: number; ry: number; shape?: "box"; kind?: "pond" };
 export const WORLD = { width: 1200, height: 820 };
 export const SPAWN: Point = { x: 343, y: 562 };
-const shore: Point[] = [[168,225],[257,146],[406,116],[593,82],[760,101],[925,158],[1030,255],[1050,407],[1003,544],[892,627],[737,674],[532,682],[351,663],[222,601],[167,502],[155,351]].map(([x,y])=>({x,y}));
+export const onBridge = (point: Point) => point.x >= 544 && point.x <= 720 && Math.abs(point.y-410) < 11;
+export const shore: Point[] = [[168,225],[257,146],[406,116],[593,82],[760,101],[925,158],[1030,255],[1050,407],[1003,544],[892,627],[737,674],[532,682],[351,663],[222,601],[167,502],[155,351]].map(([x,y])=>({x,y}));
 export function insideIsland(point: Point) {
   let inside = false;
   for (let i = 0, j = shore.length - 1; i < shore.length; j = i++) {
@@ -12,17 +13,17 @@ export function insideIsland(point: Point) {
   return inside;
 }
 export function walkable(point: Point, obstacles: Obstacle[]) {
-  return Number.isFinite(point.x) && Number.isFinite(point.y) && insideIsland(point) && obstacles.every(obstacle => ((point.x-obstacle.x)/(obstacle.rx+9))**2 + ((point.y-obstacle.y)/(obstacle.ry+9))**2 > 1);
+  return Number.isFinite(point.x) && Number.isFinite(point.y) && insideIsland(point) && obstacles.every(obstacle => obstacle.kind === "pond" && onBridge(point) ? true : obstacle.shape === "box" ? Math.abs(point.x-obstacle.x) > obstacle.rx+9 || Math.abs(point.y-obstacle.y) > obstacle.ry+9 : ((point.x-obstacle.x)/(obstacle.rx+9))**2 + ((point.y-obstacle.y)/(obstacle.ry+9))**2 > 1);
 }
 const segmentClear = (a: Point, b: Point, obstacles: Obstacle[]) => {
   const steps = Math.max(1, Math.ceil(Math.hypot(b.x-a.x, b.y-a.y)/4));
   for (let i=0; i<=steps; i++) if (!walkable({ x: a.x+(b.x-a.x)*i/steps, y: a.y+(b.y-a.y)*i/steps }, obstacles)) return false;
   return true;
 };
-export function movePlayer(point: Point, direction: Point, delta: number, obstacles: Obstacle[]): Point {
+export function movePlayer(point: Point, direction: Point, delta: number, obstacles: Obstacle[], speed = 145): Point {
   const length = Math.hypot(direction.x, direction.y);
   if (!length) return point;
-  const distance = 145 * Math.min(.04, Math.max(0, delta));
+  const distance = speed * Math.min(.04, Math.max(0, delta));
   const dx = direction.x / length * distance, dy = direction.y / length * distance;
   let next = point;
   if (walkable({ x: point.x + dx, y: point.y }, obstacles)) next = { x: point.x + dx, y: point.y };

@@ -5,12 +5,13 @@ import { API_URL } from "@/lib/api";
 import { questById } from "@/lib/game/catalog";
 import { completeQuest, equipCompanion, newAdventure, restoreAdventure, type AdventureSave, type Verdict } from "@/lib/game/progress";
 import { SPAWN, type Point } from "@/lib/game/world";
+import { discoveries } from "@/lib/game/discoveries";
 
-type Meta = { position: Point; started: boolean; tracked: string };
+type Meta = { position: Point; started: boolean; tracked: string; fieldNotes: string[] };
 type Action = { kind: "complete"; questId: string; answers: string[] } | { kind: "equip"; character: string };
 type Result = { save: AdventureSave; verdict?: Verdict };
 const guestKey = "loccao.adventure.guest.v1";
-const initialMeta = (): Meta => ({ position: { ...SPAWN }, started: false, tracked: "" });
+const initialMeta = (): Meta => ({ position: { ...SPAWN }, started: false, tracked: "", fieldNotes: [] });
 
 function readMeta(value: unknown): Meta {
   const data = value && typeof value === "object" ? value as Partial<Meta> : {};
@@ -18,6 +19,7 @@ function readMeta(value: unknown): Meta {
     position: Number.isFinite(data.position?.x) && Number.isFinite(data.position?.y) ? data.position! : { ...SPAWN },
     started: data.started === true,
     tracked: typeof data.tracked === "string" && questById(data.tracked) ? data.tracked : "",
+    fieldNotes: Array.isArray(data.fieldNotes) ? discoveries.filter(word=>data.fieldNotes!.includes(word.id)).map(word=>word.id) : [],
   };
 }
 
@@ -100,6 +102,10 @@ export function useAdventure() {
     setMeta(metaRef.current); persist(saveRef.current, metaRef.current);
   }, [persist]);
 
+  const collectWord = useCallback((id: string) => {
+    if (discoveries.some(word=>word.id===id) && !metaRef.current.fieldNotes.includes(id)) updateMeta({ fieldNotes: [...metaRef.current.fieldNotes,id] });
+  }, [updateMeta]);
+
   const act = useCallback(async (action: Action): Promise<Result> => {
     if (busyRef.current) throw new Error("Your previous action is still saving.");
     busyRef.current = true; setBusy(true);
@@ -119,5 +125,5 @@ export function useAdventure() {
     } finally { busyRef.current = false; setBusy(false); }
   }, [persist, request]);
 
-  return { save, meta, status, identity, name, storageMode, error, storageWarning, busy, load, updateMeta, act };
+  return { save, meta, status, identity, name, storageMode, error, storageWarning, busy, load, updateMeta, collectWord, act };
 }

@@ -11,18 +11,21 @@
     "assets:export": "node scripts/export-village-map.mjs",
     "assets:verify": "node scripts/verify-sunlit-assets.mjs",
     "test:assets": "playwright test --config=playwright.assets.config.ts",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "assets:3d": "node scripts/export-3d-village.mjs"
   },
   "dependencies": {
     "next": "16.3.4",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "three": "0.174.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "0.174.0",
     "typescript": "^5.0.0"
   }
 }

@@ -1,4 +1,5 @@
 import { zones } from "./catalog";
+import { fieldChests } from "./discoveries";
 import type { Obstacle } from "./world";
 
 export const scenery = [
@@ -22,7 +23,12 @@ export const scenery = [
   { id: "chest-closed", x: 825, y: 249, size: 50 },
 ];
 export const obstacles: Obstacle[] = [
-  ...zones.map(zone => ({ x: zone.x, y: zone.y - 22, rx: 49, ry: 26 })),
-  { x: 632, y: 410, rx: 72, ry: 35 },
-  ...scenery.filter(item => item.id === "bubble-tree").map(item => ({ x: item.x, y: item.y - 9, rx: 18, ry: 11 })),
+  ...zones.map(zone => zone.id === "ielts" ? { x: zone.x, y: zone.y-22, rx: 32, ry: 32 } : { x: zone.x, y: zone.y - 22, rx: 49, ry: 28, shape: "box" as const }),
+  { x: 632, y: 410, rx: 72, ry: 35, kind: "pond" },
+  { x: 562, y: 580, rx: 16, ry: 16 }, { x: 702, y: 580, rx: 16, ry: 16 },
+  ...fieldChests.map(chest=>({x:chest.x,y:chest.y,rx:10,ry:8})),
+  ...scenery.filter(item => item.id === "bubble-tree").map(item => ({ x: item.x, y: item.y, rx: 9, ry: 9 })),
+  ...scenery.filter(item => item.id === "bench").map(item => ({ x: item.x, y: item.y, rx: 20, ry: 8, shape: "box" as const })),
+  ...scenery.filter(item => ["sun-lamp", "signpost", "mailbox"].includes(item.id)).map(item => ({ x: item.x, y: item.y, rx: 4, ry: 4 })),
+  ...scenery.filter(item => item.id === "leaf-planter").map(item => ({ x: item.x, y: item.y, rx: 10, ry: 10 })),
 ];

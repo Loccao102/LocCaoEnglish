@@ -8,7 +8,7 @@ import GameDialog from "./GameDialog";
 
 export default function QuestChallenge({ quest, hidden, onPause, onComplete, onDone, finalPage }: {
   quest: Quest; hidden: boolean; onPause: () => void;
-  onComplete: (answers: string[]) => Promise<Verdict>; onDone: () => void; finalPage: boolean;
+  onComplete: (answers: string[]) => Promise<Verdict>; onDone: (passed: boolean) => void; finalPage: boolean;
 }) {
   const [index, setIndex] = useState(0), [answers, setAnswers] = useState<string[]>([]);
   const [value, setValue] = useState(""), [tokens, setTokens] = useState<number[]>([]);
@@ -60,7 +60,7 @@ export default function QuestChallenge({ quest, hidden, onPause, onComplete, onD
     <div className="reward-totals"><span><b>{verdict.correct}/3</b> correct</span><span><b>+{verdict.xp}</b> XP</span><span><b>+{verdict.coins}</b> sun coins</span></div>
     {verdict.passed && !verdict.firstClear && <p className="game-caption">Your best stars are saved. First-clear rewards have already been collected.</p>}
     {finalPage && quest.id === "final-page" && verdict.passed && <p className="story-ending">All seven pages are together. Thank you, adventurer. Visit your friends again, improve your stars, or discover more English in the learning journal.</p>}
-    <div className="game-actions">{!verdict.passed && <button className="game-button" onClick={retry}>Try again</button>}<button className={`game-button ${verdict.passed ? "" : "secondary"}`} onClick={onDone}>Return to village →</button></div>
+    <div className="game-actions">{!verdict.passed && <button className="game-button" onClick={retry}>Try again</button>}<button className={`game-button ${verdict.passed ? "" : "secondary"}`} onClick={() => onDone(verdict.passed)}>Return to village →</button></div>
   </GameDialog>;
 
   return <GameDialog title={quest.title} hidden={hidden} onClose={onPause} className="challenge-dialog">

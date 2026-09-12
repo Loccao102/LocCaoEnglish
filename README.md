@@ -1,12 +1,15 @@
 # LocCao English
 
-An English adventure in Sunlit Village, with a playable character, NPCs, a seven-chapter story and a separate learning journal for deeper practice.
+A 3D English adventure in Sunlit Village, with articulated characters, a seven-chapter story and a separate learning journal for deeper practice.
 
 ## The Seven Sun Pages
 
-Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or click a destination to walk there. Speak to a nearby guide with **E** and complete English challenges to restore the village’s lost story.
+Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or click a destination to walk there. Hold **Shift** to run, **Space** to jump, and right-drag to orbit the camera. Speak to a nearby guide or open a chest with **E** and complete English challenges to restore the village’s lost story.
 
 - Seven places, fourteen sequential quests and forty-two authored challenges.
+- A Three.js world with solid geometry, real-time lighting and shadows, camera-relative movement and collision boundaries.
+- Four original companions with idle, walk, run, jump, wave and celebration animation clips.
+- Eight collectible word seeds and three hinged discovery chests, with original synthesized sound effects.
 - Choice, sentence building, typed answers and listening with optional transcripts.
 - At least two correct answers out of three to pass; failed quests can be retried.
 - First-clear XP and sun coins, best-star replays, seven collectible Sun Pages and four companions.
@@ -17,7 +20,9 @@ See [adventure architecture and handoff](docs/ADVENTURE.md) for the game loop, r
 
 ## Sunlit Village art pack
 
-The original **Làng Nắng / Sunlit Village** collection brings 41 reusable assets into the playable world, learning journal, profiles, onboarding and rewards. Browse `/art-studio` or download `public/assets/sunlit-village-pack.zip`. The learning progress map at `/progress` retains live unlocks and an explicit offline preview.
+The playable world is built from original mesh factories in `lib/game/three/`. Run `npm run assets:3d` to export four animated companions, seven individual buildings, a tree, a chest, a word seed, a butterfly and the complete village as GLB files. Browse `/art-studio` or download `public/assets/sunlit-3d-pack.zip`; the manifest and provenance are in `public/assets/sunlit-3d/`. Runtime construction uses the same source and does not download the exported world file.
+
+The original **Làng Nắng / Sunlit Village** illustration collection retains 41 reusable assets for maps, portraits, the learning journal, profiles, onboarding and rewards. Download `public/assets/sunlit-village-pack.zip`. The learning progress map at `/progress` retains live unlocks and an explicit offline preview.
 
 See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, exact generation prompts, provenance, source files, and validation commands. A complete standalone illustrated SVG map is included.
 
