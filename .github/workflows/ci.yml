@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+          cache-dependency-path: backend/go.sum
       - run: go mod tidy
       - run: go test ./...
       - run: go vet ./...
@@ -58,7 +59,17 @@ jobs:
     needs: [backend, ai-service, compose]
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose up -d --build postgres redis ai api
+      - name: Build and start integration services
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose up -d --build postgres redis ai api; then
+              exit 0
+            fi
+            echo "Docker compose attempt ${attempt}/3 failed; cleaning up before retry."
+            docker compose down -v --remove-orphans || true
+            sleep $((attempt * 5))
+          done
+          exit 1
       - name: Wait for API
         run: |
           for i in {1..40}; do
@@ -120,7 +131,17 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - run: docker compose up -d --build
+      - name: Build and start application stack
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose up -d --build; then
+              exit 0
+            fi
+            echo "Docker compose attempt ${attempt}/3 failed; cleaning up before retry."
+            docker compose down -v --remove-orphans || true
+            sleep $((attempt * 5))
+          done
+          exit 1
       - name: Wait for web
         run: |
           for i in {1..60}; do
