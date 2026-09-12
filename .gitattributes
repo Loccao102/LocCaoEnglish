@@ -1,0 +1,5 @@
+# Asset checksums cover exact bytes on every platform, including Windows.
+public/assets/sunlit-village/** -text
+public/assets/sunlit-village/*.png binary
+public/assets/sunlit-village-pack.zip binary
+public/assets/sunlit-village/village-illustrated.svg linguist-generated=true
