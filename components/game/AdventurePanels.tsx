@@ -1,0 +1,23 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import GameArt from "@/components/GameArt";
+import { companions, zones, type Quest, type Zone } from "@/lib/game/catalog";
+import { pageCount, questOpen, type AdventureSave } from "@/lib/game/progress";
+import type { Point } from "@/lib/game/world";
+import GameDialog from "./GameDialog";
+
+export function QuestJournal({ save, onClose, onTrack }: { save: AdventureSave; onClose: () => void; onTrack: (quest: Quest) => void }) {
+  return <GameDialog title="Your field journal" onClose={onClose} className="journal-dialog"><p className="game-subtitle">Seven places. Seven lost pages. One story to bring home.</p><div className="journal-chapters">{zones.map(zone => <section key={zone.id} className="journal-chapter"><div className="journal-place"><GameArt id={zone.building}/><div><small>CHAPTER {zone.chapter}</small><h3>{zone.name}</h3></div><span>{save.completed[zone.quests[1].id] ? "☀" : "○"}</span></div>{zone.quests.map(quest => <button className="journal-quest" key={quest.id} disabled={!questOpen(save, quest)} onClick={() => onTrack(quest)}><span className="journal-check">{save.completed[quest.id] ? "✓" : questOpen(save, quest) ? "!" : "◇"}</span><span><strong>{quest.title}</strong><small>{save.completed[quest.id] ? `${"★".repeat(save.completed[quest.id])} · Replay to improve your stars` : questOpen(save, quest) ? `${quest.xp} XP · ${quest.coins} sun coins${quest.page ? " · Sun Page" : ""}` : "Complete the previous quest to unlock"}</small></span><b>{questOpen(save, quest) ? "→" : ""}</b></button>)}</section>)}</div><Link className="game-text-button journal-library" href="/camp">Open learning journal: lessons, practice & account progress ↗</Link></GameDialog>;
+}
+
+export function AdventureMap({ save, position, onClose, onTravel }: { save: AdventureSave; position: Point; onClose: () => void; onTravel: (zone: Zone) => void }) {
+  return <GameDialog title="Sunlit Village" onClose={onClose} className="map-dialog"><p className="game-subtitle">Choose an open place and your companion will walk there.</p><div className="adventure-overview"><img src="/assets/sunlit-village/village-map.svg" alt=""/>{zones.map(zone => <button key={zone.id} disabled={!questOpen(save, zone.quests[0])} className="overview-place" style={{ left: `${zone.x/12}%`, top: `${(zone.y-50)/8.2}%` }} onClick={() => onTravel(zone)} aria-label={`Walk to ${zone.name}`}><GameArt id={zone.building}/><span>{zone.chapter}. {zone.name}{!questOpen(save, zone.quests[0]) ? " · Locked" : ""}</span></button>)}<span className="overview-you" style={{ left: `${position.x/12}%`, top: `${position.y/8.2}%` }} aria-label="Your position">●</span></div><div className="map-place-list">{zones.map(zone => <button key={zone.id} className="game-button secondary" disabled={!questOpen(save, zone.quests[0])} onClick={() => onTravel(zone)}>{save.completed[zone.quests[1].id] ? "☀" : zone.chapter} {zone.name} {questOpen(save, zone.quests[0]) ? "→" : "· Locked"}</button>)}</div></GameDialog>;
+}
+
+export function AdventureBag({ save, busy, onClose, onEquip }: { save: AdventureSave; busy: boolean; onClose: () => void; onEquip: (id: string) => Promise<void> }) {
+  const [error, setError] = useState("");
+  async function equip(id: string) { setError(""); try { await onEquip(id); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not save this companion."); } }
+  return <GameDialog title="Your travel bag" onClose={onClose} className="bag-dialog"><div className="bag-summary"><GameArt id="satchel"/><div><strong>{save.coins} sun coins</strong><p>{pageCount(save)} of 7 Sun Pages restored</p></div></div><div className="collected-pages" aria-label="Collected Sun Pages">{zones.map(zone => <span key={zone.id} data-collected={!!save.completed[zone.quests[1].id]} title={zone.name}>{save.completed[zone.quests[1].id] ? "☀" : zone.chapter}</span>)}</div><h3>Choose your companion</h3><p className="game-subtitle">Companions are cosmetic. Every friend can complete every quest.</p><div className="companion-list">{companions.map(companion => <article key={companion.id}><GameArt id={companion.id}/><h4>{companion.name}</h4><p>{companion.role}</p><button className="game-button secondary" disabled={busy || save.character === companion.id || (!save.owned.includes(companion.id) && save.coins < companion.cost)} onClick={() => void equip(companion.id)}>{save.character === companion.id ? "Travelling with you" : save.owned.includes(companion.id) ? "Travel together" : `Unlock · ${companion.cost} coins`}</button></article>)}</div>{error && <p role="alert" className="game-error">{error}</p>}</GameDialog>;
+}

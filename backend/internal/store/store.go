@@ -16,6 +16,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/adventure"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -36,6 +37,8 @@ type memoryState struct {
 }
 
 type Store struct {
+	adventureMu sync.Mutex
+	adventures map[string]adventure.Save
 	db *sql.DB
 	mu sync.RWMutex
 	mem memoryState

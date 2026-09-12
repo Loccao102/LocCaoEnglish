@@ -1,2 +1,3 @@
-import WorldMap from "@/components/WorldMap";
-export default function WorldsPage(){return <div className="page-wrap"><WorldMap/></div>}
+import AdventureGame from "@/components/game/AdventureGame";
+
+export default function WorldsPage() { return <AdventureGame initialMap/>; }

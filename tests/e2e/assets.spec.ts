@@ -14,7 +14,7 @@ test("map preserves live unlocks, selection, navigation and loadout", async ({ p
     expect(route.request().postDataJSON()).toEqual({ cosmeticId: "traveler-badge" });
     await route.fulfill({ json: { ...progression, inventory: [{ ...progression.inventory[0], equipped: true }] } });
   });
-  await page.goto("/worlds");
+  await page.goto("/progress");
   await expect(page.getByRole("heading", { name: "Level 3 · 2/7 worlds open" })).toBeVisible();
   await expect(page.locator(".village-stop")).toHaveCount(7);
   const arena = page.getByRole("button", { name: /Battle Arena, locked/ });
@@ -32,7 +32,7 @@ test("map preserves live unlocks, selection, navigation and loadout", async ({ p
 test("offline preview is explorable, does not invent progress and retries", async ({ page }) => {
   let live = false;
   await page.route("**/v1/player/progression", route => route.fulfill(live ? { json: progression } : { status: 503, json: { error: "Offline" } }));
-  await page.goto("/worlds");
+  await page.goto("/progress");
   await expect(page.getByText("World preview · progress not connected")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Level \d/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Explore this world" })).toHaveCount(0);
@@ -66,7 +66,7 @@ test("Camp applies buildings and chest artwork without bypassing the reward gate
   await page.route("**/v1/**", route => route.fulfill({ status: 503, json: { error: "Offline" } }));
   await page.route("**/v1/player/progression", route => route.fulfill({ json: progression }));
   await page.route("**/v1/player/daily", route => route.fulfill({ json: { date: "2026-09-12", quests: [], completed: 0, total: 3, chestXp: 50, claimable: false, claimed: false } }));
-  await page.goto("/");
+  await page.goto("/camp");
   await expect(page.getByRole("region", { name: "Welcome to Sunlit Village" })).toBeVisible();
   await expect(page.getByRole("img", { name: "Reward chest · locked" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Clear all quests to unlock chest" })).toBeDisabled();

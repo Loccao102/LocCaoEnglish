@@ -1,0 +1,811 @@
+{
+  "version": 1,
+  "title": "The Seven Sun Pages",
+  "zones": [
+    {
+      "id": "training",
+      "name": "Pagewood School",
+      "guide": "Nắng",
+      "portrait": "nang",
+      "building": "training-school",
+      "x": 246,
+      "y": 505,
+      "npcX": 280,
+      "npcY": 562,
+      "chapter": 1,
+      "practice": "/learn",
+      "intro": "The village storybook is missing seven sun pages. Its first page is hiding in a very small word: hello.",
+      "quests": [
+        {
+          "id": "first-hello",
+          "title": "A little hello",
+          "brief": "Help Nắng welcome the new neighbors.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "A new neighbor says: “Hi, I’m Nắng.” What do you say?",
+              "answer": "Nice to meet you.",
+              "options": [
+                "Nice to meet you.",
+                "See you yesterday.",
+                "I am a window."
+              ],
+              "note": "“Nice to meet you” is a friendly first greeting.",
+              "passage": ""
+            },
+            {
+              "kind": "order",
+              "prompt": "Introduce yourself to your neighbor.",
+              "answer": "My name is Mam.",
+              "options": [
+                "is",
+                "Mam.",
+                "My",
+                "name"
+              ],
+              "note": "Use “My name is…” to introduce yourself.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "Nắng asks, “How are you?” Choose a natural reply.",
+              "answer": "I’m good, thanks.",
+              "options": [
+                "It’s a book.",
+                "I’m good, thanks.",
+                "At the station."
+              ],
+              "note": "Answer how you feel, then thank the person.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "training",
+          "requires": "",
+          "page": false
+        },
+        {
+          "id": "school-page",
+          "title": "The first sun page",
+          "brief": "Read the school notice and find the missing page.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "When does the reading club start?",
+              "answer": "At nine.",
+              "options": [
+                "At eight.",
+                "At nine.",
+                "At ten."
+              ],
+              "note": "The notice says the club starts at nine.",
+              "passage": "Reading club starts at nine in the school garden. Bring a book and a pencil."
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete the note: “Please bring a book and a ___.”",
+              "answer": "pencil",
+              "options": [],
+              "note": "The notice asks for a book and a pencil.",
+              "passage": "Reading club starts at nine in the school garden. Bring a book and a pencil."
+            },
+            {
+              "kind": "order",
+              "prompt": "Thank Nắng for helping you.",
+              "answer": "Thank you for your help.",
+              "options": [
+                "your",
+                "Thank",
+                "help.",
+                "for",
+                "you"
+              ],
+              "note": "“Thank you for your help” is a complete, polite sentence.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "training",
+          "requires": "first-hello",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "conversation",
+      "name": "Little Words Café",
+      "guide": "Nắng",
+      "portrait": "nang",
+      "building": "conversation-cafe",
+      "x": 632,
+      "y": 565,
+      "npcX": 637,
+      "npcY": 625,
+      "chapter": 2,
+      "practice": "/conversation",
+      "intro": "The café has a table for everyone. Help our visitors feel welcome and we’ll find another page.",
+      "quests": [
+        {
+          "id": "cafe-order",
+          "title": "One warm conversation",
+          "brief": "Order a drink and make a new friend.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "Ask for tea politely.",
+              "answer": "Could I have a tea, please?",
+              "options": [
+                "You! Tea!",
+                "Could I have a tea, please?",
+                "Tea had yesterday."
+              ],
+              "note": "“Could I have…” makes a polite request.",
+              "passage": ""
+            },
+            {
+              "kind": "order",
+              "prompt": "Ask someone to join you.",
+              "answer": "Would you like to sit here?",
+              "options": [
+                "here?",
+                "like",
+                "Would",
+                "sit",
+                "you",
+                "to"
+              ],
+              "note": "“Would you like to…” is a friendly invitation.",
+              "passage": ""
+            },
+            {
+              "kind": "listen",
+              "prompt": "Listen to the visitor. Which drink would they like?",
+              "answer": "Orange juice.",
+              "options": [
+                "Orange juice.",
+                "Hot chocolate.",
+                "Coffee."
+              ],
+              "note": "The visitor asks for orange juice.",
+              "passage": "I would like orange juice, please. It is a warm day."
+            }
+          ],
+          "zoneId": "conversation",
+          "requires": "school-page",
+          "page": false
+        },
+        {
+          "id": "cafe-page",
+          "title": "A table for two",
+          "brief": "Fix a misunderstanding and recover the café’s page.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "You didn’t hear the visitor. What can you say?",
+              "answer": "Could you say that again?",
+              "options": [
+                "You are incorrect.",
+                "Could you say that again?",
+                "I never listen."
+              ],
+              "note": "Ask someone to repeat themselves politely.",
+              "passage": ""
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete: “Nice to ___ you!”",
+              "answer": "meet",
+              "options": [],
+              "note": "We say “Nice to meet you” when meeting someone.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "Your friend is free after lunch. When should you meet?",
+              "answer": "In the afternoon.",
+              "options": [
+                "Before breakfast.",
+                "In the afternoon.",
+                "At midnight."
+              ],
+              "note": "After lunch usually means in the afternoon.",
+              "passage": "I’m busy this morning, but I’m free after lunch. Let’s meet at the café."
+            }
+          ],
+          "zoneId": "conversation",
+          "requires": "cafe-order",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Sunrail Station",
+      "guide": "Mây",
+      "portrait": "may",
+      "building": "travel-station",
+      "x": 390,
+      "y": 345,
+      "npcX": 417,
+      "npcY": 401,
+      "chapter": 3,
+      "practice": "/travel",
+      "intro": "Our little ferry is waiting for its passengers. Can you help everyone find the right way?",
+      "quests": [
+        {
+          "id": "station-ticket",
+          "title": "A ticket somewhere new",
+          "brief": "Read the signs and buy the right ticket.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "You want to go to Green Bay and come back. What ticket do you need?",
+              "answer": "A return ticket.",
+              "options": [
+                "A one-way ticket.",
+                "A return ticket.",
+                "A library card."
+              ],
+              "note": "A return ticket includes the journey back.",
+              "passage": ""
+            },
+            {
+              "kind": "listen",
+              "prompt": "Which platform does the train leave from?",
+              "answer": "Platform three.",
+              "options": [
+                "Platform one.",
+                "Platform three.",
+                "Platform five."
+              ],
+              "note": "The announcement names platform three.",
+              "passage": "The train to Green Bay leaves from platform three."
+            },
+            {
+              "kind": "order",
+              "prompt": "Ask how much your ticket costs.",
+              "answer": "How much is a return ticket?",
+              "options": [
+                "a",
+                "ticket?",
+                "How",
+                "return",
+                "is",
+                "much"
+              ],
+              "note": "Use “How much is…” to ask a price.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "travel",
+          "requires": "cafe-page",
+          "page": false
+        },
+        {
+          "id": "station-page",
+          "title": "The missing departure",
+          "brief": "Help a lost traveler reach the ferry.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "Which direction should the traveler take at the café?",
+              "answer": "Turn left.",
+              "options": [
+                "Turn right.",
+                "Turn left.",
+                "Go back."
+              ],
+              "note": "The directions say to turn left at the café.",
+              "passage": "Walk straight to the café. Turn left there. The ferry is next to the bridge."
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete: “The ferry is next ___ the bridge.”",
+              "answer": "to",
+              "options": [],
+              "note": "“Next to” means beside.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "The train is delayed. What does that mean?",
+              "answer": "It will leave later.",
+              "options": [
+                "It will leave later.",
+                "It has no seats.",
+                "It leaves earlier."
+              ],
+              "note": "“Delayed” means later than planned.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "travel",
+          "requires": "station-ticket",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "words",
+      "name": "Word Conservatory",
+      "guide": "Nắng",
+      "portrait": "nang",
+      "building": "word-greenhouse",
+      "x": 613,
+      "y": 252,
+      "npcX": 652,
+      "npcY": 305,
+      "chapter": 4,
+      "practice": "/word-graph",
+      "intro": "Words grow better together. Match the right meanings and help this greenhouse bloom.",
+      "quests": [
+        {
+          "id": "word-seeds",
+          "title": "Plant a word garden",
+          "brief": "Connect words that belong together.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "Which word means nearly the same as “begin”?",
+              "answer": "Start.",
+              "options": [
+                "Finish.",
+                "Start.",
+                "Forget."
+              ],
+              "note": "“Begin” and “start” are synonyms.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "Which word completes “___ a decision”?",
+              "answer": "Make.",
+              "options": [
+                "Do.",
+                "Make.",
+                "Take off."
+              ],
+              "note": "The common collocation is “make a decision”.",
+              "passage": ""
+            },
+            {
+              "kind": "type",
+              "prompt": "Write the opposite of “empty”.",
+              "answer": "full",
+              "options": [],
+              "note": "“Full” is the opposite of “empty”.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "words",
+          "requires": "station-page",
+          "page": false
+        },
+        {
+          "id": "word-page",
+          "title": "The page that blooms",
+          "brief": "Use context to restore a lost sentence.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "What does “tiny” mean here?",
+              "answer": "Very small.",
+              "options": [
+                "Very old.",
+                "Very loud.",
+                "Very small."
+              ],
+              "note": "The seed fits on a fingertip, so it is very small.",
+              "passage": "The tiny seed fit on the tip of my finger."
+            },
+            {
+              "kind": "order",
+              "prompt": "Put the words into a sentence.",
+              "answer": "Small steps lead to big changes.",
+              "options": [
+                "big",
+                "lead",
+                "Small",
+                "changes.",
+                "to",
+                "steps"
+              ],
+              "note": "The plural subject “steps” takes “lead”.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "Choose the most natural phrase.",
+              "answer": "Heavy rain.",
+              "options": [
+                "Heavy rain.",
+                "Strong rain.",
+                "Tall rain."
+              ],
+              "note": "“Heavy rain” is the usual collocation.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "words",
+          "requires": "word-seeds",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "name": "Pencilworks Studio",
+      "guide": "Sỏi",
+      "portrait": "soi",
+      "building": "work-studio",
+      "x": 875,
+      "y": 450,
+      "npcX": 890,
+      "npcY": 510,
+      "chapter": 5,
+      "practice": "/work",
+      "intro": "We’re building a reading bench for the whole village. Clear words will help us work together.",
+      "quests": [
+        {
+          "id": "studio-plan",
+          "title": "Make a plan together",
+          "brief": "Help Sỏi explain the team’s next steps.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "order",
+              "prompt": "Explain what you are working on.",
+              "answer": "I am working on the design.",
+              "options": [
+                "the",
+                "I",
+                "design.",
+                "on",
+                "working",
+                "am"
+              ],
+              "note": "Use the present continuous for work in progress.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "You need a clearer deadline. What do you ask?",
+              "answer": "When do you need it?",
+              "options": [
+                "Where was it blue?",
+                "When do you need it?",
+                "Why not yesterday?"
+              ],
+              "note": "This question asks when the work should be ready.",
+              "passage": ""
+            },
+            {
+              "kind": "listen",
+              "prompt": "What should the team finish first?",
+              "answer": "The design.",
+              "options": [
+                "The paint.",
+                "The design.",
+                "The delivery."
+              ],
+              "note": "Sỏi asks the team to finish the design first.",
+              "passage": "Let’s finish the design first. We can choose the paint tomorrow."
+            }
+          ],
+          "zoneId": "work",
+          "requires": "word-page",
+          "page": false
+        },
+        {
+          "id": "studio-page",
+          "title": "A promise you can keep",
+          "brief": "Negotiate a deadline and recover the studio’s page.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "You cannot finish by Friday. Choose a helpful response.",
+              "answer": "Could we move the deadline to Monday?",
+              "options": [
+                "That is your problem.",
+                "Could we move the deadline to Monday?",
+                "I will never do it."
+              ],
+              "note": "Suggest a specific alternative when negotiating.",
+              "passage": ""
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete: “Thanks for your ___.” (being patient)",
+              "answer": "patience",
+              "options": [],
+              "note": "“Thanks for your patience” acknowledges someone’s understanding.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "What is the team’s agreed plan?",
+              "answer": "Deliver on Monday.",
+              "options": [
+                "Deliver on Friday.",
+                "Cancel the bench.",
+                "Deliver on Monday."
+              ],
+              "note": "Sỏi accepts Monday as the revised delivery date.",
+              "passage": "Mây: Can we deliver on Monday instead? Sỏi: Yes, Monday works. Please send the design today."
+            }
+          ],
+          "zoneId": "work",
+          "requires": "studio-plan",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "arena",
+      "name": "Recall Amphitheatre",
+      "guide": "Sỏi",
+      "portrait": "soi",
+      "building": "arena-amphitheatre",
+      "x": 977,
+      "y": 298,
+      "npcX": 990,
+      "npcY": 362,
+      "chapter": 6,
+      "practice": "/games",
+      "intro": "Welcome to the village word festival. There’s no rush: a clear answer is better than a quick guess.",
+      "quests": [
+        {
+          "id": "festival-round",
+          "title": "The word festival",
+          "brief": "Use everything you have practiced so far.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "Which sentence is correct?",
+              "answer": "She goes to work by train.",
+              "options": [
+                "She go to work by train.",
+                "She goes to work by train.",
+                "She going work train."
+              ],
+              "note": "Use “goes” with the subject “she”.",
+              "passage": ""
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete: “I ___ a decision yesterday.”",
+              "answer": "made",
+              "options": [],
+              "note": "The past tense of “make” is “made”.",
+              "passage": ""
+            },
+            {
+              "kind": "order",
+              "prompt": "Invite a friend to the festival.",
+              "answer": "Would you like to come with us?",
+              "options": [
+                "with",
+                "Would",
+                "come",
+                "us?",
+                "to",
+                "you",
+                "like"
+              ],
+              "note": "“Would you like to…” offers an invitation.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "arena",
+          "requires": "studio-page",
+          "page": false
+        },
+        {
+          "id": "festival-page",
+          "title": "A festival for everyone",
+          "brief": "Read, listen and reason to earn the festival page.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "listen",
+              "prompt": "Why is the festival moving indoors?",
+              "answer": "Because it is raining.",
+              "options": [
+                "Because it is raining.",
+                "Because it is sunny.",
+                "Because it is too late."
+              ],
+              "note": "The announcement explains that rain caused the move.",
+              "passage": "Because it is raining, today’s word festival will be held inside the school."
+            },
+            {
+              "kind": "choice",
+              "prompt": "Which event takes place first?",
+              "answer": "The welcome talk.",
+              "options": [
+                "The word game.",
+                "The welcome talk.",
+                "The picnic."
+              ],
+              "note": "The welcome talk starts at ten, before the other events.",
+              "passage": "10:00 Welcome talk. 10:30 Word game. 12:00 Village picnic."
+            },
+            {
+              "kind": "choice",
+              "prompt": "Your teammate makes a mistake. What is supportive?",
+              "answer": "Let’s try that one again together.",
+              "options": [
+                "You always fail.",
+                "Let’s try that one again together.",
+                "Stop talking."
+              ],
+              "note": "Encouragement makes teamwork and learning easier.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "arena",
+          "requires": "festival-round",
+          "page": true
+        }
+      ]
+    },
+    {
+      "id": "ielts",
+      "name": "Sunpage Lighthouse",
+      "guide": "Mầm",
+      "portrait": "mam",
+      "building": "ielts-lighthouse",
+      "x": 852,
+      "y": 165,
+      "npcX": 855,
+      "npcY": 220,
+      "chapter": 7,
+      "practice": "/ielts",
+      "intro": "Six pages have brought us here. Read carefully, listen closely, and help the village finish its story.",
+      "quests": [
+        {
+          "id": "lighthouse-climb",
+          "title": "Climb toward the light",
+          "brief": "Practice inference and precise language.",
+          "xp": 60,
+          "coins": 15,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "What can you infer about the old bus service?",
+              "answer": "It ran less often.",
+              "options": [
+                "It was free.",
+                "It ran less often.",
+                "It had more routes."
+              ],
+              "note": "A rise in frequency means buses ran less often before.",
+              "passage": "The town increased bus frequency from once an hour to every fifteen minutes."
+            },
+            {
+              "kind": "type",
+              "prompt": "Complete: “The number of visitors has ___.” (gone up)",
+              "answer": "increased",
+              "options": [],
+              "note": "“Increased” means gone up or become larger.",
+              "passage": ""
+            },
+            {
+              "kind": "listen",
+              "prompt": "What does the speaker recommend?",
+              "answer": "Taking public transport.",
+              "options": [
+                "Driving alone.",
+                "Taking public transport.",
+                "Staying at home."
+              ],
+              "note": "The speaker recommends public transport to reduce traffic.",
+              "passage": "To reduce traffic in the village, I recommend taking public transport whenever possible."
+            }
+          ],
+          "zoneId": "ielts",
+          "requires": "festival-page",
+          "page": false
+        },
+        {
+          "id": "final-page",
+          "title": "The story we made",
+          "brief": "Recover the final page and light the village storybook.",
+          "xp": 90,
+          "coins": 25,
+          "questions": [
+            {
+              "kind": "choice",
+              "prompt": "Which sentence summarizes the message?",
+              "answer": "Small habits can make a lasting difference.",
+              "options": [
+                "Only long study sessions work.",
+                "Small habits can make a lasting difference.",
+                "Practice is unnecessary."
+              ],
+              "note": "The text emphasizes consistent short practice.",
+              "passage": "Learning a little every day builds confidence over time. Even a short conversation can teach you something useful."
+            },
+            {
+              "kind": "order",
+              "prompt": "Put the village’s final message in order.",
+              "answer": "Every little word opens a new world.",
+              "options": [
+                "new",
+                "Every",
+                "world.",
+                "opens",
+                "little",
+                "a",
+                "word"
+              ],
+              "note": "The singular subject “word” takes “opens”.",
+              "passage": ""
+            },
+            {
+              "kind": "choice",
+              "prompt": "A new learner arrives. What do you say?",
+              "answer": "Welcome. Let’s learn together.",
+              "options": [
+                "You should know everything.",
+                "Welcome. Let’s learn together.",
+                "Come back when you are perfect."
+              ],
+              "note": "Welcoming another learner completes the village’s story.",
+              "passage": ""
+            }
+          ],
+          "zoneId": "ielts",
+          "requires": "lighthouse-climb",
+          "page": true
+        }
+      ]
+    }
+  ],
+  "companions": [
+    {
+      "id": "mam",
+      "name": "Mầm",
+      "role": "The curious explorer",
+      "cost": 0
+    },
+    {
+      "id": "nang",
+      "name": "Nắng",
+      "role": "The gentle librarian",
+      "cost": 50
+    },
+    {
+      "id": "may",
+      "name": "Mây",
+      "role": "The brave wayfinder",
+      "cost": 80
+    },
+    {
+      "id": "soi",
+      "name": "Sỏi",
+      "role": "The inventive maker",
+      "cost": 120
+    }
+  ]
+}

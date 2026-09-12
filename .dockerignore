@@ -10,3 +10,6 @@ test-results
 *.log
 README.md
 docs
+.npm-cache
+.cache
+backend/*.exe

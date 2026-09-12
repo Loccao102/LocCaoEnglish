@@ -1,16 +1,31 @@
 # LocCao English
 
-Game-first English learning platform with adaptive quests, vocabulary graphs, mini-games, listening, dictation, speaking, IELTS-style practice, spaced repetition, AI role-play missions and progression systems.
+An English adventure in Sunlit Village, with a playable character, NPCs, a seven-chapter story and a separate learning journal for deeper practice.
+
+## The Seven Sun Pages
+
+Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or click a destination to walk there. Speak to a nearby guide with **E** and complete English challenges to restore the village’s lost story.
+
+- Seven places, fourteen sequential quests and forty-two authored challenges.
+- Choice, sentence building, typed answers and listening with optional transcripts.
+- At least two correct answers out of three to pass; failed quests can be retried.
+- First-clear XP and sun coins, best-star replays, seven collectible Sun Pages and four companions.
+- Journal (**J**), map (**M**), bag (**B**), and pause/resume (**Esc**).
+- Guest saves stay on the device. Signed-in saves use the Go API and PostgreSQL; guest progress is separate from account progress.
+
+See [adventure architecture and handoff](docs/ADVENTURE.md) for the game loop, routes, persistence, controls and current validation status.
 
 ## Sunlit Village art pack
 
-The original **Làng Nắng / Sunlit Village** collection brings 41 reusable assets into Camp, World Map, world selection, profiles, onboarding and rewards. Browse `/art-studio` or download `public/assets/sunlit-village-pack.zip`. The map supports live unlocks and an explicit offline preview.
+The original **Làng Nắng / Sunlit Village** collection brings 41 reusable assets into the playable world, learning journal, profiles, onboarding and rewards. Browse `/art-studio` or download `public/assets/sunlit-village-pack.zip`. The learning progress map at `/progress` retains live unlocks and an explicit offline preview.
 
 See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, exact generation prompts, provenance, source files, and validation commands. A complete standalone illustrated SVG map is included.
 
 ## Player loop
 
-Onboarding → Daily Quest → XP → Level → World Unlock → Evidence Gate → Boss → Trophy/Cosmetic → next chapter.
+Explore → Meet a guide → Complete three challenges → Earn stars and first-clear rewards → Restore a Sun Page → Unlock the next chapter.
+
+The learning journal at `/camp` also retains adaptive daily quests, review, practice campaigns, achievements and account cosmetics. These use the existing learning progression system; adventure chapter unlocks depend on story completion, and adventure XP is labelled separately in the game HUD.
 
 ## Travel District campaign
 
