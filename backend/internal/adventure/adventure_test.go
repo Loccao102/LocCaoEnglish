@@ -38,7 +38,7 @@ func TestEntireStoryAndRepeatRewards(t *testing.T) {
 		}
 		save = result.Save
 	}
-	if len(save.Owned) != 4 || save.Coins < 0 {
+	if len(save.Owned) != len(Content.Companions) || save.Coins < 0 {
 		t.Fatal("invalid inventory")
 	}
 }

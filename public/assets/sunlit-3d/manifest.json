@@ -1,16 +1,16 @@
 {
   "name": "Sunlit Village 3D",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "format": "glTF 2.0 binary",
-  "source": "Original procedural mesh art in lib/game/three. No third-party game art or image textures.",
-  "characterRig": "Rigid articulated joints with six animation clips; front is +Z, up is +Y, feet at Y=0.",
+  "source": "Original procedural mesh art in lib/game/three. Chibi proportions and colours follow the project-owned Sunlit Village illustration reference. No third-party game art or image textures.",
+  "characterRig": "24 distinct chibi companions, each with rigid articulated joints and six animation clips; front is +Z, up is +Y, feet at Y=0.",
   "runtime": "The game constructs these same models from source. GLB files are reusable exports, not runtime download dependencies.",
   "assets": [
     {
       "id": "mam",
       "src": "/assets/sunlit-3d/mam.glb",
-      "bytes": 78564,
-      "sha256": "d00012695071047388a9d2ac219283cf69ce4676da4c918b1cec2ef8f998f5bb",
+      "bytes": 1097820,
+      "sha256": "3cc32ddf0ea9c74794e6e4173ce71785d203bf63b450de8d9c39eb78538e6795",
       "animations": [
         "idle",
         "walk",
@@ -23,8 +23,8 @@
     {
       "id": "nang",
       "src": "/assets/sunlit-3d/nang.glb",
-      "bytes": 79196,
-      "sha256": "edbd59134c7de8ef76052c2a343f18253a5debb77e73ab4929b3fd1b1583213b",
+      "bytes": 1091572,
+      "sha256": "95110f9c0ba1ba092e5e0839e33f6e89f046f91f5e2857c52c3127bd3c54ccef",
       "animations": [
         "idle",
         "walk",
@@ -37,8 +37,8 @@
     {
       "id": "may",
       "src": "/assets/sunlit-3d/may.glb",
-      "bytes": 78696,
-      "sha256": "5d43d75cd099b688c00d36f19662a0380fc4aa964d6812ba9b78be3aa8274101",
+      "bytes": 1022996,
+      "sha256": "02fca81d7200ca52250b8787764c588bcf225741a22a411c0e6589a7d7034444",
       "animations": [
         "idle",
         "walk",
@@ -51,8 +51,288 @@
     {
       "id": "soi",
       "src": "/assets/sunlit-3d/soi.glb",
-      "bytes": 78876,
-      "sha256": "7bc1af59ec4397b282b3dde02ef28c52bf5354b28c5df9f6d9f74fe56b4bab32",
+      "bytes": 1178460,
+      "sha256": "5ba01d3c0cdd72b4d8dc742641b539a09558a066fff838d73ead500342fca5e6",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "bep",
+      "src": "/assets/sunlit-3d/bep.glb",
+      "bytes": 1208808,
+      "sha256": "e00c81901d9aef0402a80f25d5a521dd08c8f489d1eb9131c13b265b512098b5",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "bong",
+      "src": "/assets/sunlit-3d/bong.glb",
+      "bytes": 1284708,
+      "sha256": "f3cba17740526c5ed89e245543c762b3a561618cb5b36db09712ce09960ce13b",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "giot",
+      "src": "/assets/sunlit-3d/giot.glb",
+      "bytes": 990032,
+      "sha256": "5b47290d4d5ddabd54360674566790e3e31ed588b80487a672dbd069467fc2f8",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "hat",
+      "src": "/assets/sunlit-3d/hat.glb",
+      "bytes": 1037096,
+      "sha256": "6733ef26a820aac65d58e8e8710d181b1ef4f3050610f98fb5057582f60aaaa2",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "com",
+      "src": "/assets/sunlit-3d/com.glb",
+      "bytes": 1182520,
+      "sha256": "b1744747e4b526a67d8976357c397f0f3cd32a9fb7da7f0a564a5d4a7ff2260b",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "mit",
+      "src": "/assets/sunlit-3d/mit.glb",
+      "bytes": 1295788,
+      "sha256": "0d13c39d3c4435e63f87d420ad9b2b9a7b366c801e8b329427a216e8848538a7",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "dao",
+      "src": "/assets/sunlit-3d/dao.glb",
+      "bytes": 939280,
+      "sha256": "4ead1d5fa22e65f87c913eacd45c98f1bc0efe0c31db5dff885748f35221e6d6",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "dau",
+      "src": "/assets/sunlit-3d/dau.glb",
+      "bytes": 1631220,
+      "sha256": "48bdd9f2620bf09f7ad8f004d032bffe087c0ba36564fdaf7dd897be2c94f3f5",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "bo",
+      "src": "/assets/sunlit-3d/bo.glb",
+      "bytes": 1259652,
+      "sha256": "1153d07f946d476579809c41dc14452dd156e6d1aa508a665168d7861a56fb27",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "na",
+      "src": "/assets/sunlit-3d/na.glb",
+      "bytes": 1123076,
+      "sha256": "b89805d7fc07ad8dfe19ed1ad200ac36532f36541997242fcaa34b91ac633128",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "me",
+      "src": "/assets/sunlit-3d/me.glb",
+      "bytes": 1236304,
+      "sha256": "576a5e837635c689be369b149bfa2e06c7b0e8d47881cb673a49166252001c2e",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "quyt",
+      "src": "/assets/sunlit-3d/quyt.glb",
+      "bytes": 1336548,
+      "sha256": "8f1b5dfc5cb18b00fdf926c3aec595ab5e756adb29daba553294ebf3a3cfc7e6",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "sen",
+      "src": "/assets/sunlit-3d/sen.glb",
+      "bytes": 1094100,
+      "sha256": "4aaa1610af2c5af39fe31d5d6e4ede97cf173911d9b2f3f733be8802501c2588",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "truc",
+      "src": "/assets/sunlit-3d/truc.glb",
+      "bytes": 1114808,
+      "sha256": "fa4c686ab4749183a5ba76e45054fde7e9602c6a0b30852e3d8fdc5ece16fe7e",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "gao",
+      "src": "/assets/sunlit-3d/gao.glb",
+      "bytes": 921352,
+      "sha256": "63792f204f883c9e3b938360405ecb7339e3bccc140e1efe9db8085ad8ef0091",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "duong",
+      "src": "/assets/sunlit-3d/duong.glb",
+      "bytes": 1064280,
+      "sha256": "fc1df0c4975b1671d98b2da13406aa5f2b7dbb727b5ea13b6f940ad08e20393a",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "moca",
+      "src": "/assets/sunlit-3d/moca.glb",
+      "bytes": 1184408,
+      "sha256": "a112bcb01c615a150bd451e88ef3e092d3a9c65f12c9d3a94f6664a52d806dd7",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "tim",
+      "src": "/assets/sunlit-3d/tim.glb",
+      "bytes": 1152576,
+      "sha256": "439c419c64f03b8ba0a3353ee76d5f16a34196d8e3f0ccf3dbae5c55bb1e1cac",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "cuon",
+      "src": "/assets/sunlit-3d/cuon.glb",
+      "bytes": 1243648,
+      "sha256": "0bb8ff491a4ad762ff8fca083a497b82b867879b97db49a21e445710fb8f43bf",
+      "animations": [
+        "idle",
+        "walk",
+        "run",
+        "jump",
+        "wave",
+        "celebrate"
+      ]
+    },
+    {
+      "id": "bui",
+      "src": "/assets/sunlit-3d/bui.glb",
+      "bytes": 1177968,
+      "sha256": "def62dca66bc325ae4889d5f0f83aa45bbe2fdd80c198a27ecb6277d640a7474",
       "animations": [
         "idle",
         "walk",
@@ -65,64 +345,64 @@
     {
       "id": "village",
       "src": "/assets/sunlit-3d/village.glb",
-      "bytes": 16738120,
-      "sha256": "320b849f1abc0dd52cd2e6deb4cb2025f91f472e26e5026dccd5fe3555028aac",
+      "bytes": 5013900,
+      "sha256": "780ffd1a5166dd8828af33cecd7d2cf5485c3874b6273af46dcd3aed28d0c185",
       "animations": []
     },
     {
       "id": "training-school",
       "src": "/assets/sunlit-3d/training-school.glb",
-      "bytes": 143896,
-      "sha256": "d7b5121049307fa168cf1e7e3f64c31d0a6c9fa5d41c2be8bae57dee2d134335",
+      "bytes": 78640,
+      "sha256": "7fab2a2cc31731d52631d41dbd0f3a9a2c0e212c1ce844981084a29af9106fc2",
       "animations": []
     },
     {
       "id": "conversation-cafe",
       "src": "/assets/sunlit-3d/conversation-cafe.glb",
-      "bytes": 84452,
-      "sha256": "b123ff2359babff722f537479ca1c5f823865263a987d41e871e47efe5e2f3a0",
+      "bytes": 62992,
+      "sha256": "c1e9926e5e74e892660db7882041e634678422af00fbe81dd17c388129e51b8a",
       "animations": []
     },
     {
       "id": "travel-station",
       "src": "/assets/sunlit-3d/travel-station.glb",
-      "bytes": 79388,
-      "sha256": "8e5d1a627035d780447baa0f26f08b553cfce5381e4d2d56507b95796d485feb",
+      "bytes": 59648,
+      "sha256": "74ee422140fab8e404bb34d73bf4855c2f38a01a8b06c1063e272093ab400732",
       "animations": []
     },
     {
       "id": "word-greenhouse",
       "src": "/assets/sunlit-3d/word-greenhouse.glb",
-      "bytes": 178324,
-      "sha256": "9cc1ac8075a410a1fe54bab1e4d86e42738d8999168f2cb89b1cedfa5eee3b91",
+      "bytes": 85648,
+      "sha256": "dc64867d024b95266912e293a91bfb2271749eb63ee752c731b3636184ea351f",
       "animations": []
     },
     {
       "id": "work-studio",
       "src": "/assets/sunlit-3d/work-studio.glb",
-      "bytes": 91024,
-      "sha256": "874c179786a1a3d80870d1e654bd7fbd0eb411cd8c36f93c9462227939000083",
+      "bytes": 65264,
+      "sha256": "28372e4938ad21957b850556134baa229791e0501f9e3f4d37cdb24bd4ad31de",
       "animations": []
     },
     {
       "id": "arena-amphitheatre",
       "src": "/assets/sunlit-3d/arena-amphitheatre.glb",
-      "bytes": 90168,
-      "sha256": "bcea1a751b30e623d4e125cdb63f79c068f1649e6e67e447bd74de2e72b8c1be",
+      "bytes": 53540,
+      "sha256": "e8ef4e3c8477bebc262d309f558dc4cce472d7446c53fa32062e127b5165ec5a",
       "animations": []
     },
     {
       "id": "ielts-lighthouse",
       "src": "/assets/sunlit-3d/ielts-lighthouse.glb",
-      "bytes": 266864,
-      "sha256": "9a15b9e8f56aceb1c314a8fea9de9d5aff64b3affc2a6ae5ae246a10858acc8a",
+      "bytes": 115528,
+      "sha256": "7581031973261ba27d6ab685c956661e741f82588680313a239c0e58ebbff26f",
       "animations": []
     },
     {
       "id": "bubble-tree",
       "src": "/assets/sunlit-3d/bubble-tree.glb",
-      "bytes": 210480,
-      "sha256": "4b0192b1b2c0e9d6ae081657c3c777d14447547aba39faa768e9c2a17a43ad9c",
+      "bytes": 62928,
+      "sha256": "21527e9ef9b91f16f3d2b26a869869e59fcc446e7d4494493c94c7bf282ebfd5",
       "animations": []
     },
     {

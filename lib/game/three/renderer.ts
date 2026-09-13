@@ -23,6 +23,7 @@ export class VillageRenderer {
   private player: CompanionRig;
   private character: string;
   private guides: { zone: Zone; rig: CompanionRig; marker: THREE.Sprite; position: THREE.Vector3 }[] = [];
+  private companionCache = new Map<string,CompanionRig>();
   private audio = new VillageAudio();
   private resize: ResizeObserver;
   private frame = 0;
@@ -57,9 +58,9 @@ export class VillageRenderer {
   constructor(private host: HTMLDivElement, private events: RenderEvents) {
     const state=events.state();this.character=state.save.character;this.lastPosition={...state.world.position.current};
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:"high-performance"});
-    this.village=createVillage(this.art);this.player=createCompanion(this.art,this.character);
+    this.village=createVillage(this.art);this.player=createCompanion(this.art,this.character);this.companionCache.set(this.character,this.player);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,window.innerWidth<700?1.35:1.75));
-    this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
+    this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.04;
     this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     this.renderer.domElement.setAttribute("aria-label","3D Sunlit Village. Move with WASD or arrows, hold Shift to run, press Space to jump and E to interact.");
     this.renderer.domElement.setAttribute("role","img");this.renderer.domElement.tabIndex=0;
@@ -71,7 +72,7 @@ export class VillageRenderer {
     this.scene.add(this.sun,this.sun.target,this.village.root,this.player.root);
     this.target.copy(worldPoint(540,390));this.camera.position.copy(this.target).add(new THREE.Vector3(7,24,29));this.camera.lookAt(this.target);
     for(const zone of zones){const rig=createCompanion(this.art,zone.portrait);rig.root.scale.setScalar(.88);const position=worldPoint(zone.npcX,zone.npcY);rig.root.position.copy(position);rig.root.userData={zoneId:zone.id};
-      const marker=label(this.art,zone.guide,1.15);marker.position.y=2.02;rig.root.add(marker);this.scene.add(rig.root);this.guides.push({zone,rig,marker,position});}
+      const marker=label(this.art,zone.guide,1.15);marker.position.y=2.60;rig.root.add(marker);this.scene.add(rig.root);this.guides.push({zone,rig,marker,position});}
     this.particleMesh=new THREE.InstancedMesh(this.art.geometry("rock"),this.art.material(C.cream),96);this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.particleMesh.frustumCulled=false;this.scene.add(this.particleMesh);
     for(let i=0;i<96;i++){this.particles.push({position:new THREE.Vector3(),velocity:new THREE.Vector3(),life:0,max:1,size:0});this.dummy.scale.setScalar(0);this.dummy.updateMatrix();this.particleMesh.setMatrixAt(i,this.dummy.matrix);}
     this.aimRing=new THREE.Mesh(this.art.ownGeometry(new THREE.RingGeometry(.24,.29,24)),this.art.ownMaterial(new THREE.MeshBasicMaterial({color:C.cream,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false})));this.aimRing.rotation.x=-Math.PI/2;this.aimRing.visible=false;this.scene.add(this.aimRing);
@@ -141,7 +142,7 @@ export class VillageRenderer {
     this.celebration=Math.max(0,this.celebration-delta);
     state.world.step(delta);
     const pos=state.world.position.current,motion=state.world.motion.current;
-    if(state.save.character!==this.character){this.scene.remove(this.player.root);this.player.mixer.stopAllAction();this.player.mixer.uncacheRoot(this.player.root);this.character=state.save.character;this.player=createCompanion(this.art,this.character);this.scene.add(this.player.root);}
+    if(state.save.character!==this.character){this.scene.remove(this.player.root);this.character=state.save.character;let next=this.companionCache.get(this.character);if(!next){next=createCompanion(this.art,this.character);this.companionCache.set(this.character,next);}this.player=next;this.scene.add(this.player.root);}
     this.player.root.position.copy(worldPoint(pos.x,pos.y));this.player.root.position.y=motion.height+(onBridge(pos)?.15:0);
     this.player.face(motion.heading,delta);
     const pose:Pose=motion.height>.02?"jump":motion.speed>160?"run":motion.speed>5?"walk":this.celebration>0?"celebrate":motion.wave>0?"wave":"idle";
@@ -193,7 +194,7 @@ export class VillageRenderer {
     this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();
     this.motionPreference.removeEventListener("change",this.preferenceChanged);
     this.host.removeEventListener("pointerdown",this.pointerDown);this.host.removeEventListener("pointermove",this.pointerMove);this.host.removeEventListener("pointerup",this.pointerUp);this.host.removeEventListener("pointercancel",this.pointerCancel);this.host.removeEventListener("contextmenu",this.contextMenu);this.host.removeEventListener("wheel",this.wheel);window.removeEventListener("keydown",this.keyDown);this.renderer.domElement.removeEventListener("webglcontextlost",this.contextLost);
-    for(const rig of [this.player,...this.guides.map(g=>g.rig)]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}
+    for(const rig of [...this.companionCache.values(),...this.guides.map(g=>g.rig)]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}this.companionCache.clear();
     this.particleMesh.dispose();this.sun.shadow.dispose();this.audio.dispose();this.art.dispose();this.renderer.dispose();this.renderer.domElement.remove();
   }
 }

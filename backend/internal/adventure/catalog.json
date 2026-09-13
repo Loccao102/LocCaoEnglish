@@ -116,8 +116,8 @@
     {
       "id": "conversation",
       "name": "Little Words Café",
-      "guide": "Nắng",
-      "portrait": "nang",
+      "guide": "Moca",
+      "portrait": "moca",
       "building": "conversation-cafe",
       "x": 632,
       "y": 565,
@@ -338,8 +338,8 @@
     {
       "id": "words",
       "name": "Word Conservatory",
-      "guide": "Nắng",
-      "portrait": "nang",
+      "guide": "Cốm",
+      "portrait": "com",
       "building": "word-greenhouse",
       "x": 613,
       "y": 252,
@@ -560,8 +560,8 @@
     {
       "id": "arena",
       "name": "Recall Amphitheatre",
-      "guide": "Sỏi",
-      "portrait": "soi",
+      "guide": "Bông",
+      "portrait": "bong",
       "building": "arena-amphitheatre",
       "x": 977,
       "y": 298,
@@ -672,8 +672,8 @@
     {
       "id": "ielts",
       "name": "Sunpage Lighthouse",
-      "guide": "Mầm",
-      "portrait": "mam",
+      "guide": "Sen",
+      "portrait": "sen",
       "building": "ielts-lighthouse",
       "x": 852,
       "y": 165,
@@ -787,25 +787,457 @@
       "id": "mam",
       "name": "Mầm",
       "role": "The curious explorer",
-      "cost": 0
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/word-link",
+      "activity": "Word Link",
+      "greeting": "Every new word starts with a little hello.",
+      "design": {
+        "shape": "seed",
+        "hat": "sprout",
+        "outfit": "scarf",
+        "prop": "satchel",
+        "skin": "#FFE3AC",
+        "coat": "#2D968D",
+        "accent": "#F18D73"
+      }
     },
     {
       "id": "nang",
       "name": "Nắng",
       "role": "The gentle librarian",
-      "cost": 50
+      "cost": 50,
+      "family": "Meadow friends",
+      "route": "/learn",
+      "activity": "Lessons",
+      "greeting": "A good story always has room for one more friend.",
+      "design": {
+        "shape": "seed",
+        "hat": "curl",
+        "outfit": "apron",
+        "prop": "book",
+        "skin": "#FFD574",
+        "coat": "#278D89",
+        "accent": "#E88B70"
+      }
     },
     {
       "id": "may",
       "name": "Mây",
       "role": "The brave wayfinder",
-      "cost": 80
+      "cost": 80,
+      "family": "Sky friends",
+      "route": "/travel",
+      "activity": "Travel District",
+      "greeting": "Take a little courage. Leave a little kindness.",
+      "design": {
+        "shape": "seed",
+        "hat": "cap",
+        "outfit": "scarf",
+        "prop": "map",
+        "skin": "#B9E0EF",
+        "coat": "#EF8F78",
+        "accent": "#E8BD72"
+      }
     },
     {
       "id": "soi",
       "name": "Sỏi",
       "role": "The inventive maker",
-      "cost": 120
+      "cost": 120,
+      "family": "Workshop friends",
+      "route": "/work",
+      "activity": "Work District",
+      "greeting": "We can build a better sentence together.",
+      "design": {
+        "shape": "pebble",
+        "hat": "none",
+        "outfit": "overalls",
+        "prop": "pencil",
+        "skin": "#F3947B",
+        "coat": "#298F89",
+        "accent": "#FFD16F"
+      }
+    },
+    {
+      "id": "bep",
+      "name": "Bếp",
+      "role": "The story chef",
+      "cost": 0,
+      "family": "Workshop friends",
+      "route": "/games/story-choice",
+      "activity": "Story Choice",
+      "greeting": "A pinch of imagination makes a lovely story.",
+      "design": {
+        "shape": "seed",
+        "hat": "chef",
+        "outfit": "apron",
+        "prop": "spoon",
+        "skin": "#FFD7B5",
+        "coat": "#F2987E",
+        "accent": "#8DBEA1"
+      }
+    },
+    {
+      "id": "bong",
+      "name": "Bông",
+      "role": "The tiny storyteller",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/reading",
+      "activity": "Reading Race",
+      "greeting": "There is a whole adventure between these pages.",
+      "design": {
+        "shape": "bunny",
+        "hat": "bow",
+        "outfit": "vest",
+        "prop": "book",
+        "skin": "#E9DAF7",
+        "coat": "#A896CB",
+        "accent": "#F4ADBA"
+      }
+    },
+    {
+      "id": "giot",
+      "name": "Giọt",
+      "role": "The careful listener",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/listening",
+      "activity": "Listen & Pick",
+      "greeting": "Little sounds can tell a big story.",
+      "design": {
+        "shape": "drop",
+        "hat": "headphones",
+        "outfit": "scarf",
+        "prop": "none",
+        "skin": "#A9DFE5",
+        "coat": "#3BA4AE",
+        "accent": "#F7CE76"
+      }
+    },
+    {
+      "id": "hat",
+      "name": "Hạt",
+      "role": "The sunny singer",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/speaking",
+      "activity": "Speaking Studio",
+      "greeting": "Your voice belongs in the conversation.",
+      "design": {
+        "shape": "chick",
+        "hat": "tuft",
+        "outfit": "bowtie",
+        "prop": "microphone",
+        "skin": "#FFE493",
+        "coat": "#EFAC63",
+        "accent": "#79BAA4"
+      }
+    },
+    {
+      "id": "com",
+      "name": "Cốm",
+      "role": "The word gardener",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/word-graph",
+      "activity": "Word Graph",
+      "greeting": "A word grows when you give it a connection.",
+      "design": {
+        "shape": "seed",
+        "hat": "leaf",
+        "outfit": "overalls",
+        "prop": "watering",
+        "skin": "#C5E3A3",
+        "coat": "#72AD82",
+        "accent": "#FFD28A"
+      }
+    },
+    {
+      "id": "mit",
+      "name": "Mít",
+      "role": "The clue collector",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/collocation-factory",
+      "activity": "Collocation Factory",
+      "greeting": "Some words are happiest side by side.",
+      "design": {
+        "shape": "seed",
+        "hat": "detective",
+        "outfit": "vest",
+        "prop": "lens",
+        "skin": "#F2CD79",
+        "coat": "#93AD6A",
+        "accent": "#D79766"
+      }
+    },
+    {
+      "id": "dao",
+      "name": "Đào",
+      "role": "The letter carrier",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/dictation",
+      "activity": "Dictation",
+      "greeting": "I saved every word, just for you.",
+      "design": {
+        "shape": "seed",
+        "hat": "beret",
+        "outfit": "scarf",
+        "prop": "letter",
+        "skin": "#F9C0BD",
+        "coat": "#BA849D",
+        "accent": "#92C7B6"
+      }
+    },
+    {
+      "id": "dau",
+      "name": "Dâu",
+      "role": "The little painter",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/sentence-builder",
+      "activity": "Sentence Builder",
+      "greeting": "Let us paint a sentence, one word at a time.",
+      "design": {
+        "shape": "berry",
+        "hat": "crown",
+        "outfit": "apron",
+        "prop": "brush",
+        "skin": "#F3A2AB",
+        "coat": "#54A392",
+        "accent": "#FFE099"
+      }
+    },
+    {
+      "id": "bo",
+      "name": "Bơ",
+      "role": "The gentle writer",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/ielts/writing",
+      "activity": "IELTS Writing",
+      "greeting": "Your ideas deserve a place on the page.",
+      "design": {
+        "shape": "avocado",
+        "hat": "leaf",
+        "outfit": "vest",
+        "prop": "quill",
+        "skin": "#9BCA82",
+        "coat": "#74A17B",
+        "accent": "#F0BC7D"
+      }
+    },
+    {
+      "id": "na",
+      "name": "Na",
+      "role": "The pattern finder",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/placement",
+      "activity": "Placement Adventure",
+      "greeting": "Let us find the next small step for you.",
+      "design": {
+        "shape": "seed",
+        "hat": "triple",
+        "outfit": "bowtie",
+        "prop": "cards",
+        "skin": "#DEF0BC",
+        "coat": "#80B39C",
+        "accent": "#E9BA8C"
+      }
+    },
+    {
+      "id": "me",
+      "name": "Me",
+      "role": "The brave little pilot",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/missions/airport",
+      "activity": "Airport Mission",
+      "greeting": "A deep breath. A kind question. We are on our way.",
+      "design": {
+        "shape": "seed",
+        "hat": "aviator",
+        "outfit": "scarf",
+        "prop": "map",
+        "skin": "#CEA68C",
+        "coat": "#9CCAD3",
+        "accent": "#F4D199"
+      }
+    },
+    {
+      "id": "quyt",
+      "name": "Quýt",
+      "role": "The pocket conductor",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/missions/transit",
+      "activity": "City Transit",
+      "greeting": "There is always another way to get there.",
+      "design": {
+        "shape": "orange",
+        "hat": "conductor",
+        "outfit": "vest",
+        "prop": "ticket",
+        "skin": "#FFC479",
+        "coat": "#69AAA0",
+        "accent": "#FFF0B4"
+      }
+    },
+    {
+      "id": "sen",
+      "name": "Sen",
+      "role": "The patient mentor",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/ielts",
+      "activity": "IELTS Studio",
+      "greeting": "Small, steady steps will take you far.",
+      "design": {
+        "shape": "seed",
+        "hat": "lotus",
+        "outfit": "scarf",
+        "prop": "book",
+        "skin": "#F8C4D9",
+        "coat": "#B595CE",
+        "accent": "#8AC2B1"
+      }
+    },
+    {
+      "id": "truc",
+      "name": "Trúc",
+      "role": "The mindful reviewer",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/review",
+      "activity": "Spaced Review",
+      "greeting": "Let us visit the words we already know.",
+      "design": {
+        "shape": "panda",
+        "hat": "none",
+        "outfit": "scarf",
+        "prop": "cards",
+        "skin": "#F8EDCD",
+        "coat": "#80AA83",
+        "accent": "#E5BF75"
+      }
+    },
+    {
+      "id": "gao",
+      "name": "Gạo",
+      "role": "The quiet dreamer",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/ielts/listening",
+      "activity": "IELTS Listening",
+      "greeting": "Slow down. Listen for the little details.",
+      "design": {
+        "shape": "rice",
+        "hat": "nightcap",
+        "outfit": "scarf",
+        "prop": "star",
+        "skin": "#FFF1D4",
+        "coat": "#B4B6DC",
+        "accent": "#F4CE84"
+      }
+    },
+    {
+      "id": "duong",
+      "name": "Đường",
+      "role": "The warm welcome",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/missions/hotel",
+      "activity": "Hotel Mission",
+      "greeting": "Come in. There is a cosy place for your words.",
+      "design": {
+        "shape": "bear",
+        "hat": "pom",
+        "outfit": "scarf",
+        "prop": "key",
+        "skin": "#F7E7C6",
+        "coat": "#83BDC3",
+        "accent": "#F0B4A7"
+      }
+    },
+    {
+      "id": "moca",
+      "name": "Moca",
+      "role": "The café friend",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/conversation",
+      "activity": "Conversation Café",
+      "greeting": "A warm cup and a friendly conversation.",
+      "design": {
+        "shape": "bear",
+        "hat": "none",
+        "outfit": "apron",
+        "prop": "cup",
+        "skin": "#CBA48C",
+        "coat": "#42988F",
+        "accent": "#F6D8AA"
+      }
+    },
+    {
+      "id": "tim",
+      "name": "Tím",
+      "role": "The sentence mender",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/games/grammar-repair",
+      "activity": "Grammar Repair",
+      "greeting": "A tiny change can make everything click.",
+      "design": {
+        "shape": "cat",
+        "hat": "bow",
+        "outfit": "vest",
+        "prop": "pencil",
+        "skin": "#D2C1EC",
+        "coat": "#A391C3",
+        "accent": "#F4C68F"
+      }
+    },
+    {
+      "id": "cuon",
+      "name": "Cuộn",
+      "role": "The paper explorer",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/ielts/reading",
+      "activity": "IELTS Reading",
+      "greeting": "Follow the clues hidden in every paragraph.",
+      "design": {
+        "shape": "fox",
+        "hat": "beret",
+        "outfit": "vest",
+        "prop": "scroll",
+        "skin": "#E9B58F",
+        "coat": "#68A59A",
+        "accent": "#FFE1AC"
+      }
+    },
+    {
+      "id": "bui",
+      "name": "Bụi",
+      "role": "The woodland guide",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/practice-generator",
+      "activity": "Practice Workshop",
+      "greeting": "Something wonderful is waiting to be discovered.",
+      "design": {
+        "shape": "seed",
+        "hat": "mushroom",
+        "outfit": "scarf",
+        "prop": "satchel",
+        "skin": "#F3D7B0",
+        "coat": "#D99085",
+        "accent": "#84BDA8"
+      }
     }
   ]
 }

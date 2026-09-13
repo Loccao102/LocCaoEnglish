@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 
 export const SCALE = 40;
 export const worldPoint = (x: number, y: number) => new THREE.Vector3((x-600)/SCALE, 0, (y-410)/SCALE);
@@ -15,7 +15,7 @@ export class ArtResources {
   readonly extraMaterials = new Set<THREE.Material>();
   geometry(kind: string) {
     if (!this.geometries.has(kind)) {
-      const geometry = kind === "ball" ? new THREE.SphereGeometry(1, 16, 12) : kind === "rock" ? new THREE.IcosahedronGeometry(1, 1) : kind === "cylinder" ? new THREE.CylinderGeometry(1,1,1,16) : kind === "cone" ? new THREE.ConeGeometry(1,1,16) : kind === "leaf" ? new THREE.SphereGeometry(1,12,8) : new THREE.BoxGeometry(1,1,1);
+      const geometry = kind === "plush" ? new THREE.SphereGeometry(1,32,24) : kind === "ball" ? new THREE.SphereGeometry(1, 16, 12) : kind === "rock" ? new THREE.IcosahedronGeometry(1, 1) : kind === "cylinder" ? new THREE.CylinderGeometry(1,1,1,16) : kind === "cone" ? new THREE.ConeGeometry(1,1,16) : kind === "leaf" ? new THREE.SphereGeometry(1,12,8) : new THREE.BoxGeometry(1,1,1);
       this.geometries.set(kind, geometry);
     }
     return this.geometries.get(kind)!;
@@ -60,7 +60,10 @@ export function mergeArt(group: THREE.Group, art: ArtResources) {
   group.clear();
   for (const [material, geometries] of buckets) {
     const merged = mergeGeometries(geometries, false);
-    if (merged) { const mesh = new THREE.Mesh(art.ownGeometry(merged),material); mesh.castShadow = true; mesh.receiveShadow = true; group.add(mesh); }
+    if (merged) {
+      const indexed = mergeVertices(merged, .00001); merged.dispose();
+      const mesh = new THREE.Mesh(art.ownGeometry(indexed),material); mesh.castShadow = true; mesh.receiveShadow = true; group.add(mesh);
+    }
     for (const geometry of geometries) geometry.dispose();
   }
 }

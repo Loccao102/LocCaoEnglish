@@ -11,7 +11,7 @@ The home screen is a 3D exploration game. Three.js renders original mesh charact
 5. Answer at least two correctly to earn two or three stars. A failed run gives no currency or chapter progress and can be retried immediately.
 6. Collect XP and sun coins on the first successful clear. Replays can improve stars without awarding currency again.
 7. Complete the second quest in each place to restore a Sun Page and unlock the next chapter.
-8. Spend sun coins on companions in the bag. All four companions have the same gameplay abilities.
+8. Spend sun coins on companions in the bag. All 24 companions have the same gameplay abilities. Twenty new friends are available to equip for free.
 9. Restore all seven pages for the story ending, then explore, replay, or open additional practice.
 
 There is no timer or paid energy. Listening uses browser speech synthesis on demand, with a transcript available when audio is unavailable or unwanted. The original Sunlit Village art direction carries into the 3D models. The live world does not use flat character or building images; the illustration collection supplies interface portraits, maps and rewards. No third-party game art was introduced.
@@ -30,7 +30,7 @@ Optional exploration adds eight word seeds and three chests with hinged lids. Wa
 | 6 | Recall Amphitheatre | The word festival; A festival for everyone |
 | 7 | Sunpage Lighthouse | Climb toward the light; The story we made |
 
-The canonical titles, prose, questions, positions, prerequisites and rewards are in `backend/internal/adventure/catalog.json`. Both TypeScript and Go consume this file. It contains 14 quests and 42 questions. There are 1,050 adventure XP and 280 sun coins available from first clears. Companions cost 0 / 50 / 80 / 120 coins.
+The canonical titles, prose, questions, positions, prerequisites and rewards are in `backend/internal/adventure/catalog.json`. Both TypeScript and Go consume this file. It contains 14 quests and 42 questions. There are 1,050 adventure XP and 280 sun coins available from first clears. The original four companions retain their 0 / 50 / 80 / 120 coin prices; the twenty added characters cost zero. Existing purchased IDs and saves remain valid.
 
 ## Controls and routes
 
@@ -56,6 +56,7 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 | `/progress` | Existing learning XP, world evidence, trophies and cosmetics |
 | `/account` | Sign in/register and account profile |
 | `/art-studio` | Original asset gallery and downloads |
+| `/characters` | 24-character roster, 3D turntable, six animation previews and individual GLB downloads |
 | Existing practice routes | Retained; accessible through guides and the learning journal |
 
 ## Code structure
@@ -64,7 +65,11 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 - `components/game/WorldCanvas.tsx`: client-only lazy renderer loading, WebGL error/retry UI and lifecycle cleanup.
 - `components/game/useWorldController.ts`: camera-relative input, acceleration, braking, jump gravity, movement substeps, proximity, automatic walking and positional autosave. It exposes a simulation step; the renderer owns the single frame loop.
 - `lib/game/three/renderer.ts`: perspective camera, raycast interactions, lighting, shadows, NPC behavior, animation selection, pickups, doors, chests and particles. Scene transforms update outside React.
-- `lib/game/three/characters.ts`: original rigid mesh rigs and six named animation clips per companion; no raster sprites or deformable skin weights.
+- `lib/game/three/characters.ts` and `character-details.ts`: chibi mesh rigs, species shapes, faces, hats, outfits, props and six named animation clips per companion; no raster sprites or deformable skin weights.
+- `lib/game/companions.ts`: lookups and activity-host mappings from the same canonical catalog as the Go service.
+- `lib/game/three/portraits.ts`: a single temporary WebGL renderer queues portraits of the actual models, caches the resulting images, then releases its graphics context.
+- `components/game/CharacterShowcase.tsx`, `CharacterPreview.tsx` and `CompanionCollection.tsx`: collection browsing and animated previews, also reused in the Bag.
+- `components/game/LearningCompanion.tsx`: the matching friend greets learners on each of 24 learning routes.
 - `lib/game/three/environment.ts`: original mesh factories for the island, lagoon, bridge, roads, seven buildings, trees and props.
 - `lib/game/three/primitives.ts`: shared geometry/material ownership, static geometry merging and interface labels.
 - `lib/game/three/audio.ts`: original synthesized effects, unlocked by gesture.
@@ -84,7 +89,7 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 
 The bridge is traversable through a narrow channel across the lagoon collider. Jumping is a grounded exploration animation with gravity, not a way to bypass buildings or island boundaries. Building doors respond to proximity, while their guides launch chapter challenges; separate indoor levels are not part of this version.
 
-The 3D pack in `public/assets/sunlit-3d/` contains 16 GLB files: four animated characters, seven buildings, four small environment assets and one complete world. Modular exports are centered at their local origin. The full world is a static scene export; browser labels, game logic and environmental animation remain in source. Runtime factories avoid downloading the large world export. WebGL 2 is required, with an explicit recovery message when unavailable. Pixel ratio and shadow resolution are capped on small screens, but device performance has not been benchmarked.
+The 3D pack in `public/assets/sunlit-3d/` contains 36 GLB files: twenty-four animated characters, seven buildings, four small environment assets and one complete world. Modular exports are centered at their local origin. The full world is a static scene export; browser labels, game logic and environmental animation remain in source. Runtime factories avoid downloading the large world export. WebGL 2 is required, with an explicit recovery message when unavailable. Pixel ratio and shadow resolution are capped on small screens, but device performance has not been benchmarked.
 
 ## Persistence contract
 
@@ -120,3 +125,4 @@ The frontend can run the guest adventure with `npm run dev` without the API. For
 The Next.js production build, including TypeScript compilation, was completed during implementation. Automated gameplay, browser, integration and backend test suites were not run after the user requested skipping testing. Backend test files authored before that request remain available, and old browser specifications were updated to follow the relocated study routes. This is an implementation handoff, not a claim that end-to-end gameplay has been validated.
 
 The existing AI conversations and pronunciation tools retain their own service requirements.
+
