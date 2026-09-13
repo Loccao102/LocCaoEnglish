@@ -1,0 +1,39 @@
+/** Original character bible. Traits describe behaviour, never paid stat advantages. */
+export type Expression = "happy" | "joy" | "curious" | "thinking" | "surprised" | "sad" | "sleepy" | "love";
+export const expressions: { id: Expression; label: string; icon: string }[] = [
+  {id:"happy",label:"Happy",icon:"☺"},{id:"joy",label:"Joyful",icon:"✦"},
+  {id:"curious",label:"Curious",icon:"?"},{id:"thinking",label:"Thinking",icon:"…"},
+  {id:"surprised",label:"Surprised",icon:"!"},{id:"sad",label:"Sad",icon:"☂"},
+  {id:"sleepy",label:"Sleepy",icon:"☾"},{id:"love",label:"Affectionate",icon:"♡"},
+];
+export type Personality = { trait: string; talent: string; favourite: string; dream: string; story: string; habit: string; expression: Expression };
+const profiles: Record<string, [string,string,string,string,string,string,Expression]> = {
+  mam:["Brave little beginner","Finding a first step","Dew on new leaves","Map every friendly corner","Mầm once got lost following a butterfly. Now every new path begins with an invitation for someone shy to come along.","Bounces twice before an adventure","happy"],
+  nang:["Patient bookworm","Making difficult words feel small","Warm library windows","Build a library with no quiet-only rooms","Nắng keeps unfinished stories on the lowest shelf, where even the tiniest friend can reach them.","Tilts their glasses when listening","thinking"],
+  may:["Daydreaming wayfinder","Spotting patterns in the sky","Clouds shaped like dumplings","Sail a paper boat through the clouds","Mây draws maps with room for detours. The best destination is often a friend who needs company.","Sways as if carried by a breeze","curious"],
+  soi:["Determined tinkerer","Turning mistakes into inventions","Smooth pocket pebbles","Connect every island with a handmade bridge","Sỏi's first bridge fell into a puddle. The second became a bench. The third is still carrying friends home.","Nods once before trying again","thinking"],
+  bep:["Generous kitchen whirlwind","Sharing comfort through food","A spoon of pumpkin soup","Cook a meal for the whole village","Bếp counts guests instead of portions. There is always one more bowl warming beside the stove.","Wiggles with delight when food is ready","joy"],
+  bong:["Gentle storyteller","Helping quiet voices be heard","Blankets and bedtime tales","Collect a story from every friend","Bông writes down the stories people think are too small to matter, then gives them a starring role.","Ears bob when a story gets exciting","happy"],
+  giot:["Sensitive sound collector","Remembering melodies","Rain on lily pads","Make an orchestra from everyday sounds","Giọt heard music in a dripping tap. Their pond is now full of tiny instruments waiting for someone to listen.","Leans closer to a new sound","curious"],
+  hat:["Fearless tiny performer","Giving others confidence","Humming at sunrise","Sing a duet with every neighbour","Hạt used to sing only to flowers. A friendly echo convinced them that even a small voice can fill a valley.","Keeps a little rhythm with their feet","joy"],
+  com:["Tender green-fingered friend","Knowing when to wait","The first sprout of spring","Grow a garden that feeds everyone","Cốm names every seed, including the ones that take their time. In this garden, growing slowly is still growing.","Crouches to greet new seedlings","love"],
+  mit:["Playful pocket detective","Noticing overlooked clues","Mismatched buttons","Solve the mystery of the missing moon biscuit","Mít's biggest discoveries are usually small kindnesses. Their notebook has a whole chapter about who leaves flowers on doorsteps.","Raises one eyebrow at a clue","curious"],
+  dao:["Thoughtful letter carrier","Remembering what makes people smile","Handwritten postcards","Deliver a letter to the farthest island","Đào writes a tiny encouraging note on every parcel. Nobody has worked out who sends them yet.","Gives a little wave at every doorway","happy"],
+  dau:["Expressive colour explorer","Seeing beauty in surprises","Paint on their apron","Paint a mural that everyone adds to","Dâu never throws away a mixed-up colour. Yesterday's accident might be tomorrow's sunset.","Tilts their head to frame a scene","joy"],
+  bo:["Reflective word gardener","Finding the right gentle phrase","Fresh notebooks","Write a story with twenty-four endings","Bơ keeps words like seeds: some need a quiet page, some need a little sunshine, and some need a friend.","Pauses with a tiny thoughtful smile","thinking"],
+  na:["Cheerful pattern finder","Making order out of a muddle","Perfectly uneven collections","Invent a puzzle everyone can solve together","Na sorts shells by the memories they hold, which is why nobody else understands the system yet.","Counts little steps under their breath","curious"],
+  me:["Cautious sky adventurer","Preparing for the unexpected","A reliable compass","Fly beyond the peach-coloured horizon","Me checks the weather twice and packs three snacks. Being careful has taken them on some wonderfully brave journeys.","Peeks around before taking off","surprised"],
+  quyt:["Dependable little conductor","Helping everyone arrive together","The station bell","Run a train with room for every friend","Quýt once delayed a departure for a sleepy snail. The passengers still call it their favourite journey.","Bobs to the rhythm of imaginary rails","happy"],
+  sen:["Calm encouraging mentor","Seeing progress others miss","Still water at dawn","Help a shy friend become a mentor too","Sen keeps a jar of tiny successes: a first sentence, a brave question, a try-again. It is nearly overflowing.","Sways slowly when listening","love"],
+  truc:["Steady bamboo guardian","Making good habits feel cosy","An afternoon bamboo snack","Plant a forest of shared memories","Trúc returns to the same path each morning and always notices something new. Familiar things can still surprise you.","Rocks gently from heel to toe","happy"],
+  gao:["Sleepy star dreamer","Imagining impossible possibilities","A cushion under the night sky","Name a constellation after the village","Gạo falls asleep halfway through a wish and wakes up with a new idea. Their pockets are full of crumpled star maps.","Blinks slowly before a tiny yawn","sleepy"],
+  duong:["Warm-hearted host","Making strangers feel at home","A freshly made guest bed","Open an inn on every island","Đường remembers how lonely their first night in the village felt. Every guest now finds a welcome pebble on their pillow.","Opens their arms when greeting someone","love"],
+  moca:["Quietly observant barista","Remembering everyone's favourite cup","Honey tea after rain","Create a drink for every mood","Moca can tell when a friend needs conversation and when they just need a warm cup and a quiet place to sit.","Nods softly while a kettle warms","happy"],
+  tim:["Resourceful little mender","Making broken things feel loved","Colourful spare buttons","Repair the village's old story clock","Tím believes a patch is a memory you can wear. Every repair leaves something a little more interesting than before.","Ears twitch when an idea arrives","thinking"],
+  cuon:["Curious trail chronicler","Connecting clues across stories","Scrolls with secret folds","Find the village's forgotten first story","Cuộn follows footnotes as if they were forest paths. Sometimes they lead to treasure; usually they lead to another friend.","Peeks over a scroll with bright eyes","curious"],
+  bui:["Bashful forest protector","Caring for overlooked creatures","Mushrooms after a shower","Make the woods safe for the smallest visitor","Bụi is shy around crowds but fearless when a beetle needs help. Their mushroom hat is a favourite shelter in the rain.","Peeks out, then offers a small wave","happy"],
+};
+export function personalityFor(id: string): Personality {
+  const [trait,talent,favourite,dream,story,habit,expression] = profiles[id] || profiles.mam;
+  return {trait,talent,favourite,dream,story,habit,expression};
+}

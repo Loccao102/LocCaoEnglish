@@ -56,7 +56,7 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 | `/progress` | Existing learning XP, world evidence, trophies and cosmetics |
 | `/account` | Sign in/register and account profile |
 | `/art-studio` | Original asset gallery and downloads |
-| `/characters` | 24-character roster, 3D turntable, six animation previews and individual GLB downloads |
+| `/characters` | 24-character roster, 3D turntable, six body animations, eight expressions, personal stories and individual GLB downloads |
 | Existing practice routes | Retained; accessible through guides and the learning journal |
 
 ## Code structure
@@ -65,7 +65,7 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 - `components/game/WorldCanvas.tsx`: client-only lazy renderer loading, WebGL error/retry UI and lifecycle cleanup.
 - `components/game/useWorldController.ts`: camera-relative input, acceleration, braking, jump gravity, movement substeps, proximity, automatic walking and positional autosave. It exposes a simulation step; the renderer owns the single frame loop.
 - `lib/game/three/renderer.ts`: perspective camera, raycast interactions, lighting, shadows, NPC behavior, animation selection, pickups, doors, chests and particles. Scene transforms update outside React.
-- `lib/game/three/characters.ts` and `character-details.ts`: chibi mesh rigs, species shapes, faces, hats, outfits, props and six named animation clips per companion; no raster sprites or deformable skin weights.
+- `lib/game/three/characters.ts` and `character-details.ts`: chibi mesh rigs, species shapes, faces, hats, outfits, props, six body animation clips and eight expression clips per companion; no raster sprites or deformable skin weights.
 - `lib/game/companions.ts`: lookups and activity-host mappings from the same canonical catalog as the Go service.
 - `lib/game/three/portraits.ts`: a single temporary WebGL renderer queues portraits of the actual models, caches the resulting images, then releases its graphics context.
 - `components/game/CharacterShowcase.tsx`, `CharacterPreview.tsx` and `CompanionCollection.tsx`: collection browsing and animated previews, also reused in the Bag.
@@ -89,7 +89,7 @@ Losing browser focus pauses the game and clears held movement inputs. Modal pane
 
 The bridge is traversable through a narrow channel across the lagoon collider. Jumping is a grounded exploration animation with gravity, not a way to bypass buildings or island boundaries. Building doors respond to proximity, while their guides launch chapter challenges; separate indoor levels are not part of this version.
 
-The 3D pack in `public/assets/sunlit-3d/` contains 36 GLB files: twenty-four animated characters, seven buildings, four small environment assets and one complete world. Modular exports are centered at their local origin. The full world is a static scene export; browser labels, game logic and environmental animation remain in source. Runtime factories avoid downloading the large world export. WebGL 2 is required, with an explicit recovery message when unavailable. Pixel ratio and shadow resolution are capped on small screens, but device performance has not been benchmarked.
+The 3D pack in `public/assets/sunlit-3d/` contains 45 GLB files: twenty-four animated characters, seven chapter buildings, eight fair pavilions, four small environment assets, one complete world and one separate fairground. Modular exports are centered at their local origin. The full world is a static scene export; browser labels, game logic and environmental animation remain in source. Runtime factories avoid downloading the large world export. WebGL 2 is required, with an explicit recovery message when unavailable. Pixel ratio and shadow resolution are capped on small screens, but device performance has not been benchmarked.
 
 ## Persistence contract
 
@@ -126,3 +126,9 @@ The Next.js production build, including TypeScript compilation, was completed du
 
 The existing AI conversations and pronunciation tools retain their own service requirements.
 
+
+## Friendship Fair expansion
+
+The southern fair island extends the navigation bounds to 1200 × 1120, linked to the original shore by a collision-aware promenade. Eight stall hosts greet nearby players, turn toward them and open their game via click-to-walk or E. The adventure map includes a separate fair island diagram and a travel action. /play?arrival=fair enters at the fair gate; returning to the world restores the last saved position.
+
+/festival is the game hub and local friendship scrapbook. /festival/[slug] renders one of eight standalone Three.js mini-games, bringing /games to 20 games and learning activities. Game scenes unmount the village and release their own rendering, geometry, animation, input, resize and audio resources when leaving. Pause, help and result dialogs own keyboard focus and suspend controls. Current rounds are session-only; completed best scores, stars and friendship memories are saved locally and do not award account XP or coins. See FRIENDSHIP-FAIR.md.

@@ -47,10 +47,18 @@ Seven chapter guides use distinct cast members: Nắng, Moca, Mây, Cốm, Sỏi
 
 ## Rendering and delivery
 
-`lib/game/three/characters.ts` owns the rigid joint hierarchy and six clips. `character-details.ts` supplies original reusable hats, outfits and held objects. Shared static geometry is merged by material inside joint groups. The world caches equipped rigs and disposes them when leaving the scene.
+`lib/game/three/characters.ts` owns the rigid joint hierarchy, six body clips and eight facial-expression clips. `character-details.ts` supplies original reusable hats, outfits and held objects. Shared static geometry is merged by material inside joint groups. The world caches equipped rigs and disposes them when leaving the scene.
 
-The roster and HUD portraits are rendered from those same models using one queued, temporary WebGL context, then cached as browser-memory images. The character page and Bag share a live turntable with six animation choices. Reduced-motion preferences suppress decorative idle motion; animation previews remain available on explicit selection.
+The roster and HUD portraits are rendered from those same models using one queued, temporary WebGL context, then cached as browser-memory images. The character page and Bag share a live turntable with six body animation choices and eight expression choices. Reduced-motion preferences suppress decorative idle motion; animation previews remain available on explicit selection.
 
-Run `npm run assets:3d` to regenerate 24 animated companion GLBs and 12 environment GLBs (36 total), the manifest and the ZIP. Every character has idle, walk, run, jump, wave and celebrate clips. The download pack includes all models and provenance; runtime does not fetch the GLB exports.
+Run `npm run assets:3d` to regenerate 24 animated companion GLBs and 21 environment GLBs (45 total), the manifest and the ZIP. Every character has idle, walk, run, jump, wave and celebrate clips plus eight expression-* clips. The download pack includes all models and provenance; runtime does not fetch the GLB exports.
 
 Implementation checks are limited to model export, frontend production compilation and visual art/layout review. Gameplay and backend test suites remain skipped at the user's request.
+
+## Round chibi revision and character development
+
+Version 3 widens and shortens the heads, rounds the bellies and mittens, and replaces pointed cat/fox ears with soft rounded ears. Brows, eyes, mouths, cheek tears and heart eyes are authored 3D geometry. Eyes and catchlights blink together. Their ordinary, joyful, curious, thoughtful, surprised, sad, sleepy and affectionate expressions can be previewed independently of body animation.
+
+lib/game/personalities.ts is the character bible for 24 distinct traits, talents, favourite things, dreams, stories, habits and default expressions. Idle bob, sway, nod and tilt vary by character. World reactions change on greeting, jumping, sprinting and celebration. Fair hosts react with curiosity, sadness or joy to game events. The source character IDs, artwork and original chapter prices remain canonical in the adventure catalog.
+
+The Friendship Fair adds eight distinct games hosted by Mầm, Cốm, Giọt, Moca, Quýt, Mây, Dâu and Sỏi. Helpers include Nắng, Bụi, Hạt, Bếp, Đào, Me, Tím and Na. See FRIENDSHIP-FAIR.md for mechanics and persistence. Character stories and game definitions are also exported in the downloadable asset pack.

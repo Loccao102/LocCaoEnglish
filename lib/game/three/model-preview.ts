@@ -1,3 +1,4 @@
+import type { Expression } from "../personalities";
 import * as THREE from "three";
 import { ArtResources } from "./primitives";
 import { createCompanion, type CompanionRig, type Pose } from "./characters";
@@ -33,6 +34,7 @@ export class ModelPreview {
   private move=(event: PointerEvent)=>{if(!this.pointer||this.pointer.id!==event.pointerId)return;this.angle+=(event.clientX-this.pointer.x)*.012;this.pointer.x=event.clientX;};
   private up=(event: PointerEvent)=>{if(this.host.hasPointerCapture(event.pointerId))this.host.releasePointerCapture(event.pointerId);this.pointer=null;};
   turn(direction: number){this.angle+=direction*Math.PI/4;}
+  setExpression(expression: Expression){this.rig.express(expression);}
   setPose(pose: Pose){this.pose=pose;}
   private draw=(timestamp: number)=>{
     const dt=this.last?Math.min(.05,(timestamp-this.last)/1000):0;this.last=timestamp;

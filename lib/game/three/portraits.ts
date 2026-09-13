@@ -28,7 +28,7 @@ export function characterPortrait(id: string): Promise<string> {
         renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.04;
       }
       const scene = new THREE.Scene(); portraitLights(scene);
-      const rig = createCompanion(art,id); scene.add(rig.root);
+      const rig = createCompanion(art,id); rig.animate("idle",0); scene.add(rig.root);
       const camera = new THREE.OrthographicCamera(-1.25,1.25,1.30,-1.30,.1,30);
       camera.position.set(2.6,2.8,8);camera.lookAt(0,1.18,0);
       renderer.setClearColor(0,0);renderer.render(scene,camera);

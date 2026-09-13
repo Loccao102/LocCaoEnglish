@@ -18,7 +18,7 @@ Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or cli
 
 See [adventure architecture and handoff](docs/ADVENTURE.md) for the game loop, routes, persistence, controls and current validation status.
 
-Visit `/characters` to inspect every model, turn it through 360 degrees and preview all six animations. Choose any of the twenty new friends for free in the adventure Bag; existing companion purchases are preserved. Each of the 24 friends hosts a different learning route.
+Visit `/characters` to inspect every model, turn it through 360 degrees and preview six body animations and eight facial expressions. Choose any of the twenty new friends for free in the adventure Bag; existing companion purchases are preserved. Each of the 24 friends hosts a different learning route.
 
 ## Sunlit Village art pack
 
@@ -98,3 +98,9 @@ External LLM configuration is optional. Local deterministic fallback engines kee
 
 IELTS Writing/Speaking results are practice estimates, not official examiner scores. Acoustic pronunciation scoring is available when the configured speech provider is present; otherwise the product explicitly falls back to non-acoustic signals. Production deployment also supports the standalone Next.js image, Caddy reverse proxy, PostgreSQL, Redis and isolated API/AI services.
 
+
+### The Friendship Fair
+
+Visit /festival for eight new 3D mini-games and a friendship scrapbook, or use the southern bridge in /play. Bubble Meadow, Little Garden, Echo Pond, Tea Time, Parcel Trail, Cloud Hop, Colour Studio and Bridge Builder have distinct movement, memory, recipe or spatial mechanics. The game library now contains 20 games and learning activities. Finished fair games save best scores, stars and character memories on the current device.
+
+All 24 friends have round chibi models, personal stories, traits, favourites, dreams and individual idle mannerisms. The reusable collection now contains 45 GLB models with a character bible and fair-game catalog. See docs/FRIENDSHIP-FAIR.md and docs/CHIBI-CAST.md.

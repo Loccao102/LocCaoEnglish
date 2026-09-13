@@ -1,3 +1,4 @@
+import { createFairground } from "./fairground";
 import * as THREE from "three";
 import { zones, type Zone } from "../catalog";
 import { discoveries, fieldChests } from "../discoveries";
@@ -7,6 +8,7 @@ import { ArtResources, colors as C, joint, label, mergeArt, SCALE, worldPoint } 
 
 export type VillageScene = {
   root: THREE.Group;
+  fair: ReturnType<typeof createFairground>;
   buildings: { zone: Zone; root: THREE.Group; door: THREE.Group; marker: THREE.Group; sign: THREE.Sprite }[];
   trees: THREE.Group[];
   chests: { id: string; root: THREE.Group; lid: THREE.Group; open: number }[];
@@ -196,5 +198,6 @@ export function createVillage(art: ArtResources): VillageScene {
   });
   const butterflies:THREE.Group[]=[];
   for(let i=0;i<7;i++){const b=new THREE.Group();b.position.copy(worldPoint(365+i*75,325+(i%3)*80));b.position.y=.7;for(const side of [-1,1]){const wing=art.mesh(b,"leaf",i%2?C.coral:C.cream,[side*.055,0,0],[.075,.02,.06]);wing.name=side<0?"wingL":"wingR";}root.add(b);butterflies.push(b);}
-  return {root,buildings,trees,chests,seeds,waters:[sea,pond],butterflies};
+  const fair=createFairground(art);root.add(fair.root);
+  return {root,buildings,trees,chests,seeds,waters:[sea,pond],butterflies,fair};
 }

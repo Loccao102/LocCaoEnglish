@@ -36,8 +36,8 @@ export function decorateHead(art: ArtResources, head: THREE.Group, leaves: THREE
     art.mesh(leaves,"plush","#F3BCCB",[side*.28,.73,.076],[.081,.28,.025],[0,0,-side*.11]);
   }
   if (["cat","fox"].includes(d.shape)) for(const side of [-1,1]) {
-    art.mesh(detail,"cone",d.skin,[side*.39,.48,-.02],[.22,.48,.17],[0,0,-side*.20]);
-    art.mesh(detail,"cone",d.shape === "fox" ? paper : "#F2C2D4",[side*.40,.49,.097],[.12,.28,.03],[0,0,-side*.20]);
+    art.mesh(detail,"plush",d.skin,[side*.43,.49,-.02],[.19,.28,.17],[0,0,-side*.20]);
+    art.mesh(detail,"plush",d.shape === "fox" ? paper : "#F2C2D4",[side*.44,.50,.117],[.105,.18,.035],[0,0,-side*.20]);
   }
   if(d.hat === "sprout") { leaf(art,leaves,[-.04,.59,0],.70,.86); leaf(art,leaves,[.035,.61,0],-.55,1.12); }
   if(d.hat === "leaf") leaf(art,leaves,[0,.59,0],-.48,1.04);

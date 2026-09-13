@@ -4,18 +4,19 @@ import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import type { VillageRenderer, RenderState } from "@/lib/game/three/renderer";
 import type { Discovery, FieldChest } from "@/lib/game/discoveries";
 
-export default function WorldCanvas({ state, api, onCollect, onChest, onNearbyChest, onReady }: {
+export default function WorldCanvas({ state, api, onCollect, onChest, onNearbyChest, onFestival, onNearbyFestival, onReady }: {
   state: RenderState; api: MutableRefObject<VillageRenderer | null>; onCollect: (word: Discovery) => void;
+  onFestival: (id: string) => void; onNearbyFestival: (id: string) => void;
   onChest: (chest: FieldChest) => void; onNearbyChest: (chest: FieldChest | null) => void; onReady: (ready: boolean) => void;
 }) {
-  const host=useRef<HTMLDivElement>(null),latest=useRef({state,onCollect,onChest,onNearbyChest,onReady});
-  latest.current={state,onCollect,onChest,onNearbyChest,onReady};
+  const host=useRef<HTMLDivElement>(null),latest=useRef({state,onCollect,onChest,onNearbyChest,onFestival,onNearbyFestival,onReady});
+  latest.current={state,onCollect,onChest,onNearbyChest,onFestival,onNearbyFestival,onReady};
   const [error,setError]=useState(""),[loading,setLoading]=useState(true),[revision,setRevision]=useState(0);
   useEffect(()=>{
     let cancelled=false,instance:VillageRenderer|null=null;setLoading(true);setError("");latest.current.onReady(false);
     void import("@/lib/game/three/renderer").then(({VillageRenderer})=>{
       if(cancelled||!host.current)return;
-      instance=new VillageRenderer(host.current,{state:()=>latest.current.state,onCollect:word=>latest.current.onCollect(word),onChest:chest=>latest.current.onChest(chest),onNearbyChest:chest=>latest.current.onNearbyChest(chest),onError:message=>{setError(message);latest.current.onReady(false);}});
+      instance=new VillageRenderer(host.current,{state:()=>latest.current.state,onCollect:word=>latest.current.onCollect(word),onChest:chest=>latest.current.onChest(chest),onNearbyChest:chest=>latest.current.onNearbyChest(chest),onFestival:id=>latest.current.onFestival(id),onNearbyFestival:id=>latest.current.onNearbyFestival(id),onError:message=>{setError(message);latest.current.onReady(false);}});
       api.current=instance;setLoading(false);latest.current.onReady(true);
     }).catch(()=>{if(!cancelled){setLoading(false);setError("The 3D world could not open. Enable hardware acceleration in your browser, then reload the world.");latest.current.onReady(false);}});
     return()=>{cancelled=true;instance?.dispose();api.current=null;};

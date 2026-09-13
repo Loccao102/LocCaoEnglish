@@ -7,10 +7,12 @@ import { type AdventureSave, questOpen } from "../progress";
 import { ArtResources, colors as C, label, mapPoint, worldPoint } from "./primitives";
 import { createCompanion, type CompanionRig, type Pose } from "./characters";
 import { createVillage } from "./environment";
+import { festivalGames } from "../festival";
+import { personalityFor } from "../personalities";
 import { VillageAudio } from "./audio";
 
 export type RenderState = { world: WorldController; save: AdventureSave; enabled: boolean; paused: boolean; title: boolean; activeZone: Zone | null; fieldNotes: string[]; sound: boolean; };
-export type RenderEvents = { state: () => RenderState; onCollect: (word: Discovery) => void; onChest: (chest: FieldChest) => void; onNearbyChest: (chest: FieldChest | null) => void; onError: (message: string) => void; };
+export type RenderEvents = { state: () => RenderState; onCollect: (word: Discovery) => void; onChest: (chest: FieldChest) => void; onNearbyChest: (chest: FieldChest | null) => void; onFestival: (id: string) => void; onNearbyFestival: (id: string) => void; onError: (message: string) => void; };
 type Particle = { position: THREE.Vector3; velocity: THREE.Vector3; life: number; max: number; size: number; };
 
 /** One WebGL scene, one simulation/render loop, deterministic mesh assets. */
@@ -37,6 +39,9 @@ export class VillageRenderer {
   private pointer = new THREE.Vector2();
   private plane = new THREE.Plane(new THREE.Vector3(0,1,0),0);
   private drag: { x: number; y: number; distance: number; orbit: boolean; id: number } | null = null;
+  private pendingFestival = "";
+  private nearbyFestival = "";
+  private fairFriends: {id:string;rig:CompanionRig;x:number;y:number}[]=[];
   private pendingChest = "";
   private nearbyChest = "";
   private stepDistance = 0;
@@ -73,6 +78,7 @@ export class VillageRenderer {
     this.target.copy(worldPoint(540,390));this.camera.position.copy(this.target).add(new THREE.Vector3(7,24,29));this.camera.lookAt(this.target);
     for(const zone of zones){const rig=createCompanion(this.art,zone.portrait);rig.root.scale.setScalar(.88);const position=worldPoint(zone.npcX,zone.npcY);rig.root.position.copy(position);rig.root.userData={zoneId:zone.id};
       const marker=label(this.art,zone.guide,1.15);marker.position.y=2.60;rig.root.add(marker);this.scene.add(rig.root);this.guides.push({zone,rig,marker,position});}
+    for(const game of festivalGames){const rig=createCompanion(this.art,game.host);rig.root.scale.setScalar(.78);rig.root.position.copy(worldPoint(game.x,game.y+26));rig.root.userData={festivalId:game.id};this.scene.add(rig.root);this.fairFriends.push({id:game.id,rig,x:game.x,y:game.y+26});}
     this.particleMesh=new THREE.InstancedMesh(this.art.geometry("rock"),this.art.material(C.cream),96);this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.particleMesh.frustumCulled=false;this.scene.add(this.particleMesh);
     for(let i=0;i<96;i++){this.particles.push({position:new THREE.Vector3(),velocity:new THREE.Vector3(),life:0,max:1,size:0});this.dummy.scale.setScalar(0);this.dummy.updateMatrix();this.particleMesh.setMatrixAt(i,this.dummy.matrix);}
     this.aimRing=new THREE.Mesh(this.art.ownGeometry(new THREE.RingGeometry(.24,.29,24)),this.art.ownMaterial(new THREE.MeshBasicMaterial({color:C.cream,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false})));this.aimRing.rotation.x=-Math.PI/2;this.aimRing.visible=false;this.scene.add(this.aimRing);
@@ -102,9 +108,10 @@ export class VillageRenderer {
     if(this.host.hasPointerCapture(event.pointerId))this.host.releasePointerCapture(event.pointerId);
     if(!drag||drag.orbit||drag.distance>8||!this.events.state().enabled)return;
     const rect=this.host.getBoundingClientRect();this.pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);this.raycaster.setFromCamera(this.pointer,this.camera);
-    const roots=[...this.guides.map(g=>g.rig.root),...this.village.buildings.map(b=>b.root),...this.village.chests.map(c=>c.root),...this.village.seeds.filter(s=>!s.collected).map(s=>s.root)];
+    const roots=[...this.fairFriends.filter(friend=>friend.rig.root.visible).map(friend=>friend.rig.root),...this.village.fair.stalls.map(stall=>stall.root),...this.guides.map(g=>g.rig.root),...this.village.buildings.map(b=>b.root),...this.village.chests.map(c=>c.root),...this.village.seeds.filter(s=>!s.collected).map(s=>s.root)];
     const hits=this.raycaster.intersectObjects(roots,true);
-    for(const hit of hits){let node:THREE.Object3D|null=hit.object;while(node&&!node.userData.zoneId&&!node.userData.chestId&&!node.userData.seedId)node=node.parent;if(!node)continue;
+    for(const hit of hits){let node:THREE.Object3D|null=hit.object;while(node&&!node.userData.zoneId&&!node.userData.chestId&&!node.userData.seedId&&!node.userData.festivalId)node=node.parent;if(!node)continue;
+      if(node.userData.festivalId){this.visitFestival(node.userData.festivalId);return;}
       if(node.userData.zoneId){const zone=zones.find(z=>z.id===node!.userData.zoneId);if(zone)this.events.state().world.walkTo({x:zone.npcX,y:zone.npcY},zone);return;}
       if(node.userData.chestId){this.inspect(node.userData.chestId);return;}
       if(node.userData.seedId){const seed=discoveries.find(d=>d.id===node!.userData.seedId);if(seed)this.walk({x:seed.x,y:seed.y});return;}
@@ -116,12 +123,19 @@ export class VillageRenderer {
     const state=this.events.state();if(!state.enabled||event.ctrlKey||event.metaKey||event.altKey||(event.target instanceof HTMLElement&&event.target.closest("input,textarea,select")))return;
     this.audio.unlock();
     if(event.key.toLowerCase()==="e"&&!state.world.nearby&&this.nearbyChest&&!event.repeat){event.preventDefault();this.inspect(this.nearbyChest);}
+    if(event.key.toLowerCase()==="e"&&this.nearbyFestival&&!event.repeat){event.preventDefault();this.visitFestival(this.nearbyFestival);}
     if(event.key.toLowerCase()==="r"){this.yaw=.30;this.zoom=1;}
   };
-  private walk(point: Point){this.pendingChest="";this.events.state().world.walkTo(point);this.aimRing.position.copy(worldPoint(point.x,point.y));this.aimRing.position.y=.05;this.aimUntil=this.time+1.2;}
+  private walk(point: Point){this.pendingFestival="";this.pendingChest="";this.events.state().world.walkTo(point);this.aimRing.position.copy(worldPoint(point.x,point.y));this.aimRing.position.y=.05;this.aimUntil=this.time+1.2;}
   rotate(direction: number){this.yaw+=direction*Math.PI/4;}
   changeZoom(direction: number){this.zoom=THREE.MathUtils.clamp(this.zoom+direction*.15,.70,1.50);}
   celebrate(){this.celebration=2.4;this.burst(this.player.root.position,28);this.audio.pickup();}
+  visitFestival(id:string){
+    const game=festivalGames.find(game=>game.id===id),state=this.events.state();if(!game||!state.enabled)return;
+    const pos=state.world.position.current;
+    if(Math.hypot(pos.x-game.x,pos.y-(game.y+26))>48){this.pendingFestival=id;state.world.walkTo({x:game.x,y:game.y+38});return;}
+    state.world.stop();this.pendingFestival="";this.events.onFestival(id);
+  }
   inspect(id: string){
     const chest=fieldChests.find(c=>c.id===id),state=this.events.state();if(!chest||!state.enabled)return;
     const pos=state.world.position.current;
@@ -146,6 +160,7 @@ export class VillageRenderer {
     this.player.root.position.copy(worldPoint(pos.x,pos.y));this.player.root.position.y=motion.height+(onBridge(pos)?.15:0);
     this.player.face(motion.heading,delta);
     const pose:Pose=motion.height>.02?"jump":motion.speed>160?"run":motion.speed>5?"walk":this.celebration>0?"celebrate":motion.wave>0?"wave":"idle";
+    this.player.express(this.celebration>0?"joy":motion.height>.02?"surprised":motion.wave>0?"love":motion.speed>160?"curious":personalityFor(this.character).expression);
     this.player.animate(pose,this.reducedMotion&&pose==="idle"?0:delta,pose==="walk"?THREE.MathUtils.clamp(motion.speed/130,.3,1.5):pose==="run"?motion.speed/215:1);
     const squash=motion.landed>0?1-Math.sin(motion.landed/.18*Math.PI)*.12:1;this.player.root.scale.set(1/Math.sqrt(squash),squash,1/Math.sqrt(squash));
     if(motion.height>this.lastHeight&&this.lastHeight===0)this.audio.jump();this.lastHeight=motion.height;
@@ -153,13 +168,27 @@ export class VillageRenderer {
     this.lastPosition={...pos};
     for(const [index,guide] of this.guides.entries()){
       const distance=Math.hypot(guide.zone.npcX-pos.x,guide.zone.npcY-pos.y),near=distance<95;
+      guide.rig.root.visible=distance<460||state.title;if(!guide.rig.root.visible)continue;
       const wander=near||this.reducedMotion?0:Math.sin(this.time*.35+index)*.17;
       guide.rig.root.position.copy(guide.position);guide.rig.root.position.x+=wander;
       guide.rig.face(near?Math.atan2(pos.x-guide.zone.npcX,pos.y-guide.zone.npcY):Math.sin(this.time*.35+index+.3)>.0?Math.PI/2:-Math.PI/2,delta);
+      guide.rig.express(near?"happy":personalityFor(guide.zone.portrait).expression);
       guide.rig.animate(this.reducedMotion?"idle":near?(Math.floor(this.time/3.5)%2===0?"wave":"idle"):"walk",this.reducedMotion?0:delta,near?1:.27);
       guide.marker.visible=distance<180||state.title;
       guide.marker.material.opacity=near?1:.82;
     }
+    let fairNear="";
+    for(const friend of this.fairFriends){
+      const distance=Math.hypot(friend.x-pos.x,friend.y-pos.y);friend.rig.root.visible=distance<420&&!state.title;
+      if(distance<48)fairNear=friend.id;
+      if(!friend.rig.root.visible)continue;
+      friend.rig.face(distance<110?Math.atan2(pos.x-friend.x,pos.y-friend.y):.2,delta);
+      friend.rig.express(distance<90?"joy":personalityFor(festivalGames.find(game=>game.id===friend.id)!.host).expression);
+      friend.rig.animate(distance<90?"wave":"idle",this.reducedMotion?0:delta);
+    }
+    if(fairNear!==this.nearbyFestival){this.nearbyFestival=fairNear;this.events.onNearbyFestival(fairNear);}
+    if(state.enabled&&this.pendingFestival&&fairNear===this.pendingFestival)this.visitFestival(fairNear);
+    for(const stall of this.village.fair.stalls)stall.sign.visible=Math.hypot(stall.game.x-pos.x,stall.game.y-pos.y)<220;
     for(const building of this.village.buildings){
       const distance=Math.hypot(building.zone.x-pos.x,building.zone.y-pos.y),opened=questOpen(state.save,building.zone.quests[0]);
       const angle=opened&&distance<112?-.85*Math.PI:0;building.door.rotation.y+=(angle-building.door.rotation.y)*(1-Math.exp(-7*delta));
@@ -194,7 +223,7 @@ export class VillageRenderer {
     this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();
     this.motionPreference.removeEventListener("change",this.preferenceChanged);
     this.host.removeEventListener("pointerdown",this.pointerDown);this.host.removeEventListener("pointermove",this.pointerMove);this.host.removeEventListener("pointerup",this.pointerUp);this.host.removeEventListener("pointercancel",this.pointerCancel);this.host.removeEventListener("contextmenu",this.contextMenu);this.host.removeEventListener("wheel",this.wheel);window.removeEventListener("keydown",this.keyDown);this.renderer.domElement.removeEventListener("webglcontextlost",this.contextLost);
-    for(const rig of [...this.companionCache.values(),...this.guides.map(g=>g.rig)]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}this.companionCache.clear();
+    for(const rig of [...this.companionCache.values(),...this.guides.map(g=>g.rig),...this.fairFriends.map(friend=>friend.rig)]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}this.companionCache.clear();
     this.particleMesh.dispose();this.sun.shadow.dispose();this.audio.dispose();this.art.dispose();this.renderer.dispose();this.renderer.domElement.remove();
   }
 }

@@ -10,7 +10,7 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
 const root=resolve('.'),cache=resolve('.cache/export-3d'),output=resolve('public/assets/sunlit-3d');
 mkdirSync(output,{recursive:true});
-const modules=['lib/game/catalog.ts','lib/game/companions.ts','lib/game/world.ts','lib/game/scenery.ts','lib/game/discoveries.ts','lib/game/three/primitives.ts','lib/game/three/character-details.ts','lib/game/three/characters.ts','lib/game/three/environment.ts'];
+const modules=['lib/game/catalog.ts','lib/game/companions.ts','lib/game/personalities.ts','lib/game/festival.ts','lib/game/three/expressions.ts','lib/game/three/fairground.ts','lib/game/world.ts','lib/game/scenery.ts','lib/game/discoveries.ts','lib/game/three/primitives.ts','lib/game/three/character-details.ts','lib/game/three/characters.ts','lib/game/three/environment.ts'];
 for(const file of modules){
   let source=readFileSync(file,'utf8');
   if(file.endsWith('/catalog.ts'))source=source.replace('import raw from "@/backend/internal/adventure/catalog.json";',`const raw = ${readFileSync('backend/internal/adventure/catalog.json','utf8')};`);
@@ -36,20 +36,26 @@ async function save(id,object,animations=[]){
   console.log(`Exported ${id}.glb (${Math.round(bytes.length/1024)} KiB)`);
 }
 const catalog=JSON.parse(readFileSync('backend/internal/adventure/catalog.json','utf8'));
+const {personalityFor,expressions}=await import(pathToFileURL(resolve(cache,'lib/game/personalities.mjs')));
+const {festivalGames}=await import(pathToFileURL(resolve(cache,'lib/game/festival.mjs')));
+writeFileSync(resolve(output,'character-bible.json'),JSON.stringify({version:3,expressions,characters:catalog.companions.map(friend=>({...friend,personality:personalityFor(friend.id)}))},null,2)+'\n');
+writeFileSync(resolve(output,'fair-games.json'),JSON.stringify({version:1,games:festivalGames},null,2)+'\n');
 for(const {id} of catalog.companions){const art=new ArtResources(),rig=createCompanion(art,id);await save(id,rig.root,rig.clips);art.dispose();}
 const art=new ArtResources(),village=createVillage(art);await save('village',village.root);
 async function moduleAsset(id,model){const clone=model.clone(true);clone.position.set(0,0,0);clone.rotation.set(0,0,0);clone.scale.set(1,1,1);await save(id,clone);}
+await save('friendship-fair',village.fair.root);
+for(const stall of village.fair.stalls)await moduleAsset(`fair-${stall.game.id}`,stall.root);
 for(const building of village.buildings)await moduleAsset(building.zone.building,building.root);
 await moduleAsset('bubble-tree',village.trees[0]);
 await moduleAsset('field-chest',village.chests[0].root);
 await moduleAsset('word-seed',village.seeds[0].root);
 await moduleAsset('butterfly',village.butterflies[0]);
 art.dispose();
-writeFileSync(resolve(output,'manifest.json'),JSON.stringify({name:'Sunlit Village 3D',version:'2.0.0',format:'glTF 2.0 binary',source:'Original procedural mesh art in lib/game/three. Chibi proportions and colours follow the project-owned Sunlit Village illustration reference. No third-party game art or image textures.',characterRig:'24 distinct chibi companions, each with rigid articulated joints and six animation clips; front is +Z, up is +Y, feet at Y=0.',runtime:'The game constructs these same models from source. GLB files are reusable exports, not runtime download dependencies.',assets},null,2)+'\n');
+writeFileSync(resolve(output,'manifest.json'),JSON.stringify({name:'Sunlit Village 3D',version:'3.0.0',format:'glTF 2.0 binary',source:'Original procedural mesh art in lib/game/three. Chibi proportions and colours follow the project-owned Sunlit Village illustration reference. No third-party game art or image textures.',characterRig:'24 distinct chibi companions, each with rigid articulated joints and six body animation clips and eight facial expression clips; front is +Z, up is +Y, feet at Y=0.',runtime:'The game constructs these same models from source. GLB files are reusable exports, not runtime download dependencies.',assets},null,2)+'\n');
 
 // Portable deterministic ZIP, using Node's built-in DEFLATE and standard ZIP headers.
 function crc32(bytes){let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return(crc^0xffffffff)>>>0;}
-const entries=[...assets.map(asset=>`${asset.id}.glb`),'manifest.json','PROVENANCE.md'];
+const entries=[...assets.map(asset=>`${asset.id}.glb`),'manifest.json','PROVENANCE.md','character-bible.json','fair-games.json'];
 const local=[],central=[];let offset=0;
 for(const filename of entries){
   const name=Buffer.from(`sunlit-3d/${filename}`),data=readFileSync(resolve(output,filename)),compressed=deflateRawSync(data),crc=crc32(data);

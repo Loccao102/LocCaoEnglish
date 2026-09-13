@@ -1,19 +1,21 @@
+import { festivalGames, festivalShore } from "./festival";
 export type Point = { x: number; y: number };
 export type Obstacle = { x: number; y: number; rx: number; ry: number; shape?: "box"; kind?: "pond" };
-export const WORLD = { width: 1200, height: 820 };
+export const WORLD = { width: 1200, height: 1120 };
 export const SPAWN: Point = { x: 343, y: 562 };
-export const onBridge = (point: Point) => point.x >= 544 && point.x <= 720 && Math.abs(point.y-410) < 11;
+export const onBridge = (point: Point) => (point.x >= 544 && point.x <= 720 && Math.abs(point.y-410) < 11) || (point.x>=600 && point.x<=640 && point.y>=666 && point.y<=759);
 export const shore: Point[] = [[168,225],[257,146],[406,116],[593,82],[760,101],[925,158],[1030,255],[1050,407],[1003,544],[892,627],[737,674],[532,682],[351,663],[222,601],[167,502],[155,351]].map(([x,y])=>({x,y}));
-export function insideIsland(point: Point) {
+function insidePolygon(point: Point, polygon: Point[]) {
   let inside = false;
-  for (let i = 0, j = shore.length - 1; i < shore.length; j = i++) {
-    const a = shore[i], b = shore[j];
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const a = polygon[i], b = polygon[j];
     if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
   }
   return inside;
 }
+export function insideIsland(point: Point) {return insidePolygon(point,shore)||insidePolygon(point,festivalShore)||onBridge(point);}
 export function walkable(point: Point, obstacles: Obstacle[]) {
-  return Number.isFinite(point.x) && Number.isFinite(point.y) && insideIsland(point) && obstacles.every(obstacle => obstacle.kind === "pond" && onBridge(point) ? true : obstacle.shape === "box" ? Math.abs(point.x-obstacle.x) > obstacle.rx+9 || Math.abs(point.y-obstacle.y) > obstacle.ry+9 : ((point.x-obstacle.x)/(obstacle.rx+9))**2 + ((point.y-obstacle.y)/(obstacle.ry+9))**2 > 1);
+  return Number.isFinite(point.x) && Number.isFinite(point.y) && insideIsland(point) && ((point.x-610)/43)**2+((point.y-924)/40)**2>1 && festivalGames.every(game=>Math.abs(point.x-game.x)>43 || Math.abs(point.y-(game.y-18))>31) && obstacles.every(obstacle => obstacle.kind === "pond" && onBridge(point) ? true : obstacle.shape === "box" ? Math.abs(point.x-obstacle.x) > obstacle.rx+9 || Math.abs(point.y-obstacle.y) > obstacle.ry+9 : ((point.x-obstacle.x)/(obstacle.rx+9))**2 + ((point.y-obstacle.y)/(obstacle.ry+9))**2 > 1);
 }
 const segmentClear = (a: Point, b: Point, obstacles: Obstacle[]) => {
   const steps = Math.max(1, Math.ceil(Math.hypot(b.x-a.x, b.y-a.y)/4));

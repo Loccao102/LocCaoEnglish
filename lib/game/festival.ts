@@ -1,0 +1,32 @@
+export type FestivalKind = "bubble" | "garden" | "echo" | "tea" | "parcel" | "hop" | "colour" | "bridge";
+export type FestivalGame = { id: string; kind: FestivalKind; name: string; host: string; colour: string; skill: string; description: string; instructions: string; x: number; y: number; rounds: number; memory: string };
+export const festivalGames: FestivalGame[] = [
+  {id:"bubble-meadow",kind:"bubble",name:"Bubble Meadow",host:"mam",colour:"#89CABC",skill:"Word meanings",description:"Chase floating word bubbles through a little meadow.",instructions:"Read the clue. Walk into the matching bubble to catch it. Click a bubble to walk towards it, or move with WASD / arrows.",x:300,y:815,rounds:5,memory:"Mầm kept your first bubble in a little jar of sunshine."},
+  {id:"little-garden",kind:"garden",name:"Little Garden",host:"com",colour:"#A5C98A",skill:"Following instructions",description:"Carry seeds, plant them and grow a colourful garden.",instructions:"Pick up the seed Cốm asks for, then carry it to the empty garden bed. Click a seed or bed to walk there. A wrong seed can be exchanged before planting.",x:465,y:820,rounds:3,memory:"Cốm planted a friendship flower beside your garden bed."},
+  {id:"echo-pond",kind:"echo",name:"Echo Pond",host:"giot",colour:"#91C8DB",skill:"Listening & memory",description:"Listen to the pond, then play its growing melody back.",instructions:"Watch and listen to the numbered stones. Repeat their order by clicking them or pressing 1–4. Replay the melody whenever you need it.",x:690,y:810,rounds:5,memory:"Giọt added your melody to the pond's morning song."},
+  {id:"tea-time",kind:"tea",name:"Tea Time",host:"moca",colour:"#D6B291",skill:"Recipes & sequencing",description:"Layer ingredients in the right order for a friend's tea.",instructions:"Read the recipe. Add the ingredients in order, then press Serve. Empty the cup to start the current order again. Each order uses a different recipe.",x:870,y:830,rounds:3,memory:"Moca named a cosy corner of the café after your first order."},
+  {id:"parcel-trail",kind:"parcel",name:"Parcel Trail",host:"quyt",colour:"#F1BF80",skill:"Places & directions",description:"Pick up parcels and deliver them around a tiny town.",instructions:"Collect the parcel from the post box, read its address and carry it to the right building. Click a destination to walk there, or use WASD / arrows.",x:910,y:960,rounds:3,memory:"Quýt saved a special ticket for your next journey together."},
+  {id:"cloud-hop",kind:"hop",name:"Cloud Hop",host:"may",colour:"#B7C9E7",skill:"Timing & movement",description:"Leap through six cloud rings without stepping in puddles.",instructions:"Move with WASD / arrows or the touch arrows. Jump with Space or the Jump button. Pass through each glowing ring while airborne. Rose-coloured puddles return you to your last checkpoint.",x:735,y:1000,rounds:6,memory:"Mây drew your trail across a brand-new cloud map."},
+  {id:"colour-studio",kind:"colour",name:"Colour Studio",host:"dau",colour:"#EDAAB3",skill:"Colours & combinations",description:"Mix paint and bring a little flower sculpture to life.",instructions:"Choose two paint pots, then press Mix. Red + yellow makes orange, yellow + blue makes green, red + blue makes purple, and red + white makes pink. Clear the palette to try a different pair.",x:510,y:995,rounds:4,memory:"Dâu put your colours in the village's friendship mural."},
+  {id:"bridge-builder",kind:"bridge",name:"Bridge Builder",host:"soi",colour:"#C6B6A0",skill:"Spatial reasoning",description:"Turn wooden tiles to connect two riverbanks.",instructions:"Rotate each tile by clicking it or pressing 1–9. Join the golden entrance on the left to the teal exit on the right. Press Send boat when the path connects. There are three different bridges.",x:285,y:975,rounds:3,memory:"Sỏi carved a small sunshine into the bridge you built together."},
+];
+export const festivalById=(id:string)=>festivalGames.find(game=>game.id===id);
+export const festivalShore = [[215,817],[325,752],[540,736],[760,750],[951,799],[1012,914],[958,1036],[741,1095],[486,1093],[271,1042],[192,934]].map(([x,y])=>({x,y}));
+export const festivalGate={x:620,y:735};
+
+export type FairRecord={best:number;stars:number;visits:number};
+export type FairSave={version:1;games:Record<string,FairRecord>};
+export const FAIR_KEY="loccao.friendship-fair.v1";
+export function readFair():FairSave {
+  const stored=localStorage.getItem(FAIR_KEY);
+  let raw;try{raw=JSON.parse(stored||"null");}catch{raw=null;}
+  const games:FairSave["games"]={};
+  if(raw?.version===1&&raw.games)for(const game of festivalGames){const entry=raw.games[game.id];if(entry&&Number.isFinite(entry.best)&&Number.isInteger(entry.stars)&&Number.isInteger(entry.visits))games[game.id]={best:Math.max(0,Math.min(10000,entry.best)),stars:Math.max(0,Math.min(3,entry.stars)),visits:Math.max(0,Math.min(9999,entry.visits))};}
+  return {version:1,games};
+}
+export function recordFair(id:string,score:number,stars:number) {
+  if(!festivalById(id))return;
+  const save=readFair(),old=save.games[id];
+  save.games[id]={best:Math.max(old?.best||0,score),stars:Math.max(old?.stars||0,stars),visits:Math.min(9999,(old?.visits||0)+1)};
+  localStorage.setItem(FAIR_KEY,JSON.stringify(save));window.dispatchEvent(new Event("fair-progress"));
+}

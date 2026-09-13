@@ -1,352 +1,607 @@
 {
   "name": "Sunlit Village 3D",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "format": "glTF 2.0 binary",
   "source": "Original procedural mesh art in lib/game/three. Chibi proportions and colours follow the project-owned Sunlit Village illustration reference. No third-party game art or image textures.",
-  "characterRig": "24 distinct chibi companions, each with rigid articulated joints and six animation clips; front is +Z, up is +Y, feet at Y=0.",
+  "characterRig": "24 distinct chibi companions, each with rigid articulated joints and six body animation clips and eight facial expression clips; front is +Z, up is +Y, feet at Y=0.",
   "runtime": "The game constructs these same models from source. GLB files are reusable exports, not runtime download dependencies.",
   "assets": [
     {
       "id": "mam",
       "src": "/assets/sunlit-3d/mam.glb",
-      "bytes": 1097820,
-      "sha256": "3cc32ddf0ea9c74794e6e4173ce71785d203bf63b450de8d9c39eb78538e6795",
+      "bytes": 2368356,
+      "sha256": "1936d92a09f257aebea98aa6cb42697c5cba065b2a4266319005d9d62d79ff52",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "nang",
       "src": "/assets/sunlit-3d/nang.glb",
-      "bytes": 1091572,
-      "sha256": "95110f9c0ba1ba092e5e0839e33f6e89f046f91f5e2857c52c3127bd3c54ccef",
+      "bytes": 2393860,
+      "sha256": "22a2937319f47702e7db48f87c5b5cce67e5babfcd96fb64b3eda3289a5e772d",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "may",
       "src": "/assets/sunlit-3d/may.glb",
-      "bytes": 1022996,
-      "sha256": "02fca81d7200ca52250b8787764c588bcf225741a22a411c0e6589a7d7034444",
+      "bytes": 2293672,
+      "sha256": "e6d9d67cb59a2086a3dc7fe90e3a0d672c572b6e113277b9b0e7bcd8acadf955",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "soi",
       "src": "/assets/sunlit-3d/soi.glb",
-      "bytes": 1178460,
-      "sha256": "5ba01d3c0cdd72b4d8dc742641b539a09558a066fff838d73ead500342fca5e6",
+      "bytes": 2449004,
+      "sha256": "42a379fcea83b14b8c69f25002089b03120c0d1b3c5e98ff6120f92d6de0a03e",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "bep",
       "src": "/assets/sunlit-3d/bep.glb",
-      "bytes": 1208808,
-      "sha256": "e00c81901d9aef0402a80f25d5a521dd08c8f489d1eb9131c13b265b512098b5",
+      "bytes": 2479328,
+      "sha256": "38491eb465369f31d311ce98f602ebec2e6cb3c870e7c0ba9a9ede2ca04e238d",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "bong",
       "src": "/assets/sunlit-3d/bong.glb",
-      "bytes": 1284708,
-      "sha256": "f3cba17740526c5ed89e245543c762b3a561618cb5b36db09712ce09960ce13b",
+      "bytes": 2555248,
+      "sha256": "4cccb47fce537104592dc0a93335a6a96aab59894bf19868815137698b30185e",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "giot",
       "src": "/assets/sunlit-3d/giot.glb",
-      "bytes": 990032,
-      "sha256": "5b47290d4d5ddabd54360674566790e3e31ed588b80487a672dbd069467fc2f8",
+      "bytes": 2260684,
+      "sha256": "43a6b1161843ba8b08106320d88ce7e36e733003ead3437aafe5fb6605da9c99",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "hat",
       "src": "/assets/sunlit-3d/hat.glb",
-      "bytes": 1037096,
-      "sha256": "6733ef26a820aac65d58e8e8710d181b1ef4f3050610f98fb5057582f60aaaa2",
+      "bytes": 2307764,
+      "sha256": "df6ec3b5ef441969b00b5a5c762c31ab71a389c35b0d5d722c419c64ff4cb5f6",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "com",
       "src": "/assets/sunlit-3d/com.glb",
-      "bytes": 1182520,
-      "sha256": "b1744747e4b526a67d8976357c397f0f3cd32a9fb7da7f0a564a5d4a7ff2260b",
+      "bytes": 2453060,
+      "sha256": "7adbfc37484b0a35115a82d56fe6c7a0adf26637169122c1c20afdc55d8b74fb",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "mit",
       "src": "/assets/sunlit-3d/mit.glb",
-      "bytes": 1295788,
-      "sha256": "0d13c39d3c4435e63f87d420ad9b2b9a7b366c801e8b329427a216e8848538a7",
+      "bytes": 2566340,
+      "sha256": "1df0cd18eaafe7e31a8a608c29aa485e86e22cda00610d1354c867b6167e17e2",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "dao",
       "src": "/assets/sunlit-3d/dao.glb",
-      "bytes": 939280,
-      "sha256": "4ead1d5fa22e65f87c913eacd45c98f1bc0efe0c31db5dff885748f35221e6d6",
+      "bytes": 2209932,
+      "sha256": "8689b41898c5f03023f8b92e35dd527bbaffb0779bb8dca7dc96c62950d6d399",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "dau",
       "src": "/assets/sunlit-3d/dau.glb",
-      "bytes": 1631220,
-      "sha256": "48bdd9f2620bf09f7ad8f004d032bffe087c0ba36564fdaf7dd897be2c94f3f5",
+      "bytes": 2901772,
+      "sha256": "57479d245243517838ba1dc50a0bfeddba75e5ee2968c0e42f4837752573eaff",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "bo",
       "src": "/assets/sunlit-3d/bo.glb",
-      "bytes": 1259652,
-      "sha256": "1153d07f946d476579809c41dc14452dd156e6d1aa508a665168d7861a56fb27",
+      "bytes": 2530208,
+      "sha256": "2c45fe05e6898019ad079de3eb8b91705d59163ee5f38db7247062f3b7b5bb81",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "na",
       "src": "/assets/sunlit-3d/na.glb",
-      "bytes": 1123076,
-      "sha256": "b89805d7fc07ad8dfe19ed1ad200ac36532f36541997242fcaa34b91ac633128",
+      "bytes": 2425360,
+      "sha256": "7e0b03f8615d8e94b41dfad749aac465c3fdf83355441ca58539f733389d0ef8",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "me",
       "src": "/assets/sunlit-3d/me.glb",
-      "bytes": 1236304,
-      "sha256": "576a5e837635c689be369b149bfa2e06c7b0e8d47881cb673a49166252001c2e",
+      "bytes": 2506852,
+      "sha256": "9db5ae9b002e8ba1c11bd45fc4cd2b4df46992f33bca9c431c07ce4ae295855a",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "quyt",
       "src": "/assets/sunlit-3d/quyt.glb",
-      "bytes": 1336548,
-      "sha256": "8f1b5dfc5cb18b00fdf926c3aec595ab5e756adb29daba553294ebf3a3cfc7e6",
+      "bytes": 2607144,
+      "sha256": "e6baccfb9e8a3020fb86f20d2f076ec0b98166dc6c519fec1334cd0778282a59",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "sen",
       "src": "/assets/sunlit-3d/sen.glb",
-      "bytes": 1094100,
-      "sha256": "4aaa1610af2c5af39fe31d5d6e4ede97cf173911d9b2f3f733be8802501c2588",
+      "bytes": 2364628,
+      "sha256": "6b1bb55642ee9e694fe59d3e1ec0db02ea09a0be06152bdbfe4172c4c7460e38",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "truc",
       "src": "/assets/sunlit-3d/truc.glb",
-      "bytes": 1114808,
-      "sha256": "fa4c686ab4749183a5ba76e45054fde7e9602c6a0b30852e3d8fdc5ece16fe7e",
+      "bytes": 2385396,
+      "sha256": "c0dad997773ced85f7c990546a4ca5d313dfbcaaf8a3ad36f1e537eb6f712556",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "gao",
       "src": "/assets/sunlit-3d/gao.glb",
-      "bytes": 921352,
-      "sha256": "63792f204f883c9e3b938360405ecb7339e3bccc140e1efe9db8085ad8ef0091",
+      "bytes": 2223716,
+      "sha256": "32dda70e6afd890d59db66db1dea136c32619b07f8995e65f5b96b34b458b7c7",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "duong",
       "src": "/assets/sunlit-3d/duong.glb",
-      "bytes": 1064280,
-      "sha256": "fc1df0c4975b1671d98b2da13406aa5f2b7dbb727b5ea13b6f940ad08e20393a",
+      "bytes": 2334872,
+      "sha256": "cfebf20f5f7eeab76574f8bf3a0d8197905681b1ef5e6c4d6cc025324cb5507d",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "moca",
       "src": "/assets/sunlit-3d/moca.glb",
-      "bytes": 1184408,
-      "sha256": "a112bcb01c615a150bd451e88ef3e092d3a9c65f12c9d3a94f6664a52d806dd7",
+      "bytes": 2486728,
+      "sha256": "77fe78516b7117e1796339ac7a34f8f19a8388f1173fcc5b689954d4d2e7d0a5",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "tim",
       "src": "/assets/sunlit-3d/tim.glb",
-      "bytes": 1152576,
-      "sha256": "439c419c64f03b8ba0a3353ee76d5f16a34196d8e3f0ccf3dbae5c55bb1e1cac",
+      "bytes": 2556624,
+      "sha256": "e9b5e3f6bf90b2f73f9cee69bafc2236c9d2284d3f02fae274610441d8aaf5f4",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "cuon",
       "src": "/assets/sunlit-3d/cuon.glb",
-      "bytes": 1243648,
-      "sha256": "0bb8ff491a4ad762ff8fca083a497b82b867879b97db49a21e445710fb8f43bf",
+      "bytes": 2647704,
+      "sha256": "74e9aa66b2d120e8977991ee1d4a0ffa59c41db8522d1789599e1456dbc51a4f",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "bui",
       "src": "/assets/sunlit-3d/bui.glb",
-      "bytes": 1177968,
-      "sha256": "def62dca66bc325ae4889d5f0f83aa45bbe2fdd80c198a27ecb6277d640a7474",
+      "bytes": 2448500,
+      "sha256": "a5c5a51753da55efbb8c16ee78a3dc16e5c5f3e062362fa6a4e337e44ec9355d",
       "animations": [
         "idle",
         "walk",
         "run",
         "jump",
         "wave",
-        "celebrate"
+        "celebrate",
+        "expression-happy",
+        "expression-joy",
+        "expression-curious",
+        "expression-thinking",
+        "expression-surprised",
+        "expression-sad",
+        "expression-sleepy",
+        "expression-love"
       ]
     },
     {
       "id": "village",
       "src": "/assets/sunlit-3d/village.glb",
-      "bytes": 5013900,
-      "sha256": "780ffd1a5166dd8828af33cecd7d2cf5485c3874b6273af46dcd3aed28d0c185",
+      "bytes": 8516592,
+      "sha256": "01a394545e3428a2a1c540076834bbec56e19381f3bd25631639da17c41daba1",
+      "animations": []
+    },
+    {
+      "id": "friendship-fair",
+      "src": "/assets/sunlit-3d/friendship-fair.glb",
+      "bytes": 3502420,
+      "sha256": "2e36fa9eff6e86095e001b338ad98461647acd92bb0ef9f4747dfb389d66200e",
+      "animations": []
+    },
+    {
+      "id": "fair-bubble-meadow",
+      "src": "/assets/sunlit-3d/fair-bubble-meadow.glb",
+      "bytes": 331996,
+      "sha256": "679c98bc7d039cfdc4b147eea06e3c7a4c9d71b8c729667c5730ae00d93a3918",
+      "animations": []
+    },
+    {
+      "id": "fair-little-garden",
+      "src": "/assets/sunlit-3d/fair-little-garden.glb",
+      "bytes": 247184,
+      "sha256": "bf08573733adcf42f9eb6fbd78480b45e407bdfd7a440fdc25adc3643445d806",
+      "animations": []
+    },
+    {
+      "id": "fair-echo-pond",
+      "src": "/assets/sunlit-3d/fair-echo-pond.glb",
+      "bytes": 368216,
+      "sha256": "740ea58115e3827d4956d8309bcd42e8ea47284d8f482e75bdf323d7f4b2006a",
+      "animations": []
+    },
+    {
+      "id": "fair-tea-time",
+      "src": "/assets/sunlit-3d/fair-tea-time.glb",
+      "bytes": 242844,
+      "sha256": "a780f69537b9f128f0c3369015b51104ba4468723ec33916912823c9be2f095e",
+      "animations": []
+    },
+    {
+      "id": "fair-parcel-trail",
+      "src": "/assets/sunlit-3d/fair-parcel-trail.glb",
+      "bytes": 228980,
+      "sha256": "eb436a850642b228e7d1b6ab889eed40892aed68d0c70cb86ec4bc58ece9c6e0",
+      "animations": []
+    },
+    {
+      "id": "fair-cloud-hop",
+      "src": "/assets/sunlit-3d/fair-cloud-hop.glb",
+      "bytes": 233872,
+      "sha256": "ef32f74ef8c90870d53d6786c95ae19c08c3ef95f5d95c3f9ecedf83a90c3fd9",
+      "animations": []
+    },
+    {
+      "id": "fair-colour-studio",
+      "src": "/assets/sunlit-3d/fair-colour-studio.glb",
+      "bytes": 242852,
+      "sha256": "ceaae51038f7263bdc2524410c9d1b8814ba827336aaa944449bce3d07cfcd88",
+      "animations": []
+    },
+    {
+      "id": "fair-bridge-builder",
+      "src": "/assets/sunlit-3d/fair-bridge-builder.glb",
+      "bytes": 228564,
+      "sha256": "4ff24be8e1fa4a7583320ab91b1930007ca382b61ca98985b464382f94704e62",
       "animations": []
     },
     {
