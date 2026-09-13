@@ -28,6 +28,10 @@ The original **Làng Nắng / Sunlit Village** illustration collection retains 4
 
 See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, exact generation prompts, provenance, source files, and validation commands. A complete standalone illustrated SVG map is included.
 
+## One player journey
+
+Open `/journey` for the seven-chapter timeline, eight fair stamps, 24 friendship profiles, saved travelling companion and next learning activity. Each friend has three visible story/fair milestones; completed friendships reveal a personal dream. Guest and account saves remain separate.
+
 ## Player loop
 
 Explore → Meet a guide → Complete three challenges → Earn stars and first-clear rewards → Restore a Sun Page → Unlock the next chapter.
@@ -92,6 +96,19 @@ docker compose up --build
 - API: `http://localhost:8080/health`
 - AI: `http://localhost:8090/health`
 
+For hot-reload development with Go and Python installed:
+
+```bash
+docker compose up -d postgres redis
+python -m venv .cache/ai-env
+# Activate the virtual environment, then:
+pip install -r ai-service/requirements.txt
+npm ci
+npm run dev:stack
+```
+
+This starts Web on port 3102, API on 8080 and AI on 8090. Open `/journey`. Set `DATABASE_URL`, `REDIS_URL`, `PYTHON_BIN`, `WEB_PORT` or `CORS_ORIGINS` to override defaults. `--services-only` reuses an already running web server; `--memory` explicitly starts a temporary account store. Stop the stack with Ctrl+C; PostgreSQL data is retained.
+
 External LLM configuration is optional. Local deterministic fallback engines keep the learning loop usable without a model API.
 
 ## Production boundary
@@ -101,6 +118,6 @@ IELTS Writing/Speaking results are practice estimates, not official examiner sco
 
 ### The Friendship Fair
 
-Visit /festival for eight new 3D mini-games and a friendship scrapbook, or use the southern bridge in /play. Bubble Meadow, Little Garden, Echo Pond, Tea Time, Parcel Trail, Cloud Hop, Colour Studio and Bridge Builder have distinct movement, memory, recipe or spatial mechanics. The game library now contains 20 games and learning activities. Finished fair games save best scores, stars and character memories on the current device.
+Visit /festival for eight new 3D mini-games and a friendship scrapbook, or use the southern bridge in /play. Bubble Meadow, Little Garden, Echo Pond, Tea Time, Parcel Trail, Cloud Hop, Colour Studio and Bridge Builder have distinct movement, memory, recipe or spatial mechanics. The game library now contains 20 games and learning activities. Finished fair games save best scores, stars and character memories to the signed-in account, with a separate guest scrapbook on the current device. Offline completed runs wait in an account-specific queue and retry without duplicating visits.
 
 All 24 friends have round chibi models, personal stories, traits, favourites, dreams and individual idle mannerisms. The reusable collection now contains 45 GLB models with a character bible and fair-game catalog. See docs/FRIENDSHIP-FAIR.md and docs/CHIBI-CAST.md.

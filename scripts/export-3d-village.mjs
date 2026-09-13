@@ -14,6 +14,7 @@ const modules=['lib/game/catalog.ts','lib/game/companions.ts','lib/game/personal
 for(const file of modules){
   let source=readFileSync(file,'utf8');
   if(file.endsWith('/catalog.ts'))source=source.replace('import raw from "@/backend/internal/adventure/catalog.json";',`const raw = ${readFileSync('backend/internal/adventure/catalog.json','utf8')};`);
+  if(file.endsWith('/festival.ts'))source=source.replace('import catalog from "@/backend/internal/fair/catalog.json";',`const catalog = ${readFileSync('backend/internal/fair/catalog.json','utf8')};`);
   const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText.replace(/from (["'])(\.\.?\/[^"']+)\1/g,(_,quote,path)=>`from ${quote}${path}.mjs${quote}`);
   const target=resolve(cache,file.replace(/\.ts$/,'.mjs'));mkdirSync(dirname(target),{recursive:true});writeFileSync(target,compiled);
 }

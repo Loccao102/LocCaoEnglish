@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import LearningCompanion from "@/components/game/LearningCompanion";
 
-const navigation = [["/camp", "Learning journal"], ["/learn", "Lessons"], ["/progress", "Progress"], ["/review", "Review"], ["/account", "Account"]];
+const navigation = [["/journey", "My journey"], ["/festival", "Fair"], ["/camp", "Learning journal"], ["/learn", "Lessons"], ["/progress", "Progress"], ["/review", "Review"], ["/account", "Account"]];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();

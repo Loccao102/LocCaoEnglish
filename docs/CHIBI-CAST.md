@@ -53,7 +53,7 @@ The roster and HUD portraits are rendered from those same models using one queue
 
 Run `npm run assets:3d` to regenerate 24 animated companion GLBs and 21 environment GLBs (45 total), the manifest and the ZIP. Every character has idle, walk, run, jump, wave and celebrate clips plus eight expression-* clips. The download pack includes all models and provenance; runtime does not fetch the GLB exports.
 
-Implementation checks are limited to model export, frontend production compilation and visual art/layout review. Gameplay and backend test suites remain skipped at the user's request.
+Implementation is followed by game logic, backend, PostgreSQL, AI and browser validation. See [system validation](SYSTEM-VALIDATION.md) for commands, coverage and remaining environment limits.
 
 ## Round chibi revision and character development
 

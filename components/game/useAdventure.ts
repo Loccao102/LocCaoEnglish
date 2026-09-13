@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AUTH_EVENT } from "@/lib/session";
 import { API_URL } from "@/lib/api";
 import { questById } from "@/lib/game/catalog";
 import { completeQuest, equipCompanion, newAdventure, restoreAdventure, type AdventureSave, type Verdict } from "@/lib/game/progress";
@@ -93,8 +94,10 @@ export function useAdventure() {
         try { const latest = restoreAdventure(JSON.parse(event.newValue).save); saveRef.current = latest; setSave(latest); } catch { /* Keep the current valid save. */ }
       }
     };
+    const onAuth = () => { void load(); };
+    window.addEventListener(AUTH_EVENT, onAuth);
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener(AUTH_EVENT, onAuth); };
   }, [identity, load]);
 
   const updateMeta = useCallback((patch: Partial<Meta>) => {

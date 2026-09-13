@@ -122,7 +122,7 @@ A signed-in connection error offers retry, sign-in or an explicit separate guest
 
 The frontend can run the guest adventure with `npm run dev` without the API. For account saves, run the complete stack with the repository’s documented `docker compose up --build` command. Production accounts need PostgreSQL for durable storage. Frontend and API must be deployed together because the game uses new adventure endpoints.
 
-The Next.js production build, including TypeScript compilation, was completed during implementation. Automated gameplay, browser, integration and backend test suites were not run after the user requested skipping testing. Backend test files authored before that request remain available, and old browser specifications were updated to follow the relocated study routes. This is an implementation handoff, not a claim that end-to-end gameplay has been validated.
+Implementation is followed by game logic, backend, PostgreSQL, AI and browser validation. See [system validation](SYSTEM-VALIDATION.md) for commands, coverage and remaining environment limits.
 
 The existing AI conversations and pronunciation tools retain their own service requirements.
 

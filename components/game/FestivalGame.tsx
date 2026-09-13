@@ -3,13 +3,18 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { companionById } from "@/lib/game/companions";
-import { recordFair, type FestivalGame as GameDefinition } from "@/lib/game/festival";
+import { type FestivalGame as GameDefinition } from "@/lib/game/festival";
 import { FestivalSession, type FairState } from "@/lib/game/festival-session";
 import type { FestivalArena } from "@/lib/game/three/festival-arena";
 import CompanionPortrait from "./CompanionPortrait";
+import {useFairProgress} from "./FairProgressProvider";
+import FairSaveStatus from "./FairSaveStatus";
+import type {FairRun} from "@/lib/game/fair-progress";
 import GameDialog from "./GameDialog";
 
 export default function FestivalGame({game}:{game:GameDefinition}) {
+  const progress=useFairProgress(),runRef=useRef<FairRun|null>(null);
+  const [saveMessage,setSaveMessage]=useState(""),[saving,setSaving]=useState(false),[saveFailed,setSaveFailed]=useState(false);
   const host=useRef<HTMLDivElement>(null),arena=useRef<FestivalArena|null>(null),session=useRef<FestivalSession|null>(null),recorded=useRef(false);
   const [state,setState]=useState<FairState|null>(null),[ready,setReady]=useState(false),[paused,setPaused]=useState(false),[help,setHelp]=useState(false),[error,setError]=useState(""),[warning,setWarning]=useState(""),[sound,setSound]=useState(true);
   const friend=companionById(game.host);
@@ -30,9 +35,16 @@ export default function FestivalGame({game}:{game:GameDefinition}) {
   },[help]);
   useEffect(()=>{
     if(state?.phase!=="win"||recorded.current)return;recorded.current=true;
-    try{recordFair(game.id,state.score,state.hearts);setWarning("");}catch{setWarning("Your result could not be saved on this device. You can still keep playing.");}
-  },[state,game.id]);
-  function start(){recorded.current=false;setWarning("");setPaused(false);setHelp(false);arena.current?.unlock();arena.current?.reset();session.current?.start();}
+    void saveResult();
+  },[state?.phase,game.id]);
+  async function saveResult(){
+    if(!runRef.current||!session.current)return;
+    setSaving(true);setSaveFailed(false);setSaveMessage("Saving your friendship memory…");
+    try{setSaveMessage(await progress.complete(runRef.current,session.current.state.hearts));setWarning("");}
+    catch(cause){setSaveFailed(true);setSaveMessage("");setWarning(cause instanceof Error?cause.message:"Your memory could not be saved. Keep this game open and retry.");}
+    finally{setSaving(false);}
+  }
+  function start(){try{runRef.current=progress.begin(game.id);}catch(cause){setWarning(cause instanceof Error?cause.message:"Please open your scrapbook first.");return;}recorded.current=false;setWarning("");setSaveMessage("");setSaveFailed(false);setPaused(false);setHelp(false);arena.current?.unlock();arena.current?.reset();session.current?.start();}
   const actions=session.current?.objects()||[];
   return <div className="fair-game" style={{"--fair-colour":game.colour} as React.CSSProperties}>
     <div ref={host} className="fair-canvas" inert={overlay}/>
@@ -44,9 +56,9 @@ export default function FestivalGame({game}:{game:GameDefinition}) {
       </div>
       {["tea","colour","bridge","echo"].includes(game.kind)&&<div className="fair-recipe-controls">{game.kind==="echo"?<button onClick={()=>session.current?.replay()} disabled={state?.listening||!session.current?.canAct}>↺ Hear it again</button>:<><button className="fair-submit" onClick={()=>session.current?.submit()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Serve tea →":game.kind==="colour"?"Mix paint →":"Send boat →"}</button>{game.kind!=="bridge"&&<button onClick={()=>session.current?.clear()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Empty cup":"Clear palette"}</button>}</>}</div>}
     </div>
-    {phase==="ready"&&!error&&<GameDialog title={game.name} className="fair-dialog"><CompanionPortrait id={game.host}/><p className="fair-trait">WITH {friend.name.toLocaleUpperCase("vi")}</p><p>{game.instructions}</p><p className="game-caption">{game.rounds} rounds · 3 hearts · a friendship memory to collect</p><button className="game-button" disabled={!ready} onClick={start}>{ready?"Let’s play →":"Opening the playfield…"}</button><Link href="/festival" className="game-text-button">Back to the fair</Link></GameDialog>}
+    {phase==="ready"&&!error&&<GameDialog title={game.name} className="fair-dialog"><CompanionPortrait id={game.host}/><p className="fair-trait">WITH {friend.name.toLocaleUpperCase("vi")}</p><p>{game.instructions}</p><p className="game-caption">{game.rounds} rounds · 3 hearts · a friendship memory to collect</p><FairSaveStatus compact/>{warning&&<p role="alert">{warning}</p>}<button className="game-button" disabled={!ready||progress.status!=="ready"} onClick={start}>{ready?"Let’s play →":"Opening the playfield…"}</button><Link href="/festival" className="game-text-button">Back to the fair</Link></GameDialog>}
     {(paused||help)&&phase==="play"&&!error&&<GameDialog title={help?"A little help":"A little breather"} className="fair-dialog"><p>{help?game.instructions:"Your game is paused. Your current round will be waiting here."}</p><button className="game-button" onClick={()=>{setHelp(false);setPaused(false);}}>Resume game →</button><button className="game-button secondary" onClick={start}>Start this game again</button><Link href="/festival" className="game-text-button">Leave this round · return to the fair</Link></GameDialog>}
-    {(phase==="win"||phase==="lose")&&!error&&<GameDialog title={phase==="win"?"A memory made together":"Another try, little friend?"} className="fair-dialog"><CompanionPortrait id={game.host}/>{phase==="win"?<><div className="fair-result-stars" aria-label={`${state?.hearts} stars`}>{"★".repeat(state?.hearts||1)}</div><strong>{state?.score} points</strong><p>{game.memory}</p>{!warning&&<p className="game-caption">Friendship stamp and best score saved on this device.</p>}</>:<p>{state?.feedback} {friend.name} is happy to try again with you.</p>}{warning&&<p role="alert">{warning}</p>}<button className="game-button" onClick={start}>Play again →</button><Link href="/festival" className="game-button secondary">Open friendship scrapbook</Link></GameDialog>}
+    {(phase==="win"||phase==="lose")&&!error&&<GameDialog title={phase==="win"?"A memory made together":"Another try, little friend?"} className="fair-dialog"><CompanionPortrait id={game.host}/>{phase==="win"?<><div className="fair-result-stars" aria-label={`${state?.hearts} stars`}>{"★".repeat(state?.hearts||1)}</div><strong>{state?.score} points</strong><p>{game.memory}</p><p className="game-caption" role="status">{saveMessage}</p>{saveFailed&&<button className="game-button secondary" disabled={saving} onClick={()=>void saveResult()}>Retry saving memory</button>}</>:<p>{state?.feedback} {friend.name} is happy to try again with you.</p>}{warning&&<p role="alert">{warning}</p>}<button className="game-button" disabled={saving||saveFailed||progress.status!=="ready"} onClick={start}>Play again →</button>{saveFailed&&!saving&&<button className="game-text-button" disabled={progress.status!=="ready"} onClick={start}>Leave this unsaved result & play again</button>}<Link href="/festival" className="game-button secondary">Open friendship scrapbook</Link><Link href="/journey" className="game-text-button">My journey & friends →</Link></GameDialog>}
     {error&&<GameDialog title="The playfield needs a moment" className="fair-dialog"><p role="alert">{error}</p><Link href="/festival" className="game-button">Back to the fair</Link></GameDialog>}
   </div>;
 }

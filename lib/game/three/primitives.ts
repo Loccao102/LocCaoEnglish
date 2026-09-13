@@ -68,14 +68,14 @@ export function mergeArt(group: THREE.Group, art: ArtResources) {
   }
 }
 
-export function label(art: ArtResources, text: string, width = 2.8, foreground = "#365c4c", background = "#fff7dd") {
+export function label(art: ArtResources, text: string, width = 2.8, foreground = "#365c4c", background = "#fff7dd", fontSize = 36) {
   if (typeof document === "undefined") { const sprite = new THREE.Sprite(art.ownMaterial(new THREE.SpriteMaterial())); sprite.visible = false; return sprite; }
-  const canvas = document.createElement("canvas"); canvas.width = 768; canvas.height = 128;
+  const canvas = document.createElement("canvas"); canvas.width = 768; canvas.height = fontSize > 50 ? 192 : 128;
   const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = background; ctx.beginPath(); ctx.roundRect(8,12,752,104,30); ctx.fill();
+  ctx.fillStyle = background; ctx.beginPath(); ctx.roundRect(8,12,752,canvas.height-24,30); ctx.fill();
   ctx.strokeStyle = "#d7d6b0"; ctx.lineWidth = 4; ctx.stroke();
-  ctx.fillStyle = foreground; ctx.font = "600 36px 'Trebuchet MS', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text,384,67,700);
+  ctx.fillStyle = foreground; ctx.font = `600 ${fontSize}px 'Trebuchet MS', sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text,384,canvas.height/2+3,700);
   const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; art.textures.add(texture);
   const material = art.ownMaterial(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
-  const sprite = new THREE.Sprite(material); sprite.scale.set(width,width/6,1); sprite.renderOrder = 20; return sprite;
+  const sprite = new THREE.Sprite(material); sprite.scale.set(width,width*canvas.height/768,1); sprite.renderOrder = 20; return sprite;
 }

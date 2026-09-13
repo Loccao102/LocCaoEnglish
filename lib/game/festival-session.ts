@@ -38,7 +38,7 @@ export class FestivalSession {
   private lastHazard=0;
   constructor(public game:FestivalGame,private changed:(state:FairState)=>void,public tone:(index:number)=>void=()=>{}){}
   private emit(){this.state={...this.state,selection:[...this.state.selection],revision:this.state.revision+1};this.changed(this.state);}
-  start(){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0};this.wait=0;this.nextRound=false;this.prepare();}
+  start(){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
   private prepare(){
     const s=this.state,g=this.game;s.selection=[];s.carrying=null;s.feedback="";s.emotion="curious";
     if(g.kind==="bubble")s.prompt=bubbles[s.round].clue;
@@ -68,7 +68,7 @@ export class FestivalSession {
   get canAct(){return this.state.phase==="play"&&this.wait<=0&&!this.state.listening;}
   get checkpoint(){return this.state.round?hopPoints[Math.min(this.state.round-1,5)]:{x:-3,z:3.7};}
   choose(id:number){
-    if(!this.canAct)return;const s=this.state;
+    if(!this.canAct||!Number.isInteger(id)||!this.objects().some(object=>object.id===id))return;const s=this.state;
     if(this.game.kind==="bubble"){if(id===bubbles[s.round].answer){s.selection=[id];this.success();}else this.miss(`That was “${bubbles[s.round].words[id]}”. Read the clue and try again.`);}
     if(this.game.kind==="garden"){
       if(id<3){s.carrying=id;s.feedback=`Carrying a ${seeds[id].toLowerCase()} seed. Take it to the bed.`;this.emit();}
@@ -112,7 +112,7 @@ export class FestivalSession {
   private success(duration=1.1){this.state.score+=100;this.state.emotion="joy";this.state.feedback=["Lovely!","You did it!","A little more sunshine!"][this.state.round%3];this.wait=duration;this.nextRound=true;this.state.listening=false;this.tone(4);this.emit();}
   private miss(message:string){this.state.hearts--;this.state.emotion="sad";this.state.feedback=message;this.wait=.8;this.nextRound=false;if(this.state.hearts<=0){this.state.phase="lose";this.state.listening=false;}this.emit();}
   tick(dt:number){
-    if(this.state.phase!=="play")return;this.state.elapsed+=dt;this.lastHazard=Math.max(0,this.lastHazard-dt);
+    if(this.state.phase!=="play"||!Number.isFinite(dt)||dt<=0)return;this.state.elapsed+=dt;this.lastHazard=Math.max(0,this.lastHazard-dt);
     if(this.wait>0){this.wait-=dt;if(this.wait<=0&&this.nextRound){this.nextRound=false;this.state.round++;if(this.state.round>=this.game.rounds){this.state.phase="win";this.state.score+=this.state.hearts*25;this.emit();}else this.prepare();}else if(this.wait<=0){this.state.emotion="curious";this.emit();}return;}
     if(this.game.kind==="echo"){
       this.echoClock+=dt;

@@ -19,7 +19,7 @@ export class FestivalArena {
   private resize:ResizeObserver;
   private keys=new Set<string>();
   private touch={x:0,z:0};
-  private destination:{x:number;z:number;id?:number}|null=null;
+  private destination:{x:number;z:number;id?:number;via?:{x:number;z:number}[]}|null=null;
   private contacts=new Set<number>();
   private velocity=new THREE.Vector2();
   private vy=0;
@@ -46,7 +46,10 @@ export class FestivalArena {
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.08;
-    this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    const gl=this.renderer.getContext(),debug=gl.getExtension("WEBGL_debug_renderer_info");
+    const software=debug&&/swiftshader|llvmpipe|software/i.test(String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)));
+    if(software)this.renderer.setPixelRatio(1);
+    this.renderer.shadowMap.enabled=!software;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     const canvas=this.renderer.domElement;canvas.tabIndex=0;canvas.setAttribute("role","img");canvas.setAttribute("aria-label",`${session.game.name}: interactive 3D playfield. Keyboard and touch controls are below.`);container.appendChild(canvas);
     this.scene.background=new THREE.Color("#E0EEE5");portraitLights(this.scene);
     const sun=new THREE.DirectionalLight("#FFF3D5",1.5);sun.position.set(-4,12,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8,near:1,far:30});sun.shadow.normalBias=.025;this.scene.add(sun);
@@ -92,7 +95,7 @@ export class FestivalArena {
   }
   unlock(){if(!this.audio){try{this.audio=new AudioContext();}catch{return;}}if(this.audio.state==="suspended")void this.audio.resume().catch(()=>{});}
   private tone=(index:number)=>{if(!this.sound||!this.audio||this.audio.state!=="running")return;const osc=this.audio.createOscillator(),gain=this.audio.createGain(),time=this.audio.currentTime;osc.type="sine";osc.frequency.value=[330,392,494,587,784][index%5];gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(.10,time+.015);gain.gain.exponentialRampToValueAtTime(.0001,time+.28);osc.connect(gain);gain.connect(this.audio.destination);osc.start(time);osc.stop(time+.3);osc.onended=()=>{osc.disconnect();gain.disconnect();};};
-  setPaused(value:boolean){this.paused=value;this.keys.clear();this.touch={x:0,z:0};this.velocity.set(0,0);this.destination=null;}
+  setPaused(value:boolean){this.paused=value;this.last=0;this.keys.clear();this.touch={x:0,z:0};this.velocity.set(0,0);this.destination=null;}
   move(x:number,z:number){this.touch={x,z};this.destination=null;this.unlock();}
   jump(){this.unlock();if(this.paused||!this.session.canAct||this.jumping>.01||!this.session.mobile)return;this.vy=4.7;this.jumping=.001;this.tone(2);}
   reset(){this.round=-1;this.hero.root.position.set(this.session.game.kind==="hop"?-3:0,0,this.session.game.kind==="hop"?3.7:3.5);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.destination=null;this.contacts.clear();}
@@ -108,7 +111,7 @@ export class FestivalArena {
     const rect=this.container.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
     const hit=ray.intersectObjects(this.props.map(prop=>prop.root),true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined)target=target.parent;
     if(target){const id=target.userData.choice as number,prop=this.props.find(item=>item.data.id===id)!;
-      if(this.session.mobile){this.destination={x:prop.data.x,z:prop.data.z,id};if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}}
+      if(this.session.mobile){this.destination={x:prop.data.x,z:prop.data.z,id,...(this.session.game.kind==="bubble"?{via:[{x:this.hero.root.position.x,z:1.15},{x:prop.data.x,z:1.15}]}:{})};if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}}
       else this.session.choose(id);return;
     }
     const ground=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),new THREE.Vector3());if(ground&&this.session.mobile)this.destination={x:THREE.MathUtils.clamp(ground.x,-4.7,4.7),z:THREE.MathUtils.clamp(ground.z,-3.7,3.8)};
@@ -142,7 +145,7 @@ export class FestivalArena {
         path.rotation.y=-(data.rotation||0);mergeArt(path,art);
       }
       if(data.shape!=="tile")mergeArt(geometry,art);
-      const sign=label(art,data.label,data.shape==="house"?2.3:1.55);sign.position.y=data.shape==="bubble"?2.04:data.shape==="house"?2.15:data.shape==="ring"?2:1.35;root.add(sign);
+      const sign=label(art,data.label,data.shape==="house"?2.5:1.8,"#365c4c","#fff7dd",96);sign.position.y=data.shape==="bubble"?2.04:data.shape==="house"?2.15:data.shape==="ring"?2:1.35;root.add(sign);
     }
     // A new round must not immediately collect the replacement object under the player.
     for(const prop of this.props)if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<=1.18)this.contacts.add(prop.data.id);
@@ -153,12 +156,12 @@ export class FestivalArena {
     }
   }
   private draw=(timestamp:number)=>{
-    if(this.disposed)return;const dt=this.last?Math.min(.04,(timestamp-this.last)/1000):0;this.last=timestamp;
-    if(!this.paused){this.time+=dt;this.session.tick(dt);const state=this.session.state;
+    if(this.disposed)return;const elapsed=this.last?Math.min(1,(timestamp-this.last)/1000):0,dt=Math.min(.1,elapsed);this.last=timestamp;
+    if(!this.paused){this.time+=elapsed;this.session.tick(elapsed);const state=this.session.state;
       if(state.round!==this.round){this.round=state.round;this.rebuild();}
       if(state.revision!==this.revision){this.revision=state.revision;this.hero.express(state.emotion);this.hostRig.express(state.emotion==="sad"?"love":state.emotion);for(const [i,flower]of this.completedFlowers.entries())flower.visible=i<state.round;}
       this.carried.visible=state.carrying!==null&&state.emotion!=="joy";
-      if(state.emotion==="joy")this.successTime+=dt;else this.successTime=0;
+      if(state.emotion==="joy")this.successTime+=elapsed;else this.successTime=0;
       for(const [i,layer]of this.layers.entries()){layer.visible=i<state.selection.length;if(layer.visible)layer.material=this.art.material(["#B88359","#FFF2D7","#E8BA61","#9BC997"][state.selection[i]]);}
       if(this.session.game.kind==="colour"){
         const pair=[...state.selection].sort().join(),mix=({"0,1":"#EAB06F","1,2":"#8EB590","0,2":"#AC96C8","0,3":"#E9ADBC"} as Record<string,string>)[pair]|| (state.selection.length===1?["#EE947D","#F2CC71","#81B7D6","#FDF4D7"][state.selection[0]]:state.selection.length?"#B9A58E":"#FEF9E9");
@@ -173,7 +176,12 @@ export class FestivalArena {
       if(this.session.canAct&&this.session.mobile){
         dx=(Number(this.keys.has("d")||this.keys.has("arrowright"))-Number(this.keys.has("a")||this.keys.has("arrowleft")))+this.touch.x;
         dz=(Number(this.keys.has("s")||this.keys.has("arrowdown"))-Number(this.keys.has("w")||this.keys.has("arrowup")))+this.touch.z;
-        if(this.destination){const distance=Math.hypot(this.destination.x-this.hero.root.position.x,this.destination.z-this.hero.root.position.z);if(distance>(this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(this.destination.x-this.hero.root.position.x)/distance;dz=(this.destination.z-this.hero.root.position.z)/distance;}else{if(this.destination.id!==undefined&&this.session.game.kind!=="hop"){this.session.choose(this.destination.id);this.contacts.add(this.destination.id);}this.destination=null;}}
+        if(this.destination){
+          const waypoint=this.destination.via?.[0],target=waypoint||this.destination,distance=Math.hypot(target.x-this.hero.root.position.x,target.z-this.hero.root.position.z);
+          if(distance>(!waypoint&&this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(target.x-this.hero.root.position.x)/distance;dz=(target.z-this.hero.root.position.z)/distance;}
+          else if(waypoint)this.destination.via!.shift();
+          else{if(this.destination.id!==undefined&&this.session.game.kind!=="hop"){this.session.choose(this.destination.id);this.contacts.add(this.destination.id);}this.destination=null;}
+        }
       }
       const input=new THREE.Vector2(dx,dz);if(input.length()>1)input.normalize();this.velocity.lerp(input.multiplyScalar(3.1),1-Math.exp(-15*dt));
       const position=this.hero.root.position;position.x=THREE.MathUtils.clamp(position.x+this.velocity.x*dt,-4.8,4.8);position.z=THREE.MathUtils.clamp(position.z+this.velocity.y*dt,-3.5,3.9);

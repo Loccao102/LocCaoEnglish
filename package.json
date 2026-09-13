@@ -12,7 +12,10 @@
     "assets:verify": "node scripts/verify-sunlit-assets.mjs",
     "test:assets": "playwright test --config=playwright.assets.config.ts",
     "typecheck": "next typegen && tsc --noEmit",
-    "assets:3d": "node scripts/export-3d-village.mjs"
+    "assets:3d": "node scripts/export-3d-village.mjs",
+    "dev:stack": "node scripts/dev-stack.mjs",
+    "test:game": "playwright test --config=playwright.game.config.ts",
+    "assets:verify:3d": "node scripts/verify-3d-assets.mjs"
   },
   "dependencies": {
     "next": "16.3.4",
