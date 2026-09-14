@@ -24,6 +24,7 @@ The 3D arena uses the same original companion factory as the village and charact
 - `lib/game/festival.ts`: typed game catalog, stall positions and shoreline; metadata comes from the Go-embedded `backend/internal/fair/catalog.json`.
 - `lib/game/festival-session.ts`: session state machine, round data, recipes, sequence playback and path connectivity.
 - `lib/game/three/festival-arena.ts`: scene geometry, player simulation, ray picking, audio cues and visual reactions.
+- `lib/game/fair-navigation.ts`: visibility-graph routes around other interactables when a walking destination is selected.
 - `lib/game/three/fairground.ts`: island, promenade, entrance, central sculpture and eight modular pavilions.
 - `components/game/FestivalGame.tsx`: instructions, HUD, accessible choice controls, touch movement, pause/help/result dialogs and saving completed results.
 - `components/game/FestivalHub.tsx`: game discovery and friendship scrapbook.
@@ -43,10 +44,10 @@ Completed account runs are queued under a distinct browser key per account and r
 
 Current rounds, carried items and partial recipes remain in memory only. Pause/help preserves a round while the page stays open. Leaving a game discards an unfinished round. Winning records the result once for that session. Window blur and document hiding pause play until explicitly resumed. Muting removes sound while the numbered visual cue sequence remains available. Reduced motion suppresses decorative bobbing and idle loops while intentional movement and game cues remain visible.
 
-Mouse/touch can select 3D objects; non-walking games also provide regular buttons and number keys. WASD/arrows and touch arrows move the companion in walking games. Space or the Jump button triggers Cloud Hop jumps. Escape pauses or resumes. Dialogs trap focus and make the playfield/UI inert.
+Mouse/touch can select 3D objects; non-walking games also provide regular buttons and number keys. WASD/arrows and touch arrows move the companion in walking games. Space or the Jump button triggers Cloud Hop jumps without cancelling the selected walking destination. The centre of each visible ring is clickable; collected hidden rings cannot intercept clicks. Escape pauses or resumes. Dialogs trap focus and make the playfield/UI inert.
 
 ## Asset delivery
 
 `npm run assets:3d` exports the runtime factories as 45 GLBs: 24 characters, 7 chapter buildings, 8 fair pavilions, 4 small environment assets, the complete village and the fairground scene. Each companion includes 6 body clips and 8 expression clips. The ZIP includes the manifest, provenance, `character-bible.json` and `fair-games.json`. Original illustration files are unchanged.
 
-See [system validation](SYSTEM-VALIDATION.md) for the current build, backend, PostgreSQL, AI and browser results. Round timers use elapsed time independently of physics frame caps; bubble click-to-walk uses a clear approach lane, and software rendering disables expensive shadows.
+See [system validation](SYSTEM-VALIDATION.md) for the current build, backend, PostgreSQL, AI and browser results. The arena splits each rendered frame into simulation steps no larger than 1/60 second, keeping movement, gravity, round timers and collision checks on the same clock. Catch-up is bounded to one second per rendered frame, and pause/resume resets that clock. Click-to-walk routes around other objects and only interacts with the chosen destination; keyboard and touch movement retain contact-based interactions. Software rendering disables expensive shadows.

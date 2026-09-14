@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { FestivalSession, hopPuddles, type ArenaObject } from "../festival-session";
+import { fairWalkPath } from "../fair-navigation";
 import { ArtResources, label, mergeArt } from "./primitives";
 import { createCompanion, type CompanionRig } from "./characters";
 import { portraitLights } from "./portraits";
@@ -98,23 +99,27 @@ export class FestivalArena {
   setPaused(value:boolean){this.paused=value;this.last=0;this.keys.clear();this.touch={x:0,z:0};this.velocity.set(0,0);this.destination=null;}
   move(x:number,z:number){this.touch={x,z};this.destination=null;this.unlock();}
   jump(){this.unlock();if(this.paused||!this.session.canAct||this.jumping>.01||!this.session.mobile)return;this.vy=4.7;this.jumping=.001;this.tone(2);}
-  reset(){this.round=-1;this.hero.root.position.set(this.session.game.kind==="hop"?-3:0,0,this.session.game.kind==="hop"?3.7:3.5);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.destination=null;this.contacts.clear();}
+  reset(){this.keys.clear();this.touch={x:0,z:0};this.round=-1;this.hero.root.position.set(this.session.game.kind==="hop"?-3:0,0,this.session.game.kind==="hop"?3.7:3.5);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.destination=null;this.contacts.clear();}
   private lost=(event:Event)=>{event.preventDefault();this.setPaused(true);this.onError("The 3D connection was interrupted. Reopen this game to reconnect.");};
   private keyDown=(event:KeyboardEvent)=>{
     if(this.paused||event.ctrlKey||event.metaKey||event.altKey||event.target instanceof HTMLElement&&event.target.closest("input,textarea,select"))return;
-    const key=event.key.toLowerCase();if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"," "].includes(key)){if(key===" "&&event.target instanceof HTMLButtonElement)return;event.preventDefault();this.keys.add(key);this.destination=null;this.unlock();if(key===" "&&!event.repeat)this.jump();}
+    const key=event.key.toLowerCase();if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"," "].includes(key)){if(key===" "&&event.target instanceof HTMLButtonElement)return;event.preventDefault();this.keys.add(key);if(key!==" ")this.destination=null;this.unlock();if(key===" "&&!event.repeat)this.jump();}
     if(/^[1-9]$/.test(key)&&!event.repeat&&!this.session.mobile){this.unlock();const id=Number(key)-1;if(this.props.some(prop=>prop.data.id===id))this.session.choose(id);}
   };
   private keyUp=(event:KeyboardEvent)=>this.keys.delete(event.key.toLowerCase());
+  private walkTo(goal:{x:number;z:number;id?:number}){
+    const path=this.session.game.kind==="hop"?[goal]:fairWalkPath(this.hero.root.position,goal,this.session.objects(),goal.id);
+    this.destination=path.length?{...goal,via:path.slice(0,-1)}:null;
+  }
   private click=(event:PointerEvent)=>{
     if(event.button!==0||this.paused||!this.session.canAct)return;this.unlock();this.renderer.domElement.focus({preventScroll:true});
     const rect=this.container.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
-    const hit=ray.intersectObjects(this.props.map(prop=>prop.root),true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined)target=target.parent;
+    const hit=ray.intersectObjects(this.props.filter(prop=>prop.root.visible).map(prop=>prop.root),true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined)target=target.parent;
     if(target){const id=target.userData.choice as number,prop=this.props.find(item=>item.data.id===id)!;
-      if(this.session.mobile){this.destination={x:prop.data.x,z:prop.data.z,id,...(this.session.game.kind==="bubble"?{via:[{x:this.hero.root.position.x,z:1.15},{x:prop.data.x,z:1.15}]}:{})};if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}}
+      if(this.session.mobile){this.walkTo({x:prop.data.x,z:prop.data.z,id});if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}}
       else this.session.choose(id);return;
     }
-    const ground=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),new THREE.Vector3());if(ground&&this.session.mobile)this.destination={x:THREE.MathUtils.clamp(ground.x,-4.7,4.7),z:THREE.MathUtils.clamp(ground.z,-3.7,3.8)};
+    const ground=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),new THREE.Vector3());if(ground&&this.session.mobile)this.walkTo({x:THREE.MathUtils.clamp(ground.x,-4.7,4.7),z:THREE.MathUtils.clamp(ground.z,-3.5,3.8)});
   };
   private rebuild(){
     this.successTime=0;
@@ -145,6 +150,11 @@ export class FestivalArena {
         path.rotation.y=-(data.rotation||0);mergeArt(path,art);
       }
       if(data.shape!=="tile")mergeArt(geometry,art);
+      if(data.shape==="ring"){
+        // The empty centre is part of the click target, not a click through to distant ground.
+        const target=new THREE.Mesh(art.ownGeometry(new THREE.CircleGeometry(.72,24)),art.ownMaterial(new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide})));
+        target.position.y=1.05;root.add(target);
+      }
       const sign=label(art,data.label,data.shape==="house"?2.5:1.8,"#365c4c","#fff7dd",96);sign.position.y=data.shape==="bubble"?2.04:data.shape==="house"?2.15:data.shape==="ring"?2:1.35;root.add(sign);
     }
     // A new round must not immediately collect the replacement object under the player.
@@ -155,10 +165,50 @@ export class FestivalArena {
       }
     }
   }
+  private updateMovement(dt:number){
+    const state=this.session.state;
+    let dx=0,dz=0;
+    if(this.session.canAct&&this.session.mobile){
+      dx=(Number(this.keys.has("d")||this.keys.has("arrowright"))-Number(this.keys.has("a")||this.keys.has("arrowleft")))+this.touch.x;
+      dz=(Number(this.keys.has("s")||this.keys.has("arrowdown"))-Number(this.keys.has("w")||this.keys.has("arrowup")))+this.touch.z;
+      if(this.destination){
+        const waypoint=this.destination.via?.[0],target=waypoint||this.destination,distance=Math.hypot(target.x-this.hero.root.position.x,target.z-this.hero.root.position.z);
+        if(distance>(!waypoint&&this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(target.x-this.hero.root.position.x)/distance;dz=(target.z-this.hero.root.position.z)/distance;}
+        else if(waypoint)this.destination.via!.shift();
+        else{if(this.destination.id!==undefined&&this.session.game.kind!=="hop"){this.session.choose(this.destination.id);this.contacts.add(this.destination.id);}this.destination=null;}
+      }
+    }
+    const input=new THREE.Vector2(dx,dz);if(input.length()>1)input.normalize();this.velocity.lerp(input.multiplyScalar(3.1),1-Math.exp(-15*dt));
+    const position=this.hero.root.position;position.x=THREE.MathUtils.clamp(position.x+this.velocity.x*dt,-4.8,4.8);position.z=THREE.MathUtils.clamp(position.z+this.velocity.y*dt,-3.5,3.9);
+    if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}position.y=this.jumping;
+    if(this.velocity.length()>.12)this.hero.face(Math.atan2(this.velocity.x,this.velocity.y),dt);
+    for(const prop of this.props){const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
+      if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1: .75);}
+      else if(this.session.mobile&&state.phase==="play"){
+        if(distance>1.18)this.contacts.delete(prop.data.id);
+        if(distance<.95&&!this.contacts.has(prop.data.id)&&this.session.canAct&&(!this.destination||this.destination.id===prop.data.id)){this.contacts.add(prop.data.id);this.session.choose(prop.data.id);this.destination=null;}
+        // Buildings, beds and the post box have solid feet; interactions happen at their edge.
+        if(["house","bed","parcel"].includes(prop.data.shape)&&distance<.65&&distance>.001){position.x=prop.data.x+(position.x-prop.data.x)/distance*.65;position.z=prop.data.z+(position.z-prop.data.z)/distance*.65;}
+      }
+      if(prop.data.shape==="bubble"){prop.root.position.y=this.reduced.matches?0:Math.sin(this.time*1.5+prop.data.id)*.14;prop.root.visible=!(state.emotion==="joy"&&state.selection.includes(prop.data.id));}
+      if(prop.data.shape==="stone"){const lit=state.lit===prop.data.id;prop.root.scale.setScalar(lit?1.18:1);prop.root.position.y=lit?.16:0;}
+      if(["cup","paint","seed"].includes(prop.data.shape))prop.root.scale.setScalar(state.selection.includes(prop.data.id)||state.carrying===prop.data.id?1.12:1);
+      if(prop.data.shape==="tile"){const path=prop.root.getObjectByName("tile-path");if(path)path.rotation.y=-(this.session.rotations[prop.data.id]??0)*Math.PI/2;}
+    }
+    if(this.session.game.kind==="hop"&&this.jumping<.22&&hopPuddles.some(p=>Math.hypot(position.x-p.x,(position.z-p.z)*1.25)<.52)&&this.session.hazard()){const checkpoint=this.session.checkpoint;position.set(checkpoint.x,0,checkpoint.z);this.velocity.set(0,0);this.destination=null;}
+  }
   private draw=(timestamp:number)=>{
-    if(this.disposed)return;const elapsed=this.last?Math.min(1,(timestamp-this.last)/1000):0,dt=Math.min(.1,elapsed);this.last=timestamp;
-    if(!this.paused){this.time+=elapsed;this.session.tick(elapsed);const state=this.session.state;
-      if(state.round!==this.round){this.round=state.round;this.rebuild();}
+    if(this.disposed)return;const elapsed=this.last?Math.min(1,(timestamp-this.last)/1000):0,dt=elapsed;this.last=timestamp;
+    if(!this.paused){
+      this.time+=elapsed;
+      // Small simulation steps keep jumps and collisions consistent when drawing is slow.
+      const steps=Math.max(1,Math.ceil(elapsed*60)),step=elapsed/steps;
+      for(let i=0;i<steps;i++){
+        this.session.tick(step);
+        if(this.session.state.round!==this.round){this.round=this.session.state.round;this.rebuild();}
+        this.updateMovement(step);
+      }
+      const state=this.session.state;
       if(state.revision!==this.revision){this.revision=state.revision;this.hero.express(state.emotion);this.hostRig.express(state.emotion==="sad"?"love":state.emotion);for(const [i,flower]of this.completedFlowers.entries())flower.visible=i<state.round;}
       this.carried.visible=state.carrying!==null&&state.emotion!=="joy";
       if(state.emotion==="joy")this.successTime+=elapsed;else this.successTime=0;
@@ -172,35 +222,6 @@ export class FestivalArena {
         this.boat.visible=state.emotion==="joy"&&this.session.bridgePath.length>0;
         if(this.boat.visible){const path=this.session.bridgePath.map(id=>new THREE.Vector3((id%3-1)*1.65,.4,(Math.floor(id/3)-1)*1.65)),amount=Math.min(.999,this.successTime/2.6)*(path.length-1),from=Math.floor(amount);this.boat.position.copy(path[from]).lerp(path[Math.min(from+1,path.length-1)],amount-from);}
       }
-      let dx=0,dz=0;
-      if(this.session.canAct&&this.session.mobile){
-        dx=(Number(this.keys.has("d")||this.keys.has("arrowright"))-Number(this.keys.has("a")||this.keys.has("arrowleft")))+this.touch.x;
-        dz=(Number(this.keys.has("s")||this.keys.has("arrowdown"))-Number(this.keys.has("w")||this.keys.has("arrowup")))+this.touch.z;
-        if(this.destination){
-          const waypoint=this.destination.via?.[0],target=waypoint||this.destination,distance=Math.hypot(target.x-this.hero.root.position.x,target.z-this.hero.root.position.z);
-          if(distance>(!waypoint&&this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(target.x-this.hero.root.position.x)/distance;dz=(target.z-this.hero.root.position.z)/distance;}
-          else if(waypoint)this.destination.via!.shift();
-          else{if(this.destination.id!==undefined&&this.session.game.kind!=="hop"){this.session.choose(this.destination.id);this.contacts.add(this.destination.id);}this.destination=null;}
-        }
-      }
-      const input=new THREE.Vector2(dx,dz);if(input.length()>1)input.normalize();this.velocity.lerp(input.multiplyScalar(3.1),1-Math.exp(-15*dt));
-      const position=this.hero.root.position;position.x=THREE.MathUtils.clamp(position.x+this.velocity.x*dt,-4.8,4.8);position.z=THREE.MathUtils.clamp(position.z+this.velocity.y*dt,-3.5,3.9);
-      if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}position.y=this.jumping;
-      if(this.velocity.length()>.12)this.hero.face(Math.atan2(this.velocity.x,this.velocity.y),dt);
-      for(const prop of this.props){const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
-        if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1: .75);}
-        else if(this.session.mobile&&state.phase==="play"){
-          if(distance>1.18)this.contacts.delete(prop.data.id);
-          if(distance<.95&&!this.contacts.has(prop.data.id)&&this.session.canAct){this.contacts.add(prop.data.id);this.session.choose(prop.data.id);this.destination=null;}
-          // Buildings, beds and the post box have solid feet; interactions happen at their edge.
-          if(["house","bed","parcel"].includes(prop.data.shape)&&distance<.65&&distance>.001){position.x=prop.data.x+(position.x-prop.data.x)/distance*.65;position.z=prop.data.z+(position.z-prop.data.z)/distance*.65;}
-        }
-        if(prop.data.shape==="bubble"){prop.root.position.y=this.reduced.matches?0:Math.sin(this.time*1.5+prop.data.id)*.14;prop.root.visible=!(state.emotion==="joy"&&state.selection.includes(prop.data.id));}
-        if(prop.data.shape==="stone"){const lit=state.lit===prop.data.id;prop.root.scale.setScalar(lit?1.18:1);prop.root.position.y=lit?.16:0;}
-        if(["cup","paint","seed"].includes(prop.data.shape))prop.root.scale.setScalar(state.selection.includes(prop.data.id)||state.carrying===prop.data.id?1.12:1);
-        if(prop.data.shape==="tile"){const path=prop.root.getObjectByName("tile-path");if(path)path.rotation.y=-(this.session.rotations[prop.data.id]??0)*Math.PI/2;}
-      }
-      if(this.session.game.kind==="hop"&&this.jumping<.22&&hopPuddles.some(p=>Math.hypot(position.x-p.x,(position.z-p.z)*1.25)<.52)&&this.session.hazard()){const checkpoint=this.session.checkpoint;position.set(checkpoint.x,0,checkpoint.z);this.velocity.set(0,0);this.destination=null;}
       const pose=state.phase==="win"||state.emotion==="joy"?"celebrate":this.jumping>.02?"jump":this.velocity.length()>.2?"walk":"idle";
       this.hero.animate(pose,this.reduced.matches&&pose==="idle"?0:dt);this.hostRig.animate(state.emotion==="joy"?"wave":"idle",this.reduced.matches?0:dt);
     }
