@@ -1,15 +1,16 @@
 import { test, expect as baseExpect, type Page } from "@playwright/test";
-import { PerspectiveCamera, Vector3 } from "three";
+import { OrthographicCamera, Vector3 } from "three";
+import { frameFairCamera } from "../../lib/game/three/fair-view";
+import { festivalById } from "../../lib/game/festival";
 
 test.setTimeout(90000);
 const expect = baseExpect.configure({ timeout: 15000 });
 
 async function clickWorld(page: Page, x: number, y: number, z: number) {
   const rect = (await page.locator(".fair-canvas canvas").boundingBox())!;
-  const camera = new PerspectiveCamera(43, rect.width / rect.height, .1, 70);
-  const distance = rect.width < rect.height ? 18 : 13.8;
-  camera.position.set(0, distance * .85, distance * .88);
-  camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
+  const camera = new OrthographicCamera(-5, 5, 5, -5, .1, 70);
+  const slug = new URL(page.url()).pathname.split("/").pop()!;
+  frameFairCamera(camera, festivalById(slug)!, rect.width, rect.height);
   const point = new Vector3(x, y, z).project(camera);
   await page.mouse.click(rect.x + (point.x + 1) / 2 * rect.width, rect.y + (1 - point.y) / 2 * rect.height);
 }

@@ -32,6 +32,15 @@ Implementation was completed before running the suites below. Failures found dur
 
 Browser checks used the actual local Go API and PostgreSQL unless an individual test explicitly intercepted requests to simulate an outage or a fixed map state. Generated test accounts use `example.test` addresses. SQL integration tests use the dedicated `loccao_system_test` database and remove the users they create.
 
+## Readability and account-save follow-up — September 15
+
+- Four readability browser cases pass: all eight arenas at 460×551 and 390×844; resizing and zooming with a partial tea recipe; maximum zoom at 390×551. Assertions check readable labels, minimum hit areas, viewport containment, separated labels, and space between the playfield, objective and feedback. Screenshots were also inspected.
+- Eight full browser playthroughs pass with the new camera and labels: Garden, Parcel, Echo, Bridge, Cloud Hop at controlled 160 ms render intervals, Tea, Bubble and Colour. The tea case checks a saved guest memory after reloading; Colour includes pause and keyboard input.
+- The 15 game-logic checks pass again. The final build, including the account-save fix, passes with 57 generated pages.
+- The local web/API/AI processes had stopped before the follow-up save checks. PostgreSQL recovered its existing data directory, and the stack was restarted on 3102/8080/8090. Initial connection-refused test results were service availability failures, not completed save checks.
+- A new two-tab browser case reproduced a delayed scrapbook response overwriting a newer confirmed memory in the visible scrapbook and its browser cache. Account refresh, completion and storage-event paths now preserve confirmed records for the same owner.
+- All six targeted account/save browser cases pass after the fix: offline queue and reload, lost response retry, form sign-in, account isolation, blocked guest storage, and the delayed two-tab response. The new regression plays a real Tea Time game in the second tab and verifies exactly one visit in PostgreSQL. Together with the readability/playthrough cases above, 18 browser cases passed across the targeted runs.
+
 ## Fixes found while testing
 
 - Reset Cloud Hop hazard immunity and bridge state on a new run.

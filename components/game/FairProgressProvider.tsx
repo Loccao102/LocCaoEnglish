@@ -18,6 +18,13 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state), generation = useRef(0), flight = useRef<{ version: number; task: Promise<boolean> } | null>(null);
   const patch = useCallback((value: Partial<Snapshot>) => { stateRef.current = { ...stateRef.current, ...value }; setState(stateRef.current); }, []);
   const current = useCallback((version: number, token: string) => generation.current === version && getAuthToken() === token, []);
+  const confirmed = useCallback((owner: string, incoming: FairSave) => {
+    let save = mergeFair(stateRef.current.owner === owner ? stateRef.current.save : emptyFair(), incoming);
+    // Another tab may have confirmed a result after this request started.
+    try { save = mergeFair(save, restoreFair(parseStored(`${fairPrefix(owner)}snapshot`))); }
+    catch { /* A confirmed server response still works when local storage is unavailable. */ }
+    return save;
+  }, []);
 
   const sync = useCallback((owner: string, token: string, version: number): Promise<boolean> => {
     if (flight.current?.version === version) return flight.current.task;
@@ -29,7 +36,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
           if (!current(version, token)) return false;
           const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: entry.runId, gameId: entry.gameId, stars: entry.stars }) });
           if (!current(version, token)) return false;
-          const save = mergeFair(restoreFair(parseStored(`${fairPrefix(owner)}snapshot`)), result.save);
+          const save = confirmed(owner, result.save);
           // Cache first. If storage fails, leave the run queued for an idempotent retry.
           localStorage.setItem(`${fairPrefix(owner)}snapshot`, JSON.stringify(save));
           localStorage.removeItem(`${fairPrefix(owner)}run.${entry.runId}`);
@@ -45,7 +52,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
     flight.current = { version, task };
     void task.finally(() => { if (flight.current?.task === task) flight.current = null; });
     return task;
-  }, [current, patch]);
+  }, [confirmed, current, patch]);
 
   const refresh = useCallback(async () => {
     const version = ++generation.current, token = getAuthToken();
@@ -61,7 +68,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
       if (!current(version, token)) return;
       if (!data.playerId || data.save?.version !== 1 || !data.save.games) throw new Error("The scrapbook server needs an update.");
       const identity: Identity = { owner: data.playerId, name: data.displayName, storageMode: data.storageMode };
-      const save = restoreFair(data.save);
+      const save = confirmed(identity.owner, data.save);
       verifiedToken.current = token;
       patch({ ...identity, save, status: "ready" });
       try {
@@ -87,7 +94,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
       }
       patch({ status: "error", warning: error instanceof APIError && error.status === 401 ? "Your session expired. Sign in again to open your scrapbook." : "Connect once to open this account’s scrapbook, or sign out to play your separate guest adventure." });
     }
-  }, [current, patch, sync]);
+  }, [confirmed, current, patch, sync]);
 
   useEffect(() => {
     void refresh();
@@ -98,7 +105,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
         try {
           const owner = stateRef.current.owner;
           if (owner === "guest") patch({ save: guestFair() });
-          else if (owner) patch({ save: restoreFair(parseStored(`${fairPrefix(owner)}snapshot`)), pending: queuedFair(owner).length });
+          else if (owner) patch({ save: mergeFair(stateRef.current.save, restoreFair(parseStored(`${fairPrefix(owner)}snapshot`))), pending: queuedFair(owner).length });
         } catch { patch({ warning: "The scrapbook changed in another tab but could not be read. Please retry." }); }
       }
     };
@@ -119,7 +126,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
       // Account results can still be saved directly when browser storage is disabled.
       if (run.owner === "guest" || !token) throw error;
       const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: run.runId, gameId: run.gameId, stars }) });
-      if (current(version, token)) patch({ save: restoreFair(result.save) });
+      if (current(version, token)) patch({ save: confirmed(run.owner, result.save) });
       return "Your memory is saved to your account. Offline storage is unavailable on this browser.";
     }
     if (run.owner === "guest") { patch({ save: guestFair(), warning: "" }); return "Friendship stamp and best score saved on this device."; }
@@ -129,7 +136,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
     if (!current(version, token)) return "This memory is kept for the account you started with.";
     if (queuedFair(run.owner).some(entry => entry.runId === run.runId)) await sync(run.owner, token, version);
     return queuedFair(run.owner).some(entry => entry.runId === run.runId) ? "Memory kept on this device · waiting to sync to your account." : "Friendship stamp and best score saved to your account.";
-  }, [current, patch, sync]);
+  }, [confirmed, current, patch, sync]);
 
   return <FairContext.Provider value={{ ...state, refresh, begin, complete }}>{children}</FairContext.Provider>;
 }

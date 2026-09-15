@@ -1,5 +1,7 @@
 import { test, expect as baseExpect, type Page } from "@playwright/test";
-import { PerspectiveCamera, Vector3 } from "three";
+import { OrthographicCamera, Vector3 } from "three";
+import { frameFairCamera } from "../../lib/game/three/fair-view";
+import { festivalById } from "../../lib/game/festival";
 
 test.setTimeout(90000);
 const expect=baseExpect.configure({timeout:15000});
@@ -41,8 +43,8 @@ test("bubble picking moves the articulated player through all five rounds", asyn
   for (const [round, answer] of [0, 1, 2, 3, 0].entries()) {
     await expect(page.locator(".fair-objective")).toContainText(`ROUND ${round + 1} / 5`);
     const rect = (await page.locator(".fair-canvas canvas").boundingBox())!;
-    const camera = new PerspectiveCamera(43, rect.width / rect.height, .1, 70), distance = rect.width < rect.height ? 18 : 13.8;
-    camera.position.set(0, distance * .85, distance * .88); camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
+    const camera = new OrthographicCamera(-5, 5, 5, -5, .1, 70);
+    frameFairCamera(camera, festivalById("bubble-meadow")!, rect.width, rect.height);
     const point = new Vector3((answer - 1.5) * 2.15, 1.2, -.5).project(camera);
     await page.mouse.click(rect.x + (point.x + 1) / 2 * rect.width, rect.y + (1 - point.y) / 2 * rect.height);
   }
@@ -136,4 +138,35 @@ test("blocked browser storage offers retry and an explicit way to keep playing",
   await page.getByRole("button", { name: "Leave this unsaved result & play again" }).click();
   await expect(page.locator(".fair-objective")).toContainText("ROUND 1 / 3");
   await expect(page.getByRole("button", { name: "Retry saving memory" })).toHaveCount(0);
+});
+
+test("a delayed scrapbook response preserves a newer memory confirmed in another tab", async ({ page, context }) => {
+  const account = await createAccount(page, "stale-scrapbook");
+  await page.goto("/festival");
+  await expect(page.getByText(/Journey Tester’s scrapbook/)).toBeVisible();
+  let release!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  let captured!: () => void;
+  const received = new Promise<void>(resolve => { captured = resolve; });
+  await page.route("**/v1/fair", async route => {
+    const response = await route.fetch();
+    captured();
+    await held;
+    await route.fulfill({ response });
+  });
+  await page.reload();
+  await received;
+  const other = await context.newPage();
+  try {
+    await playTea(other);
+    await expect(other.getByText("Friendship stamp and best score saved to your account.")).toBeVisible();
+    release();
+    await expect(page.getByText(/Journey Tester’s scrapbook/)).toBeVisible();
+    await expect(page.getByText("Best 375 · 1 memory made")).toBeVisible();
+    await page.unroute("**/v1/fair");
+    await page.reload();
+    await expect(page.getByText("Best 375 · 1 memory made")).toBeVisible();
+    const saved = await page.request.get(`${API}/v1/fair`, { headers: { Authorization: `Bearer ${account.token}` } });
+    expect((await saved.json()).save.games["tea-time"].visits).toBe(1);
+  } finally { release(); await other.close(); }
 });

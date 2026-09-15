@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { FestivalSession, hopPuddles, type ArenaObject } from "../festival-session";
 import { fairWalkPath } from "../fair-navigation";
-import { ArtResources, label, mergeArt } from "./primitives";
+import { frameFairCamera, fairLabelHeight } from "./fair-view";
+import { ArtResources, mergeArt } from "./primitives";
 import { createCompanion, type CompanionRig } from "./characters";
 import { portraitLights } from "./portraits";
 
@@ -10,10 +11,15 @@ export class FestivalArena {
   private art=new ArtResources();
   private scene=new THREE.Scene();
   private renderer:THREE.WebGLRenderer;
-  private camera=new THREE.PerspectiveCamera(43,1,.1,70);
+  private camera=new THREE.OrthographicCamera(-5,5,5,-5,.1,70);
+  private labels=document.createElement("div");
+  private markers:{element:HTMLElement;point:THREE.Vector3}[]=[];
+  private view={width:1,height:1,centerX:0,centerY:0,unitsPerPixel:1};
+  private zoom=1;
+  private labelMetricsDirty=true;
   private hero:CompanionRig;
   private hostRig:CompanionRig;
-  private props:{data:ArenaObject;root:THREE.Group}[]=[];
+  private props:{data:ArenaObject;root:THREE.Group;label:HTMLButtonElement;width:number;height:number}[]=[];
   private propsArt=new ArtResources();
   private propRoot=new THREE.Group();
   private decoration=new THREE.Group();
@@ -52,14 +58,15 @@ export class FestivalArena {
     if(software)this.renderer.setPixelRatio(1);
     this.renderer.shadowMap.enabled=!software;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     const canvas=this.renderer.domElement;canvas.tabIndex=0;canvas.setAttribute("role","img");canvas.setAttribute("aria-label",`${session.game.name}: interactive 3D playfield. Keyboard and touch controls are below.`);container.appendChild(canvas);
+    this.labels.className="fair-label-layer";this.labels.setAttribute("role","group");this.labels.setAttribute("aria-label",session.mobile?"Playfield destinations":"Playfield choices");container.appendChild(this.labels);
     this.scene.background=new THREE.Color("#E0EEE5");portraitLights(this.scene);
     const sun=new THREE.DirectionalLight("#FFF3D5",1.5);sun.position.set(-4,12,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8,near:1,far:30});sun.shadow.normalBias=.025;this.scene.add(sun);
     const floor=this.art.mesh(this.decoration,"cylinder",session.game.kind==="bridge"||session.game.kind==="echo"?"#9DC9C6":"#B8CEA0",[0,-.3,0],[6.5,.6,5.2]);floor.receiveShadow=true;
     this.art.mesh(this.decoration,"cylinder","#DFCC9D",[0,-.5,0],[6.65,.45,5.35]);
     for(let i=0;i<24;i++){const angle=i*Math.PI*2/24;this.art.mesh(this.decoration,"plush",i%3===0?session.game.colour:"#98B780",[Math.cos(angle)*6,.17,Math.sin(angle)*4.65],[.20,.22,.20]);}
-    if(session.game.kind==="hop")for(const puddle of hopPuddles)this.art.mesh(this.decoration,"plush","#DDA8AA",[puddle.x,.015,puddle.z],[.53,.025,.39]);
+    if(session.game.kind==="hop")for(const puddle of hopPuddles)this.art.mesh(this.decoration,"plush","#BE708C",[puddle.x,.015,puddle.z],[.53,.025,.39]);
     mergeArt(this.decoration,this.art);this.scene.add(this.decoration,this.propRoot);
-    this.hero=createCompanion(this.art,session.game.host);this.hero.root.scale.setScalar(.62);this.hero.root.position.set(session.game.kind==="hop"?-3:0,0,session.game.kind==="hop"?3.7:3.5);this.scene.add(this.hero.root);
+    this.hero=createCompanion(this.art,session.game.host);this.hero.root.scale.setScalar(.9);this.hero.root.position.set(session.game.kind==="hop"?-3:0,0,session.game.kind==="hop"?3.7:3.5);this.scene.add(this.hero.root);
     this.carried.position.set(0,.73,.65);this.hero.root.add(this.carried);
     this.art.mesh(this.carried,session.game.kind==="parcel"?"box":"plush","#F2D28B",[0,0,0],[.40,.31,.31]);
     this.art.mesh(this.carried,"box","#FFF4CD",[0,0,.17],[.06,.32,.04]);mergeArt(this.carried,this.art);this.carried.visible=false;
@@ -85,14 +92,53 @@ export class FestivalArena {
       this.scene.add(this.boat);this.art.mesh(this.boat,"plush","#EEBA80",[0,0,0],[.33,.17,.22]);this.art.mesh(this.boat,"box","#C08D64",[0,.30,0],[.025,.5,.025]);this.art.mesh(this.boat,"box","#FFEDC4",[.10,.35,0],[.20,.28,.025]);mergeArt(this.boat,this.art);this.boat.visible=false;
     }
     const helper={bubble:"nang",garden:"bui",echo:"hat",tea:"bep",parcel:"dao",hop:"me",colour:"tim",bridge:"na"}[session.game.kind];
-    this.hostRig=createCompanion(this.art,helper);this.hostRig.root.scale.setScalar(.65);this.hostRig.root.position.set(-4.8,0,-3.5);this.hostRig.root.rotation.y=.5;this.scene.add(this.hostRig.root);
+    this.hostRig=createCompanion(this.art,helper);this.hostRig.root.scale.setScalar(.8);this.hostRig.root.position.set(-4.8,0,-3.5);this.hostRig.root.rotation.y=.5;this.scene.add(this.hostRig.root);
     for(let i=0;i<6;i++){
       const flower=new THREE.Group();flower.position.set(-3+i*1.2,0,-3.8);this.scene.add(flower);this.completedFlowers.push(flower);
       this.art.mesh(flower,"cylinder","#75A37B",[0,.3,0],[.035,.6,.035]);for(let j=0;j<5;j++){const angle=j*Math.PI*2/5;this.art.mesh(flower,"plush",["#F2C96F","#E9A0A8","#A5B5D8"][i%3],[Math.cos(angle)*.18,.64,Math.sin(angle)*.18],[.17,.09,.17]);}this.art.mesh(flower,"plush","#FFF1C6",[0,.69,0],[.13,.10,.13]);mergeArt(flower,this.art);flower.visible=false;
     }
-    this.resize=new ResizeObserver(entries=>{const {width,height}=entries[0].contentRect;this.renderer.setSize(Math.max(1,width),Math.max(1,height));this.camera.aspect=Math.max(1,width)/Math.max(1,height);const distance=this.camera.aspect<1?18:13.8;this.camera.position.set(0,distance*.85,distance*.88);this.camera.lookAt(0,0,0);this.camera.updateProjectionMatrix();});this.resize.observe(container);
+    this.resize=new ResizeObserver(entries=>{const width=Math.max(1,entries[0].contentRect.width),height=Math.max(1,entries[0].contentRect.height);this.renderer.setSize(width,height);this.view={width,height,...frameFairCamera(this.camera,this.session.game,width,height)};this.labelMetricsDirty=true;this.updateView();});this.resize.observe(container);
     container.addEventListener("pointerdown",this.click);window.addEventListener("keydown",this.keyDown);window.addEventListener("keyup",this.keyUp);canvas.addEventListener("webglcontextlost",this.lost);
     session.tone=this.tone;this.rebuild();this.frame=requestAnimationFrame(this.draw);
+  }
+  setZoom(value:number){this.zoom=THREE.MathUtils.clamp(value,1,1.8);this.updateView();}
+  private updateView(){
+    const {width,height,unitsPerPixel}=this.view;
+    const focus=new THREE.Vector3(this.hero.root.position.x,.8,this.hero.root.position.z).applyMatrix4(this.camera.matrixWorldInverse);
+    const follow=this.session.mobile?(this.zoom-1)/.8:0;
+    const x=THREE.MathUtils.lerp(this.view.centerX,focus.x,follow),y=THREE.MathUtils.lerp(this.view.centerY,focus.y,follow);
+    this.camera.left=x-width*unitsPerPixel/(2*this.zoom);this.camera.right=x+width*unitsPerPixel/(2*this.zoom);
+    this.camera.top=y+height*unitsPerPixel/(2*this.zoom);this.camera.bottom=y-height*unitsPerPixel/(2*this.zoom);this.camera.updateProjectionMatrix();
+    // Measure as a batch only after layout changes, never once per label per frame.
+    if(this.labelMetricsDirty){for(const prop of this.props){prop.width=prop.label.offsetWidth||prop.width;prop.height=prop.label.offsetHeight||prop.height;}this.labelMetricsDirty=false;}
+    const occupied:{left:number;top:number;width:number;height:number}[]=[];
+    for(const prop of this.props){
+      const tile=prop.data.shape==="tile";
+      const point=new THREE.Vector3(prop.data.x-(tile?.52:0),tile?.18:fairLabelHeight(prop.data.shape),prop.data.z+(tile?.52:0)).project(this.camera);
+      const x=(point.x+1)*width/2,y=(1-point.y)*height/2;
+      prop.label.hidden=!prop.root.visible;
+      const left=THREE.MathUtils.clamp(x-prop.width/2,6,Math.max(6,width-prop.width-6));
+      const preferred=THREE.MathUtils.clamp(y-prop.height*(tile?.5:1),6,Math.max(6,height-prop.height-6));
+      const candidates=[preferred,...occupied.flatMap(box=>[box.top-prop.height-4,box.top+box.height+4])].sort((a,b)=>Math.abs(a-preferred)-Math.abs(b-preferred));
+      const top=candidates.find(value=>value>=6&&value+prop.height<=height-6&&occupied.every(box=>left+prop.width+4<=box.left||left>=box.left+box.width+4||value+prop.height+4<=box.top||value>=box.top+box.height+4))??preferred;
+      prop.label.style.left=left+prop.width/2+"px";
+      prop.label.style.top=top+prop.height*(tile?.5:1)+"px";
+      if(prop.root.visible)occupied.push({left,top,width:prop.width,height:prop.height});
+      prop.label.disabled=!this.session.canAct;
+      prop.label.dataset.offscreen=String(x<16||x>width-16||y<16||y>height-16);
+      prop.label.dataset.direction=["→","↘","↓","↙","←","↖","↑","↗"][(Math.round(Math.atan2(y-height/2,x-width/2)/(Math.PI/4))+8)%8];
+      prop.label.dataset.active=String(this.session.game.kind==="hop"&&prop.data.id===this.session.state.round);
+      prop.label.setAttribute("aria-pressed",String(this.session.state.selection.includes(prop.data.id)||this.session.state.lit===prop.data.id||this.session.state.carrying===prop.data.id));
+    }
+    for(const marker of this.markers){const point=marker.point.clone().project(this.camera);marker.element.style.left=THREE.MathUtils.clamp((point.x+1)*width/2,48,width-48)+"px";marker.element.style.top=THREE.MathUtils.clamp((1-point.y)*height/2,20,height-20)+"px";}
+  }
+  private select(id:number){
+    if(this.paused||!this.session.canAct)return;this.unlock();
+    const prop=this.props.find(item=>item.data.id===id);if(!prop||!prop.root.visible)return;
+    if(this.session.mobile){
+      this.renderer.domElement.focus({preventScroll:true});this.walkTo({x:prop.data.x,z:prop.data.z,id});
+      if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}
+    }else this.session.choose(id);
   }
   unlock(){if(!this.audio){try{this.audio=new AudioContext();}catch{return;}}if(this.audio.state==="suspended")void this.audio.resume().catch(()=>{});}
   private tone=(index:number)=>{if(!this.sound||!this.audio||this.audio.state!=="running")return;const osc=this.audio.createOscillator(),gain=this.audio.createGain(),time=this.audio.currentTime;osc.type="sine";osc.frequency.value=[330,392,494,587,784][index%5];gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(.10,time+.015);gain.gain.exponentialRampToValueAtTime(.0001,time+.28);osc.connect(gain);gain.connect(this.audio.destination);osc.start(time);osc.stop(time+.3);osc.onended=()=>{osc.disconnect();gain.disconnect();};};
@@ -115,21 +161,23 @@ export class FestivalArena {
     if(event.button!==0||this.paused||!this.session.canAct)return;this.unlock();this.renderer.domElement.focus({preventScroll:true});
     const rect=this.container.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
     const hit=ray.intersectObjects(this.props.filter(prop=>prop.root.visible).map(prop=>prop.root),true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined)target=target.parent;
-    if(target){const id=target.userData.choice as number,prop=this.props.find(item=>item.data.id===id)!;
-      if(this.session.mobile){this.walkTo({x:prop.data.x,z:prop.data.z,id});if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}}
-      else this.session.choose(id);return;
-    }
+    if(target){this.select(target.userData.choice as number);return;}
     const ground=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),new THREE.Vector3());if(ground&&this.session.mobile)this.walkTo({x:THREE.MathUtils.clamp(ground.x,-4.7,4.7),z:THREE.MathUtils.clamp(ground.z,-3.5,3.8)});
   };
   private rebuild(){
     this.successTime=0;
-    this.propRoot.clear();this.propsArt.dispose();this.propsArt=new ArtResources();this.props=[];this.contacts.clear();this.destination=null;
+    this.propRoot.clear();this.propsArt.dispose();this.propsArt=new ArtResources();this.props=[];this.labels.replaceChildren();this.labelMetricsDirty=true;this.markers=[];this.contacts.clear();this.destination=null;
     const art=this.propsArt;
     for(const data of this.session.objects()){
-      const root=new THREE.Group();root.position.set(data.x,0,data.z);root.userData.choice=data.id;this.propRoot.add(root);this.props.push({data,root});
+      const root=new THREE.Group();root.position.set(data.x,0,data.z);root.userData.choice=data.id;this.propRoot.add(root);
+      const button=document.createElement("button");button.type="button";button.className="fair-object-label";button.dataset.choice=String(data.id);button.dataset.shape=data.shape;
+      if(data.shape==="tile"){const badge=document.createElement("span");badge.textContent=String(data.id+1);button.appendChild(badge);}else button.textContent=data.label;
+      button.setAttribute("aria-label",data.shape==="tile"?"Tile "+(data.id+1)+" ↻":data.shape==="ring"?"Ring "+(data.id+1):data.label);
+      button.onpointerdown=event=>event.stopPropagation();button.onclick=()=>this.select(data.id);
+      this.labels.appendChild(button);this.props.push({data,root,label:button,width:40,height:40});
       const geometry=new THREE.Group();root.add(geometry);
       if(data.shape==="bubble"){
-        const material=art.ownMaterial(new THREE.MeshPhysicalMaterial({color:data.colour,transparent:true,opacity:.76,roughness:.16,metalness:.06,clearcoat:1}));const ball=new THREE.Mesh(art.geometry("plush"),material);ball.position.y=1.2;ball.scale.setScalar(.57);geometry.add(ball);art.mesh(geometry,"plush","#FFF9E7",[-.18,1.43,.40],[.10,.14,.018]);
+        const material=art.ownMaterial(new THREE.MeshPhysicalMaterial({color:data.colour,transparent:true,opacity:.76,roughness:.16,metalness:.06,clearcoat:1}));const ball=new THREE.Mesh(art.geometry("plush"),material);ball.position.y=1.2;ball.scale.setScalar(.67);geometry.add(ball);art.mesh(geometry,"plush","#FFF9E7",[-.18,1.43,.40],[.10,.14,.018]);
       } else if(data.shape==="seed"||data.shape==="paint"||data.shape==="cup"){
         art.mesh(geometry,"cylinder","#FFF2DC",[0,.34,0],[.42,.64,.42]);art.mesh(geometry,"cylinder",data.colour,[0,.67,0],[.34,.04,.34]);
         if(data.shape==="seed"){art.mesh(geometry,"plush",data.colour,[0,.78,0],[.16,.20,.14]);art.mesh(geometry,"leaf","#74AA82",[.12,.99,0],[.20,.10,.07],[0,0,.5]);}
@@ -141,27 +189,27 @@ export class FestivalArena {
       } else if(data.shape==="parcel"){
         art.mesh(geometry,"cylinder","#A58666",[0,.38,0],[.07,.76,.07]);art.mesh(geometry,"plush","#83B9AE",[0,.9,0],[.55,.37,.36]);art.mesh(geometry,"box","#EED3A6",[0,.31,.43],[.43,.42,.4]);art.mesh(geometry,"box","#FFF7DC",[0,.31,.64],[.06,.43,.018]);
       } else if(data.shape==="ring"){
-        const ring=new THREE.Mesh(art.ownGeometry(new THREE.TorusGeometry(.63,.085,8,32)),art.material(data.colour));ring.position.y=1.05;geometry.add(ring);art.mesh(geometry,"plush","#FCF7E4",[0,.05,0],[.76,.08,.57]);
+        const ring=new THREE.Mesh(art.ownGeometry(new THREE.TorusGeometry(.8,.12,10,40)),art.material(data.id===this.session.state.round?"#D9A32F":"#579685"));ring.position.y=1.05;geometry.add(ring);art.mesh(geometry,"plush","#FCF7E4",[0,.05,0],[.76,.08,.57]);
       } else if(data.shape==="tile"){
-        art.mesh(geometry,"box","#91AF9F",[0,.03,0],[1.48,.09,1.48]);
+        art.mesh(geometry,"box","#5F978B",[0,.03,0],[1.48,.09,1.48]);
         const path=new THREE.Group();path.name="tile-path";geometry.add(path);
-        art.mesh(path,"cylinder",data.colour,[0,.12,0],[.28,.12,.28]);
-        for(const port of data.ports!){const angle=port*Math.PI/2;art.mesh(path,"box",data.colour,[Math.sin(angle)*.38,.12,-Math.cos(angle)*.38],[port%2?.8:.40,.14,port%2?.40:.8]);}
+        art.mesh(path,"cylinder","#FFDB8F",[0,.12,0],[.28,.12,.28]);
+        for(const port of data.ports!){const angle=port*Math.PI/2;art.mesh(path,"box","#FFDB8F",[Math.sin(angle)*.38,.12,-Math.cos(angle)*.38],[port%2?.8:.40,.14,port%2?.40:.8]);}
         path.rotation.y=-(data.rotation||0);mergeArt(path,art);
       }
+      if(["seed","cup","paint"].includes(data.shape))geometry.scale.setScalar(1.3);
       if(data.shape!=="tile")mergeArt(geometry,art);
       if(data.shape==="ring"){
         // The empty centre is part of the click target, not a click through to distant ground.
-        const target=new THREE.Mesh(art.ownGeometry(new THREE.CircleGeometry(.72,24)),art.ownMaterial(new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide})));
+        const target=new THREE.Mesh(art.ownGeometry(new THREE.CircleGeometry(.94,32)),art.ownMaterial(new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide})));
         target.position.y=1.05;root.add(target);
       }
-      const sign=label(art,data.label,data.shape==="house"?2.5:1.8,"#365c4c","#fff7dd",96);sign.position.y=data.shape==="bubble"?2.04:data.shape==="house"?2.15:data.shape==="ring"?2:1.35;root.add(sign);
     }
     // A new round must not immediately collect the replacement object under the player.
     for(const prop of this.props)if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<=1.18)this.contacts.add(prop.data.id);
     if(this.session.game.kind==="bridge"){
       const match=this.session.state.prompt.match(/entrance (\d).*exit (\d)/);if(match)for(const [index,id] of [Number(match[1])-1,Number(match[2])-1].entries()){
-        const arrow=label(art,index?"EXIT →":"START →",1.75);arrow.position.set(index?3.4:-3.4,.5,(Math.floor(id/3)-1)*1.65);this.propRoot.add(arrow);
+        const arrow=document.createElement("span");arrow.className="fair-bank-marker";arrow.textContent=index?"EXIT →":"START →";this.labels.appendChild(arrow);this.markers.push({element:arrow,point:new THREE.Vector3(index?3.4:-3.4,.5,(Math.floor(id/3)-1)*1.65)});
       }
     }
   }
@@ -183,7 +231,7 @@ export class FestivalArena {
     if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}position.y=this.jumping;
     if(this.velocity.length()>.12)this.hero.face(Math.atan2(this.velocity.x,this.velocity.y),dt);
     for(const prop of this.props){const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
-      if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1: .75);}
+      if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1.04:1);}
       else if(this.session.mobile&&state.phase==="play"){
         if(distance>1.18)this.contacts.delete(prop.data.id);
         if(distance<.95&&!this.contacts.has(prop.data.id)&&this.session.canAct&&(!this.destination||this.destination.id===prop.data.id)){this.contacts.add(prop.data.id);this.session.choose(prop.data.id);this.destination=null;}
@@ -225,7 +273,7 @@ export class FestivalArena {
       const pose=state.phase==="win"||state.emotion==="joy"?"celebrate":this.jumping>.02?"jump":this.velocity.length()>.2?"walk":"idle";
       this.hero.animate(pose,this.reduced.matches&&pose==="idle"?0:dt);this.hostRig.animate(state.emotion==="joy"?"wave":"idle",this.reduced.matches?0:dt);
     }
-    this.renderer.render(this.scene,this.camera);this.frame=requestAnimationFrame(this.draw);
+    this.updateView();this.renderer.render(this.scene,this.camera);this.frame=requestAnimationFrame(this.draw);
   };
-  dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.container.removeEventListener("pointerdown",this.click);window.removeEventListener("keydown",this.keyDown);window.removeEventListener("keyup",this.keyUp);this.renderer.domElement.removeEventListener("webglcontextlost",this.lost);for(const rig of [this.hero,this.hostRig]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}this.session.tone=()=>{};if(this.audio)void this.audio.close().catch(()=>{});this.propsArt.dispose();this.art.dispose();this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();}
+  dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.container.removeEventListener("pointerdown",this.click);window.removeEventListener("keydown",this.keyDown);window.removeEventListener("keyup",this.keyUp);this.renderer.domElement.removeEventListener("webglcontextlost",this.lost);for(const rig of [this.hero,this.hostRig]){rig.mixer.stopAllAction();rig.mixer.uncacheRoot(rig.root);}this.session.tone=()=>{};if(this.audio)void this.audio.close().catch(()=>{});this.propsArt.dispose();this.art.dispose();this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();this.labels.remove();}
 }

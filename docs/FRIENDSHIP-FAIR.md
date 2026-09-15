@@ -24,6 +24,7 @@ The 3D arena uses the same original companion factory as the village and charact
 - `lib/game/festival.ts`: typed game catalog, stall positions and shoreline; metadata comes from the Go-embedded `backend/internal/fair/catalog.json`.
 - `lib/game/festival-session.ts`: session state machine, round data, recipes, sequence playback and path connectivity.
 - `lib/game/three/festival-arena.ts`: scene geometry, player simulation, ray picking, audio cues and visual reactions.
+- `lib/game/three/fair-view.ts`: orthographic framing of playable objects across narrow and wide viewports.
 - `lib/game/fair-navigation.ts`: visibility-graph routes around other interactables when a walking destination is selected.
 - `lib/game/three/fairground.ts`: island, promenade, entrance, central sculpture and eight modular pavilions.
 - `components/game/FestivalGame.tsx`: instructions, HUD, accessible choice controls, touch movement, pause/help/result dialogs and saving completed results.
@@ -40,11 +41,19 @@ Guests retain the original `loccao.friendship-fair.v1` scrapbook as a baseline. 
 
 Completed account runs are queued under a distinct browser key per account and run before upload. Lost responses can retry safely; queued records survive page navigation and reload and can sync on reconnection or Retry sync. A verified account can reopen its cached scrapbook offline; a new or expired session must connect/sign in. The UI distinguishes local, queued, confirmed account and temporary memory-server states. Fair results are personal client-reported keepsakes and do not award learning evidence, XP, coins or competitive points.
 
+Account refreshes and completion responses merge with confirmed records for that same account. A delayed response or storage event cannot lower its stars, best score or visit count after another tab has saved a newer result. Pending runs stay in their separate queue until acknowledged by the server.
+
 `/journey` derives three friendship milestones for every one of the 24 characters: a chapter greeting quest, a restored chapter page and one fair memory. Complete all three to reveal the character’s dream. The same page links story progression, deeper learning and fair activities, and saves companion selection through the adventure service.
 
 Current rounds, carried items and partial recipes remain in memory only. Pause/help preserves a round while the page stays open. Leaving a game discards an unfinished round. Winning records the result once for that session. Window blur and document hiding pause play until explicitly resumed. Muting removes sound while the numbered visual cue sequence remains available. Reduced motion suppresses decorative bobbing and idle loops while intentional movement and game cues remain visible.
 
 Mouse/touch can select 3D objects; non-walking games also provide regular buttons and number keys. WASD/arrows and touch arrows move the companion in walking games. Space or the Jump button triggers Cloud Hop jumps without cancelling the selected walking destination. The centre of each visible ring is clickable; collected hidden rings cannot intercept clicks. Escape pauses or resumes. Dialogs trap focus and make the playfield/UI inert.
+
+## Readable playfields
+
+The camera fits playable objects instead of retreating to include the entire decorative island. Companions, ingredient pots and cloud rings are larger. Text uses projected HTML buttons at 16–18 px (20–21 px for ring numbers), so it stays sharp and does not shrink with the scene. Each label selects its associated object. Bridge numbers sit in the corner of a tile, leaving the connecting paths visible.
+
+The arena reserves space for the actual heights of the objective and feedback, including wrapped text. Labels stay inside the viewport and separate when zooming. The camera controls offer 100–180% zoom and a one-click fit reset; walking games follow the companion when zoomed in. Resizing or zooming preserves the current round, recipe and score. Desktop, phone and short in-app panels use the same controls.
 
 ## Asset delivery
 

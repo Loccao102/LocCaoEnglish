@@ -2,3 +2,66 @@
 @media(max-width:1050px){.fair-game-grid{grid-template-columns:repeat(2,1fr)}.fair-hub-hero{gap:35px}.fair-card-art{height:220px}.fair-card-art .companion-portrait{width:200px;height:200px}}
 @media(max-width:650px){.fair-hub-hero{grid-template-columns:1fr;gap:30px;padding-top:20px}.fair-scrapbook-cover{max-width:360px;width:90%;margin:auto}.fair-game-grid{gap:13px}.fair-card-art{height:160px}.fair-card-art .companion-portrait{width:150px;height:150px}.fair-card-body,.fair-memory{padding:15px}.fair-card h3{font-size:20px}.fair-section-heading{display:block}.fair-footer{display:block}.fair-hud{gap:9px;padding:14px}.fair-hud h1{font-size:18px}.fair-hud>div>span{font-size:7px}.fair-hud button,.fair-back{padding:8px;font-size:11px}.fair-hearts{font-size:14px}.fair-objective{top:84px;padding:9px 12px}.fair-objective>strong{font-size:12px}.fair-bottom{bottom:14px;left:12px;right:12px;gap:8px;align-items:end}.fair-bottom>p{display:none}.fair-dpad{margin-left:auto}.fair-choice-bar{gap:5px}.fair-choice-bar button{font-size:10px;padding:8px}.fair-bottom:has(.fair-choice-bar){flex-direction:column;align-items:center}.fair-bottom:has(.fair-choice-bar) .fair-help{padding:6px 10px}.fair-feedback{bottom:198px;font-size:11px}.fair-recipe-controls{bottom:141px}.fair-hud .fair-hearts small{font-size:9px}.fair-jump{padding:15px}.fair-dialog p{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.fair-card,.fair-card-art .companion-portrait{transition:none}.fair-card:hover,.fair-card:hover .companion-portrait{transform:none}}
+
+/* Keep the playfield clear of the HUD; world labels remain readable at every zoom. */
+.fair-game{--fair-top-space:158px;--fair-bottom-space:142px}
+.fair-canvas{top:var(--fair-top-space);bottom:var(--fair-bottom-space)}
+.fair-hud{padding:12px 20px;gap:12px}
+.fair-hud h1{font-size:24px}.fair-hud>div>span{font-size:11px;letter-spacing:.07em;color:#486e5b}
+.fair-hud button,.fair-back{min-width:44px;min-height:44px;font-size:16px;padding:10px}
+.fair-hearts{font-size:22px}.fair-hearts small{font-size:14px;color:#355c49}
+.fair-objective{top:76px;width:min(680px,calc(100% - 32px));padding:8px 14px;border-color:#b7cdb7;background:#fffdf4}
+.fair-objective>span{font-size:12px;color:#53735c;letter-spacing:.08em}
+.fair-objective>strong{font-size:18px;line-height:1.35;margin:3px 0 7px;color:#234d3e}
+.fair-progress i{height:5px}.fair-progress i[data-complete=true]{background:#478666}
+.fair-feedback{bottom:98px;max-width:760px;width:calc(100% - 32px);font-size:15px;color:#315e47;background:#fffdf2;line-height:1.4;padding:7px 12px;border:1px solid #c6d4bb}
+.fair-bottom{bottom:12px;left:16px;right:16px;gap:12px;align-items:center;min-height:72px}
+.fair-bottom>p{font-size:14px;color:#456650}
+.fair-help{font-size:14px;min-height:44px;padding:10px 12px}
+.fair-dpad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(2,40px);gap:4px}
+.fair-dpad button{font-size:23px;background:#fffced;color:#315f46}
+.fair-jump{min-height:54px;padding:14px 18px;font-size:18px;font-weight:700;color:#315f46;background:#fffced}
+.fair-recipe-controls{bottom:26px;left:auto;right:16px;transform:none;gap:8px}
+.fair-recipe-controls button{min-height:46px;font-size:16px;font-weight:600;padding:10px 16px}
+.fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]) .fair-key-hint{margin:0 auto 0 0}
+.fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]) .fair-bottom{padding-right:310px}
+.fair-camera-controls{position:absolute;right:12px;bottom:calc(var(--fair-bottom-space) + 4px);display:flex;gap:2px;border:1px solid #b5cbb5;background:#fffdf3f2;padding:3px;border-radius:12px;box-shadow:0 2px 8px #26493212}
+.fair-camera-controls button{min-width:34px;min-height:34px;border:0;border-radius:8px;background:transparent;color:#244f3d;font-size:20px;font-weight:700;cursor:pointer}
+.fair-camera-controls button:nth-child(2){font-size:12px;min-width:42px}.fair-camera-controls button:disabled{opacity:.35;cursor:default}
+.fair-camera-controls button:hover:not(:disabled){background:#e1edce}
+.fair-label-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fair-object-label,.fair-bank-marker{position:absolute;transform:translate(-50%,-50%);color:#244d3d;background:#fffdf0;border:2px solid #6c9273;box-shadow:0 3px 0 #5577512b,0 3px 10px #26493216;border-radius:12px;font:700 18px/1.15 'Segoe UI',sans-serif;text-align:center}
+.fair-object-label{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;padding:8px 12px;min-height:42px;max-width:150px;overflow-wrap:normal;touch-action:manipulation}
+.fair-object-label:hover:not(:disabled),.fair-object-label[aria-pressed=true]{background:#dff0bc;border-color:#376f48}
+.fair-object-label:disabled{cursor:default}.fair-object-label[hidden]{display:none}
+.fair-object-label[data-shape=ring],.fair-object-label[data-shape=tile]{border-radius:50%;width:40px;height:40px;min-height:40px;padding:0;font-size:21px}
+.fair-object-label[data-active=true]{background:#ffdc72;color:#584319;border-color:#ac801f;box-shadow:0 0 0 4px #fff2b9}
+.fair-object-label[data-shape=tile]{transform:translate(-50%,-50%);background:transparent;border:0;box-shadow:none;display:grid;place-items:center}
+.fair-object-label[data-shape=tile] span{display:grid;place-items:center;width:24px;height:24px;font-size:16px;background:#fffdf0;border:1px solid #587969;border-radius:7px;box-shadow:0 1px 3px #26493225}
+.fair-object-label[data-shape=tile]:hover:not(:disabled) span{background:#ffdf83}
+.fair-object-label[data-offscreen=true]{border-style:dashed}.fair-object-label[data-offscreen=true]::before{content:attr(data-direction);position:absolute;top:-8px;right:-6px;font-size:13px;line-height:18px;width:18px;border-radius:50%;background:#fffdf0;border:1px solid #6c9273}
+.fair-bank-marker{font-size:13px;padding:6px 8px;border-width:1px;white-space:nowrap}
+.fair-object-label:focus-visible,.fair-camera-controls button:focus-visible{outline:3px solid #24765b;outline-offset:3px}
+@media(max-width:650px){
+  .fair-game{--fair-top-space:160px;--fair-bottom-space:140px}
+  .fair-hud{padding:8px 12px;gap:8px}.fair-hud h1{font-size:20px}.fair-hud>div>span{display:none}
+  .fair-hud button,.fair-back{min-width:40px;min-height:40px;font-size:15px;padding:8px}.fair-hearts{font-size:18px;letter-spacing:1px}.fair-hud .fair-hearts small{font-size:12px}
+  .fair-objective{top:62px;width:calc(100% - 24px)}.fair-objective>strong{font-size:16px}.fair-objective>span{font-size:12px}
+  .fair-feedback{bottom:97px;font-size:14px;width:calc(100% - 24px);padding:6px 9px}
+  .fair-bottom{left:12px;right:12px;bottom:8px;gap:8px;min-height:76px}.fair-help{font-size:13px;padding:8px}.fair-dpad{grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,38px);margin-left:auto}.fair-jump{font-size:16px;padding:12px;min-height:50px}
+  .fair-object-label{font-size:16px;padding:7px 8px;min-height:40px;max-width:calc((100vw - 36px)/4)}
+  .fair-object-label[data-shape=house],.fair-object-label[data-shape=seed],.fair-object-label[data-shape=bed],.fair-object-label[data-shape=parcel]{max-width:calc((100vw - 36px)/3)}
+  .fair-object-label[data-shape=ring],.fair-object-label[data-shape=tile]{font-size:20px;max-width:none;width:38px;height:38px;min-height:38px}
+  .fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]) .fair-bottom{padding-right:0;align-items:end}
+  .fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]){--fair-bottom-space:154px}
+  .fair-recipe-controls{bottom:54px;left:12px;right:12px;justify-content:center}.fair-recipe-controls button{font-size:15px;min-height:42px;padding:8px 13px}
+  .fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]) .fair-feedback{bottom:108px}
+  .fair-game:is([data-kind=tea],[data-kind=colour],[data-kind=echo],[data-kind=bridge]) .fair-help{min-height:36px}
+  .fair-dialog p{font-size:15px}
+}
+@media(max-height:600px){
+  .fair-game{--fair-top-space:142px;--fair-bottom-space:122px}
+  .fair-hud{padding-top:6px;padding-bottom:6px}.fair-objective{top:58px;padding:6px 12px}.fair-objective>strong{font-size:16px}.fair-objective>span{font-size:11px}
+  .fair-feedback{bottom:88px;font-size:14px;padding:5px 9px}.fair-bottom{bottom:5px;min-height:70px}
+  .fair-dpad{grid-template-rows:repeat(2,34px)}
+}

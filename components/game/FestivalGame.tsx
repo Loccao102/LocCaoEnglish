@@ -14,15 +14,29 @@ import GameDialog from "./GameDialog";
 
 export default function FestivalGame({game}:{game:GameDefinition}) {
   const progress=useFairProgress(),runRef=useRef<FairRun|null>(null);
+  const [zoom,setZoom]=useState(1);
+  const layout=useRef<HTMLDivElement>(null);
   const [saveMessage,setSaveMessage]=useState(""),[saving,setSaving]=useState(false),[saveFailed,setSaveFailed]=useState(false);
   const host=useRef<HTMLDivElement>(null),arena=useRef<FestivalArena|null>(null),session=useRef<FestivalSession|null>(null),recorded=useRef(false);
   const [state,setState]=useState<FairState|null>(null),[ready,setReady]=useState(false),[paused,setPaused]=useState(false),[help,setHelp]=useState(false),[error,setError]=useState(""),[warning,setWarning]=useState(""),[sound,setSound]=useState(true);
   const friend=companionById(game.host);
   useEffect(()=>{
+    const root=layout.current;if(!root)return;
+    const objective=root.querySelector<HTMLElement>(".fair-objective")!,feedback=root.querySelector<HTMLElement>(".fair-feedback")!;
+    const fit=()=>{
+      const bounds=root.getBoundingClientRect();
+      root.style.setProperty("--fair-top-space",`${Math.ceil(objective.getBoundingClientRect().bottom-bounds.top)+12}px`);
+      root.style.setProperty("--fair-bottom-space",`${Math.ceil(bounds.bottom-feedback.getBoundingClientRect().top)+8}px`);
+    };
+    const observer=new ResizeObserver(fit);for(const element of [root,objective,feedback])observer.observe(element);fit();
+    return()=>observer.disconnect();
+  },[]);
+  useEffect(()=>{
     let cancelled=false,instance:FestivalArena|null=null;const run=new FestivalSession(game,setState);session.current=run;
     void import("@/lib/game/three/festival-arena").then(({FestivalArena})=>{if(cancelled||!host.current)return;instance=new FestivalArena(host.current,run,setError);arena.current=instance;setReady(true);}).catch(()=>{if(!cancelled)setError("The 3D playfield could not open. Enable hardware acceleration and reopen the game.");});
     return()=>{cancelled=true;instance?.dispose();arena.current=null;session.current=null;};
   },[game]);
+  useEffect(()=>{arena.current?.setZoom(zoom);},[zoom,ready]);
   const phase=state?.phase||"ready",overlay=paused||help||phase!=="play"||!!error;
   useEffect(()=>{arena.current?.setPaused(paused||help||!!error);},[paused,help,error]);
   useEffect(()=>{if(arena.current)arena.current.sound=sound;},[sound,ready]);
@@ -45,14 +59,14 @@ export default function FestivalGame({game}:{game:GameDefinition}) {
     finally{setSaving(false);}
   }
   function start(){try{runRef.current=progress.begin(game.id);}catch(cause){setWarning(cause instanceof Error?cause.message:"Please open your scrapbook first.");return;}recorded.current=false;setWarning("");setSaveMessage("");setSaveFailed(false);setPaused(false);setHelp(false);arena.current?.unlock();arena.current?.reset();session.current?.start();}
-  const actions=session.current?.objects()||[];
-  return <div className="fair-game" style={{"--fair-colour":game.colour} as React.CSSProperties}>
+  return <div ref={layout} className="fair-game" data-kind={game.kind} style={{"--fair-colour":game.colour} as React.CSSProperties}>
     <div ref={host} className="fair-canvas" inert={overlay}/>
     <div className="fair-game-ui" inert={overlay}>
       <header className="fair-hud"><Link href="/festival" className="fair-back" aria-label="Leave game and return to the fair">← Fair</Link><div><span>{friend.name}’S LITTLE ADVENTURE</span><h1>{game.name}</h1></div><div className="fair-hearts" aria-label={`${state?.hearts??3} hearts`}>{"♥".repeat(state?.hearts??3)}<small>{state?.score||0} pts</small></div><button onClick={()=>setSound(value=>!value)} aria-label={sound?"Mute sounds":"Enable sounds"} aria-pressed={sound}>♪</button><button onClick={()=>setPaused(true)} aria-label="Pause game">Ⅱ</button></header>
       <div className="fair-objective"><span>ROUND {Math.min((state?.round||0)+1,game.rounds)} / {game.rounds}</span><strong>{state?.prompt||game.description}</strong><div className="fair-progress" aria-hidden="true">{Array.from({length:game.rounds},(_,i)=><i key={i} data-complete={i<(state?.round||0)}/>)}</div></div>
+      <div className="fair-camera-controls" role="group" aria-label="Camera controls"><button aria-label="Zoom out" disabled={zoom<=1} onClick={()=>setZoom(value=>Math.max(1,Math.round((value-.2)*10)/10))}>−</button><button aria-label="Fit playfield" onClick={()=>setZoom(1)}>{Math.round(zoom*100)}%</button><button aria-label="Zoom in" disabled={zoom>=1.8} onClick={()=>setZoom(value=>Math.min(1.8,Math.round((value+.2)*10)/10))}>+</button></div>
       <div className="fair-feedback" role="status" aria-live="polite">{state?.feedback|| (state?.listening?"Listen and watch the stones…":"Take your time. Your friend is here to help.")}</div>
-      <div className="fair-bottom"><button className="fair-help" onClick={()=>setHelp(true)}>? How to play</button>{session.current?.mobile?<><p>WASD / arrows · click to walk{game.kind==="hop"?" · Space to jump":""}</p><div className="fair-dpad" role="group" aria-label="Movement controls">{[{label:"Up",x:0,z:-1,icon:"↑"},{label:"Left",x:-1,z:0,icon:"←"},{label:"Down",x:0,z:1,icon:"↓"},{label:"Right",x:1,z:0,icon:"→"}].map((direction,i)=><button key={direction.label} className={`fair-dir-${i}`} aria-label={`Move ${direction.label.toLowerCase()}`} onPointerDown={event=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);arena.current?.move(direction.x,direction.z);}} onPointerUp={()=>arena.current?.move(0,0)} onPointerCancel={()=>arena.current?.move(0,0)} onLostPointerCapture={()=>arena.current?.move(0,0)}>{direction.icon}</button>)}</div>{game.kind==="hop"&&<button className="fair-jump" onClick={()=>arena.current?.jump()}>Jump ↟</button>}</>:<div className="fair-choice-bar" role="group" aria-label="Playfield choices">{actions.map(action=><button key={action.id} disabled={!session.current?.canAct} onClick={()=>{arena.current?.unlock();session.current?.choose(action.id);}} aria-pressed={state?.selection.includes(action.id)||state?.lit===action.id}><kbd>{action.id+1}</kbd>{game.kind==="bridge"?`Tile ${action.id+1} ↻`:action.label}</button>)}</div>}
+      <div className="fair-bottom"><button className="fair-help" onClick={()=>setHelp(true)}>? How to play</button>{session.current?.mobile?<><p>WASD / arrows · click to walk{game.kind==="hop"?" · Space to jump":""}</p><div className="fair-dpad" role="group" aria-label="Movement controls">{[{label:"Up",x:0,z:-1,icon:"↑"},{label:"Left",x:-1,z:0,icon:"←"},{label:"Down",x:0,z:1,icon:"↓"},{label:"Right",x:1,z:0,icon:"→"}].map((direction,i)=><button key={direction.label} className={`fair-dir-${i}`} aria-label={`Move ${direction.label.toLowerCase()}`} onPointerDown={event=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);arena.current?.move(direction.x,direction.z);}} onPointerUp={()=>arena.current?.move(0,0)} onPointerCancel={()=>arena.current?.move(0,0)} onLostPointerCapture={()=>arena.current?.move(0,0)}>{direction.icon}</button>)}</div>{game.kind==="hop"&&<button className="fair-jump" onClick={()=>arena.current?.jump()}>Jump ↟</button>}</>:<p className="fair-key-hint">Click a label or press {game.kind==="bridge"?"1–9":"1–4"}</p>}
       </div>
       {["tea","colour","bridge","echo"].includes(game.kind)&&<div className="fair-recipe-controls">{game.kind==="echo"?<button onClick={()=>session.current?.replay()} disabled={state?.listening||!session.current?.canAct}>↺ Hear it again</button>:<><button className="fair-submit" onClick={()=>session.current?.submit()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Serve tea →":game.kind==="colour"?"Mix paint →":"Send boat →"}</button>{game.kind!=="bridge"&&<button onClick={()=>session.current?.clear()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Empty cup":"Clear palette"}</button>}</>}</div>}
     </div>
