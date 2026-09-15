@@ -34,6 +34,8 @@ Open `/journey` for the seven-chapter timeline, eight fair stamps, 24 friendship
 
 ## Player loop
 
+Cloud Hop at `/festival/cloud-hop` now has Mây’s six-course sky atlas: learn jumps, explore feather detours, unlock a double jump, steer through wind and catch drifting rings. Completing a course unlocks the next; replays improve three optional badges and personal best times. All eight fair games support device-local unfinished checkpoints; completed account course records use the durable fair queue and PostgreSQL. See [Friendship Fair](docs/FRIENDSHIP-FAIR.md) for scope and controls.
+
 Explore → Meet a guide → Complete three challenges → Earn stars and first-clear rewards → Restore a Sun Page → Unlock the next chapter.
 
 The learning journal at `/camp` also retains adaptive daily quests, review, practice campaigns, achievements and account cosmetics. These use the existing learning progression system; adventure chapter unlocks depend on story completion, and adventure XP is labelled separately in the game HUD.

@@ -35,6 +35,8 @@ func (s *Server) registerFairRoutes(mux *http.ServeMux) {
 				problem(w, 400, err.Error())
 			case errors.Is(err, fair.ErrConflict):
 				problem(w, 409, err.Error())
+			case errors.Is(err, fair.ErrLocked):
+				problem(w, 409, err.Error())
 			default:
 				problem(w, 500, "could not save your friendship memory")
 			}

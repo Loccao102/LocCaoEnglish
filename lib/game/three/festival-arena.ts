@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { FestivalSession, hopPuddles, type ArenaObject } from "../festival-session";
+import { FestivalSession, type ArenaObject } from "../festival-session";
 import { fairWalkPath } from "../fair-navigation";
 import { frameFairCamera, fairLabelHeight } from "./fair-view";
 import { ArtResources, mergeArt } from "./primitives";
@@ -31,6 +31,9 @@ export class FestivalArena {
   private velocity=new THREE.Vector2();
   private vy=0;
   private jumping=0;
+  private jumps=0;
+  private feathers:THREE.Group[]=[];
+  private windRibbon=new THREE.Group();
   private last=0;
   private time=0;
   private frame=0;
@@ -64,8 +67,21 @@ export class FestivalArena {
     const floor=this.art.mesh(this.decoration,"cylinder",session.game.kind==="bridge"||session.game.kind==="echo"?"#9DC9C6":"#B8CEA0",[0,-.3,0],[6.5,.6,5.2]);floor.receiveShadow=true;
     this.art.mesh(this.decoration,"cylinder","#DFCC9D",[0,-.5,0],[6.65,.45,5.35]);
     for(let i=0;i<24;i++){const angle=i*Math.PI*2/24;this.art.mesh(this.decoration,"plush",i%3===0?session.game.colour:"#98B780",[Math.cos(angle)*6,.17,Math.sin(angle)*4.65],[.20,.22,.20]);}
-    if(session.game.kind==="hop")for(const puddle of hopPuddles)this.art.mesh(this.decoration,"plush","#BE708C",[puddle.x,.015,puddle.z],[.53,.025,.39]);
+    if(session.game.kind==="hop")for(const puddle of session.puddles)this.art.mesh(this.decoration,"plush","#BE708C",[puddle.x,.015,puddle.z],[.53,.025,.39]);
     mergeArt(this.decoration,this.art);this.scene.add(this.decoration,this.propRoot);
+    if(session.course){
+      session.course.feathers.forEach(([x,z],id)=>{
+        const feather=new THREE.Group();feather.position.set(x,.7,z);feather.userData.feather=id;
+        this.art.mesh(feather,"leaf","#FFFCE1",[0,.1,0],[.23,.43,.08],[0,0,-.35]);
+        this.art.mesh(feather,"cylinder","#DAAD4B",[0,0,0],[.035,.65,.035],[0,0,-.35]);
+        const halo=new THREE.Mesh(this.art.ownGeometry(new THREE.TorusGeometry(.38,.025,6,24)),this.art.material("#E3BD64"));halo.rotation.x=Math.PI/2;halo.position.y=-.4;feather.add(halo);
+        mergeArt(feather,this.art);this.feathers.push(feather);this.scene.add(feather);
+      });
+      if(session.course.wind){
+        this.windRibbon.position.set(4,0,3);this.art.mesh(this.windRibbon,"cylinder","#C6A576",[0,.75,0],[.04,1.5,.04]);
+        for(let i=0;i<4;i++)this.art.mesh(this.windRibbon,"box",i%2?"#F4D599":"#F8F5D9",[.14+i*.24,1.35,0],[.26,.17,.035]);this.scene.add(this.windRibbon);
+      }
+    }
     this.hero=createCompanion(this.art,session.game.host);this.hero.root.scale.setScalar(.9);this.hero.root.position.set(session.game.kind==="hop"?-3:0,0,session.game.kind==="hop"?3.7:3.5);this.scene.add(this.hero.root);
     this.carried.position.set(0,.73,.65);this.hero.root.add(this.carried);
     this.art.mesh(this.carried,session.game.kind==="parcel"?"box":"plush","#F2D28B",[0,0,0],[.40,.31,.31]);
@@ -97,7 +113,7 @@ export class FestivalArena {
       const flower=new THREE.Group();flower.position.set(-3+i*1.2,0,-3.8);this.scene.add(flower);this.completedFlowers.push(flower);
       this.art.mesh(flower,"cylinder","#75A37B",[0,.3,0],[.035,.6,.035]);for(let j=0;j<5;j++){const angle=j*Math.PI*2/5;this.art.mesh(flower,"plush",["#F2C96F","#E9A0A8","#A5B5D8"][i%3],[Math.cos(angle)*.18,.64,Math.sin(angle)*.18],[.17,.09,.17]);}this.art.mesh(flower,"plush","#FFF1C6",[0,.69,0],[.13,.10,.13]);mergeArt(flower,this.art);flower.visible=false;
     }
-    this.resize=new ResizeObserver(entries=>{const width=Math.max(1,entries[0].contentRect.width),height=Math.max(1,entries[0].contentRect.height);this.renderer.setSize(width,height);this.view={width,height,...frameFairCamera(this.camera,this.session.game,width,height)};this.labelMetricsDirty=true;this.updateView();});this.resize.observe(container);
+    this.resize=new ResizeObserver(entries=>{const width=Math.max(1,entries[0].contentRect.width),height=Math.max(1,entries[0].contentRect.height);this.renderer.setSize(width,height);this.view={width,height,...frameFairCamera(this.camera,this.session.game,width,height,this.session)};this.labelMetricsDirty=true;this.updateView();});this.resize.observe(container);
     container.addEventListener("pointerdown",this.click);window.addEventListener("keydown",this.keyDown);window.addEventListener("keyup",this.keyUp);canvas.addEventListener("webglcontextlost",this.lost);
     session.tone=this.tone;this.rebuild();this.frame=requestAnimationFrame(this.draw);
   }
@@ -114,7 +130,7 @@ export class FestivalArena {
     const occupied:{left:number;top:number;width:number;height:number}[]=[];
     for(const prop of this.props){
       const tile=prop.data.shape==="tile";
-      const point=new THREE.Vector3(prop.data.x-(tile?.52:0),tile?.18:fairLabelHeight(prop.data.shape),prop.data.z+(tile?.52:0)).project(this.camera);
+      const point=new THREE.Vector3(prop.data.x-(tile?.52:0),tile?.18:fairLabelHeight(prop.data.shape)+(prop.data.shape==="ring"&&this.session.course?.high.includes(prop.data.id)?.6:0),prop.data.z+(tile?.52:0)).project(this.camera);
       const x=(point.x+1)*width/2,y=(1-point.y)*height/2;
       prop.label.hidden=!prop.root.visible;
       const left=THREE.MathUtils.clamp(x-prop.width/2,6,Math.max(6,width-prop.width-6));
@@ -144,8 +160,11 @@ export class FestivalArena {
   private tone=(index:number)=>{if(!this.sound||!this.audio||this.audio.state!=="running")return;const osc=this.audio.createOscillator(),gain=this.audio.createGain(),time=this.audio.currentTime;osc.type="sine";osc.frequency.value=[330,392,494,587,784][index%5];gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(.10,time+.015);gain.gain.exponentialRampToValueAtTime(.0001,time+.28);osc.connect(gain);gain.connect(this.audio.destination);osc.start(time);osc.stop(time+.3);osc.onended=()=>{osc.disconnect();gain.disconnect();};};
   setPaused(value:boolean){this.paused=value;this.last=0;this.keys.clear();this.touch={x:0,z:0};this.velocity.set(0,0);this.destination=null;}
   move(x:number,z:number){this.touch={x,z};this.destination=null;this.unlock();}
-  jump(){this.unlock();if(this.paused||!this.session.canAct||this.jumping>.01||!this.session.mobile)return;this.vy=4.7;this.jumping=.001;this.tone(2);}
-  reset(){this.keys.clear();this.touch={x:0,z:0};this.round=-1;this.hero.root.position.set(this.session.game.kind==="hop"?-3:0,0,this.session.game.kind==="hop"?3.7:3.5);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.destination=null;this.contacts.clear();}
+  jump(){this.unlock();if(this.paused||!this.session.canAct||!this.session.mobile||this.jumping>.01&&(!this.session.doubleJump||this.jumps>=2))return;this.jumps=this.jumping>.01?this.jumps+1:1;this.vy=4.7;this.jumping=Math.max(.001,this.jumping);this.tone(this.jumps===2?4:2);}
+  reset(){this.keys.clear();this.touch={x:0,z:0};this.round=-1;this.revision=-1;this.hero.root.position.set(this.session.game.kind==="hop"?-3:0,0,this.session.game.kind==="hop"?3.7:3.5);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.jumps=0;this.destination=null;this.contacts.clear();}
+  get playerPosition(){return {x:this.hero.root.position.x,z:this.hero.root.position.z};}
+  restorePosition(point:{x:number;z:number}){this.reset();const safe=this.session.game.kind==="hop"?this.session.checkpoint:point;this.hero.root.position.set(THREE.MathUtils.clamp(safe.x,-4.8,4.8),0,THREE.MathUtils.clamp(safe.z,-3.5,3.9));}
+  visitFeather(id:number){if(this.paused||!this.session.canAct||!this.feathers[id]?.visible)return;this.renderer.domElement.focus({preventScroll:true});const p=this.feathers[id].position;this.walkTo({x:p.x,z:p.z});}
   private lost=(event:Event)=>{event.preventDefault();this.setPaused(true);this.onError("The 3D connection was interrupted. Reopen this game to reconnect.");};
   private keyDown=(event:KeyboardEvent)=>{
     if(this.paused||event.ctrlKey||event.metaKey||event.altKey||event.target instanceof HTMLElement&&event.target.closest("input,textarea,select"))return;
@@ -160,7 +179,8 @@ export class FestivalArena {
   private click=(event:PointerEvent)=>{
     if(event.button!==0||this.paused||!this.session.canAct)return;this.unlock();this.renderer.domElement.focus({preventScroll:true});
     const rect=this.container.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
-    const hit=ray.intersectObjects(this.props.filter(prop=>prop.root.visible).map(prop=>prop.root),true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined)target=target.parent;
+    const hit=ray.intersectObjects([...this.props.filter(prop=>prop.root.visible).map(prop=>prop.root),...this.feathers.filter(item=>item.visible)],true)[0];let target:THREE.Object3D|null=hit?.object||null;while(target&&target.userData.choice===undefined&&target.userData.feather===undefined)target=target.parent;
+    if(target?.userData.feather!==undefined){this.visitFeather(target.userData.feather as number);return;}
     if(target){this.select(target.userData.choice as number);return;}
     const ground=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),new THREE.Vector3());if(ground&&this.session.mobile)this.walkTo({x:THREE.MathUtils.clamp(ground.x,-4.7,4.7),z:THREE.MathUtils.clamp(ground.z,-3.5,3.8)});
   };
@@ -173,6 +193,7 @@ export class FestivalArena {
       const button=document.createElement("button");button.type="button";button.className="fair-object-label";button.dataset.choice=String(data.id);button.dataset.shape=data.shape;
       if(data.shape==="tile"){const badge=document.createElement("span");badge.textContent=String(data.id+1);button.appendChild(badge);}else button.textContent=data.label;
       button.setAttribute("aria-label",data.shape==="tile"?"Tile "+(data.id+1)+" ↻":data.shape==="ring"?"Ring "+(data.id+1):data.label);
+      if(data.shape==="ring"&&this.session.course?.high.includes(data.id)){button.dataset.high="true";button.setAttribute("aria-label",`Ring ${data.id+1}, high: double jump`);}
       button.onpointerdown=event=>event.stopPropagation();button.onclick=()=>this.select(data.id);
       this.labels.appendChild(button);this.props.push({data,root,label:button,width:40,height:40});
       const geometry=new THREE.Group();root.add(geometry);
@@ -189,7 +210,7 @@ export class FestivalArena {
       } else if(data.shape==="parcel"){
         art.mesh(geometry,"cylinder","#A58666",[0,.38,0],[.07,.76,.07]);art.mesh(geometry,"plush","#83B9AE",[0,.9,0],[.55,.37,.36]);art.mesh(geometry,"box","#EED3A6",[0,.31,.43],[.43,.42,.4]);art.mesh(geometry,"box","#FFF7DC",[0,.31,.64],[.06,.43,.018]);
       } else if(data.shape==="ring"){
-        const ring=new THREE.Mesh(art.ownGeometry(new THREE.TorusGeometry(.8,.12,10,40)),art.material(data.id===this.session.state.round?"#D9A32F":"#579685"));ring.position.y=1.05;geometry.add(ring);art.mesh(geometry,"plush","#FCF7E4",[0,.05,0],[.76,.08,.57]);
+        const ring=new THREE.Mesh(art.ownGeometry(new THREE.TorusGeometry(.8,.12,10,40)),art.material(data.id===this.session.state.round?"#D9A32F":"#579685"));ring.position.y=this.session.ringHeight(data.id);geometry.add(ring);art.mesh(geometry,"plush","#FCF7E4",[0,.05,0],[.76,.08,.57]);
       } else if(data.shape==="tile"){
         art.mesh(geometry,"box","#5F978B",[0,.03,0],[1.48,.09,1.48]);
         const path=new THREE.Group();path.name="tile-path";geometry.add(path);
@@ -202,7 +223,7 @@ export class FestivalArena {
       if(data.shape==="ring"){
         // The empty centre is part of the click target, not a click through to distant ground.
         const target=new THREE.Mesh(art.ownGeometry(new THREE.CircleGeometry(.94,32)),art.ownMaterial(new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide})));
-        target.position.y=1.05;root.add(target);
+        target.position.y=this.session.ringHeight(data.id);root.add(target);
       }
     }
     // A new round must not immediately collect the replacement object under the player.
@@ -220,6 +241,7 @@ export class FestivalArena {
       dx=(Number(this.keys.has("d")||this.keys.has("arrowright"))-Number(this.keys.has("a")||this.keys.has("arrowleft")))+this.touch.x;
       dz=(Number(this.keys.has("s")||this.keys.has("arrowdown"))-Number(this.keys.has("w")||this.keys.has("arrowup")))+this.touch.z;
       if(this.destination){
+        if(this.session.course?.drift&&this.destination.id!==undefined){const point=this.session.ringPoint(this.destination.id);this.destination.x=point.x;this.destination.z=point.z;}
         const waypoint=this.destination.via?.[0],target=waypoint||this.destination,distance=Math.hypot(target.x-this.hero.root.position.x,target.z-this.hero.root.position.z);
         if(distance>(!waypoint&&this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(target.x-this.hero.root.position.x)/distance;dz=(target.z-this.hero.root.position.z)/distance;}
         else if(waypoint)this.destination.via!.shift();
@@ -227,10 +249,12 @@ export class FestivalArena {
       }
     }
     const input=new THREE.Vector2(dx,dz);if(input.length()>1)input.normalize();this.velocity.lerp(input.multiplyScalar(3.1),1-Math.exp(-15*dt));
-    const position=this.hero.root.position;position.x=THREE.MathUtils.clamp(position.x+this.velocity.x*dt,-4.8,4.8);position.z=THREE.MathUtils.clamp(position.z+this.velocity.y*dt,-3.5,3.9);
-    if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}position.y=this.jumping;
+    const position=this.hero.root.position;position.x=THREE.MathUtils.clamp(position.x+(this.velocity.x+(this.jumping>.05&&this.session.canAct?this.session.wind:0))*dt,-4.8,4.8);position.z=THREE.MathUtils.clamp(position.z+this.velocity.y*dt,-3.5,3.9);
+    if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}else this.jumps=0;position.y=this.jumping;
     if(this.velocity.length()>.12)this.hero.face(Math.atan2(this.velocity.x,this.velocity.y),dt);
-    for(const prop of this.props){const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
+    for(const prop of this.props){
+      if(prop.data.shape==="ring"){const point=this.session.ringPoint(prop.data.id);prop.data.x=point.x;prop.data.z=point.z;prop.root.position.set(point.x,0,point.z);}
+      const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
       if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1.04:1);}
       else if(this.session.mobile&&state.phase==="play"){
         if(distance>1.18)this.contacts.delete(prop.data.id);
@@ -243,7 +267,8 @@ export class FestivalArena {
       if(["cup","paint","seed"].includes(prop.data.shape))prop.root.scale.setScalar(state.selection.includes(prop.data.id)||state.carrying===prop.data.id?1.12:1);
       if(prop.data.shape==="tile"){const path=prop.root.getObjectByName("tile-path");if(path)path.rotation.y=-(this.session.rotations[prop.data.id]??0)*Math.PI/2;}
     }
-    if(this.session.game.kind==="hop"&&this.jumping<.22&&hopPuddles.some(p=>Math.hypot(position.x-p.x,(position.z-p.z)*1.25)<.52)&&this.session.hazard()){const checkpoint=this.session.checkpoint;position.set(checkpoint.x,0,checkpoint.z);this.velocity.set(0,0);this.destination=null;}
+    for(const [id,feather]of this.feathers.entries()){feather.visible=!state.feathers.includes(id);if(feather.visible&&Math.hypot(position.x-feather.position.x,position.z-feather.position.z)<.65)this.session.collectFeather(id,this.jumping);}
+    if(this.session.game.kind==="hop"&&this.jumping<.22&&this.session.puddles.some(p=>Math.hypot(position.x-p.x,(position.z-p.z)*1.25)<.52)&&this.session.hazard()){const checkpoint=this.session.checkpoint;position.set(checkpoint.x,0,checkpoint.z);this.velocity.set(0,0);this.vy=0;this.jumping=0;this.jumps=0;this.destination=null;}
   }
   private draw=(timestamp:number)=>{
     if(this.disposed)return;const elapsed=this.last?Math.min(1,(timestamp-this.last)/1000):0,dt=elapsed;this.last=timestamp;
@@ -257,6 +282,8 @@ export class FestivalArena {
         this.updateMovement(step);
       }
       const state=this.session.state;
+      this.windRibbon.rotation.y=this.session.wind>=0?0:Math.PI;
+      for(const [id,feather]of this.feathers.entries()){feather.rotation.y=this.time*.7+id;feather.position.y=.7+(this.reduced.matches?0:Math.sin(this.time*2+id)*.1);}
       if(state.revision!==this.revision){this.revision=state.revision;this.hero.express(state.emotion);this.hostRig.express(state.emotion==="sad"?"love":state.emotion);for(const [i,flower]of this.completedFlowers.entries())flower.visible=i<state.round;}
       this.carried.visible=state.carrying!==null&&state.emotion!=="joy";
       if(state.emotion==="joy")this.successTime+=elapsed;else this.successTime=0;

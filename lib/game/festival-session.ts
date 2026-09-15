@@ -1,8 +1,10 @@
 import type { FestivalGame } from "./festival";
 import type { Expression } from "./personalities";
+import { courseById, type Course } from "./fair-courses";
 
 export type ArenaObject={id:number;x:number;z:number;label:string;colour:string;shape:"bubble"|"seed"|"bed"|"stone"|"cup"|"house"|"parcel"|"ring"|"paint"|"tile";rotation?:number;ports?:number[]};
-export type FairState={phase:"ready"|"play"|"win"|"lose";round:number;hearts:number;score:number;prompt:string;feedback:string;selection:number[];carrying:number|null;lit:number;listening:boolean;emotion:Expression;revision:number;elapsed:number};
+export type FairState={phase:"ready"|"play"|"win"|"lose";round:number;hearts:number;score:number;prompt:string;feedback:string;selection:number[];carrying:number|null;lit:number;listening:boolean;emotion:Expression;revision:number;elapsed:number;feathers:number[]};
+export type FairCheckpoint = {version:1;gameId:string;courseId:string;state:FairState;rotations:number[];wait:number;nextRound:boolean;echoClock:number;echoStep:number;echoAnswer:number;lastHazard:number};
 const colours=["#EE947D","#F2CC71","#81B7D6","#FDF4D7"];
 const bubbles=[
   {clue:"Catch a word that means a small road.",words:["path","cloud","spoon","bed"],answer:0},
@@ -27,7 +29,8 @@ export const hopPuddles=[{x:-3,z:2.2},{x:-3,z:-.1},{x:-1.45,z:-2.2},{x:1.6,z:-2.
 
 /** One session owns progression and input gates; React and the 3D view share it. */
 export class FestivalSession {
-  state:FairState={phase:"ready",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0};
+  state:FairState={phase:"ready",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[]};
+  readonly course:Course|undefined;
   rotations:number[]=[];
   bridgePath:number[]=[];
   private wait=0;
@@ -36,9 +39,31 @@ export class FestivalSession {
   private echoStep=-1;
   private echoAnswer=0;
   private lastHazard=0;
-  constructor(public game:FestivalGame,private changed:(state:FairState)=>void,public tone:(index:number)=>void=()=>{}){}
+  constructor(public game:FestivalGame,private changed:(state:FairState)=>void,public tone:(index:number)=>void=()=>{},courseId?:string){this.course=game.kind==="hop"?courseById(courseId||"cloud-01"):undefined;}
   private emit(){this.state={...this.state,selection:[...this.state.selection],revision:this.state.revision+1};this.changed(this.state);}
-  start(){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
+  start(){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[]};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
+  snapshot():FairCheckpoint|null {
+    if(this.state.phase!=="play"&&this.state.phase!=="win")return null;
+    return {version:1,gameId:this.game.id,courseId:this.course?.id||"",state:{...this.state,selection:[...this.state.selection],feathers:[...this.state.feathers]},rotations:[...this.rotations],wait:Math.max(0,this.wait),nextRound:this.nextRound,echoClock:this.echoClock,echoStep:this.echoStep,echoAnswer:this.echoAnswer,lastHazard:this.lastHazard};
+  }
+  restore(value:unknown):boolean {
+    const c=value as FairCheckpoint|null,s=c?.state;
+    if(!c||c.version!==1||c.gameId!==this.game.id||c.courseId!==(this.course?.id||"")||!s||!["play","win"].includes(s.phase))return false;
+    const integer=(n:number,min:number,max:number)=>Number.isInteger(n)&&n>=min&&n<=max;
+    const finite=(n:number,min:number,max:number)=>Number.isFinite(n)&&n>=min&&n<=max;
+    const ids=(v:unknown,max:number)=>Array.isArray(v)&&v.every(n=>integer(n,0,max));
+    if(!integer(s.round,s.phase==="win"?this.game.rounds:0,s.phase==="win"?this.game.rounds:this.game.rounds-1)||!integer(s.hearts,1,3)||!finite(s.elapsed,0,86400)||!integer(s.score,0,this.game.rounds*100+75)||
+      !ids(s.selection,8)||s.selection.length>3||!ids(s.feathers,2)||new Set(s.feathers).size!==s.feathers.length||
+      !(s.carrying===null||integer(s.carrying,0,3))||!integer(s.lit,-1,3)||typeof s.listening!=="boolean"||
+      typeof s.prompt!=="string"||typeof s.feedback!=="string"||s.prompt.length>400||s.feedback.length>400||
+      !["happy","joy","curious","thinking","surprised","sad","sleepy","love"].includes(s.emotion)||
+      !ids(c.rotations,3)||c.rotations.length>9||!finite(c.wait,0,3)||typeof c.nextRound!=="boolean"||
+      !finite(c.echoClock,-1,86400)||!integer(c.echoStep,-1,6)||!integer(c.echoAnswer,0,6)||!finite(c.lastHazard,0,1.6))return false;
+    if(s.score!==(s.round+Number(c.nextRound))*100+(s.phase==="win"?s.hearts*25:0)||c.nextRound&&c.wait<=0||this.game.kind==="bridge"&&c.rotations.length!==9)return false;
+    this.state={...s,selection:[...s.selection],feathers:[...s.feathers],revision:0};this.rotations=[...c.rotations];
+    this.wait=c.wait;this.nextRound=c.nextRound;this.echoClock=c.echoClock;this.echoStep=c.echoStep;this.echoAnswer=c.echoAnswer;this.lastHazard=c.lastHazard;
+    this.bridgePath=[];this.emit();return true;
+  }
   private prepare(){
     const s=this.state,g=this.game;s.selection=[];s.carrying=null;s.feedback="";s.emotion="curious";
     if(g.kind==="bubble")s.prompt=bubbles[s.round].clue;
@@ -46,7 +71,7 @@ export class FestivalSession {
     if(g.kind==="echo"){s.prompt=`Remember ${s.round+2} notes, then play them back.`;this.replay(false);}
     if(g.kind==="tea")s.prompt=`Recipe: ${recipes[s.round].map(i=>ingredients[i]).join(" → ")}.`;
     if(g.kind==="parcel")s.prompt=addresses[s.round].clue;
-    if(g.kind==="hop")s.prompt=`Jump through ring ${s.round+1} of 6. Avoid the rose puddles!`;
+    if(g.kind==="hop")s.prompt=this.course?.high.includes(s.round)?`Double jump through HIGH ring ${s.round+1} of 6.`:`Jump through ring ${s.round+1} of 6. Avoid the rose puddles!`;
     if(g.kind==="colour")s.prompt=`Mix two paints to make ${mixes[s.round].name}.`;
     if(g.kind==="bridge"){const puzzle=puzzles[s.round];this.rotations=[...puzzle.turns];s.prompt=`Connect entrance ${puzzle.entry*3+1} to exit ${puzzle.exit*3+3}. Rotate tiles, then send the boat.`;}
     this.emit();
@@ -59,14 +84,20 @@ export class FestivalSession {
       case "echo":return colours.map((colour,id)=>({id,...spread(id),label:`${id+1} · ${["Dew","Leaf","Rain","Sun"][id]}`,colour,shape:"stone"}));
       case "tea":return ingredients.map((label,id)=>({id,...spread(id),label,colour:["#B88359","#FFF2D7","#E8BA61","#9BC997"][id],shape:"cup"}));
       case "parcel":return [...addresses.map(({place},id)=>({id,x:(id-1)*3.5,z:-2,label:place,colour:colours[id],shape:"house" as const})),{id:3,x:0,z:2.5,label:"Post box",colour:"#D29C76",shape:"parcel"}];
-      case "hop":return hopPoints.map((p,id)=>({id,...p,label:`${id+1}`,colour:id===r?"#FFE09A":"#BED9D4",shape:"ring"}));
+      case "hop":return (this.course?.rings||hopPoints.map(p=>[p.x,p.z])).map((_,id)=>({id,...this.ringPoint(id),label:`${id+1}`,colour:id===r?"#FFE09A":"#BED9D4",shape:"ring"}));
       case "colour":return ["Red","Yellow","Blue","White"].map((label,id)=>({id,...spread(id),label,colour:colours[id],shape:"paint"}));
       case "bridge":return puzzles[r].ports.map((ports,id)=>({id,x:(id%3-1)*1.65,z:(Math.floor(id/3)-1)*1.65,label:`${id+1}`,colour:"#D3B28A",shape:"tile",rotation:(this.rotations[id]??0)*Math.PI/2,ports}));
     }
   }
   get mobile(){return ["bubble","garden","parcel","hop"].includes(this.game.kind);}
   get canAct(){return this.state.phase==="play"&&this.wait<=0&&!this.state.listening;}
-  get checkpoint(){return this.state.round?hopPoints[Math.min(this.state.round-1,5)]:{x:-3,z:3.7};}
+  get checkpoint(){return this.state.round?this.ringPoint(Math.min(this.state.round-1,5)):this.course?.spawn||{x:-3,z:3.7};}
+  get doubleJump(){return !!this.course&&(this.course.high.length>0||this.course.drift>0||this.course.wind>0);}
+  get puddles(){return this.course?this.course.puddles.map(([x,z])=>({x,z})):hopPuddles;}
+  get wind(){return (this.course?.wind||0)*Math.sin(this.state.elapsed*.75);}
+  ringPoint(id:number){const point=this.course?.rings[id];const base=point?{x:point[0],z:point[1]}:hopPoints[id];return {x:base.x+(this.course?.drift||0)*Math.sin(this.state.elapsed*.9+id),z:base.z};}
+  ringHeight(id:number){return this.course?.high.includes(id)?1.65:1.05;}
+  collectFeather(id:number,height:number){if(!this.canAct||!this.course||!Number.isInteger(id)||!this.course.feathers[id]||height<.2||this.state.feathers.includes(id))return;this.state.feathers.push(id);this.state.feedback=`A sky feather! ${this.state.feathers.length} / 3 found.`;this.tone(3);this.emit();}
   choose(id:number){
     if(!this.canAct||!Number.isInteger(id)||!this.objects().some(object=>object.id===id))return;const s=this.state;
     if(this.game.kind==="bubble"){if(id===bubbles[s.round].answer){s.selection=[id];this.success();}else this.miss(`That was “${bubbles[s.round].words[id]}”. Read the clue and try again.`);}
@@ -123,6 +154,6 @@ export class FestivalSession {
       } else if(this.echoClock>=0&&this.state.lit!==-1){this.state.lit=-1;this.emit();}
     }
   }
-  touchRing(id:number,height:number){if(this.canAct&&this.game.kind==="hop"&&id===this.state.round&&height>.25)this.success();}
+  touchRing(id:number,height:number){if(this.canAct&&this.game.kind==="hop"&&id===this.state.round&&height>(this.course?.high.includes(id)?1.05:.25))this.success();}
   hazard(){if(!this.canAct||this.lastHazard>0)return false;this.lastHazard=1.6;this.miss("Splash! Back to your checkpoint. Jump over the rose puddles.");return true;}
 }

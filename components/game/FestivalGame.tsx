@@ -11,15 +11,42 @@ import {useFairProgress} from "./FairProgressProvider";
 import FairSaveStatus from "./FairSaveStatus";
 import type {FairRun} from "@/lib/game/fair-progress";
 import GameDialog from "./GameDialog";
+import { courseById, coursesFor, courseMedals, courseTime } from "@/lib/game/fair-courses";
+import { clearFairCheckpoint, readFairCheckpoint, writeFairCheckpoint, type SavedFairRun } from "@/lib/game/fair-checkpoints";
+import CloudCourseMap from "./CloudCourseMap";
 
 export default function FestivalGame({game}:{game:GameDefinition}) {
+  const [choice,setChoice]=useState({id:"cloud-01",visit:0});
+  return <FestivalRun key={`${game.id}:${choice.id}:${choice.visit}`} game={game} courseId={game.kind==="hop"?choice.id:undefined} onCourseSelect={id=>setChoice(value=>({id,visit:value.visit+1}))}/>;
+}
+
+function FestivalRun({game,courseId,onCourseSelect}:{game:GameDefinition;courseId?:string;onCourseSelect:(id:string)=>void}) {
   const progress=useFairProgress(),runRef=useRef<FairRun|null>(null);
+  const course=courseById(courseId),courseIndex=coursesFor(game.id).findIndex(item=>item.id===courseId);
+  const [checkpoint,setCheckpoint]=useState<SavedFairRun|null>(null),[checkpointWarning,setCheckpointWarning]=useState(""),[elapsed,setElapsed]=useState(0);
+  const checkpointDone=useRef(false);
   const [zoom,setZoom]=useState(1);
   const layout=useRef<HTMLDivElement>(null);
   const [saveMessage,setSaveMessage]=useState(""),[saving,setSaving]=useState(false),[saveFailed,setSaveFailed]=useState(false);
   const host=useRef<HTMLDivElement>(null),arena=useRef<FestivalArena|null>(null),session=useRef<FestivalSession|null>(null),recorded=useRef(false);
   const [state,setState]=useState<FairState|null>(null),[ready,setReady]=useState(false),[paused,setPaused]=useState(false),[help,setHelp]=useState(false),[error,setError]=useState(""),[warning,setWarning]=useState(""),[sound,setSound]=useState(true);
   const friend=companionById(game.host);
+  function keepCheckpoint(){
+    if(checkpointDone.current||!runRef.current||!session.current||!arena.current)return;
+    const snapshot=session.current.snapshot();if(!snapshot)return;
+    try{writeFairCheckpoint(runRef.current,snapshot,arena.current.playerPosition);}catch{setCheckpointWarning("Checkpoint unavailable on this browser. Keep this tab open to finish your run.");}
+  }
+  useEffect(()=>{
+    const tick=()=>{setElapsed(Math.floor(session.current?.state.elapsed||0));keepCheckpoint();};
+    const timer=window.setInterval(tick,1000);window.addEventListener("pagehide",keepCheckpoint);
+    return()=>{keepCheckpoint();window.clearInterval(timer);window.removeEventListener("pagehide",keepCheckpoint);};
+  },[]);
+  useEffect(()=>{
+    if(progress.status!=="ready"||!progress.owner)return;
+    const saved=readFairCheckpoint(progress.owner,game.id,courseId);
+    if(saved){const probe=new FestivalSession(game,()=>{},()=>{},courseId);setCheckpoint(probe.restore(saved.session)?saved:null);}
+    else setCheckpoint(null);
+  },[progress.owner,progress.status,game,courseId]);
   useEffect(()=>{
     const root=layout.current;if(!root)return;
     const objective=root.querySelector<HTMLElement>(".fair-objective")!,feedback=root.querySelector<HTMLElement>(".fair-feedback")!;
@@ -32,10 +59,10 @@ export default function FestivalGame({game}:{game:GameDefinition}) {
     return()=>observer.disconnect();
   },[]);
   useEffect(()=>{
-    let cancelled=false,instance:FestivalArena|null=null;const run=new FestivalSession(game,setState);session.current=run;
+    let cancelled=false,instance:FestivalArena|null=null;const run=new FestivalSession(game,setState,()=>{},courseId);session.current=run;
     void import("@/lib/game/three/festival-arena").then(({FestivalArena})=>{if(cancelled||!host.current)return;instance=new FestivalArena(host.current,run,setError);arena.current=instance;setReady(true);}).catch(()=>{if(!cancelled)setError("The 3D playfield could not open. Enable hardware acceleration and reopen the game.");});
     return()=>{cancelled=true;instance?.dispose();arena.current=null;session.current=null;};
-  },[game]);
+  },[game,courseId]);
   useEffect(()=>{arena.current?.setZoom(zoom);},[zoom,ready]);
   const phase=state?.phase||"ready",overlay=paused||help||phase!=="play"||!!error;
   useEffect(()=>{arena.current?.setPaused(paused||help||!!error);},[paused,help,error]);
@@ -48,31 +75,41 @@ export default function FestivalGame({game}:{game:GameDefinition}) {
     return()=>{window.removeEventListener("blur",blur);document.removeEventListener("visibilitychange",visibility);window.removeEventListener("keydown",key);};
   },[help]);
   useEffect(()=>{
+    if(state?.phase==="lose"&&runRef.current){checkpointDone.current=true;try{clearFairCheckpoint(runRef.current);}catch{}setCheckpoint(null);}
     if(state?.phase!=="win"||recorded.current)return;recorded.current=true;
     void saveResult();
   },[state?.phase,game.id]);
   async function saveResult(){
     if(!runRef.current||!session.current)return;
+    const finishedRun=runRef.current;
+    keepCheckpoint();
     setSaving(true);setSaveFailed(false);setSaveMessage("Saving your friendship memory…");
-    try{setSaveMessage(await progress.complete(runRef.current,session.current.state.hearts));setWarning("");}
+    try{setSaveMessage(await progress.complete(finishedRun,session.current.state.hearts,course?{elapsedMs:Math.max(1,Math.round(session.current.state.elapsed*1000)),feathers:session.current.state.feathers.length}:undefined));checkpointDone.current=true;try{clearFairCheckpoint(finishedRun);}catch{}setCheckpoint(null);setWarning("");}
     catch(cause){setSaveFailed(true);setSaveMessage("");setWarning(cause instanceof Error?cause.message:"Your memory could not be saved. Keep this game open and retry.");}
     finally{setSaving(false);}
   }
-  function start(){try{runRef.current=progress.begin(game.id);}catch(cause){setWarning(cause instanceof Error?cause.message:"Please open your scrapbook first.");return;}recorded.current=false;setWarning("");setSaveMessage("");setSaveFailed(false);setPaused(false);setHelp(false);arena.current?.unlock();arena.current?.reset();session.current?.start();}
+  function start(){try{runRef.current=progress.begin(game.id,courseId);}catch(cause){setWarning(cause instanceof Error?cause.message:"Please open your scrapbook first.");return;}checkpointDone.current=false;recorded.current=false;setCheckpoint(null);setElapsed(0);setWarning("");setSaveMessage("");setSaveFailed(false);setPaused(false);setHelp(false);arena.current?.unlock();arena.current?.reset();session.current?.start();keepCheckpoint();}
+  function resumeSaved(){
+    if(!checkpoint||!session.current||!arena.current||checkpoint.run.owner!==progress.owner)return;
+    try{progress.begin(game.id,courseId);}catch(cause){setWarning(cause instanceof Error?cause.message:"Open your account to continue.");return;}
+    runRef.current=checkpoint.run;checkpointDone.current=false;recorded.current=false;
+    if(!session.current.restore(checkpoint.session)){setWarning("This checkpoint is no longer compatible. Start a new game below.");return;}
+    arena.current.restorePosition(checkpoint.position);arena.current.unlock();setElapsed(Math.floor(session.current.state.elapsed));setCheckpoint(null);setPaused(false);setHelp(false);
+  }
   return <div ref={layout} className="fair-game" data-kind={game.kind} style={{"--fair-colour":game.colour} as React.CSSProperties}>
     <div ref={host} className="fair-canvas" inert={overlay}/>
     <div className="fair-game-ui" inert={overlay}>
       <header className="fair-hud"><Link href="/festival" className="fair-back" aria-label="Leave game and return to the fair">← Fair</Link><div><span>{friend.name}’S LITTLE ADVENTURE</span><h1>{game.name}</h1></div><div className="fair-hearts" aria-label={`${state?.hearts??3} hearts`}>{"♥".repeat(state?.hearts??3)}<small>{state?.score||0} pts</small></div><button onClick={()=>setSound(value=>!value)} aria-label={sound?"Mute sounds":"Enable sounds"} aria-pressed={sound}>♪</button><button onClick={()=>setPaused(true)} aria-label="Pause game">Ⅱ</button></header>
-      <div className="fair-objective"><span>ROUND {Math.min((state?.round||0)+1,game.rounds)} / {game.rounds}</span><strong>{state?.prompt||game.description}</strong><div className="fair-progress" aria-hidden="true">{Array.from({length:game.rounds},(_,i)=><i key={i} data-complete={i<(state?.round||0)}/>)}</div></div>
+      <div className="fair-objective"><span>{course&&`${courseIndex+1} · ${course.name} — `}ROUND {Math.min((state?.round||0)+1,game.rounds)} / {game.rounds}</span><strong>{state?.prompt||game.description}</strong><div className="fair-progress" aria-hidden="true">{Array.from({length:game.rounds},(_,i)=><i key={i} data-complete={i<(state?.round||0)}/>)}</div>{course&&<div className="cloud-run-goals"><div role="group" aria-label="Optional sky feathers">{course.feathers.map((_,id)=><button key={id} aria-label={`${state?.feathers.includes(id)?"Collected":"Walk to"} feather ${id+1}`} disabled={state?.feathers.includes(id)||!session.current?.canAct} onClick={()=>arena.current?.visitFeather(id)}>{state?.feathers.includes(id)?"✦":"◇"}</button>)}<span>{state?.feathers.length||0}/3</span></div><span>{courseTime(elapsed*1000)}</span><span>{course.wind?`${session.current?.wind!<0?"←":"→"} Breeze`:session.current?.doubleJump?"Jump twice ↟":"Jump ↟"}</span></div>}</div>
       <div className="fair-camera-controls" role="group" aria-label="Camera controls"><button aria-label="Zoom out" disabled={zoom<=1} onClick={()=>setZoom(value=>Math.max(1,Math.round((value-.2)*10)/10))}>−</button><button aria-label="Fit playfield" onClick={()=>setZoom(1)}>{Math.round(zoom*100)}%</button><button aria-label="Zoom in" disabled={zoom>=1.8} onClick={()=>setZoom(value=>Math.min(1.8,Math.round((value+.2)*10)/10))}>+</button></div>
       <div className="fair-feedback" role="status" aria-live="polite">{state?.feedback|| (state?.listening?"Listen and watch the stones…":"Take your time. Your friend is here to help.")}</div>
       <div className="fair-bottom"><button className="fair-help" onClick={()=>setHelp(true)}>? How to play</button>{session.current?.mobile?<><p>WASD / arrows · click to walk{game.kind==="hop"?" · Space to jump":""}</p><div className="fair-dpad" role="group" aria-label="Movement controls">{[{label:"Up",x:0,z:-1,icon:"↑"},{label:"Left",x:-1,z:0,icon:"←"},{label:"Down",x:0,z:1,icon:"↓"},{label:"Right",x:1,z:0,icon:"→"}].map((direction,i)=><button key={direction.label} className={`fair-dir-${i}`} aria-label={`Move ${direction.label.toLowerCase()}`} onPointerDown={event=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);arena.current?.move(direction.x,direction.z);}} onPointerUp={()=>arena.current?.move(0,0)} onPointerCancel={()=>arena.current?.move(0,0)} onLostPointerCapture={()=>arena.current?.move(0,0)}>{direction.icon}</button>)}</div>{game.kind==="hop"&&<button className="fair-jump" onClick={()=>arena.current?.jump()}>Jump ↟</button>}</>:<p className="fair-key-hint">Click a label or press {game.kind==="bridge"?"1–9":"1–4"}</p>}
       </div>
       {["tea","colour","bridge","echo"].includes(game.kind)&&<div className="fair-recipe-controls">{game.kind==="echo"?<button onClick={()=>session.current?.replay()} disabled={state?.listening||!session.current?.canAct}>↺ Hear it again</button>:<><button className="fair-submit" onClick={()=>session.current?.submit()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Serve tea →":game.kind==="colour"?"Mix paint →":"Send boat →"}</button>{game.kind!=="bridge"&&<button onClick={()=>session.current?.clear()} disabled={!session.current?.canAct}>{game.kind==="tea"?"Empty cup":"Clear palette"}</button>}</>}</div>}
     </div>
-    {phase==="ready"&&!error&&<GameDialog title={game.name} className="fair-dialog"><CompanionPortrait id={game.host}/><p className="fair-trait">WITH {friend.name.toLocaleUpperCase("vi")}</p><p>{game.instructions}</p><p className="game-caption">{game.rounds} rounds · 3 hearts · a friendship memory to collect</p><FairSaveStatus compact/>{warning&&<p role="alert">{warning}</p>}<button className="game-button" disabled={!ready||progress.status!=="ready"} onClick={start}>{ready?"Let’s play →":"Opening the playfield…"}</button><Link href="/festival" className="game-text-button">Back to the fair</Link></GameDialog>}
-    {(paused||help)&&phase==="play"&&!error&&<GameDialog title={help?"A little help":"A little breather"} className="fair-dialog"><p>{help?game.instructions:"Your game is paused. Your current round will be waiting here."}</p><button className="game-button" onClick={()=>{setHelp(false);setPaused(false);}}>Resume game →</button><button className="game-button secondary" onClick={start}>Start this game again</button><Link href="/festival" className="game-text-button">Leave this round · return to the fair</Link></GameDialog>}
-    {(phase==="win"||phase==="lose")&&!error&&<GameDialog title={phase==="win"?"A memory made together":"Another try, little friend?"} className="fair-dialog"><CompanionPortrait id={game.host}/>{phase==="win"?<><div className="fair-result-stars" aria-label={`${state?.hearts} stars`}>{"★".repeat(state?.hearts||1)}</div><strong>{state?.score} points</strong><p>{game.memory}</p><p className="game-caption" role="status">{saveMessage}</p>{saveFailed&&<button className="game-button secondary" disabled={saving} onClick={()=>void saveResult()}>Retry saving memory</button>}</>:<p>{state?.feedback} {friend.name} is happy to try again with you.</p>}{warning&&<p role="alert">{warning}</p>}<button className="game-button" disabled={saving||saveFailed||progress.status!=="ready"} onClick={start}>Play again →</button>{saveFailed&&!saving&&<button className="game-text-button" disabled={progress.status!=="ready"} onClick={start}>Leave this unsaved result & play again</button>}<Link href="/festival" className="game-button secondary">Open friendship scrapbook</Link><Link href="/journey" className="game-text-button">My journey & friends →</Link></GameDialog>}
+    {phase==="ready"&&!error&&<GameDialog title={course?`${courseIndex+1}. ${course.name}`:game.name} className={`fair-dialog ${course?"cloud-course-dialog":""}`}><CompanionPortrait id={game.host}/><p className="fair-trait">{course?course.chapter:`WITH ${friend.name.toLocaleUpperCase("vi")}`}</p>{course&&<p className="cloud-story">{course.story}</p>}<p>{course?.lesson||game.instructions}</p><p className="game-caption">{game.rounds} rounds · 3 hearts · {course?"3 optional feathers":"a friendship memory to collect"}</p><FairSaveStatus compact/>{warning&&<p role="alert">{warning}</p>}{checkpoint&&<><p className="cloud-checkpoint-note">Saved {checkpoint.session.state.phase==="win"?"result":`at round ${checkpoint.session.state.round+1}`} · {checkpoint.session.state.hearts} hearts</p><button className="game-button" disabled={!ready||progress.status!=="ready"} onClick={resumeSaved}>Continue saved game →</button></>}<button className={`game-button ${checkpoint?"secondary":""}`} disabled={!ready||progress.status!=="ready"} onClick={start}>{!ready?"Opening the playfield…":checkpoint?"Start a new game →":"Let’s play →"}</button>{course&&<CloudCourseMap selected={course.id} onSelect={onCourseSelect}/>}<Link href="/festival" className="game-text-button">Back to the fair</Link></GameDialog>}
+    {(paused||help)&&phase==="play"&&!error&&<GameDialog title={help?"A little help":"A little breather"} className="fair-dialog"><p>{help?(course?.lesson||game.instructions):"Your game is paused. Continue here or come back to your saved checkpoint."}</p>{course&&<p>Jump near a white feather to collect it. Finish with 3 hearts for a clean-flight badge. Your best time is optional; there is no countdown.</p>}{checkpointWarning&&<p role="status">{checkpointWarning}</p>}<button className="game-button" onClick={()=>{setHelp(false);setPaused(false);}}>Resume game →</button><button className="game-button secondary" onClick={start}>Start this game again</button>{course&&<button className="game-text-button" onClick={()=>{keepCheckpoint();onCourseSelect(course.id);}}>Open sky atlas</button>}<Link href="/festival" className="game-text-button">Save checkpoint · return to the fair</Link></GameDialog>}
+    {(phase==="win"||phase==="lose")&&!error&&<GameDialog title={phase==="win"?"A memory made together":"Another try, little friend?"} className="fair-dialog"><CompanionPortrait id={game.host}/>{phase==="win"?<><div className="fair-result-stars" aria-label={`${state?.hearts} stars`}>{"★".repeat(state?.hearts||1)}</div><strong>{state?.score} points</strong><p>{course?.reward||game.memory}</p>{course&&<div className="cloud-result-goals" aria-label="Course achievements"><strong>{courseMedals(state?.hearts===3,state?.feathers.length||0)} / 3 badges this flight</strong><span>✦ Trail completed</span><span>{state?.hearts===3?"✦":"◇"} Clean flight · keep all 3 hearts</span><span>{state?.feathers.length===3?"✦":"◇"} Feather finder · {state?.feathers.length||0} / 3</span><small>Your time {courseTime(Math.round((state?.elapsed||0)*1000))} · optional target {courseTime(course.parMs)}</small></div>}<p className="game-caption" role="status">{saveMessage}</p>{saveFailed&&<button className="game-button secondary" disabled={saving} onClick={()=>void saveResult()}>Retry saving memory</button>}</>:<p>{state?.feedback} {friend.name} is happy to try again with you.</p>}{warning&&<p role="alert">{warning}</p>}{course&&phase==="win"&&coursesFor(game.id)[courseIndex+1]&&<button className="game-button" disabled={saving||saveFailed||progress.status!=="ready"} onClick={()=>onCourseSelect(coursesFor(game.id)[courseIndex+1].id)}>Next course: {coursesFor(game.id)[courseIndex+1].name} →</button>}<button className="game-button" disabled={saving||saveFailed||progress.status!=="ready"} onClick={start}>Play again →</button>{course&&<button className="game-text-button" disabled={saving} onClick={()=>onCourseSelect(course.id)}>Open sky atlas</button>}{saveFailed&&!saving&&<button className="game-text-button" disabled={progress.status!=="ready"} onClick={start}>Leave this unsaved result & play again</button>}<Link href="/festival" className="game-button secondary">Open friendship scrapbook</Link><Link href="/journey" className="game-text-button">My journey & friends →</Link></GameDialog>}
     {error&&<GameDialog title="The playfield needs a moment" className="fair-dialog"><p role="alert">{error}</p><Link href="/festival" className="game-button">Back to the fair</Link></GameDialog>}
   </div>;
 }

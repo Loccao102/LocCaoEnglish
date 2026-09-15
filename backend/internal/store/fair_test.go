@@ -99,6 +99,37 @@ func TestFairPersistenceAndIdempotency(t *testing.T) {
 			if _, err = st.CompleteFair(ctx, player.ID, invalid); !errors.Is(err, fair.ErrInvalid) {
 				t.Fatal("invalid run accepted")
 			}
+			course := fair.Completion{RunID: "32345678-1234-4123-8123-123456789012", GameID: "cloud-hop", CourseID: "cloud-02", Stars: 3, ElapsedMS: 42000, Feathers: 1}
+			if _, err = st.CompleteFair(ctx, player.ID, course); !errors.Is(err, fair.ErrLocked) {
+				t.Fatalf("locked course accepted: %v", err)
+			}
+			course.CourseID = "cloud-01"
+			if _, err = st.CompleteFair(ctx, player.ID, course); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = st.CompleteFair(ctx, player.ID, course); err != nil {
+				t.Fatal(err)
+			}
+			altered := course
+			altered.Feathers = 3
+			if _, err = st.CompleteFair(ctx, player.ID, altered); !errors.Is(err, fair.ErrConflict) {
+				t.Fatalf("changed course retry accepted: %v", err)
+			}
+			altered.RunID = "42345678-1234-4123-8123-123456789012"
+			altered.Stars = 1
+			altered.ElapsedMS = 61000
+			if _, err = st.CompleteFair(ctx, player.ID, altered); err != nil {
+				t.Fatal(err)
+			}
+			course.RunID = "52345678-1234-4123-8123-123456789012"
+			course.CourseID = "cloud-02"
+			if _, err = st.CompleteFair(ctx, player.ID, course); err != nil {
+				t.Fatal(err)
+			}
+			courseSave, _ := st.GetFair(ctx, player.ID)
+			if r := courseSave.Courses["cloud-01"]; r.Visits != 2 || r.Medals != 3 || r.BestMS != 42000 {
+				t.Fatalf("course save lost replay progress: %+v", r)
+			}
 			if st.db != nil {
 				reopened, err := New(url)
 				if err != nil {
@@ -108,6 +139,9 @@ func TestFairPersistenceAndIdempotency(t *testing.T) {
 				durable, err := reopened.GetFair(ctx, player.ID)
 				if err != nil || durable.Games[c.GameID].Visits != 2 {
 					t.Fatalf("save did not survive a new store: %+v %v", durable, err)
+				}
+				if durable.Courses["cloud-01"].Medals != 3 || durable.Courses["cloud-02"].Visits != 1 {
+					t.Fatal("course save did not survive reopening")
 				}
 			}
 		})

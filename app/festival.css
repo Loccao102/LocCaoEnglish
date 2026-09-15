@@ -41,6 +41,19 @@
 .fair-object-label[data-shape=tile]:hover:not(:disabled) span{background:#ffdf83}
 .fair-object-label[data-offscreen=true]{border-style:dashed}.fair-object-label[data-offscreen=true]::before{content:attr(data-direction);position:absolute;top:-8px;right:-6px;font-size:13px;line-height:18px;width:18px;border-radius:50%;background:#fffdf0;border:1px solid #6c9273}
 .fair-bank-marker{font-size:13px;padding:6px 8px;border-width:1px;white-space:nowrap}
+.fair-object-label[data-high=true]::after{content:'↟';position:absolute;left:-15px;top:4px;font-size:21px;line-height:26px;color:#695382;background:#fffdf0;border-radius:8px}
+.cloud-run-goals{display:flex;justify-content:center;align-items:center;gap:18px;margin-top:5px;font-size:13px;color:#446851}
+.cloud-run-goals>div{display:flex;align-items:center;gap:3px}.cloud-run-goals button{min-width:30px;min-height:30px;font-size:22px;border:0;border-radius:8px;background:#f3ecd5;color:#6f6840;cursor:pointer}.cloud-run-goals button:disabled{color:#b07b1d;background:#ffedb5;cursor:default}
+.fair-dialog.cloud-course-dialog{max-width:680px!important}.cloud-course-dialog>.companion-portrait{width:88px;height:88px;margin:0 auto}.cloud-course-dialog .cloud-story{color:#365949;margin:7px auto;max-width:510px}.cloud-course-dialog .fair-trait{font-size:12px;margin:5px;color:#806b47}
+.cloud-atlas{margin:24px 0 8px;padding:18px;border-radius:20px;border:1px solid #d6cfb5;background:#f7f0de;text-align:left}
+.cloud-atlas-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;color:#34564a}.cloud-atlas-heading>span{font-size:13px;color:#776849}
+.cloud-course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cloud-course-grid>button{display:flex;flex-direction:column;align-items:start;gap:6px;min-height:132px;padding:12px;border:1px solid #d1d8c4;border-radius:15px;text-align:left;color:#3f6250;background:#fffdf3;cursor:pointer}
+.cloud-course-grid>button[aria-pressed=true]{border:2px solid #588c72;background:#e9f2d6;padding:11px}.cloud-course-grid>button:disabled{color:#8b8e80;background:#eee9dc;cursor:default}.cloud-course-grid>button:focus-visible{outline:3px solid #4c816c;outline-offset:2px}
+.cloud-course-number{font-size:13px;font-weight:700;color:#8b7446}.cloud-course-grid strong{font-size:15px}.cloud-course-grid small{font-size:12px;line-height:1.4}.cloud-course-medals{font-size:13px;color:#977531;margin-top:auto}
+.cloud-atlas>p{font-size:13px;line-height:1.5;margin:14px 0 0}.cloud-checkpoint-note{padding:9px;background:#e8efda;border-radius:12px;color:#396448!important}
+.cloud-result-goals{display:grid;gap:9px;padding:18px;margin:16px auto;border:1px solid #d7d5bd;border-radius:16px;background:#f9f2df;text-align:left;color:#4c6c53}.cloud-result-goals strong{font-size:18px}.cloud-result-goals span{font-size:14px}.cloud-result-goals small{font-size:13px;border-top:1px solid #dfd8c1;padding-top:9px}
+.fair-card-body .cloud-hub-progress{color:#5a704d;font-weight:600}
+@media(max-width:650px){.cloud-course-grid{grid-template-columns:repeat(2,1fr)}.cloud-atlas{padding:12px}.cloud-run-goals{gap:10px;font-size:12px}.cloud-run-goals button{min-width:30px;min-height:30px}.cloud-course-dialog>.companion-portrait{height:65px;width:65px}}
 .fair-object-label:focus-visible,.fair-camera-controls button:focus-visible{outline:3px solid #24765b;outline-offset:3px}
 @media(max-width:650px){
   .fair-game{--fair-top-space:160px;--fair-bottom-space:140px}

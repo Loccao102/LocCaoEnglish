@@ -11,7 +11,7 @@ The fair is an original southern island in Sunlit Village. Eight neighbours each
 | Echo Pond | Giọt | Watch and hear four stones, repeat a growing sequence; replay the cue as needed | 5 melodies of 2–6 notes |
 | Tea Time | Moca | Build an ordered three-ingredient recipe, then serve; clear the cup without a penalty | 3 recipes |
 | Parcel Trail | Quýt | Collect a parcel and walk it to the library, bakery or greenhouse named in the address | 3 deliveries |
-| Cloud Hop | Mây | Move and jump through ordered rings, avoid puddles and return to a checkpoint on a mistake | 6 rings |
+| Cloud Hop | Mây | Six sequential courses with double jumps, wind, drifting rings and optional feathers | 6 rings per course |
 | Colour Studio | Dâu | Combine two primary/white paint pots into a requested colour; see the mix on a flower sculpture | 4 mixes |
 | Bridge Builder | Sỏi | Rotate nine path tiles, connect reciprocal edges from entrance to exit, and send a boat | 3 layouts |
 
@@ -45,9 +45,26 @@ Account refreshes and completion responses merge with confirmed records for that
 
 `/journey` derives three friendship milestones for every one of the 24 characters: a chapter greeting quest, a restored chapter page and one fair memory. Complete all three to reveal the character’s dream. The same page links story progression, deeper learning and fair activities, and saves companion selection through the adventure service.
 
-Current rounds, carried items and partial recipes remain in memory only. Pause/help preserves a round while the page stays open. Leaving a game discards an unfinished round. Winning records the result once for that session. Window blur and document hiding pause play until explicitly resumed. Muting removes sound while the numbered visual cue sequence remains available. Reduced motion suppresses decorative bobbing and idle loops while intentional movement and game cues remain visible.
+All eight games keep a device-local checkpoint each second and on page exit. Checkpoints retain the run UUID, round, hearts, elapsed time, optional feathers, recipes, carried objects, tile rotations and melody state. They are scoped to account/game/course and expire after seven days. Continue resumes a Cloud Hop player at the last safe ring. A pending win keeps its exact result for retry; successful saving or a loss clears the checkpoint. Completed account results sync to the server; unfinished checkpoints stay on this device. Window blur and document hiding pause play until explicitly resumed. Muting removes sound while the numbered visual cue sequence remains available. Reduced motion suppresses decorative bobbing and idle loops while intentional movement and game cues remain visible.
 
 Mouse/touch can select 3D objects; non-walking games also provide regular buttons and number keys. WASD/arrows and touch arrows move the companion in walking games. Space or the Jump button triggers Cloud Hop jumps without cancelling the selected walking destination. The centre of each visible ring is clickable; collected hidden rings cannot intercept clicks. Escape pauses or resumes. Dialogs trap focus and make the playfield/UI inert.
+
+## Mây’s sky atlas
+
+Cloud Hop is the first game with a full course progression loop: learn a move, use it on a changed route, combine skills, then replay for optional achievements. Its six authored courses share `backend/internal/fair/courses.json` between the frontend and Go service:
+
+1. **First Flight** teaches walking and jumping over puddles.
+2. **Paper Trail** introduces detours for three optional feathers.
+3. **High Hopes** unlocks a second airborne jump and high rings.
+4. **Breezy Bend** adds a changing lateral breeze and a visible streamer.
+5. **Dancing Clouds** introduces gently moving targets.
+6. **Homeward Sky** combines the moves to complete Mây’s atlas.
+
+Finishing unlocks the next course. Each course offers three badges: finish, keep all three hearts, and find all three feathers. Clean-flight and feather badges can be earned on separate replays; a slower replay never erases the best time. Target times are optional and do not gate progress. Older Cloud Hop completions also unlock Paper Trail.
+
+`fair-courses.ts` defines course records and merging. `fair-checkpoints.ts` handles owner-scoped local recovery. The account completion ledger stores the course ID, elapsed milliseconds and feather count alongside the original run fields. Go checks sequential unlocks and exact retry metadata inside the account transaction. Queued account completions make the next course available offline and upload in chronological order. Migration `012_fair_courses.sql` adds the ledger fields without changing old results.
+
+The other seven fair games share checkpoint recovery but retain their existing rounds. They do not yet have separate course catalogs or progression abilities.
 
 ## Readable playfields
 

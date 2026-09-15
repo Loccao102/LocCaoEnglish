@@ -7,13 +7,13 @@ export function fairLabelHeight(shape: string) {
 }
 
 /** Fit the playable objects, not the much larger decorative island. */
-export function frameFairCamera(camera: OrthographicCamera, game: FestivalGame, width: number, height: number) {
+export function frameFairCamera(camera: OrthographicCamera, game: FestivalGame, width: number, height: number, session?:FestivalSession) {
   camera.position.set(0, 14, 12); camera.lookAt(0, .5, .25); camera.updateMatrixWorld();
-  const objects = new FestivalSession(game, () => {}).objects();
+  const objects = (session||new FestivalSession(game, () => {})).objects();
   const points: Vector3[] = [];
   for (const object of objects) {
     for (const side of [-1, 1]) points.push(new Vector3(object.x + side * .95, 0, object.z + side * .7));
-    points.push(new Vector3(object.x, fairLabelHeight(object.shape) + .25, object.z));
+    points.push(new Vector3(object.x, fairLabelHeight(object.shape) + .25+(session?.course?.high.includes(object.id)?.6:0), object.z));
   }
   const playerX = game.kind === "hop" ? -3 : 0, playerZ = game.kind === "hop" ? 3.7 : 3.5;
   points.push(new Vector3(playerX - .7, 0, playerZ + .5), new Vector3(playerX + .7, 2, playerZ));
