@@ -1,0 +1,79 @@
+# The Friendship Fair
+
+The fair is an original southern island in Sunlit Village. Eight neighbours each built an activity around their own talent. It is available from the adventure toolbar, the map, `/festival`, and the southern bridge. All games are open without chapter or currency gates.
+
+## Games
+
+| Game | Host | Mechanic | Completion |
+| --- | --- | --- | --- |
+| Bubble Meadow | Mầm | Walk into a floating word bubble matching a written clue; click-to-walk and keyboard movement | 5 catches |
+| Little Garden | Cốm | Pick a seed, carry it to the bed and plant it; exchange a seed before planting | 3 plants |
+| Echo Pond | Giọt | Watch and hear four stones, repeat a growing sequence; replay the cue as needed | 5 melodies of 2–6 notes |
+| Tea Time | Moca | Build an ordered three-ingredient recipe, then serve; clear the cup without a penalty | 3 recipes |
+| Parcel Trail | Quýt | Collect a parcel and walk it to the library, bakery or greenhouse named in the address | 3 deliveries |
+| Cloud Hop | Mây | Six sequential courses with double jumps, wind, drifting rings and optional feathers | 6 rings per course |
+| Colour Studio | Dâu | Combine two primary/white paint pots into a requested colour; see the mix on a flower sculpture | 4 mixes |
+| Bridge Builder | Sỏi | Rotate nine path tiles, connect reciprocal edges from entrance to exit, and send a boat | 3 layouts |
+
+Each session starts with three hearts. Mistakes show specific feedback and remove one heart. A successful round awards 100 points; completing a game adds 25 points per remaining heart and records 1–3 stars. A finished game unlocks its host's friendship memory. Replays can improve best scores and stars. There is no countdown, payment, energy gate or account-currency reward.
+
+The 3D arena uses the same original companion factory as the village and character page. Walking games have acceleration and braking, click destinations, contact-triggered interactions, bounded ground, solid building/bed/post-box bases and visible carried items. Cloud Hop adds vertical velocity, gravity, airborne ring collection and hazard checkpoints. Recipe games show ingredient layers or mixed paint. Bridge Builder validates a connected graph, then moves a little boat along the successful path. Correct actions produce a celebration; mistakes produce a sad expression and encouraging feedback.
+
+## Source structure
+
+- `lib/game/festival.ts`: typed game catalog, stall positions and shoreline; metadata comes from the Go-embedded `backend/internal/fair/catalog.json`.
+- `lib/game/festival-session.ts`: session state machine, round data, recipes, sequence playback and path connectivity.
+- `lib/game/three/festival-arena.ts`: scene geometry, player simulation, ray picking, audio cues and visual reactions.
+- `lib/game/three/fair-view.ts`: orthographic framing of playable objects across narrow and wide viewports.
+- `lib/game/fair-navigation.ts`: visibility-graph routes around other interactables when a walking destination is selected.
+- `lib/game/three/fairground.ts`: island, promenade, entrance, central sculpture and eight modular pavilions.
+- `components/game/FestivalGame.tsx`: instructions, HUD, accessible choice controls, touch movement, pause/help/result dialogs and saving completed results.
+- `components/game/FestivalHub.tsx`: game discovery and friendship scrapbook.
+- `components/game/FairProgressProvider.tsx` and `lib/game/fair-progress.ts`: verified account identity, durable browser queue, legacy guest migration and idempotent uploads.
+- `backend/internal/fair`, `backend/internal/store/fair.go`: account records, score rules and transactional completion ledger.
+- `components/game/PlayerJourney.tsx` and `lib/game/journey.ts`: shared story timeline, 24 companion milestone sets, next activities and companion selection.
+- `lib/game/personalities.ts`: 24 original character profiles and eight expression definitions.
+- `lib/game/three/expressions.ts`: curved facial meshes and portable expression animation clips.
+
+## Persistence and input
+
+Guests retain the original `loccao.friendship-fair.v1` scrapbook as a baseline. New guest completions use an append-only local journal; duplicate run IDs cannot add a second visit. Accounts use authenticated `GET /v1/fair` and `POST /v1/fair/completions`, with a UUID per completed run. Go validates known games and 1–3 stars, derives scores, and commits the run ledger and account summary atomically in PostgreSQL. Account saves never merge with guest saves automatically.
+
+Completed account runs are queued under a distinct browser key per account and run before upload. Lost responses can retry safely; queued records survive page navigation and reload and can sync on reconnection or Retry sync. A verified account can reopen its cached scrapbook offline; a new or expired session must connect/sign in. The UI distinguishes local, queued, confirmed account and temporary memory-server states. Fair results are personal client-reported keepsakes and do not award learning evidence, XP, coins or competitive points.
+
+Account refreshes and completion responses merge with confirmed records for that same account. A delayed response or storage event cannot lower its stars, best score or visit count after another tab has saved a newer result. Pending runs stay in their separate queue until acknowledged by the server.
+
+`/journey` derives three friendship milestones for every one of the 24 characters: a chapter greeting quest, a restored chapter page and one fair memory. Complete all three to reveal the character’s dream. The same page links story progression, deeper learning and fair activities, and saves companion selection through the adventure service.
+
+All eight games keep a device-local checkpoint each second and on page exit. Checkpoints retain the run UUID, round, hearts, elapsed time, optional feathers, recipes, carried objects, tile rotations and melody state. They are scoped to account/game/course and expire after seven days. Continue resumes a Cloud Hop player at the last safe ring. A pending win keeps its exact result for retry; successful saving or a loss clears the checkpoint. Completed account results sync to the server; unfinished checkpoints stay on this device. Window blur and document hiding pause play until explicitly resumed. Muting removes sound while the numbered visual cue sequence remains available. Reduced motion suppresses decorative bobbing and idle loops while intentional movement and game cues remain visible.
+
+Mouse/touch can select 3D objects; non-walking games also provide regular buttons and number keys. WASD/arrows and touch arrows move the companion in walking games. Space or the Jump button triggers Cloud Hop jumps without cancelling the selected walking destination. The centre of each visible ring is clickable; collected hidden rings cannot intercept clicks. Escape pauses or resumes. Dialogs trap focus and make the playfield/UI inert.
+
+## Mây’s sky atlas
+
+Cloud Hop is the first game with a full course progression loop: learn a move, use it on a changed route, combine skills, then replay for optional achievements. Its six authored courses share `backend/internal/fair/courses.json` between the frontend and Go service:
+
+1. **First Flight** teaches walking and jumping over puddles.
+2. **Paper Trail** introduces detours for three optional feathers.
+3. **High Hopes** unlocks a second airborne jump and high rings.
+4. **Breezy Bend** adds a changing lateral breeze and a visible streamer.
+5. **Dancing Clouds** introduces gently moving targets.
+6. **Homeward Sky** combines the moves to complete Mây’s atlas.
+
+Finishing unlocks the next course. Each course offers three badges: finish, keep all three hearts, and find all three feathers. Clean-flight and feather badges can be earned on separate replays; a slower replay never erases the best time. Target times are optional and do not gate progress. Older Cloud Hop completions also unlock Paper Trail.
+
+`fair-courses.ts` defines course records and merging. `fair-checkpoints.ts` handles owner-scoped local recovery. The account completion ledger stores the course ID, elapsed milliseconds and feather count alongside the original run fields. Go checks sequential unlocks and exact retry metadata inside the account transaction. Queued account completions make the next course available offline and upload in chronological order. Migration `012_fair_courses.sql` adds the ledger fields without changing old results.
+
+The other seven fair games share checkpoint recovery but retain their existing rounds. They do not yet have separate course catalogs or progression abilities.
+
+## Readable playfields
+
+The camera fits playable objects instead of retreating to include the entire decorative island. Companions, ingredient pots and cloud rings are larger. Text uses projected HTML buttons at 16–18 px (20–21 px for ring numbers), so it stays sharp and does not shrink with the scene. Each label selects its associated object. Bridge numbers sit in the corner of a tile, leaving the connecting paths visible.
+
+The arena reserves space for the actual heights of the objective and feedback, including wrapped text. Labels stay inside the viewport and separate when zooming. The camera controls offer 100–180% zoom and a one-click fit reset; walking games follow the companion when zoomed in. Resizing or zooming preserves the current round, recipe and score. Desktop, phone and short in-app panels use the same controls.
+
+## Asset delivery
+
+`npm run assets:3d` exports the runtime factories as 45 GLBs: 24 characters, 7 chapter buildings, 8 fair pavilions, 4 small environment assets, the complete village and the fairground scene. Each companion includes 6 body clips and 8 expression clips. The ZIP includes the manifest, provenance, `character-bible.json` and `fair-games.json`. Original illustration files are unchanged.
+
+See [system validation](SYSTEM-VALIDATION.md) for the current build, backend, PostgreSQL, AI and browser results. The arena splits each rendered frame into simulation steps no larger than 1/60 second, keeping movement, gravity, round timers and collision checks on the same clock. Catch-up is bounded to one second per rendered frame, and pause/resume resets that clock. Click-to-walk routes around other objects and only interacts with the chosen destination; keyboard and touch movement retain contact-based interactions. Software rendering disables expensive shadows.

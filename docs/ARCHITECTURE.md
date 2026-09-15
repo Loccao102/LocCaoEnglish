@@ -13,7 +13,7 @@
 Next.js App Router UI. Browser-native speech synthesis and speech recognition provide a zero-cost development path for listening/shadowing.
 
 ### API
-Go `net/http` service. Owns accounts, skill confidence, XP, attempts, reviews and daily-plan construction. It can use PostgreSQL or in-memory demo mode.
+Go `net/http` service. Owns accounts, skill confidence, XP, attempts, reviews, daily-plan construction, adventure saves and idempotent fair completions. It can use PostgreSQL or in-memory demo mode.
 
 ### AI service
 FastAPI service with four contracts:
@@ -29,7 +29,7 @@ It can call a configured OpenAI-compatible chat endpoint or use local determinis
 Durable learner state. Schema is created idempotently by the API and also documented under `backend/migrations`.
 
 ### Redis
-Provisioned for future queues, realtime session state and generated-content caching. No core MVP route depends on it yet.
+Stores presence, challenge state, pub/sub and rate limits. The realtime service reports an explicit in-memory fallback when Redis is unavailable; PostgreSQL-backed player progress remains durable.
 
 ## Skill confidence
 
@@ -51,3 +51,7 @@ Answers under 85% accuracy enter the review queue. Review grading uses a small S
 - Session tokens use HMAC-SHA256 signed JWT-shaped tokens with expiry.
 - The repository default secret is development-only and must be changed for deployment.
 - Raw speaking audio is not uploaded in the current browser transcript mode.
+
+## Player journey
+
+See [ADR 001](decisions/001-unified-player-journey.md) for the shared catalog, guest/account boundary, offline completion queue, transactional ledger and derived companion friendship milestones.

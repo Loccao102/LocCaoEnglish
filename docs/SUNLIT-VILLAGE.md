@@ -4,6 +4,8 @@ The learning world is a small sunlit lagoon village. Its memorable detail is a s
 
 ## Deliverables
 
+This document describes the illustration collection. The live adventure now uses the original 3D models in `lib/game/three/`, with GLB exports, a manifest and provenance in `public/assets/sunlit-3d/`. Download the separate `public/assets/sunlit-3d-pack.zip` or use `/art-studio`. Regenerate this collection with `npm run assets:3d`; see `docs/ADVENTURE.md` for the renderer and interaction structure.
+
 The reusable pack lives in `public/assets/sunlit-village/`; `public/assets/sunlit-village-pack.zip` is the downloadable delivery. `/art-studio` previews all 41 entries with category filters and downloads. Generated bitmap art retains its original transparent PNG bytes; editable SVG provides terrain, paths and the emblem. `village-illustrated.svg` is a standalone export of the complete map with embedded artwork, usable without the app. Exact prompts, provenance, SHA-256 hashes and the manifest are included.
 
 | Category | Count | Source |

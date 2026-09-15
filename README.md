@@ -1,16 +1,44 @@
 # LocCao English
 
-Game-first English learning platform with adaptive quests, vocabulary graphs, mini-games, listening, dictation, speaking, IELTS-style practice, spaced repetition, AI role-play missions and progression systems.
+A 3D English adventure in Sunlit Village, with articulated characters, a seven-chapter story and a separate learning journal for deeper practice.
+
+## The Seven Sun Pages
+
+Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or click a destination to walk there. Hold **Shift** to run, **Space** to jump, and right-drag to orbit the camera. Speak to a nearby guide or open a chest with **E** and complete English challenges to restore the village’s lost story.
+
+- Seven places, fourteen sequential quests and forty-two authored challenges.
+- A Three.js world with solid geometry, real-time lighting and shadows, camera-relative movement and collision boundaries.
+- Twenty-four original chibi companions with idle, walk, run, jump, wave and celebration clips. Their bean silhouettes, tiny limbs, large eyes and accessories follow the original illustration reference.
+- Eight collectible word seeds and three hinged discovery chests, with original synthesized sound effects.
+- Choice, sentence building, typed answers and listening with optional transcripts.
+- At least two correct answers out of three to pass; failed quests can be retried.
+- First-clear XP and sun coins, best-star replays, seven collectible Sun Pages and twenty-four companions.
+- Journal (**J**), map (**M**), bag (**B**), and pause/resume (**Esc**).
+- Guest saves stay on the device. Signed-in saves use the Go API and PostgreSQL; guest progress is separate from account progress.
+
+See [adventure architecture and handoff](docs/ADVENTURE.md) for the game loop, routes, persistence, controls and current validation status.
+
+Visit `/characters` to inspect every model, turn it through 360 degrees and preview six body animations and eight facial expressions. Choose any of the twenty new friends for free in the adventure Bag; existing companion purchases are preserved. Each of the 24 friends hosts a different learning route.
 
 ## Sunlit Village art pack
 
-The original **Làng Nắng / Sunlit Village** collection brings 41 reusable assets into Camp, World Map, world selection, profiles, onboarding and rewards. Browse `/art-studio` or download `public/assets/sunlit-village-pack.zip`. The map supports live unlocks and an explicit offline preview.
+The playable world is built from original mesh factories in `lib/game/three/`. Run `npm run assets:3d` to export twenty-four animated companions, seven individual buildings, a tree, a chest, a word seed, a butterfly and the complete village as GLB files. Browse `/art-studio` or download `public/assets/sunlit-3d-pack.zip`; the manifest and provenance are in `public/assets/sunlit-3d/`. Runtime construction uses the same source and does not download the exported world file.
+
+The original **Làng Nắng / Sunlit Village** illustration collection retains 41 reusable assets for maps, portraits, the learning journal, profiles, onboarding and rewards. Download `public/assets/sunlit-village-pack.zip`. The learning progress map at `/progress` retains live unlocks and an explicit offline preview.
 
 See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, exact generation prompts, provenance, source files, and validation commands. A complete standalone illustrated SVG map is included.
 
+## One player journey
+
+Open `/journey` for the seven-chapter timeline, eight fair stamps, 24 friendship profiles, saved travelling companion and next learning activity. Each friend has three visible story/fair milestones; completed friendships reveal a personal dream. Guest and account saves remain separate.
+
 ## Player loop
 
-Onboarding → Daily Quest → XP → Level → World Unlock → Evidence Gate → Boss → Trophy/Cosmetic → next chapter.
+Cloud Hop at `/festival/cloud-hop` now has Mây’s six-course sky atlas: learn jumps, explore feather detours, unlock a double jump, steer through wind and catch drifting rings. Completing a course unlocks the next; replays improve three optional badges and personal best times. All eight fair games support device-local unfinished checkpoints; completed account course records use the durable fair queue and PostgreSQL. See [Friendship Fair](docs/FRIENDSHIP-FAIR.md) for scope and controls.
+
+Explore → Meet a guide → Complete three challenges → Earn stars and first-clear rewards → Restore a Sun Page → Unlock the next chapter.
+
+The learning journal at `/camp` also retains adaptive daily quests, review, practice campaigns, achievements and account cosmetics. These use the existing learning progression system; adventure chapter unlocks depend on story completion, and adventure XP is labelled separately in the game HUD.
 
 ## Travel District campaign
 
@@ -70,8 +98,28 @@ docker compose up --build
 - API: `http://localhost:8080/health`
 - AI: `http://localhost:8090/health`
 
+For hot-reload development with Go and Python installed:
+
+```bash
+docker compose up -d postgres redis
+python -m venv .cache/ai-env
+# Activate the virtual environment, then:
+pip install -r ai-service/requirements.txt
+npm ci
+npm run dev:stack
+```
+
+This starts Web on port 3102, API on 8080 and AI on 8090. Open `/journey`. Set `DATABASE_URL`, `REDIS_URL`, `PYTHON_BIN`, `WEB_PORT` or `CORS_ORIGINS` to override defaults. `--services-only` reuses an already running web server; `--memory` explicitly starts a temporary account store. Stop the stack with Ctrl+C; PostgreSQL data is retained.
+
 External LLM configuration is optional. Local deterministic fallback engines keep the learning loop usable without a model API.
 
 ## Production boundary
 
 IELTS Writing/Speaking results are practice estimates, not official examiner scores. Acoustic pronunciation scoring is available when the configured speech provider is present; otherwise the product explicitly falls back to non-acoustic signals. Production deployment also supports the standalone Next.js image, Caddy reverse proxy, PostgreSQL, Redis and isolated API/AI services.
+
+
+### The Friendship Fair
+
+Visit /festival for eight new 3D mini-games and a friendship scrapbook, or use the southern bridge in /play. Bubble Meadow, Little Garden, Echo Pond, Tea Time, Parcel Trail, Cloud Hop, Colour Studio and Bridge Builder have distinct movement, memory, recipe or spatial mechanics. The game library now contains 20 games and learning activities. Finished fair games save best scores, stars and character memories to the signed-in account, with a separate guest scrapbook on the current device. Offline completed runs wait in an account-specific queue and retry without duplicating visits.
+
+All 24 friends have round chibi models, personal stories, traits, favourites, dreams and individual idle mannerisms. The reusable collection now contains 45 GLB models with a character bible and fair-game catalog. See docs/FRIENDSHIP-FAIR.md and docs/CHIBI-CAST.md.

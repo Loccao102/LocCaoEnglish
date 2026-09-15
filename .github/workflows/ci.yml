@@ -14,12 +14,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm ci
+      - run: npm run test:game
+      - run: npm run assets:verify:3d
       - run: npm run assets:verify
       - run: npm run build
 
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: loccao
+          POSTGRES_PASSWORD: loccao
+          POSTGRES_DB: loccao_system_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U loccao -d loccao_system_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://loccao:loccao@127.0.0.1:5432/loccao_system_test?sslmode=disable
     defaults:
       run:
         working-directory: backend
@@ -29,8 +44,8 @@ jobs:
         with:
           go-version: '1.23.x'
           cache-dependency-path: backend/go.sum
-      - run: go mod tidy
-      - run: go test ./...
+      - run: go mod download
+      - run: go test -race ./...
       - run: go vet ./...
 
   ai-service:
@@ -129,7 +144,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Build and start application stack
         run: |

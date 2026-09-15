@@ -1,0 +1,719 @@
+{
+  "version": 3,
+  "expressions": [
+    {
+      "id": "happy",
+      "label": "Happy",
+      "icon": "☺"
+    },
+    {
+      "id": "joy",
+      "label": "Joyful",
+      "icon": "✦"
+    },
+    {
+      "id": "curious",
+      "label": "Curious",
+      "icon": "?"
+    },
+    {
+      "id": "thinking",
+      "label": "Thinking",
+      "icon": "…"
+    },
+    {
+      "id": "surprised",
+      "label": "Surprised",
+      "icon": "!"
+    },
+    {
+      "id": "sad",
+      "label": "Sad",
+      "icon": "☂"
+    },
+    {
+      "id": "sleepy",
+      "label": "Sleepy",
+      "icon": "☾"
+    },
+    {
+      "id": "love",
+      "label": "Affectionate",
+      "icon": "♡"
+    }
+  ],
+  "characters": [
+    {
+      "id": "mam",
+      "name": "Mầm",
+      "role": "The curious explorer",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/word-link",
+      "activity": "Word Link",
+      "greeting": "Every new word starts with a little hello.",
+      "design": {
+        "shape": "seed",
+        "hat": "sprout",
+        "outfit": "scarf",
+        "prop": "satchel",
+        "skin": "#FFE3AC",
+        "coat": "#2D968D",
+        "accent": "#F18D73"
+      },
+      "personality": {
+        "trait": "Brave little beginner",
+        "talent": "Finding a first step",
+        "favourite": "Dew on new leaves",
+        "dream": "Map every friendly corner",
+        "story": "Mầm once got lost following a butterfly. Now every new path begins with an invitation for someone shy to come along.",
+        "habit": "Bounces twice before an adventure",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "nang",
+      "name": "Nắng",
+      "role": "The gentle librarian",
+      "cost": 50,
+      "family": "Meadow friends",
+      "route": "/learn",
+      "activity": "Lessons",
+      "greeting": "A good story always has room for one more friend.",
+      "design": {
+        "shape": "seed",
+        "hat": "curl",
+        "outfit": "apron",
+        "prop": "book",
+        "skin": "#FFD574",
+        "coat": "#278D89",
+        "accent": "#E88B70"
+      },
+      "personality": {
+        "trait": "Patient bookworm",
+        "talent": "Making difficult words feel small",
+        "favourite": "Warm library windows",
+        "dream": "Build a library with no quiet-only rooms",
+        "story": "Nắng keeps unfinished stories on the lowest shelf, where even the tiniest friend can reach them.",
+        "habit": "Tilts their glasses when listening",
+        "expression": "thinking"
+      }
+    },
+    {
+      "id": "may",
+      "name": "Mây",
+      "role": "The brave wayfinder",
+      "cost": 80,
+      "family": "Sky friends",
+      "route": "/travel",
+      "activity": "Travel District",
+      "greeting": "Take a little courage. Leave a little kindness.",
+      "design": {
+        "shape": "seed",
+        "hat": "cap",
+        "outfit": "scarf",
+        "prop": "map",
+        "skin": "#B9E0EF",
+        "coat": "#EF8F78",
+        "accent": "#E8BD72"
+      },
+      "personality": {
+        "trait": "Daydreaming wayfinder",
+        "talent": "Spotting patterns in the sky",
+        "favourite": "Clouds shaped like dumplings",
+        "dream": "Sail a paper boat through the clouds",
+        "story": "Mây draws maps with room for detours. The best destination is often a friend who needs company.",
+        "habit": "Sways as if carried by a breeze",
+        "expression": "curious"
+      }
+    },
+    {
+      "id": "soi",
+      "name": "Sỏi",
+      "role": "The inventive maker",
+      "cost": 120,
+      "family": "Workshop friends",
+      "route": "/work",
+      "activity": "Work District",
+      "greeting": "We can build a better sentence together.",
+      "design": {
+        "shape": "pebble",
+        "hat": "none",
+        "outfit": "overalls",
+        "prop": "pencil",
+        "skin": "#F3947B",
+        "coat": "#298F89",
+        "accent": "#FFD16F"
+      },
+      "personality": {
+        "trait": "Determined tinkerer",
+        "talent": "Turning mistakes into inventions",
+        "favourite": "Smooth pocket pebbles",
+        "dream": "Connect every island with a handmade bridge",
+        "story": "Sỏi's first bridge fell into a puddle. The second became a bench. The third is still carrying friends home.",
+        "habit": "Nods once before trying again",
+        "expression": "thinking"
+      }
+    },
+    {
+      "id": "bep",
+      "name": "Bếp",
+      "role": "The story chef",
+      "cost": 0,
+      "family": "Workshop friends",
+      "route": "/games/story-choice",
+      "activity": "Story Choice",
+      "greeting": "A pinch of imagination makes a lovely story.",
+      "design": {
+        "shape": "seed",
+        "hat": "chef",
+        "outfit": "apron",
+        "prop": "spoon",
+        "skin": "#FFD7B5",
+        "coat": "#F2987E",
+        "accent": "#8DBEA1"
+      },
+      "personality": {
+        "trait": "Generous kitchen whirlwind",
+        "talent": "Sharing comfort through food",
+        "favourite": "A spoon of pumpkin soup",
+        "dream": "Cook a meal for the whole village",
+        "story": "Bếp counts guests instead of portions. There is always one more bowl warming beside the stove.",
+        "habit": "Wiggles with delight when food is ready",
+        "expression": "joy"
+      }
+    },
+    {
+      "id": "bong",
+      "name": "Bông",
+      "role": "The tiny storyteller",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/reading",
+      "activity": "Reading Race",
+      "greeting": "There is a whole adventure between these pages.",
+      "design": {
+        "shape": "bunny",
+        "hat": "bow",
+        "outfit": "vest",
+        "prop": "book",
+        "skin": "#E9DAF7",
+        "coat": "#A896CB",
+        "accent": "#F4ADBA"
+      },
+      "personality": {
+        "trait": "Gentle storyteller",
+        "talent": "Helping quiet voices be heard",
+        "favourite": "Blankets and bedtime tales",
+        "dream": "Collect a story from every friend",
+        "story": "Bông writes down the stories people think are too small to matter, then gives them a starring role.",
+        "habit": "Ears bob when a story gets exciting",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "giot",
+      "name": "Giọt",
+      "role": "The careful listener",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/listening",
+      "activity": "Listen & Pick",
+      "greeting": "Little sounds can tell a big story.",
+      "design": {
+        "shape": "drop",
+        "hat": "headphones",
+        "outfit": "scarf",
+        "prop": "none",
+        "skin": "#A9DFE5",
+        "coat": "#3BA4AE",
+        "accent": "#F7CE76"
+      },
+      "personality": {
+        "trait": "Sensitive sound collector",
+        "talent": "Remembering melodies",
+        "favourite": "Rain on lily pads",
+        "dream": "Make an orchestra from everyday sounds",
+        "story": "Giọt heard music in a dripping tap. Their pond is now full of tiny instruments waiting for someone to listen.",
+        "habit": "Leans closer to a new sound",
+        "expression": "curious"
+      }
+    },
+    {
+      "id": "hat",
+      "name": "Hạt",
+      "role": "The sunny singer",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/speaking",
+      "activity": "Speaking Studio",
+      "greeting": "Your voice belongs in the conversation.",
+      "design": {
+        "shape": "chick",
+        "hat": "tuft",
+        "outfit": "bowtie",
+        "prop": "microphone",
+        "skin": "#FFE493",
+        "coat": "#EFAC63",
+        "accent": "#79BAA4"
+      },
+      "personality": {
+        "trait": "Fearless tiny performer",
+        "talent": "Giving others confidence",
+        "favourite": "Humming at sunrise",
+        "dream": "Sing a duet with every neighbour",
+        "story": "Hạt used to sing only to flowers. A friendly echo convinced them that even a small voice can fill a valley.",
+        "habit": "Keeps a little rhythm with their feet",
+        "expression": "joy"
+      }
+    },
+    {
+      "id": "com",
+      "name": "Cốm",
+      "role": "The word gardener",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/word-graph",
+      "activity": "Word Graph",
+      "greeting": "A word grows when you give it a connection.",
+      "design": {
+        "shape": "seed",
+        "hat": "leaf",
+        "outfit": "overalls",
+        "prop": "watering",
+        "skin": "#C5E3A3",
+        "coat": "#72AD82",
+        "accent": "#FFD28A"
+      },
+      "personality": {
+        "trait": "Tender green-fingered friend",
+        "talent": "Knowing when to wait",
+        "favourite": "The first sprout of spring",
+        "dream": "Grow a garden that feeds everyone",
+        "story": "Cốm names every seed, including the ones that take their time. In this garden, growing slowly is still growing.",
+        "habit": "Crouches to greet new seedlings",
+        "expression": "love"
+      }
+    },
+    {
+      "id": "mit",
+      "name": "Mít",
+      "role": "The clue collector",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/collocation-factory",
+      "activity": "Collocation Factory",
+      "greeting": "Some words are happiest side by side.",
+      "design": {
+        "shape": "seed",
+        "hat": "detective",
+        "outfit": "vest",
+        "prop": "lens",
+        "skin": "#F2CD79",
+        "coat": "#93AD6A",
+        "accent": "#D79766"
+      },
+      "personality": {
+        "trait": "Playful pocket detective",
+        "talent": "Noticing overlooked clues",
+        "favourite": "Mismatched buttons",
+        "dream": "Solve the mystery of the missing moon biscuit",
+        "story": "Mít's biggest discoveries are usually small kindnesses. Their notebook has a whole chapter about who leaves flowers on doorsteps.",
+        "habit": "Raises one eyebrow at a clue",
+        "expression": "curious"
+      }
+    },
+    {
+      "id": "dao",
+      "name": "Đào",
+      "role": "The letter carrier",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/dictation",
+      "activity": "Dictation",
+      "greeting": "I saved every word, just for you.",
+      "design": {
+        "shape": "seed",
+        "hat": "beret",
+        "outfit": "scarf",
+        "prop": "letter",
+        "skin": "#F9C0BD",
+        "coat": "#BA849D",
+        "accent": "#92C7B6"
+      },
+      "personality": {
+        "trait": "Thoughtful letter carrier",
+        "talent": "Remembering what makes people smile",
+        "favourite": "Handwritten postcards",
+        "dream": "Deliver a letter to the farthest island",
+        "story": "Đào writes a tiny encouraging note on every parcel. Nobody has worked out who sends them yet.",
+        "habit": "Gives a little wave at every doorway",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "dau",
+      "name": "Dâu",
+      "role": "The little painter",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/games/sentence-builder",
+      "activity": "Sentence Builder",
+      "greeting": "Let us paint a sentence, one word at a time.",
+      "design": {
+        "shape": "berry",
+        "hat": "crown",
+        "outfit": "apron",
+        "prop": "brush",
+        "skin": "#F3A2AB",
+        "coat": "#54A392",
+        "accent": "#FFE099"
+      },
+      "personality": {
+        "trait": "Expressive colour explorer",
+        "talent": "Seeing beauty in surprises",
+        "favourite": "Paint on their apron",
+        "dream": "Paint a mural that everyone adds to",
+        "story": "Dâu never throws away a mixed-up colour. Yesterday's accident might be tomorrow's sunset.",
+        "habit": "Tilts their head to frame a scene",
+        "expression": "joy"
+      }
+    },
+    {
+      "id": "bo",
+      "name": "Bơ",
+      "role": "The gentle writer",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/ielts/writing",
+      "activity": "IELTS Writing",
+      "greeting": "Your ideas deserve a place on the page.",
+      "design": {
+        "shape": "avocado",
+        "hat": "leaf",
+        "outfit": "vest",
+        "prop": "quill",
+        "skin": "#9BCA82",
+        "coat": "#74A17B",
+        "accent": "#F0BC7D"
+      },
+      "personality": {
+        "trait": "Reflective word gardener",
+        "talent": "Finding the right gentle phrase",
+        "favourite": "Fresh notebooks",
+        "dream": "Write a story with twenty-four endings",
+        "story": "Bơ keeps words like seeds: some need a quiet page, some need a little sunshine, and some need a friend.",
+        "habit": "Pauses with a tiny thoughtful smile",
+        "expression": "thinking"
+      }
+    },
+    {
+      "id": "na",
+      "name": "Na",
+      "role": "The pattern finder",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/placement",
+      "activity": "Placement Adventure",
+      "greeting": "Let us find the next small step for you.",
+      "design": {
+        "shape": "seed",
+        "hat": "triple",
+        "outfit": "bowtie",
+        "prop": "cards",
+        "skin": "#DEF0BC",
+        "coat": "#80B39C",
+        "accent": "#E9BA8C"
+      },
+      "personality": {
+        "trait": "Cheerful pattern finder",
+        "talent": "Making order out of a muddle",
+        "favourite": "Perfectly uneven collections",
+        "dream": "Invent a puzzle everyone can solve together",
+        "story": "Na sorts shells by the memories they hold, which is why nobody else understands the system yet.",
+        "habit": "Counts little steps under their breath",
+        "expression": "curious"
+      }
+    },
+    {
+      "id": "me",
+      "name": "Me",
+      "role": "The brave little pilot",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/missions/airport",
+      "activity": "Airport Mission",
+      "greeting": "A deep breath. A kind question. We are on our way.",
+      "design": {
+        "shape": "seed",
+        "hat": "aviator",
+        "outfit": "scarf",
+        "prop": "map",
+        "skin": "#CEA68C",
+        "coat": "#9CCAD3",
+        "accent": "#F4D199"
+      },
+      "personality": {
+        "trait": "Cautious sky adventurer",
+        "talent": "Preparing for the unexpected",
+        "favourite": "A reliable compass",
+        "dream": "Fly beyond the peach-coloured horizon",
+        "story": "Me checks the weather twice and packs three snacks. Being careful has taken them on some wonderfully brave journeys.",
+        "habit": "Peeks around before taking off",
+        "expression": "surprised"
+      }
+    },
+    {
+      "id": "quyt",
+      "name": "Quýt",
+      "role": "The pocket conductor",
+      "cost": 0,
+      "family": "Meadow friends",
+      "route": "/missions/transit",
+      "activity": "City Transit",
+      "greeting": "There is always another way to get there.",
+      "design": {
+        "shape": "orange",
+        "hat": "conductor",
+        "outfit": "vest",
+        "prop": "ticket",
+        "skin": "#FFC479",
+        "coat": "#69AAA0",
+        "accent": "#FFF0B4"
+      },
+      "personality": {
+        "trait": "Dependable little conductor",
+        "talent": "Helping everyone arrive together",
+        "favourite": "The station bell",
+        "dream": "Run a train with room for every friend",
+        "story": "Quýt once delayed a departure for a sleepy snail. The passengers still call it their favourite journey.",
+        "habit": "Bobs to the rhythm of imaginary rails",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "sen",
+      "name": "Sen",
+      "role": "The patient mentor",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/ielts",
+      "activity": "IELTS Studio",
+      "greeting": "Small, steady steps will take you far.",
+      "design": {
+        "shape": "seed",
+        "hat": "lotus",
+        "outfit": "scarf",
+        "prop": "book",
+        "skin": "#F8C4D9",
+        "coat": "#B595CE",
+        "accent": "#8AC2B1"
+      },
+      "personality": {
+        "trait": "Calm encouraging mentor",
+        "talent": "Seeing progress others miss",
+        "favourite": "Still water at dawn",
+        "dream": "Help a shy friend become a mentor too",
+        "story": "Sen keeps a jar of tiny successes: a first sentence, a brave question, a try-again. It is nearly overflowing.",
+        "habit": "Sways slowly when listening",
+        "expression": "love"
+      }
+    },
+    {
+      "id": "truc",
+      "name": "Trúc",
+      "role": "The mindful reviewer",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/review",
+      "activity": "Spaced Review",
+      "greeting": "Let us visit the words we already know.",
+      "design": {
+        "shape": "panda",
+        "hat": "none",
+        "outfit": "scarf",
+        "prop": "cards",
+        "skin": "#F8EDCD",
+        "coat": "#80AA83",
+        "accent": "#E5BF75"
+      },
+      "personality": {
+        "trait": "Steady bamboo guardian",
+        "talent": "Making good habits feel cosy",
+        "favourite": "An afternoon bamboo snack",
+        "dream": "Plant a forest of shared memories",
+        "story": "Trúc returns to the same path each morning and always notices something new. Familiar things can still surprise you.",
+        "habit": "Rocks gently from heel to toe",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "gao",
+      "name": "Gạo",
+      "role": "The quiet dreamer",
+      "cost": 0,
+      "family": "Sky friends",
+      "route": "/ielts/listening",
+      "activity": "IELTS Listening",
+      "greeting": "Slow down. Listen for the little details.",
+      "design": {
+        "shape": "rice",
+        "hat": "nightcap",
+        "outfit": "scarf",
+        "prop": "star",
+        "skin": "#FFF1D4",
+        "coat": "#B4B6DC",
+        "accent": "#F4CE84"
+      },
+      "personality": {
+        "trait": "Sleepy star dreamer",
+        "talent": "Imagining impossible possibilities",
+        "favourite": "A cushion under the night sky",
+        "dream": "Name a constellation after the village",
+        "story": "Gạo falls asleep halfway through a wish and wakes up with a new idea. Their pockets are full of crumpled star maps.",
+        "habit": "Blinks slowly before a tiny yawn",
+        "expression": "sleepy"
+      }
+    },
+    {
+      "id": "duong",
+      "name": "Đường",
+      "role": "The warm welcome",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/missions/hotel",
+      "activity": "Hotel Mission",
+      "greeting": "Come in. There is a cosy place for your words.",
+      "design": {
+        "shape": "bear",
+        "hat": "pom",
+        "outfit": "scarf",
+        "prop": "key",
+        "skin": "#F7E7C6",
+        "coat": "#83BDC3",
+        "accent": "#F0B4A7"
+      },
+      "personality": {
+        "trait": "Warm-hearted host",
+        "talent": "Making strangers feel at home",
+        "favourite": "A freshly made guest bed",
+        "dream": "Open an inn on every island",
+        "story": "Đường remembers how lonely their first night in the village felt. Every guest now finds a welcome pebble on their pillow.",
+        "habit": "Opens their arms when greeting someone",
+        "expression": "love"
+      }
+    },
+    {
+      "id": "moca",
+      "name": "Moca",
+      "role": "The café friend",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/conversation",
+      "activity": "Conversation Café",
+      "greeting": "A warm cup and a friendly conversation.",
+      "design": {
+        "shape": "bear",
+        "hat": "none",
+        "outfit": "apron",
+        "prop": "cup",
+        "skin": "#CBA48C",
+        "coat": "#42988F",
+        "accent": "#F6D8AA"
+      },
+      "personality": {
+        "trait": "Quietly observant barista",
+        "talent": "Remembering everyone's favourite cup",
+        "favourite": "Honey tea after rain",
+        "dream": "Create a drink for every mood",
+        "story": "Moca can tell when a friend needs conversation and when they just need a warm cup and a quiet place to sit.",
+        "habit": "Nods softly while a kettle warms",
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "tim",
+      "name": "Tím",
+      "role": "The sentence mender",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/games/grammar-repair",
+      "activity": "Grammar Repair",
+      "greeting": "A tiny change can make everything click.",
+      "design": {
+        "shape": "cat",
+        "hat": "bow",
+        "outfit": "vest",
+        "prop": "pencil",
+        "skin": "#D2C1EC",
+        "coat": "#A391C3",
+        "accent": "#F4C68F"
+      },
+      "personality": {
+        "trait": "Resourceful little mender",
+        "talent": "Making broken things feel loved",
+        "favourite": "Colourful spare buttons",
+        "dream": "Repair the village's old story clock",
+        "story": "Tím believes a patch is a memory you can wear. Every repair leaves something a little more interesting than before.",
+        "habit": "Ears twitch when an idea arrives",
+        "expression": "thinking"
+      }
+    },
+    {
+      "id": "cuon",
+      "name": "Cuộn",
+      "role": "The paper explorer",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/ielts/reading",
+      "activity": "IELTS Reading",
+      "greeting": "Follow the clues hidden in every paragraph.",
+      "design": {
+        "shape": "fox",
+        "hat": "beret",
+        "outfit": "vest",
+        "prop": "scroll",
+        "skin": "#E9B58F",
+        "coat": "#68A59A",
+        "accent": "#FFE1AC"
+      },
+      "personality": {
+        "trait": "Curious trail chronicler",
+        "talent": "Connecting clues across stories",
+        "favourite": "Scrolls with secret folds",
+        "dream": "Find the village's forgotten first story",
+        "story": "Cuộn follows footnotes as if they were forest paths. Sometimes they lead to treasure; usually they lead to another friend.",
+        "habit": "Peeks over a scroll with bright eyes",
+        "expression": "curious"
+      }
+    },
+    {
+      "id": "bui",
+      "name": "Bụi",
+      "role": "The woodland guide",
+      "cost": 0,
+      "family": "Woodland friends",
+      "route": "/practice-generator",
+      "activity": "Practice Workshop",
+      "greeting": "Something wonderful is waiting to be discovered.",
+      "design": {
+        "shape": "seed",
+        "hat": "mushroom",
+        "outfit": "scarf",
+        "prop": "satchel",
+        "skin": "#F3D7B0",
+        "coat": "#D99085",
+        "accent": "#84BDA8"
+      },
+      "personality": {
+        "trait": "Bashful forest protector",
+        "talent": "Caring for overlooked creatures",
+        "favourite": "Mushrooms after a shower",
+        "dream": "Make the woods safe for the smallest visitor",
+        "story": "Bụi is shy around crowds but fearless when a beetle needs help. Their mushroom hat is a favourite shelter in the rain.",
+        "habit": "Peeks out, then offers a small wave",
+        "expression": "happy"
+      }
+    }
+  ]
+}

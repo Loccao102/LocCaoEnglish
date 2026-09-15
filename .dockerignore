@@ -10,3 +10,9 @@ test-results
 *.log
 README.md
 docs
+.npm-cache
+.cache
+backend/*.exe
+
+__pycache__
+*.pyc

@@ -11,3 +11,9 @@ coverage
 playwright-report
 test-results
 *.tsbuildinfo
+.npm-cache
+.cache
+backend/*.exe
+
+__pycache__/
+*.pyc

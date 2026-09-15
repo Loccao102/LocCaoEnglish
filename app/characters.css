@@ -1,0 +1,67 @@
+/* The chibi cast: portraits are snapshots of the live 3D models. */
+.companion-portrait { position: relative; display: inline-block; background: none !important; overflow: visible; }
+.companion-portrait > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.portrait-loading { display: grid; place-items: center; width: 64%; height: 64%; margin: 18%; border-radius: 46%; color: #816447; font: bold 22px Georgia, serif; opacity: .5; }
+.character-studio { padding-bottom: 60px; }
+.character-studio-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 36px 0 28px; }
+.character-studio-heading h1 { font: 58px/.98 Georgia, serif; letter-spacing: -.055em; margin: 14px 0 20px; color: #346659; }
+.character-studio-heading p:not(.eyebrow) { font-size: 14px; line-height: 1.8; max-width: 540px; color: #6C8374; }
+.character-feature { display: grid; grid-template-columns: 1.1fr 1fr; border: 1px solid #DBE4CD; border-radius: 30px; background: #F5F5E7; overflow: hidden; margin-bottom: 36px; }
+.character-preview { position: relative; min-width: 0; padding: 10px 20px 24px; background: radial-gradient(ellipse at 50% 54%, color-mix(in srgb, var(--friend-tint, #FFE3AC) 65%, white), #F4F3E400 69%); }
+.character-preview-canvas { width: 100%; height: 400px; touch-action: pan-y; cursor: grab; }
+.character-preview-canvas:active { cursor: grabbing; }
+.character-preview-canvas > canvas { width: 100%; height: 100%; display: block; }
+.character-turn { display: flex; gap: 22px; justify-content: center; align-items: center; margin-top: -16px; position: relative; }
+.character-turn button { width: 36px; height: 36px; border: 1px solid #DDD9BF; border-radius: 50%; color: #568674; background: #FFFCED; font-size: 22px; cursor: pointer; }
+.character-turn span { font-size: 10px; color: #859477; }
+.character-poses { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 18px 0 0; }
+.character-poses button { padding: 8px 12px; border-radius: 20px; border: 1px solid #DDDCC7; background: #FFFBED; color: #748269; text-transform: capitalize; font-size: 10px; cursor: pointer; }
+.character-poses button[aria-pressed="true"] { background: #458774; color: #FFF4D9; border-color: #458774; }
+.character-story { padding: 54px 36px 36px 10px; align-self: center; }
+.character-story h2 { color: #356A59; font: 72px/1 Georgia, serif; letter-spacing: -.055em; margin: 17px 0 12px; }
+.character-role { color: #AB8950; font-weight: 700; font-size: 14px; margin: 0; }
+.character-story blockquote { font: 23px/1.6 Georgia, serif; color: #76846A; margin: 26px 0; max-width: 370px; }
+.character-story .button { font-size: 12px; }
+.character-model-link { display: block; font-size: 11px; color: #6C8B77; margin: 19px 0; text-decoration: underline; text-underline-offset: 3px; }
+.character-bag-hint { font-size: 11px; line-height: 1.8; color: #959B7E; max-width: 330px; }
+.companion-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+.companion-filters button { padding: 10px 15px; min-height: 37px; border-radius: 30px; border: 1px solid #D4DFC9; background: #FAF8EC; color: #71816A; font-size: 11px; cursor: pointer; }
+.companion-filters button[aria-pressed="true"] { background: #356F60; color: #FFF4D5; border-color: #356F60; }
+.companion-roster { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 12px; }
+.companion-card { position: relative; display: flex; flex-direction: column; align-items: center; border: 1px solid #D8E1CC; border-radius: 20px; background: #FAF9EC; padding: 7px 10px 18px; text-align: center; cursor: pointer; min-width: 0; }
+.companion-card:hover { border-color: #82AA91; background: #FFFDF3; }
+.companion-card[aria-pressed="true"] { border: 2px solid #57947D; padding: 6px 9px 17px; background: color-mix(in srgb, var(--friend-tint) 22%, #FFFDF2); }
+.companion-card > .companion-portrait { width: 100%; height: auto; aspect-ratio: 1; max-width: 170px; }
+.companion-card strong { font: 23px/1.2 Georgia, serif; color: #3A6B57; margin: -3px 0 5px; }
+.companion-card > span:not(.companion-portrait) { font-size: 9px; line-height: 1.7; color: #859478; }
+.companion-card i { position: absolute; right: 11px; top: 10px; border-radius: 50%; background: #57947D; color: white; font-size: 10px; width: 19px; height: 19px; display: grid; place-items: center; font-style: normal; }
+.character-studio :focus-visible, .companion-collection :focus-visible, .character-preview :focus-visible { outline: 3px solid #C08A56; outline-offset: 3px; }
+.character-studio-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 1px solid #D9DFC9; margin-top: 36px; padding-top: 26px; }
+.character-studio-footer p { font-size: 12px; line-height: 1.8; color: #849278; max-width: 490px; }
+.character-studio-footer a { font-size: 11px; }
+.preview-error { position: absolute; top: 35%; left: 15%; width: 70%; color: #776D55; font-size: 12px; line-height: 1.7; text-align: center; }
+.learning-companion { display: flex; align-items: center; gap: 16px; width: min(1180px,calc(100% - 64px)); margin: 24px auto 0; padding: 2px 22px 2px 8px; background: #EDF2E3; border: 1px solid #DAE3CF; border-radius: 18px; }
+.learning-companion > .companion-portrait { flex: 0 0 78px; height: 78px; }
+.learning-companion > div { flex: 1; }
+.learning-companion span:not(.companion-portrait):not(.portrait-loading) { color: #689079; font-weight: 700; font-size: 10px; }
+.learning-companion p { margin: 6px 0; font: 17px/1.4 Georgia,serif; color: #547562; }
+.learning-companion > a { font-size: 10px; color: #829778; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.adventure-dialog.bag-dialog { width: min(940px,100%); max-width: 940px; }
+.bag-companion-preview { display: grid; grid-template-columns: 280px 1fr; align-items: center; background: #F0F1DA; border: 1px solid #D7DEC2; border-radius: 21px; margin: 20px 0; overflow: hidden; }
+.bag-companion-preview .character-preview { padding: 0 14px 20px; }
+.bag-companion-preview .character-preview-canvas { height: 260px; }
+.bag-companion-info { padding: 25px 30px 25px 10px; }
+.bag-companion-info > span { font-size: 9px; color: #8A9775; }
+.bag-companion-info h4 { font: 40px/1 Georgia,serif; color: #3E7059; margin: 12px 0; }
+.bag-companion-info p { color: #879574; line-height: 1.8; font-size: 12px; }
+.bag-companion-info .game-button { margin-top: 14px; font-size: 12px; }
+.bag-dialog .companion-roster { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.game-card .companion-portrait { width: 110px; height: 110px; }
+@media (max-width: 1050px) { .companion-roster { grid-template-columns: repeat(4,minmax(0,1fr)); }.character-story h2 { font-size: 59px; }.character-story blockquote { font-size: 20px; } }
+@media (max-width: 700px) { .character-studio-heading { display: block; padding-top: 20px; }.character-studio-heading h1 { font-size: 46px; }.character-studio-heading > a { margin-top: 8px; }.character-feature { grid-template-columns: 1fr; }.character-preview-canvas { height: 330px; }.character-story { padding: 15px 27px 28px; }.character-story h2 { font-size: 53px; margin: 12px 0; }.character-story blockquote { margin: 18px 0; }.companion-roster { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }.companion-card { padding: 6px 5px 13px; border-radius: 15px; }.companion-card[aria-pressed="true"] { padding: 5px 4px 12px; }.companion-card strong { font-size: 20px; }.companion-card > span:not(.companion-portrait) { font-size: 8px; }.companion-filters { gap: 5px; }.companion-filters button { padding: 8px 10px; font-size: 9px; }.character-studio-footer { display: block; }.learning-companion { width: calc(100% - 30px); padding-right: 12px; gap: 6px; margin-top: 16px; }.learning-companion > .companion-portrait { flex-basis: 62px; height: 68px; }.learning-companion p { font-size: 13px; }.learning-companion > a { display: none; }.bag-companion-preview { grid-template-columns: 1fr; }.bag-companion-preview .character-preview-canvas { height: 250px; }.bag-companion-info { padding: 5px 25px 25px; text-align: center; }.bag-dialog .companion-roster { grid-template-columns: repeat(3,minmax(0,1fr)); }.bag-companion-info h4 { font-size: 33px; } }
+
+/* System lettering keeps Vietnamese character names and tone marks together. */
+.character-story h2, .companion-card strong, .bag-companion-info h4 { font-family: "Segoe UI", "Arial", sans-serif; font-weight: 750; letter-spacing: -.035em; }
+.character-feature { scroll-margin-top: 86px; }
+
+.character-expressions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px 18px}.character-expressions button{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid #d5dfd6;background:#fffaf0;border-radius:14px;padding:8px 4px;color:#3c6260;font:600 11px sans-serif;cursor:pointer}.character-expressions button span{font-size:22px}.character-expressions button[aria-pressed=true]{background:#d9eee3;border-color:#318a79;box-shadow:0 0 0 1px #318a79}.character-trait{display:inline-block;border-radius:20px;background:#e9eebd;color:#556938;padding:6px 12px;font-weight:700;font-size:13px}.character-personality{display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px}.character-personality dt{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#7d9180;margin-bottom:4px}.character-personality dd{margin:0;line-height:1.6;color:#35574d}.character-feature{align-items:start}.character-feature .character-preview{position:sticky;top:20px}.character-studio-footer{flex-wrap:wrap;gap:16px}@media(max-width:720px){.character-feature .character-preview{position:static}.character-personality{gap:12px}}

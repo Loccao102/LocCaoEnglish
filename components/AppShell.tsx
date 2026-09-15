@@ -1,19 +1,14 @@
-import Link from "next/link";
-import GameArt from "./GameArt";
-import type { ReactNode } from "react";
+"use client";
 
-const nav = [
-  ["/", "⌂", "Camp"],
-  ["/worlds", "◫", "World Map"],
-  ["/learn", "⚑", "Quests"],
-  ["/word-graph", "◇", "Word Network"],
-  ["/games", "✦", "Arcade"],
-  ["/social", "⚔", "Arena"],
-  ["/review", "↻", "Recovery"],
-  ["/ielts", "▤", "IELTS Tower"],
-  ["/missions/airport", "☠", "Bosses"],
-];
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import LearningCompanion from "@/components/game/LearningCompanion";
+
+const navigation = [["/journey", "My journey"], ["/festival", "Fair"], ["/camp", "Learning journal"], ["/learn", "Lessons"], ["/progress", "Progress"], ["/review", "Review"], ["/account", "Account"]];
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  return <div className="app-shell"><aside className="sidebar"><Link href="/" className="brand" aria-label="LocCao English player camp"><span className="brand-mark"><img src="/assets/sunlit-village/village-mark.svg" alt="" width="38" height="38"/></span><span><strong>LocCao</strong><small>English</small></span></Link><nav className="sidebar-nav" aria-label="Player navigation">{nav.map(([href, icon, label]) => <Link href={href} key={label} className="nav-item"><span className="nav-icon">{icon}</span><span>{label}</span></Link>)}</nav><div className="sidebar-bottom"><div className="level-card"><div className="level-row"><span>Quest director</span><strong>ADAPTIVE</strong></div><div className="progress"><i style={{ width: "72%" }} /></div><small>Your mistakes decide what challenge appears next.</small></div><Link href="/account" className="profile-mini"><GameArt id="mam" className="avatar"/><span><strong>Adventurer</strong><small>Profile & loadout →</small></span></Link></div></aside><main className="main-content">{children}</main></div>
+  const pathname = usePathname();
+  if (["/", "/play", "/worlds"].includes(pathname) || pathname.startsWith("/festival/")) return <main className="adventure-shell">{children}</main>;
+  return <div className="study-shell"><header className="study-header"><Link href="/" className="study-return"><img src="/assets/sunlit-village/village-mark.svg" alt="" width="35" height="35"/><span>← Back to village</span></Link><nav aria-label="Learning navigation">{navigation.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}>{label}</Link>)}</nav></header><main className="study-content"><LearningCompanion pathname={pathname}/>{children}</main></div>;
 }
