@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { FestivalSession } from "../../lib/game/festival-session";
 import { festivalById, festivalGames } from "../../lib/game/festival";
 import { fairCourses, courseUnlocked } from "../../lib/game/fair-courses";
-import { applyFair, emptyFair, mergeFair, restoreFair } from "../../lib/game/fair-progress";
+import { applyFair, availableCourses, emptyFair, mergeFair, queueFair, queuedFair, restoreFair } from "../../lib/game/fair-progress";
 
 const tick=(session:FestivalSession,seconds=1.2)=>{for(let i=0;i<seconds*60;i++)session.tick(1/60);};
 
@@ -69,4 +69,20 @@ test("a checkpoint across a round transition or unsaved win keeps exact result d
   tick(first);tick(second);expect(second.state.phase).toBe("win");expect(second.state.elapsed).toBe(first.state.elapsed);
   const result=new FestivalSession(first.game,()=>{});expect(result.restore(JSON.parse(JSON.stringify(second.snapshot())))).toBe(true);
   tick(result,10);expect(result.state.elapsed).toBe(second.state.elapsed);expect(result.state.feathers).toEqual([0]);
+});
+
+test("queued course results unlock locally, keep exact metadata and stay with their owner",()=>{
+  const entries=new Map<string,string>();
+  const previous=Object.getOwnPropertyDescriptor(globalThis,"localStorage");
+  Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{get length(){return entries.size;},key:(index:number)=>[...entries.keys()][index],getItem:(key:string)=>entries.get(key)||null,setItem:(key:string,value:string)=>entries.set(key,value)}});
+  try{
+    const run={runId:"12345678-1234-4123-8123-123456789012",owner:"sky-explorer",gameId:"cloud-hop",courseId:"cloud-01"};
+    queueFair(run,3,{elapsedMs:42000,feathers:2});queueFair(run,3,{elapsedMs:42000,feathers:2});
+    expect(queuedFair(run.owner)).toHaveLength(1);
+    expect(queuedFair(run.owner)[0]).toMatchObject({courseId:"cloud-01",elapsedMs:42000,feathers:2,stars:3});
+    expect(courseUnlocked("cloud-02",availableCourses(emptyFair(),run.owner))).toBe(true);
+    expect(courseUnlocked("cloud-02",availableCourses(emptyFair(),"someone-else"))).toBe(false);
+    expect(()=>queueFair(run,3,{elapsedMs:41000,feathers:2})).toThrow();
+    expect(()=>queueFair(run,3,{elapsedMs:42000,feathers:3})).toThrow();
+  }finally{if(previous)Object.defineProperty(globalThis,"localStorage",previous);else Reflect.deleteProperty(globalThis,"localStorage");}
 });

@@ -92,3 +92,16 @@ test("a feather and safe Cloud Hop checkpoint survive a short-screen reload",asy
   await expect(page.getByRole("button",{name:"Collected feather 1",exact:true})).toBeDisabled();
   await expect(page.locator(".fair-objective")).toContainText("ROUND 1 / 6");
 });
+
+test("losing a game clears its earlier checkpoint instead of reviving a failed run",async({page})=>{
+  await page.goto("/festival/tea-time");await clickVisible(page,page.getByRole("button",{name:"Let’s play →"}));
+  const milk=page.getByRole("group",{name:"Playfield choices"}).getByRole("button",{name:"Milk",exact:true});
+  for(let attempt=0;attempt<3;attempt++){
+    for(let layer=0;layer<3;layer++)await milk.click();
+    await page.getByRole("button",{name:"Serve tea →"}).click();
+  }
+  await expect(page.getByRole("heading",{name:"Another try, little friend?"})).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button",{name:"Let’s play →"})).toBeEnabled();
+  await expect(page.getByRole("button",{name:"Continue saved game →"})).toHaveCount(0);
+});
