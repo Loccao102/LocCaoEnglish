@@ -32,6 +32,7 @@ The 3D arena uses the same original companion factory as the village and charact
 - `components/game/FairProgressProvider.tsx` and `lib/game/fair-progress.ts`: verified account identity, durable browser queue, legacy guest migration and idempotent uploads.
 - `backend/internal/fair`, `backend/internal/store/fair.go`: account records, score rules and transactional completion ledger.
 - `components/game/PlayerJourney.tsx` and `lib/game/journey.ts`: shared story timeline, 24 companion milestone sets, next activities and companion selection.
+- `components/game/FairJourneyProgress.tsx`, `useFairCheckpoints.ts` and `lib/game/fair-continuation.ts`: owner-scoped resume cards, course entry selection and atlas goals on the journey.
 - `lib/game/personalities.ts`: 24 original character profiles and eight expression definitions.
 - `lib/game/three/expressions.ts`: curved facial meshes and portable expression animation clips.
 
@@ -65,6 +66,10 @@ Finishing unlocks the next course. Each course offers three badges: finish, keep
 `fair-courses.ts` defines course records and merging. `fair-checkpoints.ts` handles owner-scoped local recovery. The account completion ledger stores the course ID, elapsed milliseconds and feather count alongside the original run fields. Go checks sequential unlocks and exact retry metadata inside the account transaction. Queued account completions make the next course available offline and upload in chronological order. Migration `012_fair_courses.sql` adds the ledger fields without changing old results.
 
 The other seven fair games share checkpoint recovery but retain their existing rounds. They do not yet have separate course catalogs or progression abilities.
+
+The journey displays six atlas pages and the next recommended trail. Recommendations finish the story before returning to courses with missing badges; after all eighteen badges, players can revisit the final trail for a personal best. Result screens explain which badge remains. The fair and journey show the latest unfinished session for each game, up to three cards, with its round and hearts. Guest checkpoints never appear in an account's cards.
+
+Opening Cloud Hop honours an explicit unlocked `?course=cloud-02` link. Otherwise it recovers the most recent eligible course checkpoint, then suggests the next course or replay goal. A locked or invalid link falls back to an available course. Course selection updates the URL so reloading retains the selected trail. The atlas marks courses with unfinished checkpoints; opening a card still asks the player to continue or start anew.
 
 ## Readable playfields
 

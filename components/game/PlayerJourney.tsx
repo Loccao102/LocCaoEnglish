@@ -13,6 +13,7 @@ import { useAdventure } from "./useAdventure";
 import { useFairProgress } from "./FairProgressProvider";
 import FairSaveStatus from "./FairSaveStatus";
 import CompanionPortrait from "./CompanionPortrait";
+import FairJourneyProgress from "./FairJourneyProgress";
 
 export default function PlayerJourney() {
   const adventure = useAdventure(), fair = useFairProgress();
@@ -51,6 +52,7 @@ export default function PlayerJourney() {
       <Link href={learning?.dueReviews ? "/review" : "/camp"}><span>03 · A LITTLE ENGLISH</span><strong>{learning?.dueReviews ? `${learning.dueReviews} words to revisit` : "Your learning journal"}</strong><small>{learning ? `${learning.user.xp} account XP · find your next lesson` : "Lessons, practice and skill progress"} →</small></Link>
     </div></section>
     {learningError && <p role="status">{learningError}</p>}
+    <FairJourneyProgress/>
 
     <section className="journey-chapters" aria-label="Story chapters"><div className="journey-section-title"><div><span className="eyebrow">THE BOOK OF SUN PAGES</span><h2>Seven places. One shared story.</h2></div><span>{ready ? Object.keys(adventure.save.completed).length : "—"} / {quests.length} quests</span></div><div className="journey-chapter-list">{zones.map(zone => {
       const done = ready && zone.quests.every(quest => adventure.save.completed[quest.id]), open = ready && questOpen(adventure.save, zone.quests[0]);

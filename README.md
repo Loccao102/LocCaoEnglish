@@ -30,7 +30,7 @@ See [art direction and integration](docs/SUNLIT-VILLAGE.md) for the manifest, ex
 
 ## One player journey
 
-Open `/journey` for the seven-chapter timeline, eight fair stamps, 24 friendship profiles, saved travelling companion and next learning activity. Each friend has three visible story/fair milestones; completed friendships reveal a personal dream. Guest and account saves remain separate.
+Open `/journey` for the seven-chapter timeline, eight fair stamps, 24 friendship profiles, saved travelling companion and next learning activity. Mây’s sky atlas shows completed course pages, badges and the next trail or replay goal. The journey and fair also offer links back to unfinished games on this device. Each friend has three visible story/fair milestones; completed friendships reveal a personal dream. Guest and account saves remain separate.
 
 ## Player loop
 

@@ -53,6 +53,7 @@
 .cloud-atlas>p{font-size:13px;line-height:1.5;margin:14px 0 0}.cloud-checkpoint-note{padding:9px;background:#e8efda;border-radius:12px;color:#396448!important}
 .cloud-result-goals{display:grid;gap:9px;padding:18px;margin:16px auto;border:1px solid #d7d5bd;border-radius:16px;background:#f9f2df;text-align:left;color:#4c6c53}.cloud-result-goals strong{font-size:18px}.cloud-result-goals span{font-size:14px}.cloud-result-goals small{font-size:13px;border-top:1px solid #dfd8c1;padding-top:9px}
 .fair-card-body .cloud-hub-progress{color:#5a704d;font-weight:600}
+.cloud-course-grid .cloud-saved-marker{color:#2d715c;font-weight:700}.cloud-next-goal{padding:12px;border-radius:12px;background:#eaf0dc;color:#426650!important}
 @media(max-width:650px){.cloud-course-grid{grid-template-columns:repeat(2,1fr)}.cloud-atlas{padding:12px}.cloud-run-goals{gap:10px;font-size:12px}.cloud-run-goals button{min-width:30px;min-height:30px}.cloud-course-dialog>.companion-portrait{height:65px;width:65px}}
 .fair-object-label:focus-visible,.fair-camera-controls button:focus-visible{outline:3px solid #24765b;outline-offset:3px}
 @media(max-width:650px){
