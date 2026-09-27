@@ -1,5 +1,9 @@
 # Architecture
 
+Contribution policy: [PROJECT-RULES](PROJECT-RULES.md). Implementation priorities:
+[ROADMAP](ROADMAP.md). The server-owned learning-attempt design is planned work
+(CORE-001); the existing generic attempt API still accepts client-reported accuracy.
+
 ## Principles
 
 1. **Game content and learner state are separate.** A mini-game emits attempts; the adaptive engine decides what those attempts mean for the learner.
@@ -50,8 +54,13 @@ Answers under 85% accuracy enter the review queue. Review grading uses a small S
 - Passwords use a PBKDF2-HMAC-SHA256 implementation with per-password random salt.
 - Session tokens use HMAC-SHA256 signed JWT-shaped tokens with expiry.
 - The repository default secret is development-only and must be changed for deployment.
-- Raw speaking audio is not uploaded in the current browser transcript mode.
+- Speaking can record PCM audio locally. Requesting acoustic assessment sends the
+  recorded audio to the scoring endpoint; transcript-only fallback is a different
+  evidence mode and must not be presented as acoustic pronunciation scoring.
 
 ## Player journey
 
 See [ADR 001](decisions/001-unified-player-journey.md) for the shared catalog, guest/account boundary, offline completion queue, transactional ledger and derived companion friendship milestones.
+
+See [ADR 002](decisions/002-core-first-development.md) for core-first development
+and the distinction between Fair result stars and learning evidence.

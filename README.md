@@ -2,6 +2,17 @@
 
 A 3D English adventure in Sunlit Village, with articulated characters, a seven-chapter story and a separate learning journal for deeper practice.
 
+## Before contributing / Trước khi code
+
+Mọi developer và coding agent phải đọc [quy tắc dự án](docs/PROJECT-RULES.md),
+[roadmap ưu tiên core](docs/ROADMAP.md), [CONTRIBUTING](CONTRIBUTING.md) và
+[điều kiện hoàn tất](docs/DEFINITION-OF-DONE.md). Agent bắt đầu ở [AGENTS.md](AGENTS.md).
+Xem [mục lục docs](docs/README.md) để chọn đúng contract trước khi sửa.
+
+Ưu tiên tiếp theo là server-owned learning attempts và vòng chơi dùng chung;
+không mở rộng số lượng game để thay cho chiều sâu. Phần planned trong roadmap
+chưa phải tính năng đã triển khai.
+
 ## The Seven Sun Pages
 
 Open `/` or `/play` to begin. Move with WASD, arrow keys, touch controls, or click a destination to walk there. Hold **Shift** to run, **Space** to jump, and right-drag to orbit the camera. Speak to a nearby guide or open a chest with **E** and complete English challenges to restore the village’s lost story.

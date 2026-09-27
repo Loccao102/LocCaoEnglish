@@ -2,7 +2,10 @@
 
 Base development URL: `http://localhost:8080`
 
-Requests without `Authorization` use the seeded demo learner. Registered users send `Authorization: Bearer <token>`.
+Some legacy learning routes support a seeded demo learner without `Authorization`.
+Authenticated routes, including account Fair saves/completions, require identity;
+do not assume every endpoint accepts anonymous requests. Registered users send
+`Authorization: Bearer <token>`.
 
 ## Auth
 
@@ -17,6 +20,11 @@ Requests without `Authorization` use the seeded demo learner. Registered users s
 - `POST /v1/attempts`
 
 Attempt payload:
+
+This is the **current legacy contract**, not the planned trusted grading model.
+Client-reported accuracy is a known limitation. New server-owned attempts are
+tracked as CORE-001 in [ROADMAP](ROADMAP.md); do not copy this trust model into new
+reward or ranking features. The proposed API must be specified before migration.
 
 ```json
 {

@@ -2,6 +2,10 @@
 
 Status: accepted for implementation, 2026-09-13.
 
+Follow-up: [ADR 002](002-core-first-development.md) clarifies difficulty-adjusted
+Fair result stars and establishes core-first development. The domain boundaries
+and persistence guarantees below remain in force.
+
 ## Context
 
 Sunlit Village has a playable 3D adventure, 24 original companions, 8 fair games and a learning platform. The fair initially wrote to one device-only scrapbook. Account progress, guest progress and learning evidence need to remain distinct while the player sees one coherent journey.
