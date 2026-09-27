@@ -1,8 +1,10 @@
 # Architecture
 
 Contribution policy: [PROJECT-RULES](PROJECT-RULES.md). Implementation priorities:
-[ROADMAP](ROADMAP.md). The server-owned learning-attempt design is planned work
-(CORE-001); the existing generic attempt API still accepts client-reported accuracy.
+[ROADMAP](ROADMAP.md). Word Link implements the server-owned attempt pilot
+([ADR 003](decisions/003-server-owned-word-link.md)); the generic attempt API still
+accepts client-reported accuracy for other activities. Shared lifecycle and wider
+migration remain CORE-002/003, and competitive integrity remains CORE-005.
 
 ## Principles
 

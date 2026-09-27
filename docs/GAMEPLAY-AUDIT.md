@@ -14,7 +14,7 @@ that all learning activities received a full manual playthrough in this pass.
 | Cloud Hop | Completion independent of exploration | Required feathers and stronger Challenge movement; atlas records still aggregate across modes |
 | Colour Studio | Only four fixed pairs | Ratio-sensitive mixtures; shade names/recipes still need a clearer teaching reference and calibration |
 | Bridge Builder | Fixed rotations, unlimited trial turns | Seeded unsolved starts, path validation and solvable turn budgets; still three authored topologies |
-| Word Link | `shuffled` currently returns the original options; small pack banks | Shared question presentation and server-owned scoring needed before competitive expansion |
+| Word Link | Server-issued shuffled options and snapshot grading replace the ineffective shuffle/client score; banks remain small | CORE-001 pilot adds atomic daily progression and retry/resume; shared lifecycle, richer distractors and ranked grading still need CORE-002/003/005 |
 | Word Graph | Link Mode retains the answer edges and Connections inspector | Hide answer relations while attempting; distinguish exploration from assessed recall |
 | Collocation Factory | Fixed option positions and very small default bank; copy promises pressure absent from implementation | Shared round engine, new distractors and honest mode descriptions |
 | Sentence Builder | Chunk bank uses authored order, sometimes already the solution; Reset allows answer-exposed retry | Shuffle indexed chunks; record first attempt separately from assisted retry |

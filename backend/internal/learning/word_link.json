@@ -1,0 +1,146 @@
+[
+  {
+    "id": "default",
+    "label": "CORE ENGLISH",
+    "version": 1,
+    "questions": [
+      {
+        "word": "significant",
+        "relation": "Choose the closest synonym",
+        "answer": "substantial",
+        "options": [
+          "minor",
+          "substantial",
+          "temporary",
+          "ordinary"
+        ],
+        "note": "Significant and substantial can both describe something large or important in degree.",
+        "id": "word-link:default:significant"
+      },
+      {
+        "word": "increase",
+        "relation": "Choose a natural collocation",
+        "answer": "increase dramatically",
+        "options": [
+          "increase loudly",
+          "increase dramatically",
+          "increase politely",
+          "increase softly"
+        ],
+        "note": "Dramatically is a common adverb with increase.",
+        "id": "word-link:default:increase"
+      },
+      {
+        "word": "scarce",
+        "relation": "Choose the antonym",
+        "answer": "abundant",
+        "options": [
+          "rare",
+          "limited",
+          "abundant",
+          "insufficient"
+        ],
+        "note": "Scarce means limited; abundant means plentiful.",
+        "id": "word-link:default:scarce"
+      },
+      {
+        "word": "benefit",
+        "relation": "Choose the strongest word-family link",
+        "answer": "beneficial",
+        "options": [
+          "beneficial",
+          "beautiful",
+          "beneath",
+          "belief"
+        ],
+        "note": "Beneficial is the related adjective.",
+        "id": "word-link:default:benefit"
+      },
+      {
+        "word": "allocate",
+        "relation": "Choose the best meaning",
+        "answer": "distribute for a purpose",
+        "options": [
+          "remove completely",
+          "distribute for a purpose",
+          "speak uncertainly",
+          "compare two objects"
+        ],
+        "note": "Allocate means assign resources for a purpose.",
+        "id": "word-link:default:allocate"
+      }
+    ]
+  },
+  {
+    "id": "travel-airport",
+    "label": "TRAVEL · AIRPORT",
+    "version": 1,
+    "questions": [
+      {
+        "word": "boarding pass",
+        "relation": "Choose what it lets you do",
+        "answer": "board the flight",
+        "options": [
+          "claim baggage",
+          "board the flight",
+          "exchange money",
+          "book a hotel"
+        ],
+        "note": "A boarding pass is the document used to enter the aircraft.",
+        "id": "word-link:travel-airport:boarding-pass"
+      },
+      {
+        "word": "gate",
+        "relation": "Choose the closest airport meaning",
+        "answer": "departure point",
+        "options": [
+          "departure point",
+          "passport stamp",
+          "seat class",
+          "baggage weight"
+        ],
+        "note": "At an airport, the gate is the departure point for boarding.",
+        "id": "word-link:travel-airport:gate"
+      },
+      {
+        "word": "rebook",
+        "relation": "Choose the best meaning",
+        "answer": "book a replacement journey",
+        "options": [
+          "cancel all travel",
+          "book a replacement journey",
+          "check a suitcase",
+          "change currency"
+        ],
+        "note": "Rebook means arrange another booking, often after disruption.",
+        "id": "word-link:travel-airport:rebook"
+      },
+      {
+        "word": "miss",
+        "relation": "Choose the natural collocation",
+        "answer": "miss a flight",
+        "options": [
+          "miss a flight",
+          "miss a luggage",
+          "miss a passport",
+          "miss a gate number"
+        ],
+        "note": "Miss a flight is the natural collocation when you arrive too late.",
+        "id": "word-link:travel-airport:miss"
+      },
+      {
+        "word": "connection",
+        "relation": "Choose the travel meaning",
+        "answer": "a linked onward flight",
+        "options": [
+          "a linked onward flight",
+          "a security officer",
+          "a seat upgrade",
+          "a baggage label"
+        ],
+        "note": "A connection is an onward flight linked to your journey.",
+        "id": "word-link:travel-airport:connection"
+      }
+    ]
+  }
+]

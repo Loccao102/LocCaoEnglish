@@ -25,7 +25,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 
 | ID | Ưu tiên | Công việc | Phụ thuộc | Trạng thái |
 | --- | --- | --- | --- | --- |
-| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | planned |
+| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | in_review |
 | CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | planned |
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | planned |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
@@ -44,6 +44,9 @@ trạng thái done khi CI là điều kiện nghiệm thu của task.
 
 ## CORE-001 — Server-owned attempt
 
+Owner/task: Codex, luồng Word Link; bắt đầu 2026-09-27 trên PR #3. Contract pilot
+được chốt trong [ADR 003](decisions/003-server-owned-word-link.md).
+
 **Vấn đề:** client đang báo accuracy, một số nơi gửi đáp án chuẩn thay câu trả lời
 thật. Kết quả đó chưa đủ tin cậy để cấp mastery/rank.
 
@@ -52,10 +55,10 @@ activity/content ID, content version, rules version và trạng thái. Client g�
 chọn/thứ tự/text thật, không gửi điểm có thẩm quyền. Server chấm câu hỏi khách quan,
 trả verdict và cập nhật progression nguyên tử. Đưa Word Link qua toàn bộ luồng này.
 
-Đây là thiết kế cần xây dựng, chưa phải endpoint đã có. Quyết định TTL, offline,
-gợi ý và chính sách replay phải ghi trong ADR/API spec; không tự dùng timer UI làm
-bằng chứng chống gian lận. Không gửi đáp án chuẩn xuống trong payload trước chấm
-nếu đang dùng kết quả cho competitive/unassisted evidence.
+Pilot đã có code/API/migration 014 trên branch, đang xác minh; không đồng nghĩa
+API local/production đã được triển khai. TTL, offline, gợi ý và replay được mô tả
+trong ADR/API spec. Không dùng timer UI làm bằng chứng chống gian lận. Không gửi
+đáp án chuẩn xuống trước chấm; pilot chưa dùng cho competitive evidence.
 
 **Hoàn tất khi:**
 
@@ -65,6 +68,11 @@ nếu đang dùng kết quả cho competitive/unassisted evidence.
   cùng ID bị từ chối. Có test PostgreSQL và HTTP, không chỉ memory.
 - Có actual response và correct answer riêng, trạng thái hỗ trợ rõ, migration API
   cũ được mô tả; không làm mất lịch sử người học.
+
+**Xác minh hiện tại:** code pilot/migration đã có; domain + HTTP tests, Go vet,
+frontend build và 2 browser fault-injection tests đạt local. PostgreSQL/race và
+browser dùng API thật còn chờ CI của revision này; chưa deploy API local/production.
+Windows Application Control chặn store test executable; không thử vượt chính sách.
 
 ## CORE-002 — Shared learning round lifecycle
 

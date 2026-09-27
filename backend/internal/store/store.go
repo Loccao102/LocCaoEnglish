@@ -38,15 +38,18 @@ type memoryState struct {
 }
 
 type Store struct {
-	fairMu      sync.Mutex
-	fairs       map[string]fair.Save
-	fairRuns    map[string]map[string]fair.Completion
-	adventureMu sync.Mutex
-	adventures  map[string]adventure.Save
-	db          *sql.DB
-	mu          sync.RWMutex
-	mem         memoryState
-	demoID      string
+	learning         map[string]learningRecord
+	learningRequests map[string]string
+	learningRewards  map[string]bool
+	fairMu           sync.Mutex
+	fairs            map[string]fair.Save
+	fairRuns         map[string]map[string]fair.Completion
+	adventureMu      sync.Mutex
+	adventures       map[string]adventure.Save
+	db               *sql.DB
+	mu               sync.RWMutex
+	mem              memoryState
+	demoID           string
 }
 
 func New(databaseURL string) (*Store, error) {
@@ -240,51 +243,64 @@ func (s *Store) Skills(ctx context.Context, userID string) ([]model.Skill, error
 }
 
 func (s *Store) RecordAttempt(ctx context.Context, userID string, in model.AttemptInput) (model.AttemptResult, error) {
-	accuracy := math.Max(0, math.Min(1, in.Accuracy))
-	xp := 10 + int(math.Round(20*accuracy))
-	review := accuracy < 0.85
 	if s.db != nil {
 		tx, err := s.db.BeginTx(ctx, nil)
 		if err != nil {
 			return model.AttemptResult{}, err
 		}
 		defer tx.Rollback()
-		var old float64
-		err = tx.QueryRowContext(ctx, `SELECT confidence FROM user_skills WHERE user_id=$1 AND skill=$2 FOR UPDATE`, userID, in.Skill).Scan(&old)
-		if errors.Is(err, sql.ErrNoRows) {
-			old = .35
-			_, err = tx.ExecContext(ctx, `INSERT INTO user_skills(user_id,skill,confidence,level,updated_at) VALUES($1,$2,$3,$4,NOW())`, userID, in.Skill, old, levelFor(old))
-		}
+		result, err := recordAttemptTx(ctx, tx, userID, in, in.Answer, newID())
 		if err != nil {
-			return model.AttemptResult{}, err
+			return result, err
 		}
-		next := old*.75 + accuracy*.25
-		level := levelFor(next)
-		_, err = tx.ExecContext(ctx, `UPDATE user_skills SET confidence=$3,level=$4,updated_at=NOW() WHERE user_id=$1 AND skill=$2`, userID, in.Skill, next, level)
-		if err != nil {
-			return model.AttemptResult{}, err
-		}
-		_, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())`, newID(), userID, in.Skill, in.Activity, in.ItemKey, in.Prompt, in.Answer, accuracy, in.DurationSec)
-		if err != nil {
-			return model.AttemptResult{}, err
-		}
-		_, err = tx.ExecContext(ctx, `UPDATE users SET xp=xp+$2 WHERE id=$1`, userID, xp)
-		if err != nil {
-			return model.AttemptResult{}, err
-		}
-		if review {
-			_, err = tx.ExecContext(ctx, `INSERT INTO review_items(user_id,item_key,kind,prompt,answer,due_at,interval_days,ease,failures) VALUES($1,$2,$3,$4,$5,NOW(),1,2.5,1) ON CONFLICT(user_id,item_key) DO UPDATE SET prompt=EXCLUDED.prompt,answer=EXCLUDED.answer,due_at=NOW(),failures=review_items.failures+1`, userID, in.ItemKey, in.Activity, in.Prompt, in.Answer)
-			if err != nil {
-				return model.AttemptResult{}, err
-			}
-		}
-		if err := tx.Commit(); err != nil {
-			return model.AttemptResult{}, err
-		}
-		return model.AttemptResult{XPDelta: xp, NewConfidence: next, Level: level, ReviewAdded: review}, nil
+		return result, tx.Commit()
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.recordAttemptMemory(userID, in, in.Answer)
+}
+func recordAttemptTx(ctx context.Context, tx *sql.Tx, userID string, in model.AttemptInput, reviewAnswer, attemptID string) (model.AttemptResult, error) {
+	accuracy := math.Max(0, math.Min(1, in.Accuracy))
+	xp := 10 + int(math.Round(20*accuracy))
+	review := accuracy < .85
+	var old float64
+	err := tx.QueryRowContext(ctx, `SELECT confidence FROM user_skills WHERE user_id=$1 AND skill=$2 FOR UPDATE`, userID, in.Skill).Scan(&old)
+	if errors.Is(err, sql.ErrNoRows) {
+		old = .35
+		_, err = tx.ExecContext(ctx, `INSERT INTO user_skills(user_id,skill,confidence,level,updated_at) VALUES($1,$2,$3,$4,NOW())`, userID, in.Skill, old, levelFor(old))
+	}
+	if err != nil {
+		return model.AttemptResult{}, err
+	}
+	next := old*.75 + accuracy*.25
+	level := levelFor(next)
+	_, err = tx.ExecContext(ctx, `UPDATE user_skills SET confidence=$3,level=$4,updated_at=NOW() WHERE user_id=$1 AND skill=$2`, userID, in.Skill, next, level)
+	if err != nil {
+		return model.AttemptResult{}, err
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())`, attemptID, userID, in.Skill, in.Activity, in.ItemKey, in.Prompt, in.Answer, accuracy, in.DurationSec)
+	if err != nil {
+		return model.AttemptResult{}, err
+	}
+	_, err = tx.ExecContext(ctx, `UPDATE users SET xp=xp+$2 WHERE id=$1`, userID, xp)
+	if err != nil {
+		return model.AttemptResult{}, err
+	}
+	if review {
+		_, err = tx.ExecContext(ctx, `INSERT INTO review_items(user_id,item_key,kind,prompt,answer,due_at,interval_days,ease,failures) VALUES($1,$2,$3,$4,$5,NOW(),1,2.5,1) ON CONFLICT(user_id,item_key) DO UPDATE SET prompt=EXCLUDED.prompt,answer=EXCLUDED.answer,due_at=NOW(),failures=review_items.failures+1`, userID, in.ItemKey, in.Activity, in.Prompt, reviewAnswer)
+		if err != nil {
+			return model.AttemptResult{}, err
+		}
+	}
+
+	return model.AttemptResult{XPDelta: xp, NewConfidence: next, Level: level, ReviewAdded: review}, nil
+}
+
+// Caller holds s.mu; this is shared with atomic server-graded submissions.
+func (s *Store) recordAttemptMemory(userID string, in model.AttemptInput, reviewAnswer string) (model.AttemptResult, error) {
+	accuracy := math.Max(0, math.Min(1, in.Accuracy))
+	xp := 10 + int(math.Round(20*accuracy))
+	review := accuracy < .85
 	skmap := s.mem.skills[userID]
 	if skmap == nil {
 		return model.AttemptResult{}, ErrNotFound
@@ -309,7 +325,7 @@ func (s *Store) RecordAttempt(ctx context.Context, userID string, in model.Attem
 		r.ItemKey = in.ItemKey
 		r.Kind = in.Activity
 		r.Prompt = in.Prompt
-		r.Answer = in.Answer
+		r.Answer = reviewAnswer
 		r.DueAt = time.Now()
 		r.IntervalDays = 1
 		if r.Ease == 0 {

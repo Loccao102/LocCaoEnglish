@@ -2,8 +2,7 @@ export type SentenceRound={chunks:string[];answer:string};
 export type GrammarRound={prompt:string;answer:string;options:string[]};
 export type CollocationRound={core:string;answer:string;options:string[]};
 export type ListeningRound={audio:string;q:string;answer:string;options:string[]};
-export type WordLinkRound={word:string;relation:string;answer:string;options:string[];note:string};
-export type LearningPack={label:string;sentenceRounds:SentenceRound[];grammarRounds:GrammarRound[];collocations:CollocationRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
+export type LearningPack={label:string;sentenceRounds:SentenceRound[];grammarRounds:GrammarRound[];collocations:CollocationRound[];listeningRounds:ListeningRound[];speakingPrompts:string[]};
 type PackOverride=Partial<Omit<LearningPack,"label">>&{label:string};
 
 const base:LearningPack={
@@ -29,23 +28,10 @@ const base:LearningPack={
   {audio:"Due to engineering work, trains to Oxford will leave from platform six until noon, then return to platform three.",q:"Where do Oxford trains leave from before noon?",answer:"Platform six",options:["Platform three","Platform four","Platform six","Platform nine"]},
  ],
  speakingPrompts:["Could I have a window seat, please?","I usually prefer travelling by train because it is more comfortable.","One of the main reasons people move to large cities is the availability of better job opportunities."],
- wordLinkRounds:[
-  {word:"significant",relation:"Choose the closest synonym",answer:"substantial",options:["minor","substantial","temporary","ordinary"],note:"Significant and substantial can both describe something large or important in degree."},
-  {word:"increase",relation:"Choose a natural collocation",answer:"increase dramatically",options:["increase loudly","increase dramatically","increase politely","increase softly"],note:"Dramatically is a common adverb with increase."},
-  {word:"scarce",relation:"Choose the antonym",answer:"abundant",options:["rare","limited","abundant","insufficient"],note:"Scarce means limited; abundant means plentiful."},
-  {word:"benefit",relation:"Choose the strongest word-family link",answer:"beneficial",options:["beneficial","beautiful","beneath","belief"],note:"Beneficial is the related adjective."},
-  {word:"allocate",relation:"Choose the best meaning",answer:"distribute for a purpose",options:["remove completely","distribute for a purpose","speak uncertainly","compare two objects"],note:"Allocate means assign resources for a purpose."},
- ]
 };
 
 const packs:Record<string,PackOverride>={
- "travel-airport":{label:"TRAVEL · AIRPORT",wordLinkRounds:[
-  {word:"boarding pass",relation:"Choose what it lets you do",answer:"board the flight",options:["claim baggage","board the flight","exchange money","book a hotel"],note:"A boarding pass is the document used to enter the aircraft."},
-  {word:"gate",relation:"Choose the closest airport meaning",answer:"departure point",options:["departure point","passport stamp","seat class","baggage weight"],note:"At an airport, the gate is the departure point for boarding."},
-  {word:"rebook",relation:"Choose the best meaning",answer:"book a replacement journey",options:["cancel all travel","book a replacement journey","check a suitcase","change currency"],note:"Rebook means arrange another booking, often after disruption."},
-  {word:"miss",relation:"Choose the natural collocation",answer:"miss a flight",options:["miss a flight","miss a luggage","miss a passport","miss a gate number"],note:"Miss a flight is the natural collocation when you arrive too late."},
-  {word:"connection",relation:"Choose the travel meaning",answer:"a linked onward flight",options:["a linked onward flight","a security officer","a seat upgrade","a baggage label"],note:"A connection is an onward flight linked to your journey."},
- ],listeningRounds:[
+ "travel-airport":{label:"TRAVEL · AIRPORT",listeningRounds:[
   {audio:"Passengers for flight LC218 should proceed to gate C12. Boarding begins at seven oh five, twenty minutes earlier than scheduled.",q:"What should the passenger remember?",answer:"Gate C12 and 7:05 boarding",options:["Gate C12 and 7:05 boarding","Gate C7 and 7:20 boarding","Baggage claim C12","Check-in closes at 7:05"]},
   {audio:"Your replacement flight leaves at seven forty and has one short connection in Singapore.",q:"What is special about the replacement flight?",answer:"It has one connection",options:["It is direct","It has one connection","It leaves tomorrow","It has no seats"]},
  ],speakingPrompts:["I missed my flight. Could you help me rebook, please?","I would prefer the earliest available flight, even if it has a short connection.","Could you confirm the gate and the boarding time for me?"]},

@@ -44,6 +44,9 @@ func main() {
 	if err := st.EnsureFair(context.Background()); err != nil {
 		log.Fatalf("initialize friendship fair: %v", err)
 	}
+	if err := st.EnsureLearningAttempts(context.Background()); err != nil {
+		log.Fatalf("initialize learning attempts: %v", err)
+	}
 	social := realtime.New(os.Getenv("REDIS_URL"))
 	defer social.Close()
 	app := httpapi.New(st, auth.New(env("JWT_SECRET", "dev-only-change-me"), 7*24*time.Hour), ai.New(env("AI_SERVICE_URL", "http://localhost:8090")), social)

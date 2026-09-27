@@ -138,3 +138,29 @@ python -m unittest discover -s tests -v
 ```
 
 On PowerShell, assign each variable using `$env:NAME='value'` before invoking the command. Point `TEST_DATABASE_URL` at a dedicated database named `loccao_system_test`. The portable Windows session uses port 55432; the Docker development defaults use port 5432.
+# CORE-001 · Word Link server grading · 2026-09-27
+
+Scope: pilot on PR #3. Earlier CI run 84 (commit `b123d47`) passed, but does not
+validate the new pilot. This section records local checks before its CI run.
+
+- `go test ./internal/learning ./internal/httpapi`: passed; catalogue integrity,
+  version/option validation, private answer key, HTTP owner isolation and retries.
+- `go vet ./...`: passed.
+- `npm run build`: passed, 57 pages with TypeScript checks.
+- Playwright `word-link-recovery.spec.ts`: 2 passed on Chromium/D3D11, frontend
+  production build at 3102. These deliberately mock/fail transport; they validate
+  creation retry identity, locked choice after reload and repeated submit payload.
+- Inspected `.cache/word-link-mobile.png` at 390 × 844: labels and choice controls
+  remain readable without horizontal overflow. This screenshot uses a UI fixture.
+- Windows Application Control blocked local store test execution. Earlier API
+  launch attempts were also denied by policy; no replacement-port workaround.
+  New migrations/API have **not** been verified running on the local service.
+- Added real API/browser flows in `word-link.spec.ts` and PostgreSQL/race coverage
+  in `store/learning_test.go`: full guest loop, lost committed response, account
+  switching, actual wrong answer/review, invalid owner/version, concurrent same-ID
+  submissions and distinct-ID daily reward claims, expiry and reconnect durability.
+  Results are pending Linux CI; do not treat authored tests as passed tests.
+
+Rollout/remaining scope: [API contract](API.md), [ADR 003](decisions/003-server-owned-word-link.md),
+[ROADMAP](ROADMAP.md). Other learning activities and ranked evidence remain legacy.
+
