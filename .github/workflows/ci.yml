@@ -168,5 +168,11 @@ jobs:
       - run: npm run test:e2e
         env:
           E2E_BASE_URL: http://127.0.0.1:3000
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: test-results/
+          retention-days: 7
       - if: always()
         run: docker compose down -v

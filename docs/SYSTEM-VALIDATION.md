@@ -80,6 +80,15 @@ Fair completions are personal client-reported keepsakes, not server-replayed com
 - Four affected browser regressions pass again after the entry-flow change: the entire six-course campaign, partial recipe recovery, full guest storage with retry/discard, and the delayed two-tab account-save response.
 - The updated production build passes with 57 pages. The mobile atlas screenshot was inspected. This UI follow-up is newer than CI run 79; that CI result is evidence for the shared core/API implementation, not a claim that the later UI revision ran there.
 
+## Café gameplay and navigation follow-up — September 27
+
+- Tea Time adds visiting-friend shifts with three different customers from six authored characters, distinct ordered recipes, three timed strength bands, free recipe hints and cup resets. Brewing, serving, incorrect orders and replay all use the existing three-heart game and completion ledger.
+- Twenty-eight game logic cases pass, including queue variety, all three orders, input locking during brewing, oversteeping, incorrect recipes/strengths, checkpoint validation, legacy recipe compatibility and exact brewing recovery.
+- The production build passes with 57 pages. Seven browser scenarios pass on that build: the six-course Cloud Hop campaign, journey/course continuation including live URL and Back navigation, classic partial-recipe recovery, all eight playfields at 460×551 and 390×844, a complete three-customer shift saving once, and pause/reload/oversteep recovery at 390×551. The short-screen screenshot was inspected; the recipe card replaces the longer order text and ingredient labels remain separate.
+- All 45 GLBs and their checksums pass verification. The exported fair metadata and downloadable ZIP were refreshed to match the Tea Time instructions; no character meshes or image assets were replaced.
+- Remote run 81 completed with five successful jobs and one failed browser case (36 browser cases passed). That failure was a frozen-clock navigation assertion when opening Paper Trail from Journey. Navigation now waits for the destination with the clock running, then pauses for physics inputs. Course entry also subscribes to query changes instead of reading the URL only once per account. CI retains browser failure screenshots/traces for seven days to support future diagnosis.
+- These local checks used a production frontend on port 3102 and the installed Chromium with `E2E_GL_BACKEND=d3d11`. No backend service was restarted or account database migrated for this feature; shifts use the existing Tea Time completion payload. The remote CI result for this revision is reported on PR #3.
+
 ## Reproduce
 
 Use the local startup steps in README. With the services running:

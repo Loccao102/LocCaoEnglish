@@ -9,7 +9,7 @@ The fair is an original southern island in Sunlit Village. Eight neighbours each
 | Bubble Meadow | Mầm | Walk into a floating word bubble matching a written clue; click-to-walk and keyboard movement | 5 catches |
 | Little Garden | Cốm | Pick a seed, carry it to the bed and plant it; exchange a seed before planting | 3 plants |
 | Echo Pond | Giọt | Watch and hear four stones, repeat a growing sequence; replay the cue as needed | 5 melodies of 2–6 notes |
-| Tea Time | Moca | Build an ordered three-ingredient recipe, then serve; clear the cup without a penalty | 3 recipes |
+| Tea Time | Moca | Practise ordered recipes or serve a varied queue of friends with timed tea strengths | 3 recipes or guest orders |
 | Parcel Trail | Quýt | Collect a parcel and walk it to the library, bakery or greenhouse named in the address | 3 deliveries |
 | Cloud Hop | Mây | Six sequential courses with double jumps, wind, drifting rings and optional feathers | 6 rings per course |
 | Colour Studio | Dâu | Combine two primary/white paint pots into a requested colour; see the mix on a flower sculpture | 4 mixes |
@@ -70,6 +70,16 @@ The other seven fair games share checkpoint recovery but retain their existing r
 The journey displays six atlas pages and the next recommended trail. Recommendations finish the story before returning to courses with missing badges; after all eighteen badges, players can revisit the final trail for a personal best. Result screens explain which badge remains. The fair and journey show the latest unfinished session for each game, up to three cards, with its round and hearts. Guest checkpoints never appear in an account's cards.
 
 Opening Cloud Hop honours an explicit unlocked `?course=cloud-02` link. Otherwise it recovers the most recent eligible course checkpoint, then suggests the next course or replay goal. A locked or invalid link falls back to an available course. Course selection updates the URL so reloading retains the selected trail. The atlas marks courses with unfinished checkpoints; opening a card still asks the player to continue or start anew.
+
+## Moca’s visiting friends
+
+Tea Time now offers **Serve visiting friends** alongside the original recipe practice. A shift draws three distinct visitors from Mầm, Mây, Sỏi, Bông, Nắng and Trúc. The run ID selects the queue once; reloading never rerolls it. Each friend has an authored order, a preferred tea strength and a personal response when served. The actual 3D visitor changes with each order; a tea bag and rising steam reflect the brewing state.
+
+Read the order, add its three ingredients in order, then start steeping. Lift the tea in the marked band: gentle (1.5–3 seconds), balanced (3.5–5), or bold (5.5–7). Ingredients lock while brewing. Serving checks both the recipe and strength. An oversteeped cup stops at eight seconds, and emptying it before serving costs no heart. Recipe cards are free, and pause/help also stop brewing. The short-screen layout swaps the spoken order for its recipe when the card is open and shows the meter when brewing begins.
+
+The checkpoint includes the exact visitor queue, cup layers, brewing stage/time and open recipe card. Time away from the page does not brew the tea. Practice checkpoints from earlier versions remain compatible. A finished shift uses the existing Tea Time memory and idempotent completion journal; it does not create a separate currency, per-visitor relationship record or competitive score. Replay starts a fresh queue; a resumed shift keeps its original run ID.
+
+The authored data and validation live in `lib/game/tea-service.ts`, with the shared session enforcing all input/timing rules and `TeaOrderCard.tsx` presenting the order and accessible meter.
 
 ## Readable playfields
 

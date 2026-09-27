@@ -1,9 +1,10 @@
 import type { FestivalGame } from "./festival";
 import type { Expression } from "./personalities";
 import { courseById, type Course } from "./fair-courses";
+import { createTeaService, teaGuest, teaIngredients, teaStrength, teaStrengths, validTeaService, type TeaService } from "./tea-service";
 
 export type ArenaObject={id:number;x:number;z:number;label:string;colour:string;shape:"bubble"|"seed"|"bed"|"stone"|"cup"|"house"|"parcel"|"ring"|"paint"|"tile";rotation?:number;ports?:number[]};
-export type FairState={phase:"ready"|"play"|"win"|"lose";round:number;hearts:number;score:number;prompt:string;feedback:string;selection:number[];carrying:number|null;lit:number;listening:boolean;emotion:Expression;revision:number;elapsed:number;feathers:number[]};
+export type FairState={phase:"ready"|"play"|"win"|"lose";round:number;hearts:number;score:number;prompt:string;feedback:string;selection:number[];carrying:number|null;lit:number;listening:boolean;emotion:Expression;revision:number;elapsed:number;feathers:number[];tea?:TeaService};
 export type FairCheckpoint = {version:1;gameId:string;courseId:string;state:FairState;rotations:number[];wait:number;nextRound:boolean;echoClock:number;echoStep:number;echoAnswer:number;lastHazard:number};
 const colours=["#EE947D","#F2CC71","#81B7D6","#FDF4D7"];
 const bubbles=[
@@ -14,7 +15,7 @@ const bubbles=[
   {clue:"Catch the opposite of alone.",words:["together","under","empty","late"],answer:0},
 ];
 const seeds=["Sunflower","Bluebell","Rose"],seedColours=["#F6CB66","#8CBADD","#EE9FAC"];
-const recipes=[[0,1,2],[0,3,2],[0,1,3]],ingredients=["Tea","Milk","Honey","Mint"];
+const recipes=[[0,1,2],[0,3,2],[0,1,3]],ingredients=teaIngredients;
 const addresses=[{place:"Library",clue:"Deliver this book to the library."},{place:"Bakery",clue:"Deliver this flour to the bakery."},{place:"Greenhouse",clue:"Deliver these seeds to the greenhouse."}];
 const mixes=[{name:"orange",pair:[0,1]},{name:"green",pair:[1,2]},{name:"purple",pair:[0,2]},{name:"pink",pair:[0,3]}];
 const sequence=[0,2,1,3,0,1,2];
@@ -40,11 +41,11 @@ export class FestivalSession {
   private echoAnswer=0;
   private lastHazard=0;
   constructor(public game:FestivalGame,private changed:(state:FairState)=>void,public tone:(index:number)=>void=()=>{},courseId?:string){this.course=game.kind==="hop"?courseById(courseId||"cloud-01"):undefined;}
-  private emit(){this.state={...this.state,selection:[...this.state.selection],revision:this.state.revision+1};this.changed(this.state);}
-  start(){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[]};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
+  private emit(){this.state={...this.state,selection:[...this.state.selection],tea:this.state.tea?{...this.state.tea,guests:[...this.state.tea.guests]}:undefined,revision:this.state.revision+1};this.changed(this.state);}
+  start(teaRunId?:string){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[],tea:this.game.kind==="tea"&&teaRunId?createTeaService(teaRunId):undefined};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
   snapshot():FairCheckpoint|null {
     if(this.state.phase!=="play"&&this.state.phase!=="win")return null;
-    return {version:1,gameId:this.game.id,courseId:this.course?.id||"",state:{...this.state,selection:[...this.state.selection],feathers:[...this.state.feathers]},rotations:[...this.rotations],wait:Math.max(0,this.wait),nextRound:this.nextRound,echoClock:this.echoClock,echoStep:this.echoStep,echoAnswer:this.echoAnswer,lastHazard:this.lastHazard};
+    return {version:1,gameId:this.game.id,courseId:this.course?.id||"",state:{...this.state,tea:this.state.tea?{...this.state.tea,guests:[...this.state.tea.guests]}:undefined,selection:[...this.state.selection],feathers:[...this.state.feathers]},rotations:[...this.rotations],wait:Math.max(0,this.wait),nextRound:this.nextRound,echoClock:this.echoClock,echoStep:this.echoStep,echoAnswer:this.echoAnswer,lastHazard:this.lastHazard};
   }
   restore(value:unknown):boolean {
     const c=value as FairCheckpoint|null,s=c?.state;
@@ -60,7 +61,8 @@ export class FestivalSession {
       !ids(c.rotations,3)||c.rotations.length>9||!finite(c.wait,0,3)||typeof c.nextRound!=="boolean"||
       !finite(c.echoClock,-1,86400)||!integer(c.echoStep,-1,6)||!integer(c.echoAnswer,0,6)||!finite(c.lastHazard,0,1.6))return false;
     if(s.score!==(s.round+Number(c.nextRound))*100+(s.phase==="win"?s.hearts*25:0)||c.nextRound&&c.wait<=0||this.game.kind==="bridge"&&c.rotations.length!==9)return false;
-    this.state={...s,selection:[...s.selection],feathers:[...s.feathers],revision:0};this.rotations=[...c.rotations];
+    if(s.tea!==undefined&&(this.game.kind!=="tea"||!validTeaService(s.tea)||s.tea.stage!=="mixing"&&s.selection.length!==3||!ids(s.selection,3)))return false;
+    this.state={...s,tea:s.tea?{...s.tea,guests:[...s.tea.guests]}:undefined,selection:[...s.selection],feathers:[...s.feathers],revision:0};this.rotations=[...c.rotations];
     this.wait=c.wait;this.nextRound=c.nextRound;this.echoClock=c.echoClock;this.echoStep=c.echoStep;this.echoAnswer=c.echoAnswer;this.lastHazard=c.lastHazard;
     this.bridgePath=[];this.emit();return true;
   }
@@ -69,7 +71,10 @@ export class FestivalSession {
     if(g.kind==="bubble")s.prompt=bubbles[s.round].clue;
     if(g.kind==="garden")s.prompt=`Plant a ${seeds[s.round].toLowerCase()} in the empty bed.`;
     if(g.kind==="echo"){s.prompt=`Remember ${s.round+2} notes, then play them back.`;this.replay(false);}
-    if(g.kind==="tea")s.prompt=`Recipe: ${recipes[s.round].map(i=>ingredients[i]).join(" → ")}.`;
+    if(g.kind==="tea"){
+      if(s.tea){s.tea={...s.tea,stage:"mixing",seconds:0,hint:false};s.prompt=this.customer!.request;}
+      else s.prompt=`Recipe: ${recipes[s.round].map(i=>ingredients[i]).join(" → ")}.`;
+    }
     if(g.kind==="parcel")s.prompt=addresses[s.round].clue;
     if(g.kind==="hop")s.prompt=this.course?.high.includes(s.round)?`Double jump through HIGH ring ${s.round+1} of 6.`:`Jump through ring ${s.round+1} of 6. Avoid the rose puddles!`;
     if(g.kind==="colour")s.prompt=`Mix two paints to make ${mixes[s.round].name}.`;
@@ -91,6 +96,8 @@ export class FestivalSession {
   }
   get mobile(){return ["bubble","garden","parcel","hop"].includes(this.game.kind);}
   get canAct(){return this.state.phase==="play"&&this.wait<=0&&!this.state.listening;}
+  get customer(){return teaGuest(this.state.tea,this.state.round);}
+  get canChoose(){return this.canAct&&(!this.state.tea||this.state.tea.stage==="mixing");}
   get checkpoint(){return this.state.round?this.ringPoint(Math.min(this.state.round-1,5)):this.course?.spawn||{x:-3,z:3.7};}
   get doubleJump(){return !!this.course&&(this.course.high.length>0||this.course.drift>0||this.course.wind>0);}
   get puddles(){return this.course?this.course.puddles.map(([x,z])=>({x,z})):hopPuddles;}
@@ -99,7 +106,7 @@ export class FestivalSession {
   ringHeight(id:number){return this.course?.high.includes(id)?1.65:1.05;}
   collectFeather(id:number,height:number){if(!this.canAct||!this.course||!Number.isInteger(id)||!this.course.feathers[id]||height<.2||this.state.feathers.includes(id))return;this.state.feathers.push(id);this.state.feedback=`A sky feather! ${this.state.feathers.length} / 3 found.`;this.tone(3);this.emit();}
   choose(id:number){
-    if(!this.canAct||!Number.isInteger(id)||!this.objects().some(object=>object.id===id))return;const s=this.state;
+    if(!this.canChoose||!Number.isInteger(id)||!this.objects().some(object=>object.id===id))return;const s=this.state;
     if(this.game.kind==="bubble"){if(id===bubbles[s.round].answer){s.selection=[id];this.success();}else this.miss(`That was “${bubbles[s.round].words[id]}”. Read the clue and try again.`);}
     if(this.game.kind==="garden"){
       if(id<3){s.carrying=id;s.feedback=`Carrying a ${seeds[id].toLowerCase()} seed. Take it to the bed.`;this.emit();}
@@ -125,6 +132,14 @@ export class FestivalSession {
     if(!this.canAct)return;const s=this.state;
     if(this.game.kind==="tea"){
       if(s.selection.length<3){s.feedback="The recipe needs three ingredients.";this.emit();return;}
+      if(s.tea){
+        if(s.tea.stage!=="ready"){s.feedback="Start steeping, then lift the tea before serving.";this.emit();return;}
+        const customer=this.customer!;
+        if(!s.selection.every((value,i)=>value===customer.recipe[i])){this.resetTea();this.miss("This is a different recipe. Read your friend's order or open the recipe card.");}
+        else if(teaStrength(s.tea.seconds)!==customer.strength){this.resetTea();this.miss(`Your friend asked for ${teaStrengths[customer.strength].name.toLowerCase()} tea. Lift the tea inside the marked band.`);}
+        else{this.success(2.8);this.state.feedback=customer.thanks;this.emit();}
+        return;
+      }
       if(s.selection.every((value,i)=>value===recipes[s.round][i]))this.success();else{s.selection=[];this.miss("The layers are out of order. Follow the recipe from left to right.");}
     }
     if(this.game.kind==="colour"){
@@ -138,13 +153,30 @@ export class FestivalSession {
       if(seen.has(goal)&&ports[goal].includes(1)){this.bridgePath=[goal];let at=goal;while(at!==start){at=came.get(at)!;this.bridgePath.unshift(at);}this.success(2.8);}else this.miss("The boat found a gap. Line up the wooden paths between neighbouring tiles.");
     }
   }
-  clear(){if(!this.canAct)return;this.state.selection=[];this.state.feedback="A clean start for this recipe.";this.emit();}
+  private resetTea(){this.state.selection=[];if(this.state.tea)this.state.tea={...this.state.tea,stage:"mixing",seconds:0};}
+  clear(){if(!this.canAct)return;this.resetTea();this.state.feedback="A clean start for this recipe.";this.emit();}
+  showTeaRecipe(){if(!this.canAct||!this.state.tea)return;this.state.tea.hint=!this.state.tea.hint;this.emit();}
+  brewTea(){
+    if(!this.canAct||!this.state.tea)return;const tea=this.state.tea;
+    if(tea.stage==="mixing"){
+      if(this.state.selection.length!==3)return;
+      tea.stage="steeping";this.state.feedback="Watch the band. Lift the tea when it tastes just right.";
+    }else if(tea.stage==="steeping"){
+      tea.stage="ready";this.state.feedback="Tea lifted. Serve it, or empty the cup and try again.";
+    }else return;
+    this.emit();
+  }
   replay(emit=true){if(this.game.kind!=="echo"||this.state.phase!=="play")return;this.state.listening=true;this.state.lit=-1;this.echoClock=0;this.echoStep=-1;this.echoAnswer=0;if(emit)this.emit();}
   private success(duration=1.1){this.state.score+=100;this.state.emotion="joy";this.state.feedback=["Lovely!","You did it!","A little more sunshine!"][this.state.round%3];this.wait=duration;this.nextRound=true;this.state.listening=false;this.tone(4);this.emit();}
   private miss(message:string){this.state.hearts--;this.state.emotion="sad";this.state.feedback=message;this.wait=.8;this.nextRound=false;if(this.state.hearts<=0){this.state.phase="lose";this.state.listening=false;}this.emit();}
   tick(dt:number){
     if(this.state.phase!=="play"||!Number.isFinite(dt)||dt<=0)return;this.state.elapsed+=dt;this.lastHazard=Math.max(0,this.lastHazard-dt);
     if(this.wait>0){this.wait-=dt;if(this.wait<=0&&this.nextRound){this.nextRound=false;this.state.round++;if(this.state.round>=this.game.rounds){this.state.phase="win";this.state.score+=this.state.hearts*25;this.emit();}else this.prepare();}else if(this.wait<=0){this.state.emotion="curious";this.emit();}return;}
+    if(this.state.tea?.stage==="steeping"){
+      const tea=this.state.tea,previous=Math.floor(tea.seconds*10);tea.seconds=Math.min(8,tea.seconds+dt);
+      if(tea.seconds===8){tea.stage="ready";this.state.feedback="This cup steeped too long. Empty it to brew again before serving.";this.emit();}
+      else if(Math.floor(tea.seconds*10)!==previous)this.emit();
+    }
     if(this.game.kind==="echo"){
       this.echoClock+=dt;
       if(this.state.listening){const step=Math.floor(this.echoClock/.72),count=this.state.round+2;

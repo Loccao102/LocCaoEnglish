@@ -1,7 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 
 async function click(page:Page,control:Locator){
-  await expect(control).toBeVisible();await expect(control).toBeEnabled();
+  await expect(control).toBeVisible({timeout:15000});await expect(control).toBeEnabled();
   await control.evaluate(element=>element.scrollIntoView({block:"center"}));
   const box=(await control.boundingBox())!;await page.mouse.click(box.x+box.width/2,box.y+box.height/2);
 }
@@ -23,12 +23,16 @@ test("the journey opens the next sky page and the fair returns to an unfinished 
   await expect(atlas).toContainText("1 / 6 pages · 2 / 18 badges");
   await expect(atlas.getByRole("heading",{name:"Paper Trail"})).toBeVisible();
   await expect(atlas.getByRole("link",{name:"Explore this trail →"})).toHaveAttribute("href","/festival/cloud-hop?course=cloud-02");
-  await click(page,atlas.getByRole("link",{name:"Explore this trail →"}));await page.clock.runFor(320);
-  await expect(page.getByRole("heading",{name:"2. Paper Trail",exact:true})).toBeVisible();
+  // Let navigation settle with a running clock; a prefetched production route can
+  // commit after the old fixed 320 ms window and otherwise remain frozen on CI.
+  await page.clock.resume();await click(page,atlas.getByRole("link",{name:"Explore this trail →"}));
+  await expect(page).toHaveURL(/course=cloud-02/);
+  await expect(page.getByRole("heading",{name:"2. Paper Trail",exact:true})).toBeVisible({timeout:15000});
+  await page.clock.pauseAt(new Date(await page.evaluate(()=>Date.now())+500));
   await click(page,page.getByRole("button",{name:"Let’s play →"}));await page.clock.runFor(320);
   await click(page,page.getByRole("button",{name:"Ring 1",exact:true}));await page.clock.runFor(350);await page.keyboard.press("Space");await page.clock.runFor(2400);
   await expect(page.locator(".fair-objective")).toContainText("ROUND 2 / 6");
-  await click(page,page.getByRole("link",{name:"Leave game and return to the fair"}));await page.clock.runFor(320);
+  await page.clock.resume();await click(page,page.getByRole("link",{name:"Leave game and return to the fair"}));
   const resume=page.getByRole("region",{name:"Games to continue"});
   await expect(resume).toContainText("Round 2 of 6");
   await expect(resume.getByRole("link",{name:"Continue Cloud Hop: Paper Trail"})).toHaveAttribute("href","/festival/cloud-hop?course=cloud-02");
@@ -40,6 +44,10 @@ test("the journey opens the next sky page and the fair returns to an unfinished 
   await expect(page.getByRole("heading",{name:"2. Paper Trail",exact:true})).toBeVisible();
   await expect(page.getByRole("button",{name:"Course 6: Homeward Sky, locked",exact:true})).toBeDisabled();
   await page.goto("/festival/cloud-hop?course=cloud-01");await page.clock.runFor(320);
+  await expect(page.getByRole("heading",{name:"1. First Flight",exact:true})).toBeVisible();
+  await page.evaluate(()=>window.history.pushState(null,"","?course=cloud-02"));
+  await expect(page.getByRole("heading",{name:"2. Paper Trail",exact:true})).toBeVisible();
+  await page.goBack();
   await expect(page.getByRole("heading",{name:"1. First Flight",exact:true})).toBeVisible();
   await page.setViewportSize({width:390,height:844});await page.goto("/journey");await page.clock.runFor(320);
   await expect(atlas).toContainText("1 / 6 pages");

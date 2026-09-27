@@ -5,6 +5,20 @@
 
 /* Keep the playfield clear of the HUD; world labels remain readable at every zoom. */
 .fair-game{--fair-top-space:158px;--fair-bottom-space:142px}
+.tea-order-card{margin-top:8px;text-align:left;border-top:1px dashed #c3cda9;padding-top:7px}
+.tea-order-heading,.tea-steep-caption{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;line-height:1.4}
+.tea-order-heading button{border:1px solid #b5c5a4;background:#f5f2dc;color:#305641;border-radius:9px;padding:6px 9px;min-height:36px;font-size:14px;cursor:pointer}
+.tea-order-card p{font-size:14px;line-height:1.4;margin:4px 0;color:#355641}
+.tea-steep-meter{height:14px;border-radius:8px;background:#e6dfcb;position:relative;margin:8px 3px;border:1px solid #b5b899}
+.tea-target-band{position:absolute;inset-block:0;background:#85ac70;border-inline:2px solid #3d6844}
+.tea-steep-meter i{position:absolute;top:-4px;width:5px;height:20px;background:#563b27;border:1px solid #fff8e4;border-radius:3px;transform:translateX(-50%)}
+.tea-steep-caption strong{white-space:nowrap}.tea-steep-caption{font-size:13px}
+.tea-service-invite{margin-top:18px;padding:16px;background:#f2ecd7;border:1px solid #d7cba9;border-radius:16px}
+.tea-service-invite p{margin:6px 0}.fair-game[data-tea-service=true] .fair-key-hint{display:none}
+.fair-game[data-tea-hint=true] .fair-objective>strong{display:none}
+.tea-order-card[data-stage=mixing] .tea-steep-meter{display:none}
+.tea-order-card[data-stage=mixing] .tea-steep-caption{margin-top:5px}
+@media(max-width:650px){.fair-game[data-tea-service=true] .fair-recipe-controls{gap:5px}.fair-game[data-tea-service=true] .fair-recipe-controls button{font-size:14px;padding:8px}.tea-order-heading{font-size:14px}.tea-steep-caption{font-size:12px}}
 .fair-canvas{top:var(--fair-top-space);bottom:var(--fair-bottom-space)}
 .fair-hud{padding:12px 20px;gap:12px}
 .fair-hud h1{font-size:24px}.fair-hud>div>span{font-size:11px;letter-spacing:.07em;color:#486e5b}
