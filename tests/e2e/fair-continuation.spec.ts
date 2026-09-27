@@ -29,7 +29,7 @@ test("the journey opens the next sky page and the fair returns to an unfinished 
   await page.clock.resume();await click(page,atlas.getByRole("link",{name:"Explore this trail →"}));
   await expect(page).toHaveURL(/course=cloud-02/);
   await expect(page.getByRole("heading",{name:"2. Paper Trail",exact:true})).toBeVisible({timeout:15000});
-  await page.clock.pauseAt(new Date(await page.evaluate(()=>Date.now())+500));
+  await page.clock.pauseAt(new Date(await page.evaluate(()=>Date.now())+10_000));
   await click(page,page.getByRole("button",{name:"Let’s play →"}));await page.clock.runFor(320);
   await click(page,page.getByRole("button",{name:"Ring 1",exact:true}));await page.clock.runFor(350);await page.keyboard.press("Space");await page.clock.runFor(2400);
   await expect(page.locator(".fair-objective")).toContainText("ROUND 2 / 6");
