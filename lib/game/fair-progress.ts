@@ -1,10 +1,11 @@
 import { festivalById, festivalGames } from "./festival";
 import { courseById, fairCourses, courseMedals, mergeCourse, type CourseRecord, type CourseResult } from "./fair-courses";
+import { difficulties, isDifficulty, type Difficulty } from "./challenge";
 
-export type FairRecord = { best: number; stars: number; visits: number; lastPlayedAt?: string };
+export type FairRecord = { best: number; stars: number; visits: number; lastPlayedAt?: string;levels?:Partial<Record<Difficulty,{stars:number;visits:number}>> };
 export type FairSave = { version: 1; games: Record<string, FairRecord>; courses?:Record<string,CourseRecord> };
-export type FairCompletion = { runId: string; gameId: string; stars: number; courseId?:string;elapsedMs?:number;feathers?:number };
-export type FairRun = { runId: string; gameId: string; owner: string; courseId?:string };
+export type FairCompletion = { runId: string; gameId: string; stars: number; courseId?:string;elapsedMs?:number;feathers?:number;difficulty?:Difficulty };
+export type FairRun = { runId: string; gameId: string; owner: string; courseId?:string;difficulty?:Difficulty };
 export const emptyFair = (): FairSave => ({ version: 1, games: {} });
 export const FAIR_EVENT = "fair-progress";
 const root = "loccao.fair.v2.";
@@ -16,6 +17,7 @@ export function restoreFair(value: unknown): FairSave {
     const record = raw.games[game.id];
     if (!record || !Number.isInteger(record.stars) || record.stars < 1 || record.stars > 3 || !Number.isInteger(record.visits) || record.visits < 1) continue;
     save.games[game.id] = { best: game.rounds * 100 + record.stars * 25, stars: record.stars, visits: Math.min(1000000, record.visits), ...(typeof record.lastPlayedAt === "string" && Number.isFinite(Date.parse(record.lastPlayedAt)) ? { lastPlayedAt: record.lastPlayedAt } : {}) };
+    for(const difficulty of difficulties){const level=record.levels?.[difficulty];if(level&&Number.isInteger(level.stars)&&level.stars>=1&&level.stars<=3&&Number.isInteger(level.visits)&&level.visits>=1){save.games[game.id].levels??={};save.games[game.id].levels![difficulty]={stars:level.stars,visits:Math.min(1000000,level.visits)};}}
   }
   for(const course of fairCourses){
     const record=raw.courses?.[course.id];if(!record)continue;
@@ -27,10 +29,13 @@ export function restoreFair(value: unknown): FairSave {
 export function applyFair(save: FairSave, completion: FairCompletion, at: string): FairSave {
   const game = festivalById(completion.gameId);
   if (!game || !Number.isInteger(completion.stars) || completion.stars < 1 || completion.stars > 3) throw new Error("This result is not a completed fair game.");
+  if(completion.difficulty!==undefined&&!isDifficulty(completion.difficulty))throw new Error("This difficulty is not supported.");
   if(completion.courseId){const course=courseById(completion.courseId);if(!course||course.gameId!==game.id||!Number.isInteger(completion.elapsedMs)||completion.elapsedMs!<1||completion.elapsedMs!>86400000||!Number.isInteger(completion.feathers??0)||(completion.feathers??0)<0||(completion.feathers??0)>3)throw new Error("This course result could not be saved.");}
   else if(completion.elapsedMs||completion.feathers)throw new Error("This course result needs its course name.");
   const previous = save.games[game.id], stars = Math.max(previous?.stars || 0, completion.stars);
   const next:FairSave={ ...save, version: 1, games: { ...save.games, [game.id]: { best: game.rounds * 100 + stars * 25, stars, visits: (previous?.visits || 0) + 1, lastPlayedAt: at } } };
+  const difficulty=completion.difficulty||"practice",level=previous?.levels?.[difficulty];
+  next.games[game.id].levels={...previous?.levels,[difficulty]:{stars:Math.max(level?.stars||0,completion.stars),visits:(level?.visits||0)+1}};
   if(completion.courseId){const old=save.courses?.[completion.courseId];next.courses={...save.courses,[completion.courseId]:mergeCourse(old,{medals:1,clean:completion.stars===3,feathers:completion.feathers||0,bestMs:completion.elapsedMs!,visits:(old?.visits||0)+1})};}
   return next;
 }
@@ -41,6 +46,7 @@ export function mergeFair(a: FairSave, b: FairSave): FairSave {
     const old = result.games[id];
     if (!old) { result.games[id] = next; continue; }
     result.games[id] = { best: Math.max(old.best, next.best), stars: Math.max(old.stars, next.stars), visits: Math.max(old.visits, next.visits), lastPlayedAt: (old.lastPlayedAt || "") > (next.lastPlayedAt || "") ? old.lastPlayedAt : next.lastPlayedAt };
+    for(const difficulty of difficulties){const a=old.levels?.[difficulty],b=next.levels?.[difficulty];if(a||b){result.games[id].levels??={};result.games[id].levels![difficulty]={stars:Math.max(a?.stars||0,b?.stars||0),visits:Math.max(a?.visits||0,b?.visits||0)};}}
   }
   for(const [id,next]of Object.entries(restoreFair(b).courses||{})){result.courses??={};result.courses[id]=mergeCourse(result.courses[id],next);}
   return result;
@@ -64,10 +70,10 @@ export function queuedFair(owner: string): (FairCompletion & { at: string })[] {
   return entries.sort((a, b) => a.at.localeCompare(b.at) || a.runId.localeCompare(b.runId));
 }
 export function queueFair(run: FairRun, stars: number, result?:CourseResult) {
-  const value = { runId: run.runId, gameId: run.gameId, stars, ...(run.courseId?{courseId:run.courseId,elapsedMs:result?.elapsedMs,feathers:result?.feathers||0}:{}), at: new Date().toISOString() };
+  const value = { runId: run.runId, gameId: run.gameId, stars,...(run.difficulty?{difficulty:run.difficulty}:{}), ...(run.courseId?{courseId:run.courseId,elapsedMs:result?.elapsedMs,feathers:result?.feathers||0}:{}), at: new Date().toISOString() };
   applyFair(emptyFair(), value, value.at);
   const key = `${fairPrefix(run.owner)}run.${run.runId}`, old = parseStored(key) as FairCompletion | null;
-  if (old && (old.gameId !== value.gameId || old.stars !== value.stars || (old.courseId||"")!==(value.courseId||"") || (old.elapsedMs||0)!==(value.elapsedMs||0) || (old.feathers||0)!==(value.feathers||0))) throw new Error("This run already has a different saved result.");
+  if (old && (old.gameId !== value.gameId || old.stars !== value.stars || (old.difficulty||"")!==(value.difficulty||"") || (old.courseId||"")!==(value.courseId||"") || (old.elapsedMs||0)!==(value.elapsedMs||0) || (old.feathers||0)!==(value.feathers||0))) throw new Error("This run already has a different saved result.");
   if (!old) localStorage.setItem(key, JSON.stringify(value));
 }
 /** Course unlocks may use completed local runs while account uploads are waiting. */

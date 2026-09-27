@@ -81,7 +81,7 @@ export class FestivalArena {
         const halo=new THREE.Mesh(this.art.ownGeometry(new THREE.TorusGeometry(.38,.025,6,24)),this.art.material("#E3BD64"));halo.rotation.x=Math.PI/2;halo.position.y=-.4;feather.add(halo);
         mergeArt(feather,this.art);this.feathers.push(feather);this.scene.add(feather);
       });
-      if(session.course.wind){
+      {
         this.windRibbon.position.set(4,0,3);this.art.mesh(this.windRibbon,"cylinder","#C6A576",[0,.75,0],[.04,1.5,.04]);
         for(let i=0;i<4;i++)this.art.mesh(this.windRibbon,"box",i%2?"#F4D599":"#F8F5D9",[.14+i*.24,1.35,0],[.26,.17,.035]);this.scene.add(this.windRibbon);
       }
@@ -163,7 +163,7 @@ export class FestivalArena {
     const prop=this.props.find(item=>item.data.id===id);if(!prop||!prop.root.visible)return;
     if(this.session.mobile){
       this.renderer.domElement.focus({preventScroll:true});this.walkTo({x:prop.data.x,z:prop.data.z,id});
-      if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.session.choose(id);this.destination=null;}
+      if(Math.hypot(this.hero.root.position.x-prop.data.x,this.hero.root.position.z-prop.data.z)<1.1&&this.session.game.kind!=="hop"){this.contacts.add(id);this.session.choose(id);this.destination=null;}
     }else this.session.choose(id);
   }
   unlock(){if(!this.audio){try{this.audio=new AudioContext();}catch{return;}}if(this.audio.state==="suspended")void this.audio.resume().catch(()=>{});}
@@ -264,7 +264,9 @@ export class FestivalArena {
       dx=(Number(this.keys.has("d")||this.keys.has("arrowright"))-Number(this.keys.has("a")||this.keys.has("arrowleft")))+this.touch.x;
       dz=(Number(this.keys.has("s")||this.keys.has("arrowdown"))-Number(this.keys.has("w")||this.keys.has("arrowup")))+this.touch.z;
       if(this.destination){
-        if(this.session.course?.drift&&this.destination.id!==undefined){const point=this.session.ringPoint(this.destination.id);this.destination.x=point.x;this.destination.z=point.z;}
+        if(this.destination.id!==undefined&&(this.session.course||this.session.game.kind==="bubble")){
+          const point=this.session.course?this.session.ringPoint(this.destination.id):this.session.bubblePoint(this.destination.id);this.destination.x=point.x;this.destination.z=point.z;
+        }
         const waypoint=this.destination.via?.[0],target=waypoint||this.destination,distance=Math.hypot(target.x-this.hero.root.position.x,target.z-this.hero.root.position.z);
         if(distance>(!waypoint&&this.destination.id!==undefined&&this.session.game.kind!=="hop"?.8:.12)){dx=(target.x-this.hero.root.position.x)/distance;dz=(target.z-this.hero.root.position.z)/distance;}
         else if(waypoint)this.destination.via!.shift();
@@ -276,6 +278,7 @@ export class FestivalArena {
     if(this.jumping>0){this.vy-=11.5*dt;this.jumping=Math.max(0,this.jumping+this.vy*dt);}else this.jumps=0;position.y=this.jumping;
     if(this.velocity.length()>.12)this.hero.face(Math.atan2(this.velocity.x,this.velocity.y),dt);
     for(const prop of this.props){
+      if(prop.data.shape==="bubble"){const point=this.session.bubblePoint(prop.data.id);prop.data.x=point.x;prop.data.z=point.z;prop.root.position.x=point.x;prop.root.position.z=point.z;}
       if(prop.data.shape==="ring"){const point=this.session.ringPoint(prop.data.id);prop.data.x=point.x;prop.data.z=point.z;prop.root.position.set(point.x,0,point.z);}
       const distance=Math.hypot(position.x-prop.data.x,position.z-prop.data.z);
       if(this.session.game.kind==="hop"){if(distance<.6)this.session.touchRing(prop.data.id,this.jumping);prop.root.visible=prop.data.id>=state.round;prop.root.scale.setScalar(prop.data.id===state.round?1.04:1);}
@@ -305,6 +308,7 @@ export class FestivalArena {
         this.updateMovement(step);
       }
       const state=this.session.state;
+      this.windRibbon.visible=!!this.session.course?.wind||this.session.state.challenge?.level==="expert";
       this.windRibbon.rotation.y=this.session.wind>=0?0:Math.PI;
       for(const [id,feather]of this.feathers.entries()){feather.rotation.y=this.time*.7+id;feather.position.y=.7+(this.reduced.matches?0:Math.sin(this.time*2+id)*.1);}
       if(state.revision!==this.revision){this.revision=state.revision;this.hero.express(state.emotion);this.hostRig.express(state.emotion==="sad"?"love":state.emotion);for(const [i,flower]of this.completedFlowers.entries())flower.visible=i<state.round;}
@@ -320,9 +324,11 @@ export class FestivalArena {
       }
       if(this.session.game.kind==="colour"){
         const pair=[...state.selection].sort().join(),mix=({"0,1":"#EAB06F","1,2":"#8EB590","0,2":"#AC96C8","0,3":"#E9ADBC"} as Record<string,string>)[pair]|| (state.selection.length===1?["#EE947D","#F2CC71","#81B7D6","#FDF4D7"][state.selection[0]]:state.selection.length?"#B9A58E":"#FEF9E9");
-        for(const petal of this.painted)petal.material=this.art.material(mix);
+        let colour=mix;
+        if(state.challenge&&state.selection.length){const mixed=new THREE.Color(0,0,0);for(const id of state.selection)mixed.add(new THREE.Color(["#EE947D","#F2CC71","#81B7D6","#FDF4D7"][id]));mixed.multiplyScalar(1/state.selection.length);colour=state.emotion==="joy"?this.session.paintOrder.hex:`#${mixed.getHexString()}`;}
+        for(const petal of this.painted)petal.material=this.art.material(colour);
       }
-      if(this.session.game.kind==="garden"){this.seedling.scale.setScalar(state.emotion==="joy"?Math.min(1,this.successTime*2):0);for(const petal of this.painted)petal.material=this.art.material(["#F6CB66","#8CBADD","#EE9FAC"][Math.min(state.round,2)]);}
+      if(this.session.game.kind==="garden"){this.seedling.scale.setScalar(state.emotion==="joy"?Math.min(1,this.successTime*2):state.challenge?.step?Math.min(.8,.2+state.challenge.step*.15):0);for(const petal of this.painted)petal.material=this.art.material(["#F6CB66","#8CBADD","#EE9FAC"][Math.min(this.session.garden.seed,2)]);}
       if(this.session.game.kind==="bridge"){
         this.boat.visible=state.emotion==="joy"&&this.session.bridgePath.length>0;
         if(this.boat.visible){const path=this.session.bridgePath.map(id=>new THREE.Vector3((id%3-1)*1.65,.4,(Math.floor(id/3)-1)*1.65)),amount=Math.min(.999,this.successTime/2.6)*(path.length-1),from=Math.floor(amount);this.boat.position.copy(path[from]).lerp(path[Math.min(from+1,path.length-1)],amount-from);}

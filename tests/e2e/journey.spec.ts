@@ -1,4 +1,5 @@
-import { test, expect as baseExpect, type Page } from "@playwright/test";
+import { test } from "./fair-fixture";
+import { expect as baseExpect, type Page } from "@playwright/test";
 import { OrthographicCamera, Vector3 } from "three";
 import { frameFairCamera } from "../../lib/game/three/fair-view";
 import { festivalById } from "../../lib/game/festival";

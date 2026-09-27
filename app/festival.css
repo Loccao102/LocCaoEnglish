@@ -18,6 +18,14 @@
 .fair-game[data-tea-hint=true] .fair-objective>strong{display:none}
 .tea-order-card[data-stage=mixing] .tea-steep-meter{display:none}
 .tea-order-card[data-stage=mixing] .tea-steep-caption{margin-top:5px}
+.fair-difficulty{border:1px solid #c5d1b6;border-radius:16px;padding:12px;margin:16px 0;text-align:left}
+.fair-difficulty legend{font-size:14px;font-weight:700;padding:0 6px}.fair-difficulty>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.fair-difficulty label{display:flex;flex-direction:column;gap:4px;padding:10px 5px;border:1px solid #d9decc;background:#fffdf1;border-radius:10px;text-align:center;cursor:pointer;font-size:14px}
+.fair-difficulty label[data-selected=true]{border-color:#4c795b;background:#e6efcf}.fair-difficulty input{accent-color:#457753;align-self:center}
+.fair-difficulty small{font-size:12px;line-height:1.5;display:block;color:#49644d}.fair-difficulty p{margin:8px 0!important;font-size:14px!important}
+.fair-challenge-status{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;margin-top:6px;font-size:13px;line-height:1.3;color:#355641}
+.fair-challenge-status button{background:#edf1db;border:1px solid #a9bb97;border-radius:8px;padding:5px 8px;min-height:32px;font-size:13px;color:#355641;cursor:pointer}
+.fair-challenge-status p{width:100%;margin:0;font-weight:600}
 @media(max-width:650px){.fair-game[data-tea-service=true] .fair-recipe-controls{gap:5px}.fair-game[data-tea-service=true] .fair-recipe-controls button{font-size:14px;padding:8px}.tea-order-heading{font-size:14px}.tea-steep-caption{font-size:12px}}
 .fair-canvas{top:var(--fair-top-space);bottom:var(--fair-bottom-space)}
 .fair-hud{padding:12px 20px;gap:12px}
@@ -93,3 +101,5 @@
   .fair-feedback{bottom:88px;font-size:14px;padding:5px 9px}.fair-bottom{bottom:5px;min-height:70px}
   .fair-dpad{grid-template-rows:repeat(2,34px)}
 }
+
+.fair-level-records{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px!important;font-weight:650}

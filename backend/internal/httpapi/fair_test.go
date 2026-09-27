@@ -51,6 +51,9 @@ func TestFairRequiresIdentityAndStrictCompletion(t *testing.T) {
 		{`{"runId":"12345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":3}`, 200},
 		{`{"runId":"12345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":3}`, 200},
 		{`{"runId":"12345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":1}`, 409},
+		{`{"runId":"12345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":3,"difficulty":"expert"}`, 409},
+		{`{"runId":"32345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":1,"difficulty":"expert"}`, 200},
+		{`{"runId":"42345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":3,"difficulty":"unknown"}`, 400},
 		{`{"runId":"invalid","gameId":"tea-time","stars":3}`, 400},
 		{`{"runId":"22345678-1234-4123-8123-123456789012","gameId":"tea-time","stars":3,"score":99999}`, 400},
 	} {

@@ -1,3 +1,4 @@
+import { isDifficulty } from "./challenge";
 import type { FairRun } from "./fair-progress";
 import type { FairCheckpoint } from "./festival-session";
 
@@ -11,6 +12,7 @@ export function readFairCheckpoint(owner:string,gameId:string,courseId=""):Saved
     const saved=JSON.parse(localStorage.getItem(key(owner,gameId,courseId))||"null") as SavedFairRun|null;
     if(!saved||saved.version!==1||saved.run.owner!==owner||saved.run.gameId!==gameId||(saved.run.courseId||"")!==courseId||
       !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(saved.run.runId)||
+      (saved.run.difficulty!==undefined&&!isDifficulty(saved.run.difficulty))||(saved.run.difficulty||"practice")!==(saved.session.state.challenge?.level||"practice")||
       !Number.isFinite(saved.savedAt)||Date.now()-saved.savedAt>7*86400000||saved.savedAt>Date.now()+60000||
       !Number.isFinite(saved.position.x)||!Number.isFinite(saved.position.z))return null;
     return saved;

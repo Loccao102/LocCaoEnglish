@@ -1,8 +1,9 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { test } from "./fair-fixture";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 async function click(page:Page,control:Locator){
   await expect(control).toBeVisible({timeout:15000});await expect(control).toBeEnabled();
-  await control.evaluate(element=>element.scrollIntoView({block:"center"}));
+  await control.evaluate(element=>element.scrollIntoView({block:"center",behavior:"instant"}));
   const box=(await control.boundingBox())!;await page.mouse.click(box.x+box.width/2,box.y+box.height/2);
 }
 async function openShift(page:Page){

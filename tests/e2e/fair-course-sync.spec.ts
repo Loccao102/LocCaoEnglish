@@ -3,6 +3,24 @@ import { test, expect } from "@playwright/test";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080";
 
+test("account difficulty clears survive retries without inheriting easy stars", async ({ request }) => {
+  const account = await request.post(`${API}/v1/auth/register`, { data: {
+    email: `fair-levels-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Challenge Friend",
+  } });
+  expect(account.ok(), await account.text()).toBe(true);
+  const { token } = await account.json(), headers = { Authorization: `Bearer ${token}` };
+  const first = { runId: randomUUID(), gameId: "tea-time", stars: 3, difficulty: "practice" };
+  const post = (data: typeof first) => request.post(`${API}/v1/fair/completions`, { headers, data });
+  expect((await post(first)).ok()).toBe(true);
+  expect((await post({ ...first, difficulty: "expert" })).status()).toBe(409);
+  expect((await post({ ...first, runId: randomUUID(), difficulty: "impossible" })).status()).toBe(400);
+  const hard = { ...first, runId: randomUUID(), stars: 1, difficulty: "expert" };
+  for (const response of await Promise.all(Array.from({ length: 6 }, () => post(hard)))) expect(response.ok(), await response.text()).toBe(true);
+  const { save } = await (await request.get(`${API}/v1/fair`, { headers })).json();
+  expect(save.games["tea-time"].visits).toBe(2);
+  expect(save.games["tea-time"].levels).toEqual({ practice: { stars: 3, visits: 1 }, expert: { stars: 1, visits: 1 } });
+});
+
 test("account courses enforce unlocks and retain replay badges with idempotent retries", async ({ request }) => {
   const account = await request.post(`${API}/v1/auth/register`, {
     data: { email: `sky-atlas-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Sky Explorer" },

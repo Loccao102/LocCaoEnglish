@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { test } from "./fair-fixture";
+import { expect } from "@playwright/test";
 import { festivalGames } from "../../lib/game/festival";
 
 test.setTimeout(120000);

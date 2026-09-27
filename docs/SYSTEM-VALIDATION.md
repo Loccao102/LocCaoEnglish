@@ -89,6 +89,36 @@ Fair completions are personal client-reported keepsakes, not server-replayed com
 - Remote run 81 completed with five successful jobs and one failed browser case (36 browser cases passed). That failure was a frozen-clock navigation assertion when opening Paper Trail from Journey. Navigation now waits for the destination with the clock running, then pauses for physics inputs. Course entry also subscribes to query changes instead of reading the URL only once per account. CI retains browser failure screenshots/traces for seven days to support future diagnosis.
 - These local checks used a production frontend on port 3102 and the installed Chromium with `E2E_GL_BACKEND=d3d11`. No backend service was restarted or account database migrated for this feature; shifts use the existing Tea Time completion payload. The remote CI result for this revision is reported on PR #3.
 
+## Shared difficulty foundation — September 27
+
+- Practice preserves the original rules; Adventure is the default; Challenge
+  adds stricter memory, timing, routing and turn constraints. All eight fair
+  games use seeded, versioned challenge state and separate per-level records.
+- 50 game logic cases pass. The 16 full advanced-mode runs cover every game at
+  both new levels, alongside assistance, clocks, checkpoints and solvable bridges.
+- 17 affected browser scenarios pass locally: four difficulty scenarios (including
+  full garden/delivery runs via actual 3D movement), journey continuation, six
+  original playfield scenarios, four readability/zoom scenarios and two café
+  scenarios. All eight Challenge arenas retain readable, non-overlapping labels
+  at 390 × 551. The mobile café was also inspected using normal rendering.
+- The final production build passes (57 pages). `go test ./...` and `go vet ./...`
+  pass locally; the expanded HTTP validation test also passes. These local Go
+  tests used the memory store, not PostgreSQL. The new account API E2E and
+  PostgreSQL/race checks run in CI against the updated backend.
+- CI run 82 passed five jobs and 38 browser scenarios, with one journey-link
+  failure. Its click helper used smooth scrolling followed immediately by screen
+  coordinates. The helper now scrolls instantly; the continuation scenario passes
+  locally. The current commit still needs its own CI result.
+- Corrected nearby click/contact handling so one activation cannot be counted
+  again by the next collision frame. This matters for exact watering counts.
+- The production frontend on port 3102 includes this foundation. The local API
+  was not restarted or migrated; deploy the API/schema update before relying on
+  advanced-mode account sync. Failed uploads remain queued under their owner.
+- Design contracts, limitations and the next core priorities are documented in
+  `GAMEPLAY-FOUNDATION.md` and `GAMEPLAY-AUDIT.md`. The audit distinguishes active
+  routes from old unused components and does not claim the 12 learning activities
+  have already received the new fair engine.
+
 ## Reproduce
 
 Use the local startup steps in README. With the services running:

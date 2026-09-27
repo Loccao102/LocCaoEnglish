@@ -1,0 +1,1 @@
+ALTER TABLE fair_completions ADD COLUMN IF NOT EXISTS difficulty TEXT NOT NULL DEFAULT '';

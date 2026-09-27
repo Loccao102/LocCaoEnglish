@@ -41,10 +41,15 @@ type Game struct {
 	Rounds int    `json:"rounds"`
 }
 type Record struct {
-	Best         int       `json:"best"`
-	Stars        int       `json:"stars"`
-	Visits       int       `json:"visits"`
-	LastPlayedAt time.Time `json:"lastPlayedAt"`
+	Best         int                    `json:"best"`
+	Stars        int                    `json:"stars"`
+	Visits       int                    `json:"visits"`
+	LastPlayedAt time.Time              `json:"lastPlayedAt"`
+	Levels       map[string]LevelRecord `json:"levels,omitempty"`
+}
+type LevelRecord struct {
+	Stars  int `json:"stars"`
+	Visits int `json:"visits"`
 }
 type Save struct {
 	Version int                     `json:"version"`
@@ -52,12 +57,13 @@ type Save struct {
 	Courses map[string]CourseRecord `json:"courses,omitempty"`
 }
 type Completion struct {
-	RunID     string `json:"runId"`
-	GameID    string `json:"gameId"`
-	Stars     int    `json:"stars"`
-	CourseID  string `json:"courseId,omitempty"`
-	ElapsedMS int    `json:"elapsedMs,omitempty"`
-	Feathers  int    `json:"feathers,omitempty"`
+	Difficulty string `json:"difficulty,omitempty"`
+	RunID      string `json:"runId"`
+	GameID     string `json:"gameId"`
+	Stars      int    `json:"stars"`
+	CourseID   string `json:"courseId,omitempty"`
+	ElapsedMS  int    `json:"elapsedMs,omitempty"`
+	Feathers   int    `json:"feathers,omitempty"`
 }
 
 var ErrInvalid = errors.New("invalid fair completion")
@@ -80,6 +86,13 @@ func NewSave() Save { return Save{Version: 1, Games: map[string]Record{}} }
 func Clone(save Save) Save {
 	next := NewSave()
 	for id, record := range save.Games {
+		if record.Levels != nil {
+			levels := map[string]LevelRecord{}
+			for difficulty, level := range record.Levels {
+				levels[difficulty] = level
+			}
+			record.Levels = levels
+		}
 		next.Games[id] = record
 	}
 	if len(save.Courses) > 0 {
@@ -91,6 +104,9 @@ func Clone(save Save) Save {
 	return next
 }
 func Validate(c Completion) error {
+	if c.Difficulty != "" && c.Difficulty != "practice" && c.Difficulty != "adventure" && c.Difficulty != "expert" {
+		return ErrInvalid
+	}
 	if _, ok := games[c.GameID]; !ok || c.Stars < 1 || c.Stars > 3 || !runPattern.MatchString(c.RunID) {
 		return ErrInvalid
 	}
@@ -132,6 +148,17 @@ func Apply(save Save, c Completion, now time.Time) Save {
 	r.Stars = max(r.Stars, c.Stars)
 	r.Visits++
 	r.LastPlayedAt = now.UTC()
+	if r.Levels == nil {
+		r.Levels = map[string]LevelRecord{}
+	}
+	difficulty := c.Difficulty
+	if difficulty == "" {
+		difficulty = "practice"
+	}
+	level := r.Levels[difficulty]
+	level.Stars = max(level.Stars, c.Stars)
+	level.Visits++
+	r.Levels[difficulty] = level
 	next.Games[c.GameID] = r
 	if c.CourseID != "" {
 		if next.Courses == nil {

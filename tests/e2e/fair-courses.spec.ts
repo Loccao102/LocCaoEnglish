@@ -1,4 +1,5 @@
-import { test, expect, type Page, type Locator } from "@playwright/test";
+import { test } from "./fair-fixture";
+import { expect, type Page, type Locator } from "@playwright/test";
 import { fairCourses } from "../../lib/game/fair-courses";
 
 test.setTimeout(240000);
@@ -10,7 +11,7 @@ async function controlled(page:Page){
 async function clickVisible(page:Page,locator:Locator){
   await expect(locator).toBeVisible({timeout:15000});
   await expect(locator).toBeEnabled();
-  await locator.evaluate(element=>element.scrollIntoView({block:"center"}));
+  await locator.evaluate(element=>element.scrollIntoView({block:"center",behavior:"instant"}));
   const rect=await locator.boundingBox();
   if(!rect)throw new Error("Missing visible control");
   await page.mouse.click(rect.x+rect.width/2,rect.y+rect.height/2);

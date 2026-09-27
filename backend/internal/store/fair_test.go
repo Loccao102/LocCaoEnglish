@@ -59,17 +59,32 @@ func TestFairPersistenceAndIdempotency(t *testing.T) {
 				t.Fatalf("duplicated or wrong result: %+v", r)
 			}
 			changed := c
+			changed.Difficulty = "expert"
+			if _, err = st.CompleteFair(ctx, player.ID, changed); !errors.Is(err, fair.ErrConflict) {
+				t.Fatalf("difficulty changed on retry: %v", err)
+			}
+			changed = c
 			changed.Stars = 3
 			if _, err = st.CompleteFair(ctx, player.ID, changed); !errors.Is(err, fair.ErrConflict) {
 				t.Fatalf("changed retry accepted: %v", err)
 			}
 			changed.RunID = "22345678-1234-4123-8123-123456789012"
+			changed.Difficulty = "expert"
 			if _, err = st.CompleteFair(ctx, player.ID, changed); err != nil {
 				t.Fatal(err)
 			}
 			save, _ = st.GetFair(ctx, player.ID)
 			if r := save.Games[c.GameID]; r.Visits != 2 || r.Best != 375 || r.Stars != 3 {
 				t.Fatalf("best did not improve: %+v", r)
+			}
+			levels := save.Games[c.GameID].Levels
+			if levels["practice"].Stars != 2 || levels["practice"].Visits != 1 || levels["expert"].Stars != 3 || levels["expert"].Visits != 1 {
+				t.Fatalf("difficulty records mixed: %+v", levels)
+			}
+			delete(levels, "expert")
+			isolated, _ := st.GetFair(ctx, player.ID)
+			if isolated.Games[c.GameID].Levels["expert"].Stars != 3 {
+				t.Fatal("save leaked nested difficulty records")
 			}
 			delete(save.Games, c.GameID)
 			fresh, _ := st.GetFair(ctx, player.ID)

@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { apiFetch, APIError } from "@/lib/api";
 import { AUTH_EVENT, getAuthToken } from "@/lib/session";
 import { availableCourses, emptyFair, FAIR_EVENT, fairPrefix, guestFair, mergeFair, parseStored, queuedFair, queueFair, restoreFair, type FairRun, type FairSave } from "@/lib/game/fair-progress";
+import { isDifficulty, type Difficulty } from "@/lib/game/challenge";
 import { courseUnlocked, type CourseRecord, type CourseResult } from "@/lib/game/fair-courses";
 
 type Identity = { owner: string; name: string; storageMode: string };
@@ -11,7 +12,7 @@ type Snapshot = Identity & { save: FairSave; status: "loading" | "ready" | "erro
 type APIState = { save: FairSave; playerId: string; displayName: string; storageMode: string };
 const initial: Snapshot = { owner: "", name: "Adventurer", storageMode: "device", save: emptyFair(), status: "loading", pending: 0, syncing: false, warning: "" };
 const identityKey = "loccao.fair.session.v1";
-const FairContext = createContext<(Snapshot & { courses:Record<string,CourseRecord>;refresh: () => Promise<void>; begin: (gameId: string,courseId?:string) => FairRun; complete: (run: FairRun, stars: number,result?:CourseResult) => Promise<string> }) | null>(null);
+const FairContext = createContext<(Snapshot & { courses:Record<string,CourseRecord>;refresh: () => Promise<void>; begin: (gameId: string,courseId?:string,difficulty?:Difficulty) => FairRun; complete: (run: FairRun, stars: number,result?:CourseResult) => Promise<string> }) | null>(null);
 
 export function FairProgressProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Snapshot>(initial);
@@ -35,7 +36,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
       try {
         for (const entry of queuedFair(owner)) {
           if (!current(version, token)) return false;
-          const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: entry.runId, gameId: entry.gameId, stars: entry.stars,courseId:entry.courseId,elapsedMs:entry.elapsedMs,feathers:entry.feathers }) });
+          const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: entry.runId, gameId: entry.gameId, stars: entry.stars,difficulty:entry.difficulty,courseId:entry.courseId,elapsedMs:entry.elapsedMs,feathers:entry.feathers }) });
           if (!current(version, token)) return false;
           const save = confirmed(owner, result.save);
           // Cache first. If storage fails, leave the run queued for an idempotent retry.
@@ -115,10 +116,11 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
     return () => { generation.current++; window.removeEventListener(AUTH_EVENT, auth); window.removeEventListener("storage", storage); window.removeEventListener("online", online); window.removeEventListener(FAIR_EVENT, online); };
   }, [patch, refresh, sync]);
 
-  const begin = useCallback((gameId: string,courseId?:string): FairRun => {
+  const begin = useCallback((gameId: string,courseId?:string,difficulty:Difficulty="practice"): FairRun => {
+    if(!isDifficulty(difficulty))throw new Error("Choose a supported difficulty.");
     if (stateRef.current.status !== "ready" || !stateRef.current.owner || getAuthToken() !== verifiedToken.current) throw new Error("Open your scrapbook before starting a game.");
     if(courseId&&!courseUnlocked(courseId,availableCourses(stateRef.current.save,stateRef.current.owner),!!stateRef.current.save.games["cloud-hop"]?.visits))throw new Error("Complete the previous course to open this trail.");
-    return { runId: crypto.randomUUID(), gameId, owner: stateRef.current.owner,...(courseId?{courseId}:{}) };
+    return { runId: crypto.randomUUID(), gameId, owner: stateRef.current.owner,...(difficulty!=="practice"?{difficulty}:{}),...(courseId?{courseId}:{}) };
   }, []);
   const complete = useCallback(async (run: FairRun, stars: number, courseResult?:CourseResult) => {
     if (stateRef.current.owner !== run.owner || getAuthToken() !== verifiedToken.current || stateRef.current.status !== "ready") throw new Error("Your account changed during this game. Return to the original account to save this memory.");
@@ -127,7 +129,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
     catch (error) {
       // Account results can still be saved directly when browser storage is disabled.
       if (run.owner === "guest" || !token) throw error;
-      const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: run.runId, gameId: run.gameId, stars,...(run.courseId?{courseId:run.courseId,...courseResult}:{}) }) });
+      const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: run.runId, gameId: run.gameId, stars,difficulty:run.difficulty,...(run.courseId?{courseId:run.courseId,...courseResult}:{}) }) });
       if (current(version, token)) patch({ save: confirmed(run.owner, result.save) });
       return "Your memory is saved to your account. Offline storage is unavailable on this browser.";
     }
