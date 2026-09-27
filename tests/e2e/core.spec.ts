@@ -24,6 +24,15 @@ test("Word Link is actually playable", async ({ page }) => {
   await expect(page.getByText(/Connection verified|Not quite/)).toBeVisible();
 });
 
+test("Grammar Repair uses the verified A1-C2 round lifecycle", async ({ page }) => {
+  await page.goto("/games/grammar-repair");
+  await expect(page.getByLabel("Grammar CEFR level")).toHaveValue("A1");
+  const choices=page.locator(".verified-grammar-card .choice-stack button");
+  await expect(choices.first()).toBeVisible();
+  await choices.first().click();
+  await expect(page.locator(".verified-grammar-card").getByText(/Correct repair|Review this pattern/)).toBeVisible();
+});
+
 test("campaign links load world-specific practice packs", async ({ page }) => {
   await page.goto("/games/word-link?pack=travel-airport");
   await expect(page.getByText("boarding pass", { exact: true })).toBeVisible();

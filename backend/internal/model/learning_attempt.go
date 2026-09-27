@@ -9,21 +9,22 @@ type LearningAttemptStartInput struct {
 }
 
 type LearningAttemptPrompt struct {
-	Word     string   `json:"word"`
-	Relation string   `json:"relation"`
+	Word     string   `json:"word,omitempty"`
+	Relation string   `json:"relation,omitempty"`
+	Question string   `json:"question,omitempty"`
 	Options  []string `json:"options"`
 }
 
 type LearningAttemptStart struct {
-	AttemptID     string                `json:"attemptId"`
-	Activity      string                `json:"activity"`
-	Pack          string                `json:"pack"`
-	ItemKey       string                `json:"itemKey"`
-	CEFRLevel     string                `json:"cefrLevel"`
-	ContentVersion string               `json:"contentVersion"`
-	RulesVersion  string                `json:"rulesVersion"`
-	Status        string                `json:"status"`
-	Prompt        LearningAttemptPrompt `json:"prompt"`
+	AttemptID      string                `json:"attemptId"`
+	Activity       string                `json:"activity"`
+	Pack           string                `json:"pack"`
+	ItemKey        string                `json:"itemKey"`
+	CEFRLevel      string                `json:"cefrLevel"`
+	ContentVersion string                `json:"contentVersion"`
+	RulesVersion   string                `json:"rulesVersion"`
+	Status         string                `json:"status"`
+	Prompt         LearningAttemptPrompt `json:"prompt"`
 }
 
 type LearningAttemptSubmitInput struct {
@@ -31,15 +32,15 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
-	AttemptID       string  `json:"attemptId"`
-	Status          string  `json:"status"`
-	Correct         bool    `json:"correct"`
-	CorrectAnswer   string  `json:"correctAnswer"`
-	Feedback        string  `json:"feedback"`
-	XPDelta         int     `json:"xpDelta"`
-	NewConfidence   float64 `json:"newConfidence"`
-	Level           int     `json:"level"`
-	ReviewAdded     bool    `json:"reviewAdded"`
-	ContentVersion  string  `json:"contentVersion"`
-	RulesVersion    string  `json:"rulesVersion"`
+	AttemptID      string  `json:"attemptId"`
+	Status         string  `json:"status"`
+	Correct        bool    `json:"correct"`
+	CorrectAnswer  string  `json:"correctAnswer"`
+	Feedback       string  `json:"feedback"`
+	XPDelta        int     `json:"xpDelta"`
+	NewConfidence  float64 `json:"newConfidence"`
+	Level          int     `json:"level"`
+	ReviewAdded    bool    `json:"reviewAdded"`
+	ContentVersion string  `json:"contentVersion"`
+	RulesVersion   string  `json:"rulesVersion"`
 }

@@ -1,0 +1,304 @@
+{
+  "contentVersion": "2026-09-27.1",
+  "items": [
+    {
+      "id": "a1-be-from",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "question": "Choose the correct sentence.",
+      "options": [
+        "I am from Vietnam.",
+        "I is from Vietnam.",
+        "I are from Vietnam."
+      ],
+      "correctAnswer": "I am from Vietnam.",
+      "feedback": "Use am with I: I am from Vietnam."
+    },
+    {
+      "id": "a1-third-person",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "question": "Choose the correct present simple sentence.",
+      "options": [
+        "She works at a cafe.",
+        "She work at a cafe.",
+        "She working at a cafe."
+      ],
+      "correctAnswer": "She works at a cafe.",
+      "feedback": "With he, she or it in the present simple, the verb usually takes -s."
+    },
+    {
+      "id": "a2-past-question",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "question": "Choose the correct past simple question.",
+      "options": [
+        "Did you visit the museum?",
+        "Did you visited the museum?",
+        "Do you visited the museum?"
+      ],
+      "correctAnswer": "Did you visit the museum?",
+      "feedback": "After did, use the base form of the verb."
+    },
+    {
+      "id": "a2-comparative",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "question": "Choose the natural comparative sentence.",
+      "options": [
+        "This route is faster than the other one.",
+        "This route is more fast than the other one.",
+        "This route is fastest than the other one."
+      ],
+      "correctAnswer": "This route is faster than the other one.",
+      "feedback": "For short adjectives like fast, use -er + than."
+    },
+    {
+      "id": "b1-present-perfect",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "question": "Choose the sentence that connects past experience to now.",
+      "options": [
+        "I have worked here for two years.",
+        "I worked here for two years and I still do.",
+        "I am work here since two years."
+      ],
+      "correctAnswer": "I have worked here for two years.",
+      "feedback": "Use the present perfect with for/since when a situation began in the past and continues now."
+    },
+    {
+      "id": "b1-first-conditional",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "question": "Choose the correct first conditional.",
+      "options": [
+        "If it rains, we will take the bus.",
+        "If it will rain, we take the bus.",
+        "If it rained, we will take the bus."
+      ],
+      "correctAnswer": "If it rains, we will take the bus.",
+      "feedback": "Use present simple in the if-clause and will + base verb for a likely future result."
+    },
+    {
+      "id": "b2-passive-report",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "question": "Choose the correct passive form.",
+      "options": [
+        "The update is expected to reduce errors.",
+        "The update expects to reduce errors.",
+        "The update is expect reducing errors."
+      ],
+      "correctAnswer": "The update is expected to reduce errors.",
+      "feedback": "The pattern be expected to + verb is a common passive reporting structure."
+    },
+    {
+      "id": "b2-third-conditional",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "question": "Choose the correct third conditional.",
+      "options": [
+        "If I had checked the gate, I would not have missed the flight.",
+        "If I checked the gate, I would not have missed the flight.",
+        "If I had checked the gate, I will not miss the flight."
+      ],
+      "correctAnswer": "If I had checked the gate, I would not have missed the flight.",
+      "feedback": "Use if + past perfect, then would have + past participle for an unreal past result."
+    },
+    {
+      "id": "c1-inversion",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "question": "Choose the correct formal inversion.",
+      "options": [
+        "Rarely have I seen such a convincing proposal.",
+        "Rarely I have seen such a convincing proposal.",
+        "Rarely did I have seen such a convincing proposal."
+      ],
+      "correctAnswer": "Rarely have I seen such a convincing proposal.",
+      "feedback": "After a negative or restrictive adverb at the front, invert the auxiliary and subject."
+    },
+    {
+      "id": "c1-participle",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "question": "Choose the most concise participle clause.",
+      "options": [
+        "Having reviewed the evidence, the team changed its recommendation.",
+        "Having reviewed the evidence, the recommendation was changed by the team.",
+        "The team having review the evidence changed recommendation."
+      ],
+      "correctAnswer": "Having reviewed the evidence, the team changed its recommendation.",
+      "feedback": "The understood subject of the participle clause must match the subject of the main clause."
+    },
+    {
+      "id": "c2-subjunctive",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "question": "Choose the formal mandative subjunctive.",
+      "options": [
+        "The committee recommended that the clause be revised.",
+        "The committee recommended that the clause is revised.",
+        "The committee recommended that the clause was revise."
+      ],
+      "correctAnswer": "The committee recommended that the clause be revised.",
+      "feedback": "In formal English, recommend that can take the base-form subjunctive: be revised."
+    },
+    {
+      "id": "c2-counterfactual-inversion",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "question": "Choose the precise counterfactual inversion.",
+      "options": [
+        "Had it not been for the delay, we would have arrived before noon.",
+        "Had it not be for the delay, we would arrive before noon.",
+        "If had it not been for the delay, we would have arrived before noon."
+      ],
+      "correctAnswer": "Had it not been for the delay, we would have arrived before noon.",
+      "feedback": "Had + subject + past participle can replace an if-clause in formal counterfactual conditionals."
+    },
+    {
+      "id": "travel-hotel-polite-request",
+      "pack": "travel-hotel",
+      "cefrLevel": "B1",
+      "question": "Choose the most natural polite request.",
+      "options": [
+        "You check reservation again.",
+        "Could you check the reservation number again, please?",
+        "Can checking my reservation now?"
+      ],
+      "correctAnswer": "Could you check the reservation number again, please?",
+      "feedback": "Could you ... please? is a natural polite request at a hotel."
+    },
+    {
+      "id": "travel-hotel-present-perfect",
+      "pack": "travel-hotel",
+      "cefrLevel": "B1",
+      "question": "Repair the present perfect sentence.",
+      "options": [
+        "I already receive a confirmation email.",
+        "I have already received a confirmation email.",
+        "I have already receive confirmation email."
+      ],
+      "correctAnswer": "I have already received a confirmation email.",
+      "feedback": "Use have + past participle: have received."
+    },
+    {
+      "id": "travel-hotel-indirect-question",
+      "pack": "travel-hotel",
+      "cefrLevel": "B1",
+      "question": "Choose the natural indirect question.",
+      "options": [
+        "Could you tell me is breakfast included?",
+        "Could you tell me whether breakfast is included?",
+        "Tell me whether is breakfast included?"
+      ],
+      "correctAnswer": "Could you tell me whether breakfast is included?",
+      "feedback": "After whether in an indirect question, use statement word order."
+    },
+    {
+      "id": "conversation-clarity-clarify",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "question": "Choose the most natural clarification.",
+      "options": [
+        "Sorry, I'm not sure what you mean. Could you explain that again?",
+        "I don't understand you meaning.",
+        "Explain again because wrong."
+      ],
+      "correctAnswer": "Sorry, I'm not sure what you mean. Could you explain that again?",
+      "feedback": "A softener plus a clear request makes clarification natural and cooperative."
+    },
+    {
+      "id": "conversation-clarity-rephrase",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "question": "Choose the clearest rephrase.",
+      "options": [
+        "I mean later not cancel maybe.",
+        "What I mean is that I may arrive later, not that I am cancelling.",
+        "My meaning is no cancel but late."
+      ],
+      "correctAnswer": "What I mean is that I may arrive later, not that I am cancelling.",
+      "feedback": "What I mean is that ... is a clear structure for correcting a misunderstanding."
+    },
+    {
+      "id": "conversation-clarity-confirm",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "question": "Choose the natural confirmation.",
+      "options": [
+        "So you mean the plan is still on, but the time may change?",
+        "You mean plan still but time?",
+        "So the time change plan yes?"
+      ],
+      "correctAnswer": "So you mean the plan is still on, but the time may change?",
+      "feedback": "So you mean ...? is a natural way to confirm your understanding."
+    },
+    {
+      "id": "work-requirements-clarification",
+      "pack": "work-requirements",
+      "cefrLevel": "B2",
+      "question": "Choose the clearest clarification question.",
+      "options": [
+        "What exactly should happen when the search returns no results?",
+        "What happen search no result?",
+        "Should what happen no results?"
+      ],
+      "correctAnswer": "What exactly should happen when the search returns no results?",
+      "feedback": "A precise wh-question makes the missing acceptance condition explicit."
+    },
+    {
+      "id": "work-requirements-confirm",
+      "pack": "work-requirements",
+      "cefrLevel": "B2",
+      "question": "Choose the natural confirmation.",
+      "options": [
+        "So requirement suggestions no match correct?",
+        "So the requirement is to show suggestions when there are no exact matches, correct?",
+        "The requirement is suggestions when not match is it?"
+      ],
+      "correctAnswer": "So the requirement is to show suggestions when there are no exact matches, correct?",
+      "feedback": "Restating the requirement before asking for confirmation reduces ambiguity."
+    },
+    {
+      "id": "work-requirements-ambiguity",
+      "pack": "work-requirements",
+      "cefrLevel": "B2",
+      "question": "Repair the ambiguity statement.",
+      "options": [
+        "Better results unclear because no ranking rule define.",
+        "The phrase 'better results' is unclear because it does not define the ranking rule.",
+        "Better results is not clarity ranking."
+      ],
+      "correctAnswer": "The phrase 'better results' is unclear because it does not define the ranking rule.",
+      "feedback": "The sentence clearly identifies both the ambiguous phrase and the missing definition."
+    },
+    {
+      "id": "work-deadline-constraint",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "question": "Choose the calmest constraint statement.",
+      "options": [
+        "Friday is impossible and I won't do it.",
+        "I can commit to Friday for the core flow, but the full scope would put testing at risk.",
+        "Maybe Friday but testing no."
+      ],
+      "correctAnswer": "I can commit to Friday for the core flow, but the full scope would put testing at risk.",
+      "feedback": "This structure commits to what is feasible while naming the trade-off clearly."
+    },
+    {
+      "id": "work-deadline-tradeoff",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "question": "Choose the clearest trade-off.",
+      "options": [
+        "If full scope then something must change.",
+        "If we keep the full scope, we either need more time or we reduce the testing window.",
+        "Full scope means testing bad maybe."
+      ],
+      "correctAnswer": "If we keep the full scope, we either need more time or we reduce the testing window.",
+      "feedback": "Either ... or ... makes the two trade-off options explicit."
+    }
+  ]
+}

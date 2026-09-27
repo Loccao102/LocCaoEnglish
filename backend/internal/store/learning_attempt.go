@@ -18,6 +18,7 @@ type LearningAttemptRecord struct {
 	UserID           string
 	RequestID        string
 	Activity         string
+	Skill            string
 	ItemKey          string
 	CEFRLevel        string
 	ContentVersion   string
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS learning_attempts(
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   request_id TEXT NOT NULL,
   activity TEXT NOT NULL,
+  skill TEXT NOT NULL DEFAULT 'Vocabulary',
   item_key TEXT NOT NULL,
   cefr_level TEXT NOT NULL,
   content_version TEXT NOT NULL,
@@ -59,20 +61,19 @@ CREATE TABLE IF NOT EXISTS learning_attempts(
   completed_at TIMESTAMPTZ NULL,
   UNIQUE(user_id, request_id)
 );
+ALTER TABLE learning_attempts ADD COLUMN IF NOT EXISTS skill TEXT NOT NULL DEFAULT 'Vocabulary';
 CREATE INDEX IF NOT EXISTS idx_learning_attempts_user_created ON learning_attempts(user_id, created_at DESC);
 `
 
-func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, activity, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback string) (LearningAttemptRecord, bool, error) {
+func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, activity, skill, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback string) (LearningAttemptRecord, bool, error) {
 	if s.db != nil {
 		id := newID()
 		result, err := s.db.ExecContext(ctx, `
-			INSERT INTO learning_attempts(id,user_id,request_id,activity,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,created_at)
-			VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'active',NOW())
+			INSERT INTO learning_attempts(id,user_id,request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,created_at)
+			VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'active',NOW())
 			ON CONFLICT(user_id,request_id) DO NOTHING
-		`, id, userID, requestID, activity, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback)
-		if err != nil {
-			return LearningAttemptRecord{}, false, err
-		}
+		`, id, userID, requestID, activity, skill, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback)
+		if err != nil { return LearningAttemptRecord{}, false, err }
 		rows, _ := result.RowsAffected()
 		rec, err := s.learningAttemptByRequest(ctx, userID, requestID)
 		return rec, rows == 1, err
@@ -86,7 +87,7 @@ func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, act
 		}
 	}
 	rec := LearningAttemptRecord{
-		ID: newID(), UserID: userID, RequestID: requestID, Activity: activity, ItemKey: itemKey,
+		ID: newID(), UserID: userID, RequestID: requestID, Activity: activity, Skill: skill, ItemKey: itemKey,
 		CEFRLevel: cefrLevel, ContentVersion: contentVersion, RulesVersion: rulesVersion,
 		Prompt: prompt, CorrectAnswer: correctAnswer, Feedback: feedback, Status: "active", CreatedAt: time.Now().UTC(),
 	}
@@ -98,50 +99,34 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	answer = strings.TrimSpace(answer)
 	if s.db != nil {
 		tx, err := s.db.BeginTx(ctx, nil)
-		if err != nil {
-			return model.LearningAttemptResult{}, err
-		}
+		if err != nil { return model.LearningAttemptResult{}, err }
 		defer tx.Rollback()
 
 		rec, err := learningAttemptFromRow(tx.QueryRowContext(ctx, `
-			SELECT id,user_id,request_id,activity,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at
+			SELECT id,user_id,request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at
 			FROM learning_attempts WHERE id=$1 FOR UPDATE
 		`, attemptID))
-		if errors.Is(err, sql.ErrNoRows) {
-			return model.LearningAttemptResult{}, ErrNotFound
-		}
-		if err != nil {
-			return model.LearningAttemptResult{}, err
-		}
-		if rec.UserID != userID {
-			return model.LearningAttemptResult{}, ErrAttemptOwner
-		}
+		if errors.Is(err, sql.ErrNoRows) { return model.LearningAttemptResult{}, ErrNotFound }
+		if err != nil { return model.LearningAttemptResult{}, err }
+		if rec.UserID != userID { return model.LearningAttemptResult{}, ErrAttemptOwner }
 		if rec.Status == "completed" {
-			if !sameAnswer(rec.SubmittedAnswer, answer) {
-				return model.LearningAttemptResult{}, ErrAttemptConflict
-			}
+			if !sameAnswer(rec.SubmittedAnswer, answer) { return model.LearningAttemptResult{}, ErrAttemptConflict }
 			return learningAttemptResult(rec), nil
 		}
 
 		correct := sameAnswer(rec.CorrectAnswer, answer)
-		accuracy := 0.0
-		xp := 0
-		if correct {
-			accuracy = 1
-			xp = 20
-		}
+		accuracy, xp := 0.0, 0
+		if correct { accuracy, xp = 1, 20 }
 		var old float64
-		err = tx.QueryRowContext(ctx, `SELECT confidence FROM user_skills WHERE user_id=$1 AND skill='Vocabulary' FOR UPDATE`, userID).Scan(&old)
+		err = tx.QueryRowContext(ctx, `SELECT confidence FROM user_skills WHERE user_id=$1 AND skill=$2 FOR UPDATE`, userID, rec.Skill).Scan(&old)
 		if errors.Is(err, sql.ErrNoRows) {
 			old = .35
-			_, err = tx.ExecContext(ctx, `INSERT INTO user_skills(user_id,skill,confidence,level,updated_at) VALUES($1,'Vocabulary',$2,$3,NOW())`, userID, old, levelFor(old))
+			_, err = tx.ExecContext(ctx, `INSERT INTO user_skills(user_id,skill,confidence,level,updated_at) VALUES($1,$2,$3,$4,NOW())`, userID, rec.Skill, old, levelFor(old))
 		}
-		if err != nil {
-			return model.LearningAttemptResult{}, err
-		}
+		if err != nil { return model.LearningAttemptResult{}, err }
 		next := old*.75 + accuracy*.25
 		level := levelFor(next)
-		if _, err = tx.ExecContext(ctx, `UPDATE user_skills SET confidence=$2,level=$3,updated_at=NOW() WHERE user_id=$1 AND skill='Vocabulary'`, userID, next, level); err != nil {
+		if _, err = tx.ExecContext(ctx, `UPDATE user_skills SET confidence=$3,level=$4,updated_at=NOW() WHERE user_id=$1 AND skill=$2`, userID, rec.Skill, next, level); err != nil {
 			return model.LearningAttemptResult{}, err
 		}
 		if xp > 0 {
@@ -166,9 +151,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		`, rec.ID, answer, correct, xp, next, level, reviewAdded); err != nil {
 			return model.LearningAttemptResult{}, err
 		}
-		if err = tx.Commit(); err != nil {
-			return model.LearningAttemptResult{}, err
-		}
+		if err = tx.Commit(); err != nil { return model.LearningAttemptResult{}, err }
 		rec.Status, rec.SubmittedAnswer, rec.Correct, rec.XPDelta = "completed", answer, correct, xp
 		rec.ResultConfidence, rec.ResultLevel, rec.ReviewAdded = next, level, reviewAdded
 		return learningAttemptResult(rec), nil
@@ -177,36 +160,22 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	rec, ok := s.learningAttempts[attemptID]
-	if !ok {
-		return model.LearningAttemptResult{}, ErrNotFound
-	}
-	if rec.UserID != userID {
-		return model.LearningAttemptResult{}, ErrAttemptOwner
-	}
+	if !ok { return model.LearningAttemptResult{}, ErrNotFound }
+	if rec.UserID != userID { return model.LearningAttemptResult{}, ErrAttemptOwner }
 	if rec.Status == "completed" {
-		if !sameAnswer(rec.SubmittedAnswer, answer) {
-			return model.LearningAttemptResult{}, ErrAttemptConflict
-		}
+		if !sameAnswer(rec.SubmittedAnswer, answer) { return model.LearningAttemptResult{}, ErrAttemptConflict }
 		return learningAttemptResult(rec), nil
 	}
 	skills := s.mem.skills[userID]
-	if skills == nil {
-		return model.LearningAttemptResult{}, ErrNotFound
-	}
-	skill, ok := skills["Vocabulary"]
-	if !ok {
-		skill = model.Skill{Name: "Vocabulary", Confidence: .35, Level: levelFor(.35), UpdatedAt: time.Now()}
-	}
+	if skills == nil { return model.LearningAttemptResult{}, ErrNotFound }
+	skill, ok := skills[rec.Skill]
+	if !ok { skill = model.Skill{Name: rec.Skill, Confidence: .35, Level: levelFor(.35), UpdatedAt: time.Now()} }
 	correct := sameAnswer(rec.CorrectAnswer, answer)
-	accuracy := 0.0
-	xp := 0
-	if correct {
-		accuracy = 1
-		xp = 20
-	}
+	accuracy, xp := 0.0, 0
+	if correct { accuracy, xp = 1, 20 }
 	next := skill.Confidence*.75 + accuracy*.25
 	skill.Confidence, skill.Level, skill.UpdatedAt = next, levelFor(next), time.Now()
-	skills["Vocabulary"] = skill
+	skills[rec.Skill] = skill
 	if xp > 0 {
 		account := s.mem.users[userID]
 		account.user.XP += xp
@@ -214,15 +183,11 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	}
 	reviewAdded := !correct
 	if reviewAdded {
-		if s.mem.reviews[userID] == nil {
-			s.mem.reviews[userID] = map[string]model.ReviewItem{}
-		}
+		if s.mem.reviews[userID] == nil { s.mem.reviews[userID] = map[string]model.ReviewItem{} }
 		item := s.mem.reviews[userID][rec.ItemKey]
 		item.ItemKey, item.Kind, item.Prompt, item.Answer = rec.ItemKey, rec.Activity, rec.Prompt, rec.CorrectAnswer
 		item.DueAt, item.IntervalDays = time.Now(), 1
-		if item.Ease == 0 {
-			item.Ease = 2.5
-		}
+		if item.Ease == 0 { item.Ease = 2.5 }
 		item.Failures++
 		s.mem.reviews[userID][rec.ItemKey] = item
 	}
@@ -234,7 +199,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 
 func (s *Store) learningAttemptByRequest(ctx context.Context, userID, requestID string) (LearningAttemptRecord, error) {
 	return learningAttemptFromRow(s.db.QueryRowContext(ctx, `
-		SELECT id,user_id,request_id,activity,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at
+		SELECT id,user_id,request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at
 		FROM learning_attempts WHERE user_id=$1 AND request_id=$2
 	`, userID, requestID))
 }
@@ -243,7 +208,7 @@ type learningRow interface{ Scan(dest ...any) error }
 
 func learningAttemptFromRow(row learningRow) (LearningAttemptRecord, error) {
 	var rec LearningAttemptRecord
-	err := row.Scan(&rec.ID,&rec.UserID,&rec.RequestID,&rec.Activity,&rec.ItemKey,&rec.CEFRLevel,&rec.ContentVersion,&rec.RulesVersion,&rec.Prompt,&rec.CorrectAnswer,&rec.Feedback,&rec.Status,&rec.SubmittedAnswer,&rec.Correct,&rec.XPDelta,&rec.ResultConfidence,&rec.ResultLevel,&rec.ReviewAdded,&rec.CreatedAt)
+	err := row.Scan(&rec.ID,&rec.UserID,&rec.RequestID,&rec.Activity,&rec.Skill,&rec.ItemKey,&rec.CEFRLevel,&rec.ContentVersion,&rec.RulesVersion,&rec.Prompt,&rec.CorrectAnswer,&rec.Feedback,&rec.Status,&rec.SubmittedAnswer,&rec.Correct,&rec.XPDelta,&rec.ResultConfidence,&rec.ResultLevel,&rec.ReviewAdded,&rec.CreatedAt)
 	return rec, err
 }
 
