@@ -46,11 +46,12 @@ type Store struct {
 	db          *sql.DB
 	mu          sync.RWMutex
 	mem         memoryState
-	demoID      string
+	demoID           string
+	learningAttempts map[string]LearningAttemptRecord
 }
 
 func New(databaseURL string) (*Store, error) {
-	s := &Store{mem: memoryState{users: map[string]account{}, emails: map[string]string{}, skills: map[string]map[string]model.Skill{}, reviews: map[string]map[string]model.ReviewItem{}}}
+	s := &Store{mem: memoryState{users: map[string]account{}, emails: map[string]string{}, skills: map[string]map[string]model.Skill{}, reviews: map[string]map[string]model.ReviewItem{}}, learningAttempts: map[string]LearningAttemptRecord{}}
 	if databaseURL != "" {
 		db, err := sql.Open("postgres", databaseURL)
 		if err != nil {
@@ -66,6 +67,10 @@ func New(databaseURL string) (*Store, error) {
 		if _, err := db.ExecContext(ctx, schemaSQL); err != nil {
 			db.Close()
 			return nil, fmt.Errorf("apply schema: %w", err)
+		}
+		if _, err := db.ExecContext(ctx, learningAttemptSchemaSQL); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("apply learning attempt schema: %w", err)
 		}
 	}
 	if _, err := s.EnsureDemo(context.Background()); err != nil {
