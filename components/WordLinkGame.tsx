@@ -15,6 +15,7 @@ type Phase="loading"|"active"|"submitting"|"feedback"|"load-error"|"submit-error
 export default function WordLinkGame(){
   const[level,setLevel]=useState<CEFRLevel>("A1");
   const[challenge,setChallenge]=useState<string|null>(null);
+  const[pack,setPack]=useState("cefr-core");
   const[attempt,setAttempt]=useState<LearningAttempt|null>(null);
   const[result,setResult]=useState<LearningAttemptResult|null>(null);
   const[phase,setPhase]=useState<Phase>("loading");
@@ -27,13 +28,19 @@ export default function WordLinkGame(){
   const seenKeys=useRef<string[]>([]);
   const requestSeq=useRef(0);
   const started=useRef(false);
+  const packRef=useRef("cefr-core");
 
   useEffect(()=>{
     if(started.current)return;
     started.current=true;
     const query=new URLSearchParams(window.location.search);
     setChallenge(query.get("challenge"));
-    void openRound("A1",true);
+    const requestedPack=query.get("pack")==="travel-airport"?"travel-airport":"cefr-core";
+    const initialLevel:CEFRLevel=requestedPack==="travel-airport"?"B1":"A1";
+    packRef.current=requestedPack;
+    setPack(requestedPack);
+    setLevel(initialLevel);
+    void openRound(initialLevel,true);
   },[]);
 
   async function openRound(targetLevel:CEFRLevel,newRequest:boolean){
@@ -47,7 +54,7 @@ export default function WordLinkGame(){
     setMessage("");
     setPhase("loading");
     try{
-      const next=await startWordLinkAttempt({requestId,cefrLevel:targetLevel,excludeItemKeys:seenKeys.current});
+      const next=await startWordLinkAttempt({requestId,cefrLevel:targetLevel,pack:packRef.current,excludeItemKeys:seenKeys.current});
       if(seq!==requestSeq.current)return;
       pendingStartId.current="";
       if(!seenKeys.current.includes(next.itemKey))seenKeys.current=[...seenKeys.current,next.itemKey];
@@ -98,6 +105,8 @@ export default function WordLinkGame(){
     requestSeq.current++;
     pendingStartId.current="";
     seenKeys.current=[];
+    packRef.current="cefr-core";
+    setPack("cefr-core");
     setLevel(nextLevel);
     setRound(0);
     setScore(0);
@@ -112,7 +121,7 @@ export default function WordLinkGame(){
     {challenge&&<div className="challenge-banner">VERIFIED PRACTICE DUEL · leaderboard submission stays disabled until competitive scoring also uses server-owned results.</div>}
     <div className="play-top">
       <div>
-        <span className="eyebrow">WORD LINK · SERVER-VERIFIED</span>
+        <span className="eyebrow">WORD LINK · {pack==="travel-airport"?"TRAVEL · AIRPORT":"SERVER-VERIFIED"}</span>
         <strong>Round {round+1}/{ROUNDS}</strong>
       </div>
       <label className="mode-badge">CEFR&nbsp;

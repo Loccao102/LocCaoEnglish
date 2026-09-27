@@ -3,6 +3,7 @@ package model
 type LearningAttemptStartInput struct {
 	RequestID       string   `json:"requestId"`
 	Activity        string   `json:"activity"`
+	Pack            string   `json:"pack,omitempty"`
 	CEFRLevel       string   `json:"cefrLevel"`
 	ExcludeItemKeys []string `json:"excludeItemKeys,omitempty"`
 }
@@ -16,6 +17,7 @@ type LearningAttemptPrompt struct {
 type LearningAttemptStart struct {
 	AttemptID     string                `json:"attemptId"`
 	Activity      string                `json:"activity"`
+	Pack          string                `json:"pack"`
 	ItemKey       string                `json:"itemKey"`
 	CEFRLevel     string                `json:"cefrLevel"`
 	ContentVersion string               `json:"contentVersion"`

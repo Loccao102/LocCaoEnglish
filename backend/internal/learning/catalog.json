@@ -1,28 +1,350 @@
 {
-  "contentVersion": "2026-09-27.1",
+  "contentVersion": "2026-09-27.2",
   "items": [
-    {"id":"a1-happy-synonym","cefrLevel":"A1","word":"happy","relation":"Choose a synonym","options":["glad","late","small","cold"],"correctAnswer":"glad","note":"Happy and glad both describe a positive feeling."},
-    {"id":"a1-begin-synonym","cefrLevel":"A1","word":"begin","relation":"Choose a synonym","options":["start","close","forget","carry"],"correctAnswer":"start","note":"Begin and start have the same core meaning."},
-    {"id":"a1-big-synonym","cefrLevel":"A1","word":"big","relation":"Choose a synonym","options":["large","slow","quiet","thin"],"correctAnswer":"large","note":"Big and large can describe something with a lot of size."},
-
-    {"id":"a2-borrow-meaning","cefrLevel":"A2","word":"borrow","relation":"Choose the best meaning","options":["take and return later","give forever","buy cheaply","lose something"],"correctAnswer":"take and return later","note":"You borrow something when you take it temporarily and return it later."},
-    {"id":"a2-improve-meaning","cefrLevel":"A2","word":"improve","relation":"Choose the best meaning","options":["make better","make shorter","make louder","make empty"],"correctAnswer":"make better","note":"To improve something is to make it better."},
-    {"id":"a2-usually-synonym","cefrLevel":"A2","word":"usually","relation":"Choose the closest meaning","options":["normally","never","suddenly","only"],"correctAnswer":"normally","note":"Usually and normally both describe what happens most of the time."},
-
-    {"id":"b1-reliable-synonym","cefrLevel":"B1","word":"reliable","relation":"Choose a synonym","options":["dependable","temporary","careless","ordinary"],"correctAnswer":"dependable","note":"A reliable person or thing can be depended on."},
-    {"id":"b1-avoid-meaning","cefrLevel":"B1","word":"avoid","relation":"Choose the best meaning","options":["stay away from","prepare carefully","look forward to","divide equally"],"correctAnswer":"stay away from","note":"To avoid something is to keep away from it or prevent contact with it."},
-    {"id":"b1-consider-meaning","cefrLevel":"B1","word":"consider","relation":"Choose the best meaning","options":["think about carefully","repeat loudly","move quickly","refuse immediately"],"correctAnswer":"think about carefully","note":"To consider an idea is to think about it before deciding."},
-
-    {"id":"b2-scarce-antonym","cefrLevel":"B2","word":"scarce","relation":"Choose an antonym","options":["abundant","limited","rare","insufficient"],"correctAnswer":"abundant","note":"Scarce means in short supply; abundant means available in large amounts."},
-    {"id":"b2-compelling-synonym","cefrLevel":"B2","word":"compelling","relation":"Choose a synonym","options":["persuasive","accidental","routine","fragile"],"correctAnswer":"persuasive","note":"A compelling argument is persuasive enough to hold attention or convince."},
-    {"id":"b2-mitigate-meaning","cefrLevel":"B2","word":"mitigate","relation":"Choose the best meaning","options":["reduce the severity","prove completely","delay forever","combine randomly"],"correctAnswer":"reduce the severity","note":"To mitigate a problem is to make its effects less severe."},
-
-    {"id":"c1-ubiquitous-synonym","cefrLevel":"C1","word":"ubiquitous","relation":"Choose the closest meaning","options":["widespread","uncertain","temporary","hidden"],"correctAnswer":"widespread","note":"Ubiquitous describes something that seems to be present everywhere."},
-    {"id":"c1-nuanced-meaning","cefrLevel":"C1","word":"nuanced","relation":"Choose the best meaning","options":["showing subtle differences","completely obvious","poorly organized","strictly identical"],"correctAnswer":"showing subtle differences","note":"A nuanced view recognizes fine distinctions instead of treating everything as simple."},
-    {"id":"c1-corroborate-meaning","cefrLevel":"C1","word":"corroborate","relation":"Choose the best meaning","options":["confirm with evidence","criticize in public","simplify a process","predict without data"],"correctAnswer":"confirm with evidence","note":"To corroborate a claim is to support or confirm it with independent evidence."},
-
-    {"id":"c2-equivocal-synonym","cefrLevel":"C2","word":"equivocal","relation":"Choose the closest meaning","options":["ambiguous","meticulous","inevitable","transparent"],"correctAnswer":"ambiguous","note":"Equivocal language is deliberately or inherently ambiguous."},
-    {"id":"c2-assiduous-synonym","cefrLevel":"C2","word":"assiduous","relation":"Choose a synonym","options":["diligent","sporadic","careless","reserved"],"correctAnswer":"diligent","note":"Assiduous describes persistent, careful effort."},
-    {"id":"c2-obfuscate-meaning","cefrLevel":"C2","word":"obfuscate","relation":"Choose the best meaning","options":["make unclear","verify independently","state concisely","organize logically"],"correctAnswer":"make unclear","note":"To obfuscate information is to make it harder to understand."}
+    {
+      "id": "a1-happy-synonym",
+      "cefrLevel": "A1",
+      "word": "happy",
+      "relation": "Choose a synonym",
+      "options": [
+        "glad",
+        "late",
+        "small",
+        "cold"
+      ],
+      "correctAnswer": "glad",
+      "note": "Happy and glad both describe a positive feeling.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "a1-begin-synonym",
+      "cefrLevel": "A1",
+      "word": "begin",
+      "relation": "Choose a synonym",
+      "options": [
+        "start",
+        "close",
+        "forget",
+        "carry"
+      ],
+      "correctAnswer": "start",
+      "note": "Begin and start have the same core meaning.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "a1-big-synonym",
+      "cefrLevel": "A1",
+      "word": "big",
+      "relation": "Choose a synonym",
+      "options": [
+        "large",
+        "slow",
+        "quiet",
+        "thin"
+      ],
+      "correctAnswer": "large",
+      "note": "Big and large can describe something with a lot of size.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "a2-borrow-meaning",
+      "cefrLevel": "A2",
+      "word": "borrow",
+      "relation": "Choose the best meaning",
+      "options": [
+        "take and return later",
+        "give forever",
+        "buy cheaply",
+        "lose something"
+      ],
+      "correctAnswer": "take and return later",
+      "note": "You borrow something when you take it temporarily and return it later.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "a2-improve-meaning",
+      "cefrLevel": "A2",
+      "word": "improve",
+      "relation": "Choose the best meaning",
+      "options": [
+        "make better",
+        "make shorter",
+        "make louder",
+        "make empty"
+      ],
+      "correctAnswer": "make better",
+      "note": "To improve something is to make it better.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "a2-usually-synonym",
+      "cefrLevel": "A2",
+      "word": "usually",
+      "relation": "Choose the closest meaning",
+      "options": [
+        "normally",
+        "never",
+        "suddenly",
+        "only"
+      ],
+      "correctAnswer": "normally",
+      "note": "Usually and normally both describe what happens most of the time.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b1-reliable-synonym",
+      "cefrLevel": "B1",
+      "word": "reliable",
+      "relation": "Choose a synonym",
+      "options": [
+        "dependable",
+        "temporary",
+        "careless",
+        "ordinary"
+      ],
+      "correctAnswer": "dependable",
+      "note": "A reliable person or thing can be depended on.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b1-avoid-meaning",
+      "cefrLevel": "B1",
+      "word": "avoid",
+      "relation": "Choose the best meaning",
+      "options": [
+        "stay away from",
+        "prepare carefully",
+        "look forward to",
+        "divide equally"
+      ],
+      "correctAnswer": "stay away from",
+      "note": "To avoid something is to keep away from it or prevent contact with it.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b1-consider-meaning",
+      "cefrLevel": "B1",
+      "word": "consider",
+      "relation": "Choose the best meaning",
+      "options": [
+        "think about carefully",
+        "repeat loudly",
+        "move quickly",
+        "refuse immediately"
+      ],
+      "correctAnswer": "think about carefully",
+      "note": "To consider an idea is to think about it before deciding.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b2-scarce-antonym",
+      "cefrLevel": "B2",
+      "word": "scarce",
+      "relation": "Choose an antonym",
+      "options": [
+        "abundant",
+        "limited",
+        "rare",
+        "insufficient"
+      ],
+      "correctAnswer": "abundant",
+      "note": "Scarce means in short supply; abundant means available in large amounts.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b2-compelling-synonym",
+      "cefrLevel": "B2",
+      "word": "compelling",
+      "relation": "Choose a synonym",
+      "options": [
+        "persuasive",
+        "accidental",
+        "routine",
+        "fragile"
+      ],
+      "correctAnswer": "persuasive",
+      "note": "A compelling argument is persuasive enough to hold attention or convince.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "b2-mitigate-meaning",
+      "cefrLevel": "B2",
+      "word": "mitigate",
+      "relation": "Choose the best meaning",
+      "options": [
+        "reduce the severity",
+        "prove completely",
+        "delay forever",
+        "combine randomly"
+      ],
+      "correctAnswer": "reduce the severity",
+      "note": "To mitigate a problem is to make its effects less severe.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c1-ubiquitous-synonym",
+      "cefrLevel": "C1",
+      "word": "ubiquitous",
+      "relation": "Choose the closest meaning",
+      "options": [
+        "widespread",
+        "uncertain",
+        "temporary",
+        "hidden"
+      ],
+      "correctAnswer": "widespread",
+      "note": "Ubiquitous describes something that seems to be present everywhere.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c1-nuanced-meaning",
+      "cefrLevel": "C1",
+      "word": "nuanced",
+      "relation": "Choose the best meaning",
+      "options": [
+        "showing subtle differences",
+        "completely obvious",
+        "poorly organized",
+        "strictly identical"
+      ],
+      "correctAnswer": "showing subtle differences",
+      "note": "A nuanced view recognizes fine distinctions instead of treating everything as simple.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c1-corroborate-meaning",
+      "cefrLevel": "C1",
+      "word": "corroborate",
+      "relation": "Choose the best meaning",
+      "options": [
+        "confirm with evidence",
+        "criticize in public",
+        "simplify a process",
+        "predict without data"
+      ],
+      "correctAnswer": "confirm with evidence",
+      "note": "To corroborate a claim is to support or confirm it with independent evidence.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c2-equivocal-synonym",
+      "cefrLevel": "C2",
+      "word": "equivocal",
+      "relation": "Choose the closest meaning",
+      "options": [
+        "ambiguous",
+        "meticulous",
+        "inevitable",
+        "transparent"
+      ],
+      "correctAnswer": "ambiguous",
+      "note": "Equivocal language is deliberately or inherently ambiguous.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c2-assiduous-synonym",
+      "cefrLevel": "C2",
+      "word": "assiduous",
+      "relation": "Choose a synonym",
+      "options": [
+        "diligent",
+        "sporadic",
+        "careless",
+        "reserved"
+      ],
+      "correctAnswer": "diligent",
+      "note": "Assiduous describes persistent, careful effort.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "c2-obfuscate-meaning",
+      "cefrLevel": "C2",
+      "word": "obfuscate",
+      "relation": "Choose the best meaning",
+      "options": [
+        "make unclear",
+        "verify independently",
+        "state concisely",
+        "organize logically"
+      ],
+      "correctAnswer": "make unclear",
+      "note": "To obfuscate information is to make it harder to understand.",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "travel-airport-boarding-pass",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "word": "boarding pass",
+      "relation": "Choose what it lets you do",
+      "options": [
+        "claim baggage",
+        "board the flight",
+        "exchange money",
+        "book a hotel"
+      ],
+      "correctAnswer": "board the flight",
+      "note": "A boarding pass is the document used to enter the aircraft."
+    },
+    {
+      "id": "travel-airport-gate",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "word": "gate",
+      "relation": "Choose the closest airport meaning",
+      "options": [
+        "departure point",
+        "passport stamp",
+        "seat class",
+        "baggage weight"
+      ],
+      "correctAnswer": "departure point",
+      "note": "At an airport, the gate is the departure point for boarding."
+    },
+    {
+      "id": "travel-airport-rebook",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "word": "rebook",
+      "relation": "Choose the best meaning",
+      "options": [
+        "cancel all travel",
+        "book a replacement journey",
+        "check a suitcase",
+        "change currency"
+      ],
+      "correctAnswer": "book a replacement journey",
+      "note": "Rebook means arrange another booking, often after disruption."
+    },
+    {
+      "id": "travel-airport-miss",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "word": "miss",
+      "relation": "Choose the natural collocation",
+      "options": [
+        "miss a flight",
+        "miss a luggage",
+        "miss a passport",
+        "miss a gate number"
+      ],
+      "correctAnswer": "miss a flight",
+      "note": "Miss a flight is the natural collocation when you arrive too late."
+    },
+    {
+      "id": "travel-airport-connection",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "word": "connection",
+      "relation": "Choose the travel meaning",
+      "options": [
+        "a linked onward flight",
+        "a security officer",
+        "a seat upgrade",
+        "a baggage label"
+      ],
+      "correctAnswer": "a linked onward flight",
+      "note": "A connection is an onward flight linked to your journey."
+    }
   ]
 }

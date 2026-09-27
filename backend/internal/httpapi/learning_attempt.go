@@ -36,11 +36,19 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		problem(w, 400, "cefrLevel must be one of A1, A2, B1, B2, C1, C2")
 		return
 	}
+	pack := strings.TrimSpace(in.Pack)
+	if pack == "" {
+		pack = "cefr-core"
+	}
+	if pack != "cefr-core" && pack != "travel-airport" {
+		problem(w, 400, "unsupported word-link pack")
+		return
+	}
 	if len(in.ExcludeItemKeys) > 20 {
 		problem(w, 400, "excludeItemKeys is too large")
 		return
 	}
-	item, err := learning.PickWordLink(level, in.RequestID, in.ExcludeItemKeys)
+	item, err := learning.PickWordLink(level, pack, in.RequestID, in.ExcludeItemKeys)
 	if err != nil {
 		problem(w, 500, err.Error())
 		return
@@ -59,8 +67,8 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	storedItem, found := learning.WordLinkItemByID(rec.ItemKey)
-	if !found || storedItem.CEFRLevel != rec.CEFRLevel {
-		problem(w, 409, "attempt content version is no longer available")
+	if !found || storedItem.CEFRLevel != rec.CEFRLevel || storedItem.Pack != pack {
+		problem(w, 409, "attempt content or pack no longer matches this request")
 		return
 	}
 	status := http.StatusOK
@@ -68,7 +76,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		status = http.StatusCreated
 	}
 	write(w, status, model.LearningAttemptStart{
-		AttemptID: rec.ID, Activity: rec.Activity, ItemKey: rec.ItemKey, CEFRLevel: rec.CEFRLevel,
+		AttemptID: rec.ID, Activity: rec.Activity, Pack: storedItem.Pack, ItemKey: rec.ItemKey, CEFRLevel: rec.CEFRLevel,
 		ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, Status: rec.Status,
 		Prompt: model.LearningAttemptPrompt{
 			Word: storedItem.Word, Relation: storedItem.Relation,

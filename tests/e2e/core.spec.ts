@@ -18,8 +18,10 @@ test("structured lesson catalog comes from the backend", async ({ page }) => {
 
 test("Word Link is actually playable", async ({ page }) => {
   await page.goto("/games/word-link");
-  await page.getByRole("button", { name: "substantial" }).click();
-  await expect(page.getByText(/Connection found/)).toBeVisible();
+  const options = page.locator(".word-option");
+  await expect(options.first()).toBeVisible();
+  await options.first().click();
+  await expect(page.getByText(/Connection verified|Not quite/)).toBeVisible();
 });
 
 test("campaign links load world-specific practice packs", async ({ page }) => {

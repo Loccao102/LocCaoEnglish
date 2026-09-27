@@ -15,6 +15,7 @@ var catalogJSON []byte
 
 type WordLinkItem struct {
 	ID            string   `json:"id"`
+	Pack          string   `json:"pack"`
 	CEFRLevel     string   `json:"cefrLevel"`
 	Word          string   `json:"word"`
 	Relation      string   `json:"relation"`
@@ -57,26 +58,29 @@ func WordLinkItemByID(id string) (WordLinkItem, bool) {
 	return WordLinkItem{}, false
 }
 
-func PickWordLink(level, seed string, excluded []string) (WordLinkItem, error) {
+func PickWordLink(level, pack, seed string, excluded []string) (WordLinkItem, error) {
 	exclude := map[string]bool{}
 	for _, id := range excluded {
 		exclude[id] = true
 	}
 	candidates := make([]WordLinkItem, 0)
 	for _, item := range wordLinkCatalog.Items {
-		if item.CEFRLevel == level && !exclude[item.ID] {
+		if item.CEFRLevel == level && item.Pack == pack && !exclude[item.ID] {
 			candidates = append(candidates, item)
 		}
 	}
 	if len(candidates) == 0 {
 		for _, item := range wordLinkCatalog.Items {
-			if item.CEFRLevel == level {
+			if item.CEFRLevel == level && item.Pack == pack {
 				candidates = append(candidates, item)
 			}
 		}
 	}
 	if len(candidates) == 0 {
 		return WordLinkItem{}, errors.New("no word-link content for CEFR level")
+	}
+	if pack != "cefr-core" {
+		return candidates[0], nil
 	}
 	sum := sha256.Sum256([]byte(seed + "|" + level))
 	index := int(binary.BigEndian.Uint16(sum[:2])) % len(candidates)

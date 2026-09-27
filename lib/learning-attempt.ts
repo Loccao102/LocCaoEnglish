@@ -4,6 +4,7 @@ export type CEFRLevel="A1"|"A2"|"B1"|"B2"|"C1"|"C2";
 export type LearningAttempt={
   attemptId:string;
   activity:string;
+  pack:string;
   itemKey:string;
   cefrLevel:CEFRLevel;
   contentVersion:string;
@@ -25,10 +26,10 @@ export type LearningAttemptResult={
   rulesVersion:string;
 };
 
-export function startWordLinkAttempt(input:{requestId:string;cefrLevel:CEFRLevel;excludeItemKeys?:string[]}){
+export function startWordLinkAttempt(input:{requestId:string;cefrLevel:CEFRLevel;pack?:string;excludeItemKeys?:string[]}){
   return apiFetch<LearningAttempt>("/v1/learning/attempts",{
     method:"POST",
-    body:JSON.stringify({requestId:input.requestId,activity:"word-link",cefrLevel:input.cefrLevel,excludeItemKeys:input.excludeItemKeys||[]})
+    body:JSON.stringify({requestId:input.requestId,activity:"word-link",pack:input.pack||"cefr-core",cefrLevel:input.cefrLevel,excludeItemKeys:input.excludeItemKeys||[]})
   });
 }
 
