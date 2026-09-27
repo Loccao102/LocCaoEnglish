@@ -15,7 +15,7 @@ async function clock(page: Page) {
     window.cancelAnimationFrame = handle => window.clearTimeout(handle);
   });
 }
-const pause = async (page: Page) => page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 200));
+const pause = async (page: Page) => page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 10_000));
 
 test("advanced planting and deliveries are achievable through actual 3D movement", async ({ page }) => {
   test.setTimeout(120000); await clock(page);
