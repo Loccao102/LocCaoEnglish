@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	wordLinkRulesVersion = "word-link.v1"
-	grammarRulesVersion  = "grammar-repair.v1"
+	wordLinkRulesVersion    = "word-link.v1"
+	grammarRulesVersion     = "grammar-repair.v1"
+	collocationRulesVersion = "collocation-factory.v1"
 )
 
 func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
@@ -94,6 +95,20 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		contentVersion, rulesVersion = learning.GrammarContentVersion(), grammarRulesVersion
 		promptText, correctAnswer, feedback = item.Question, item.CorrectAnswer, item.Feedback
 		publicPrompt = model.LearningAttemptPrompt{Question: item.Question, Options: learning.ShuffledGrammarOptions(item, in.RequestID)}
+	case "collocation-factory":
+		if !supportedCollocationPack(pack) {
+			problem(w, 400, "unsupported collocation-factory pack")
+			return
+		}
+		item, err := learning.PickCollocation(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Vocabulary", item.ID
+		contentVersion, rulesVersion = learning.CollocationContentVersion(), collocationRulesVersion
+		promptText, correctAnswer, feedback = item.Core+" + ?", item.CorrectAnswer, item.Feedback
+		publicPrompt = model.LearningAttemptPrompt{Word: item.Core, Relation: "Complete the natural collocation", Options: learning.ShuffledCollocationOptions(item, in.RequestID)}
 	default:
 		problem(w, 400, "activity is not supported by the verified learning engine")
 		return
@@ -139,6 +154,15 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 func supportedGrammarPack(pack string) bool {
 	switch pack {
 	case "cefr-core", "travel-hotel", "conversation-clarity", "work-requirements", "work-deadline":
+		return true
+	default:
+		return false
+	}
+}
+
+func supportedCollocationPack(pack string) bool {
+	switch pack {
+	case "cefr-core", "travel-transit", "conversation-cafe", "conversation-clarity", "work-standup", "work-deadline":
 		return true
 	default:
 		return false

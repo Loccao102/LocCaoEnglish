@@ -16,7 +16,7 @@ that all learning activities received a full manual playthrough in this pass.
 | Bridge Builder | Fixed rotations, unlimited trial turns | Seeded unsolved starts, path validation and solvable turn budgets; still three authored topologies |
 | Word Link | A1–C2 server-owned content and shared recovery lifecycle now replace client scoring | Snapshot/version grading, guest isolation and daily progression claims added; content depth and competitive integrity still need work |
 | Word Graph | Link Mode retains the answer edges and Connections inspector | Hide answer relations while attempting; distinguish exploration from assessed recall |
-| Collocation Factory | Fixed option positions and very small default bank; copy promises pressure absent from implementation | Shared round engine, new distractors and honest mode descriptions |
+| Collocation Factory | Fixed option positions and very small default bank; copy promises pressure absent from implementation | Server-owned shared round engine, seeded distractors, six CEFR core levels and honest practice copy; campaign depth still needs playtest |
 | Sentence Builder | Chunk bank uses authored order, sometimes already the solution; Reset allows answer-exposed retry | Shuffle indexed chunks; record first attempt separately from assisted retry |
 | Grammar Repair | A1–C2 and campaign content now use the same server attempts/recovery hook as Word Link | Preserve varied distractors and level/pack identity; validate depth through playtests |
 | Reading Race | Two fixed passages and recurring answer positions | More passage/question types; optional pacing after answer/evidence model is sound |
