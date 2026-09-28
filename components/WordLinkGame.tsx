@@ -1,23 +1,43 @@
 "use client";
-import{useEffect,useRef,useState}from"react";
-import{CEFRLevel}from"@/lib/learning-attempt";
-import useVerifiedLearningRound from"@/components/learning/useVerifiedLearningRound";
-const LEVELS:CEFRLevel[]=["A1","A2","B1","B2","C1","C2"],ROUNDS=5;
-export default function WordLinkGame(){
- const[level,setLevel]=useState<CEFRLevel>("A1"),[challenge,setChallenge]=useState<string|null>(null),[pack,setPack]=useState("cefr-core"),[round,setRound]=useState(0),[score,setScore]=useState(0),[streak,setStreak]=useState(0);
- const packRef=useRef("cefr-core"),seenKeys=useRef<string[]>([]),started=useRef(false);const verified=useVerifiedLearningRound("word-link");
- useEffect(()=>{if(started.current)return;started.current=true;const q=new URLSearchParams(window.location.search);setChallenge(q.get("challenge"));const p=q.get("pack")==="travel-airport"?"travel-airport":"cefr-core",initial:CEFRLevel=p==="travel-airport"?"B1":"A1";packRef.current=p;setPack(p);setLevel(initial);void openRound(initial,true)},[]);
- async function openRound(target:CEFRLevel,newRequest:boolean){const next=await verified.open({cefrLevel:target,pack:packRef.current,excludeItemKeys:seenKeys.current,newRequest});if(next&&!seenKeys.current.includes(next.itemKey))seenKeys.current=[...seenKeys.current,next.itemKey]}
- async function choose(option:string){const verdict=await verified.submit(option);if(!verdict)return;setScore(v=>v+verdict.xpDelta);setStreak(v=>verdict.correct?v+1:0)}
- async function retry(){const verdict=await verified.retrySubmit();if(!verdict)return;setScore(v=>v+verdict.xpDelta);setStreak(v=>verdict.correct?v+1:0)}
- function next(){if(round>=ROUNDS-1){setRound(0);setScore(0);setStreak(0);seenKeys.current=[]}else setRound(v=>v+1);void openRound(level,true)}
- function changeLevel(value:string){const nextLevel=value as CEFRLevel;verified.invalidate();seenKeys.current=[];packRef.current="cefr-core";setPack("cefr-core");setLevel(nextLevel);setRound(0);setScore(0);setStreak(0);void openRound(nextLevel,true)}
- const{attempt,result,selected,phase,message}=verified,progress=((round+(phase==="feedback"?1:0))/ROUNDS)*100,completed=round===ROUNDS-1&&phase==="feedback";
- return <div className="play-shell">{challenge&&<div className="challenge-banner">VERIFIED PRACTICE DUEL · leaderboard submission stays disabled until competitive scoring also uses server-owned results.</div>}<div className="play-top"><div><span className="eyebrow">WORD LINK · {pack==="travel-airport"?"TRAVEL · AIRPORT":"SERVER-VERIFIED"}</span><strong>Round {round+1}/{ROUNDS}</strong></div><label className="mode-badge">CEFR&nbsp;<select aria-label="CEFR level" value={level} disabled={phase==="submitting"} onChange={e=>changeLevel(e.target.value)}>{LEVELS.map(x=><option key={x}>{x}</option>)}</select></label><div className="play-score"><span>🔥 {streak}</span><b>{score} verified XP</b></div></div><div className="progress large"><i style={{width:`${progress}%`}}/></div>
- {phase==="loading"&&<section className="word-game-card"><p className="prompt-label">Opening a {level} round…</p></section>}
- {phase==="load-error"&&<section className="word-game-card"><div className="feedback-box error"><div><strong>Round could not load</strong><p>{message}</p></div><button className="button primary" onClick={()=>void openRound(level,false)}>Retry same request →</button></div></section>}
- {attempt&&<section className="word-game-card"><p className="prompt-label">{attempt.cefrLevel} · {attempt.prompt.relation}</p><div className="word-link-arena"><div className="core-word"><small>CORE WORD</small><strong>{attempt.prompt.word}</strong><span>choose the best connection</span></div><div className="option-grid">{attempt.prompt.options.map(option=>{let state="";if(result)state=option===result.correctAnswer?"correct":option===selected?"wrong":"muted";else if(selected===option)state="muted";return <button key={option} disabled={phase!=="active"} className={`word-option ${state}`} onClick={()=>void choose(option)}><span className="link-dot">•</span>{option}</button>})}</div></div>
- {phase==="submitting"&&<div className="feedback-box"><div><strong>Checking on the server…</strong><p>Your browser does not decide the score.</p></div></div>}
- {phase==="submit-error"&&<div className="feedback-box error"><div><strong>Answer not confirmed yet</strong><p>{message} Retrying uses the same attempt, so it cannot award XP twice.</p></div><button className="button primary" onClick={()=>void retry()}>Retry verification →</button></div>}
- {result&&phase==="feedback"&&<div className={`feedback-box ${result.correct?"success":"error"}`}><div><strong>{result.correct?"Connection verified ✓":`Not quite — ${result.correctAnswer}`}</strong><p>{result.feedback} {result.reviewAdded&&"This item was added to your adaptive review queue."} Result saved with {result.rulesVersion}.</p></div><button className="button primary" onClick={next}>{completed?"Play another set":"Next verified link →"}</button></div>}</section>}</div>
+
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { type CEFRLevel } from "@/lib/learning-attempt";
+import useVerifiedLearningRound from "@/components/learning/useVerifiedLearningRound";
+import LearningRoundNotice from "@/components/learning/LearningRoundNotice";
+
+const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"], ROUNDS = 5;
+export default function WordLinkGame() {
+  return <Suspense fallback={<p role="status">Opening Word Link…</p>}><WordLinkEntry /></Suspense>;
+}
+function WordLinkEntry() {
+  const query = useSearchParams(), pack = query.get("pack") === "travel-airport" ? "travel-airport" : "cefr-core";
+  return <WordLinkRound key={pack} pack={pack} challenge={!!query.get("challenge")} />;
+}
+function WordLinkRound({ pack, challenge }: { pack: string; challenge: boolean }) {
+  const verified = useVerifiedLearningRound("word-link", pack, pack === "travel-airport" ? "B1" : "A1", ROUNDS);
+  const { attempt, result, selected, phase, context, score, streak } = verified;
+  const progress = (context.round + Number(!!result)) / ROUNDS * 100;
+  return <div className="play-shell">
+    {challenge && <div className="challenge-banner">Practice duel · leaderboard submission is paused while ranked scoring is being updated.</div>}
+    <div className="play-top"><div><span className="eyebrow">WORD LINK · {context.pack === "travel-airport" ? "TRAVEL · AIRPORT" : "VOCABULARY"}</span><strong>Round {context.round + 1}/{ROUNDS}</strong></div>
+      <label className="mode-badge">CEFR <select aria-label="CEFR level" value={context.level} disabled={phase === "submitting" || phase === "loading"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label>
+      <div className="play-score"><span>🔥 {streak}</span><b>{attempt?.mode === "guest" ? "Guest practice" : `${score} XP this set`}</b></div>
+    </div>
+    <div className="progress large"><i style={{ width: `${progress}%` }} /></div>
+    <LearningRoundNotice round={verified} />
+    {attempt && <section className="word-game-card">
+      <p className="prompt-label">{attempt.cefrLevel} · {attempt.prompt.relation}</p>
+      <div className="word-link-arena"><div className="core-word"><small>CORE WORD</small><strong>{attempt.prompt.word}</strong><span>choose the best connection</span></div>
+        <div className="option-grid">{attempt.prompt.options.map(option => {
+          const state = result ? option === result.correctAnswer ? "correct" : option === selected ? "wrong" : "muted" : selected === option ? "muted" : "";
+          return <button key={option} disabled={phase !== "active"} aria-pressed={selected === option} className={`word-option ${state}`} onClick={() => void verified.submit(option)}><span className="link-dot">•</span>{option}</button>;
+        })}</div>
+      </div>
+      {result && phase === "feedback" && <div className={`feedback-box ${result.correct ? "success" : "error"}`}><div>
+        <strong>{result.correct ? "Connection verified ✓" : `Not quite — ${result.correctAnswer}`}</strong>
+        <p>{result.feedback} {result.reviewAdded && "This item was added to your adaptive review queue."}</p>
+      </div><button className="button primary" onClick={verified.next}>{context.round === ROUNDS - 1 ? "Play another set" : "Next verified link →"}</button></div>}
+    </section>}
+  </div>;
 }

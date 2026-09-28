@@ -38,16 +38,17 @@ type memoryState struct {
 }
 
 type Store struct {
-	fairMu      sync.Mutex
-	fairs       map[string]fair.Save
-	fairRuns    map[string]map[string]fair.Completion
-	adventureMu sync.Mutex
-	adventures  map[string]adventure.Save
-	db          *sql.DB
-	mu          sync.RWMutex
-	mem         memoryState
+	fairMu           sync.Mutex
+	fairs            map[string]fair.Save
+	fairRuns         map[string]map[string]fair.Completion
+	adventureMu      sync.Mutex
+	adventures       map[string]adventure.Save
+	db               *sql.DB
+	mu               sync.RWMutex
+	mem              memoryState
 	demoID           string
 	learningAttempts map[string]LearningAttemptRecord
+	learningRewards  map[string]bool
 }
 
 func New(databaseURL string) (*Store, error) {

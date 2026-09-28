@@ -1,8 +1,10 @@
 # Architecture
 
 Contribution policy: [PROJECT-RULES](PROJECT-RULES.md). Implementation priorities:
-[ROADMAP](ROADMAP.md). The server-owned learning-attempt design is planned work
-(CORE-001); the existing generic attempt API still accepts client-reported accuracy.
+[ROADMAP](ROADMAP.md). Word Link and Grammar Repair share server-owned attempts
+and a recoverable frontend lifecycle ([ADR 003](decisions/003-learning-recovery.md)).
+The generic attempt API still accepts client-reported accuracy for other activities;
+their migration and competitive integrity remain CORE-003/005 work.
 
 ## Principles
 

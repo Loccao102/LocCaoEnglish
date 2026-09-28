@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type LearningAttemptStartInput struct {
 	RequestID       string   `json:"requestId"`
 	Activity        string   `json:"activity"`
@@ -16,31 +18,39 @@ type LearningAttemptPrompt struct {
 }
 
 type LearningAttemptStart struct {
-	AttemptID      string                `json:"attemptId"`
-	Activity       string                `json:"activity"`
-	Pack           string                `json:"pack"`
-	ItemKey        string                `json:"itemKey"`
-	CEFRLevel      string                `json:"cefrLevel"`
-	ContentVersion string                `json:"contentVersion"`
-	RulesVersion   string                `json:"rulesVersion"`
-	Status         string                `json:"status"`
-	Prompt         LearningAttemptPrompt `json:"prompt"`
+	AttemptID      string                 `json:"attemptId"`
+	Activity       string                 `json:"activity"`
+	Pack           string                 `json:"pack"`
+	ItemKey        string                 `json:"itemKey"`
+	CEFRLevel      string                 `json:"cefrLevel"`
+	ContentVersion string                 `json:"contentVersion"`
+	RulesVersion   string                 `json:"rulesVersion"`
+	Status         string                 `json:"status"`
+	Prompt         LearningAttemptPrompt  `json:"prompt"`
+	Mode           string                 `json:"mode"`
+	ExpiresAt      time.Time              `json:"expiresAt"`
+	Result         *LearningAttemptResult `json:"result,omitempty"`
 }
 
 type LearningAttemptSubmitInput struct {
-	Answer string `json:"answer"`
+	Answer         string `json:"answer"`
+	ContentVersion string `json:"contentVersion"`
+	RulesVersion   string `json:"rulesVersion"`
 }
 
 type LearningAttemptResult struct {
-	AttemptID      string  `json:"attemptId"`
-	Status         string  `json:"status"`
-	Correct        bool    `json:"correct"`
-	CorrectAnswer  string  `json:"correctAnswer"`
-	Feedback       string  `json:"feedback"`
-	XPDelta        int     `json:"xpDelta"`
-	NewConfidence  float64 `json:"newConfidence"`
-	Level          int     `json:"level"`
-	ReviewAdded    bool    `json:"reviewAdded"`
-	ContentVersion string  `json:"contentVersion"`
-	RulesVersion   string  `json:"rulesVersion"`
+	AttemptID          string  `json:"attemptId"`
+	Status             string  `json:"status"`
+	Correct            bool    `json:"correct"`
+	CorrectAnswer      string  `json:"correctAnswer"`
+	Feedback           string  `json:"feedback"`
+	XPDelta            int     `json:"xpDelta"`
+	NewConfidence      float64 `json:"newConfidence"`
+	Level              int     `json:"level"`
+	ReviewAdded        bool    `json:"reviewAdded"`
+	ContentVersion     string  `json:"contentVersion"`
+	RulesVersion       string  `json:"rulesVersion"`
+	ActualAnswer       string  `json:"actualAnswer"`
+	ProgressionApplied bool    `json:"progressionApplied"`
+	Evidence           string  `json:"evidence"`
 }
