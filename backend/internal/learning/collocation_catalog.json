@@ -1,0 +1,27 @@
+{
+  "contentVersion": "2026-09-28.1",
+  "items": [
+    {"id":"core-have-breakfast","pack":"cefr-core","cefrLevel":"A1","core":"have","options":["breakfast","a decision","a threat","research"],"correctAnswer":"breakfast","feedback":"Have breakfast is a basic, natural daily routine phrase."},
+    {"id":"core-take-break","pack":"cefr-core","cefrLevel":"A2","core":"take","options":["a break","effective","a threat","a decision"],"correctAnswer":"a break","feedback":"Take a break means stop working or studying for a short time."},
+    {"id":"core-make-decision","pack":"cefr-core","cefrLevel":"B1","core":"make","options":["a decision","a rain","a traffic","a research"],"correctAnswer":"a decision","feedback":"Make a decision is the natural collocation."},
+    {"id":"core-highly-effective","pack":"cefr-core","cefrLevel":"B1","core":"highly","options":["effective","rain","traffic","journey"],"correctAnswer":"effective","feedback":"Highly effective is a common adjective combination."},
+    {"id":"core-pose-threat","pack":"cefr-core","cefrLevel":"B2","core":"pose","options":["a threat","a homework","a transport","a weather"],"correctAnswer":"a threat","feedback":"Pose a threat means create a possible danger."},
+    {"id":"core-deeply-rooted","pack":"cefr-core","cefrLevel":"C1","core":"deeply","options":["rooted","a ticket","effective","a deadline"],"correctAnswer":"rooted","feedback":"Deeply rooted describes something firmly established over time."},
+    {"id":"core-raise-objection","pack":"cefr-core","cefrLevel":"C2","core":"raise","options":["an objection","a ticket","a break","a train"],"correctAnswer":"an objection","feedback":"Raise an objection means formally express disagreement with a proposal."},
+    {"id":"transit-change-lines","pack":"travel-transit","cefrLevel":"B1","core":"change","options":["lines","tickets","stations late","a platform number"],"correctAnswer":"lines","feedback":"Passengers change lines when they move between routes."},
+    {"id":"transit-last-train","pack":"travel-transit","cefrLevel":"B1","core":"last","options":["train","route quickly","ticket office","platform map"],"correctAnswer":"train","feedback":"The last train is the final service of the day."},
+    {"id":"transit-valid-ticket","pack":"travel-transit","cefrLevel":"A2","core":"valid","options":["ticket","traffic","station","direction"],"correctAnswer":"ticket","feedback":"A valid ticket is accepted for travel."},
+    {"id":"cafe-nice-meet","pack":"conversation-cafe","cefrLevel":"A2","core":"nice to","options":["meet you","see a coffee","know your name","talk a seat"],"correctAnswer":"meet you","feedback":"Nice to meet you is a natural first greeting."},
+    {"id":"cafe-come-often","pack":"conversation-cafe","cefrLevel":"A2","core":"come here","options":["often","friendly","coffee","weekend plan"],"correctAnswer":"often","feedback":"Come here often is a friendly way to ask about visits."},
+    {"id":"cafe-keep-touch","pack":"conversation-cafe","cefrLevel":"B1","core":"keep in","options":["touch","talking","meeting","question"],"correctAnswer":"touch","feedback":"Keep in touch means continue communicating."},
+    {"id":"clarity-clear-up","pack":"conversation-clarity","cefrLevel":"B1","core":"clear up","options":["a misunderstanding","a sentence loudly","a meeting time fast","a grammar"],"correctAnswer":"a misunderstanding","feedback":"Clear up a misunderstanding means explain it so the confusion ends."},
+    {"id":"clarity-rephrase-idea","pack":"conversation-clarity","cefrLevel":"B2","core":"rephrase","options":["an idea","a listener","a coffee","a schedule late"],"correctAnswer":"an idea","feedback":"You rephrase an idea when you say it in different words."},
+    {"id":"clarity-make-clear","pack":"conversation-clarity","cefrLevel":"B1","core":"make yourself","options":["clear","understand","meaning","repeat"],"correctAnswer":"clear","feedback":"Make yourself clear means communicate your meaning successfully."},
+    {"id":"standup-fix-bug","pack":"work-standup","cefrLevel":"B1","core":"fix","options":["a bug","a deadline","a meeting","a blocker person"],"correctAnswer":"a bug","feedback":"Developers fix a bug when they remove an error."},
+    {"id":"standup-run-tests","pack":"work-standup","cefrLevel":"B1","core":"run","options":["tests","a requirement","a code review late","a progress"],"correctAnswer":"tests","feedback":"Run tests means execute automated or manual checks."},
+    {"id":"standup-raise-blocker","pack":"work-standup","cefrLevel":"B2","core":"raise","options":["a blocker","a feature done","a stand-up","a branch fast"],"correctAnswer":"a blocker","feedback":"Raise a blocker means tell the team about an issue stopping progress."},
+    {"id":"deadline-meet","pack":"work-deadline","cefrLevel":"B2","core":"meet","options":["a deadline","a risk","a scope","a testing"],"correctAnswer":"a deadline","feedback":"Meet a deadline means finish by the agreed time."},
+    {"id":"deadline-reduce-scope","pack":"work-deadline","cefrLevel":"B2","core":"reduce","options":["scope","a deadline meet","a release date long","a blocker"],"correctAnswer":"scope","feedback":"Reduce scope means deliver fewer requirements to protect quality."},
+    {"id":"deadline-phased-delivery","pack":"work-deadline","cefrLevel":"B2","core":"phased","options":["delivery","deadline","testing risk","priority task"],"correctAnswer":"delivery","feedback":"Phased delivery releases work in planned stages."}
+  ]
+}

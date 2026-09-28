@@ -28,7 +28,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | --- | --- | --- | --- | --- |
 | CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | done |
 | CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | done |
-| CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | planned |
+| CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | in_progress |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | planned |
@@ -106,6 +106,11 @@ input/render/chấm phù hợp. Tên trạng thái là đề xuất, phải ch�
 - Feedback có lỗi, retry và đường đi tiếp rõ ràng; không mất câu trả lời vì request lỗi.
 
 ## CORE-003 — Hoạt động khách quan và answer leakage
+
+Owner/task: Codex, branch `codex/core003-collocation`, 2026-09-28. Lát cắt đầu tiên
+chuyển Collocation Factory sang attempt server-owned: catalog/version, lựa chọn
+được trộn bằng seed, chấm actual answer và retry/resume dùng chung. Đang chờ CI
+và review trước khi ghi nhận done; các hoạt động còn lại vẫn là migration debt.
 
 Di chuyển theo lát cắt nhỏ; mỗi hoạt động phải đáp ứng CORE-001/002, không chỉ đổi UI.
 

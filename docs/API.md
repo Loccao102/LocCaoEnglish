@@ -38,7 +38,7 @@ Do not extend the legacy trust model to new rewards/ranking.
 }
 ```
 
-## Verified learning attempts — Word Link and Grammar Repair
+## Verified learning attempts — Word Link, Grammar Repair and Collocation Factory
 
 Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisions/003-learning-recovery.md).
 
@@ -48,9 +48,11 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`; CEFR A1–C2. Default pack `cefr-core`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`; CEFR A1–C2. Default pack `cefr-core`.
 Word Link also accepts `travel-airport` (B1). Grammar accepts `travel-hotel`,
 `conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2). Unsupported
+`collocation-factory` accepts `travel-transit`, `conversation-cafe`,
+`conversation-clarity`, `work-standup` and `work-deadline` campaign packs. Unsupported
 level/pack pairs return 400. Exclusion lists are limited to 20 item keys; when a
 bank is exhausted, practice can repeat. Catalogs remain server-only JSON files in
 `backend/internal/learning`; content versions must change with material bank edits.
