@@ -25,8 +25,8 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 
 | ID | Ưu tiên | Công việc | Phụ thuộc | Trạng thái |
 | --- | --- | --- | --- | --- |
-| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | planned |
-| CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | planned |
+| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | in_review |
+| CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | in_review |
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | planned |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
@@ -44,6 +44,13 @@ trạng thái done khi CI là điều kiện nghiệm thu của task.
 
 ## CORE-001 — Server-owned attempt
 
+Owner/task: Codex, branch `codex/learning-recovery`, 2026-09-27. Tiếp nối A1–C2
+Word Link/Grammar Repair trên main `8aa9e06`; không tạo engine pilot song song.
+Đã bổ sung snapshot/resume, owner guest/account, version validation, daily claim,
+actual response log và migration 016. Xem [ADR 003](decisions/003-learning-recovery.md).
+Local build/domain/HTTP/vet đạt; PostgreSQL/race và browser/API thật chờ CI.
+Windows chặn store executable/API launch; chưa deploy API local/production.
+
 **Vấn đề:** client đang báo accuracy, một số nơi gửi đáp án chuẩn thay câu trả lời
 thật. Kết quả đó chưa đủ tin cậy để cấp mastery/rank.
 
@@ -52,10 +59,10 @@ activity/content ID, content version, rules version và trạng thái. Client g�
 chọn/thứ tự/text thật, không gửi điểm có thẩm quyền. Server chấm câu hỏi khách quan,
 trả verdict và cập nhật progression nguyên tử. Đưa Word Link qua toàn bộ luồng này.
 
-Đây là thiết kế cần xây dựng, chưa phải endpoint đã có. Quyết định TTL, offline,
-gợi ý và chính sách replay phải ghi trong ADR/API spec; không tự dùng timer UI làm
-bằng chứng chống gian lận. Không gửi đáp án chuẩn xuống trong payload trước chấm
-nếu đang dùng kết quả cho competitive/unassisted evidence.
+Endpoint pilot đã có trong code; mức triển khai/xác minh không được suy từ đó.
+TTL, offline và replay được chốt trong ADR/API spec; không tự dùng timer UI làm
+bằng chứng chống gian lận. Không gửi đáp án chuẩn xuống trước chấm. Kết quả pilot
+là practice, chưa đủ để xác nhận competitive/unassisted evidence.
 
 **Hoàn tất khi:**
 
@@ -67,6 +74,10 @@ nếu đang dùng kết quả cho competitive/unassisted evidence.
   cũ được mô tả; không làm mất lịch sử người học.
 
 ## CORE-002 — Shared learning round lifecycle
+
+Owner/task: cùng branch CORE-001. Word Link và Grammar Repair dùng chung hook
+khôi phục, khóa submit/retry, loại response cũ và owner-scoped reference; UI giữ
+A1–C2 và campaign packs. Trạng thái in_review đến khi browser/API thật xác minh.
 
 **Cần làm:** tách controller/reducer hoặc module tương đương cho vòng đời
 ready → active → submitting → feedback → finished; mỗi hoạt động cung cấp adapter

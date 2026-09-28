@@ -29,7 +29,13 @@ A level is not unlocked because a player watched an animation or accumulated cos
 
 Word Link is the pilot. It now has server-owned A1, A2, B1, B2, C1 and C2 content. The start response does not expose the correct answer. Submit returns the authoritative verdict and correct answer for feedback. A repeated submit with the same answer returns the recorded result; a different answer for the same completed attempt conflicts.
 
-Next migrations should reuse this contract rather than creating separate scoring logic: Grammar Repair, Sentence Builder, Collocation Factory, Reading Race, Listen & Pick and Dictation Rush. Speaking and IELTS need a separate evidence contract because transcript match, acoustic scoring and coaching estimates are not equivalent evidence.
+Grammar Repair now shares the attempt contract and recoverable lifecycle with Word
+Link. Both retain versioned prompt snapshots, pending answers, guest/account
+isolation and daily progression claims; see [ADR 003](decisions/003-learning-recovery.md).
+Next migrations should reuse this contract: Sentence Builder, Collocation Factory,
+Reading Race, Listen & Pick and Dictation Rush. Speaking and IELTS need a separate
+evidence contract because transcript match, acoustic scoring and coaching estimates
+are not equivalent evidence.
 
 ## Animation principles
 

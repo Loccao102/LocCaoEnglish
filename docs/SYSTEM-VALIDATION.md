@@ -138,3 +138,28 @@ python -m unittest discover -s tests -v
 ```
 
 On PowerShell, assign each variable using `$env:NAME='value'` before invoking the command. Point `TEST_DATABASE_URL` at a dedicated database named `loccao_system_test`. The portable Windows session uses port 55432; the Docker development defaults use port 5432.
+
+## Learning recovery · 2026-09-28
+
+Scope: CORE-001/002, branch `codex/learning-recovery`, based on main `8aa9e06`.
+Preserves the main branch A1–C2 catalogs and both active learning games.
+
+- `npm run build`: 57 pages and TypeScript passed.
+- `go test ./internal/learning ./internal/httpapi`: passed, including new HTTP
+  snapshot, owner, version, guest and legacy-bypass checks.
+- `go vet ./...`: passed.
+- `learning-recovery-ui.spec.ts`: 3 Playwright fault-injection scenarios passed
+  locally on production frontend/Chromium D3D11: creation retry identity, locked
+  answer across reload, expired-round recovery and persistent CEFR selection.
+- Visually inspected `.cache/learning-mobile.png` at 390 × 844; readable options
+  without horizontal overflow. This image uses a UI fixture, not a real API round.
+- Added memory/PostgreSQL tests for same-ID and distinct-ID concurrency, daily
+  progression, actual answer versus review answer, expiry, reconnect and transaction
+  rollback after an evidence write fails. Added four real API/browser scenarios for
+  guest sets, both activities' lost committed responses, auth isolation and replay.
+  These require the current CI revision; authored tests are not yet passing evidence.
+- Windows Application Control blocked the local store executable; earlier API
+  launch was denied by automatic policy review. No bypass was attempted. The updated
+  API/schema have not been verified running locally or deployed to production.
+
+Contract and rollout: [API](API.md), [ADR 003](decisions/003-learning-recovery.md).

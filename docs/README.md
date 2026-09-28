@@ -18,7 +18,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Miền | Tài liệu |
 | --- | --- |
 | Tổng quan và khởi chạy | [README dự án](../README.md) |
-| Kiến trúc dịch vụ | [ARCHITECTURE](ARCHITECTURE.md), [API hiện tại](API.md) |
+| Kiến trúc dịch vụ | [ARCHITECTURE](ARCHITECTURE.md), [API hiện tại](API.md), [ADR 003: khôi phục learning rounds](decisions/003-learning-recovery.md) |
 | Thế giới, quest và story rewards | [ADVENTURE](ADVENTURE.md) |
 | Hội chợ, độ khó, checkpoint | [FRIENDSHIP-FAIR](FRIENDSHIP-FAIR.md), [GAMEPLAY-FOUNDATION](GAMEPLAY-FOUNDATION.md) |
 | Vấn đề gameplay đã rà soát | [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md) |
