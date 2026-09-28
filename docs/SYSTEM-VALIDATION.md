@@ -157,9 +157,17 @@ Preserves the main branch A1–C2 catalogs and both active learning games.
   progression, actual answer versus review answer, expiry, reconnect and transaction
   rollback after an evidence write fails. Added four real API/browser scenarios for
   guest sets, both activities' lost committed responses, auth isolation and replay.
-  These require the current CI revision; authored tests are not yet passing evidence.
+  All of these passed on Linux CI run 94 for runtime `cf13e2f`.
 - Windows Application Control blocked the local store executable; earlier API
   launch was denied by automatic policy review. No bypass was attempted. The updated
   API/schema have not been verified running locally or deployed to production.
 
 Contract and rollout: [API](API.md), [ADR 003](decisions/003-learning-recovery.md).
+
+Final evidence: [CI run 94](https://github.com/Loccao102/LocCaoEnglish/actions/runs/36450327003)
+passed all six jobs. E2E logged **52 passed (15.4m)**, including all four real API
+learning flows and three recovery UI fixtures. PostgreSQL/race tests, frontend,
+AI, compose and integration passed. [PR #4](https://github.com/Loccao102/LocCaoEnglish/pull/4)
+merged as `238c931` on 2026-09-28. The subsequent roadmap/evidence update changes
+documentation only; runtime remains exactly the tested revision. Its document
+links and diff are checked without rerunning application tests for prose changes.

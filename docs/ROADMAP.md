@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-09-27, code `ed042a1`. Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-09-28, runtime `cf13e2f`, merge `238c931`. Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -11,7 +11,8 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- 12 learning activities **chưa** có shared attempt engine/chấm điểm tin cậy đồng bộ.
+- Word Link và Grammar Repair dùng chung server attempts và lifecycle khôi phục;
+  các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
   Đây không phải xác nhận CI/production cho mọi revision sau này.
@@ -25,8 +26,8 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 
 | ID | Ưu tiên | Công việc | Phụ thuộc | Trạng thái |
 | --- | --- | --- | --- | --- |
-| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | in_review |
-| CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | in_review |
+| CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | done |
+| CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | done |
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | planned |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
@@ -48,8 +49,15 @@ Owner/task: Codex, branch `codex/learning-recovery`, 2026-09-27. Tiếp nối A1
 Word Link/Grammar Repair trên main `8aa9e06`; không tạo engine pilot song song.
 Đã bổ sung snapshot/resume, owner guest/account, version validation, daily claim,
 actual response log và migration 016. Xem [ADR 003](decisions/003-learning-recovery.md).
-Local build/domain/HTTP/vet đạt; PostgreSQL/race và browser/API thật chờ CI.
-Windows chặn store executable/API launch; chưa deploy API local/production.
+Đã merge qua [PR #4](https://github.com/Loccao102/LocCaoEnglish/pull/4), commit
+`238c931`. Runtime `cf13e2f` đạt đủ 6 jobs tại
+[CI 94](https://github.com/Loccao102/LocCaoEnglish/actions/runs/36450327003):
+PostgreSQL/race, HTTP/domain, build, assets, integration và 52 E2E browser.
+Các luồng mới xác minh guest/account, lost-response/reload, version/owner, actual
+response/review, concurrent daily claims và rollback giao dịch. Chi tiết ở
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#learning-recovery--2026-09-28).
+Done áp dụng code/contract đã merge; chưa deploy API local/production. Windows
+chặn store executable/API launch, phần đó được kiểm tra trên Linux CI.
 
 **Vấn đề:** client đang báo accuracy, một số nơi gửi đáp án chuẩn thay câu trả lời
 thật. Kết quả đó chưa đủ tin cậy để cấp mastery/rank.
@@ -75,9 +83,14 @@ là practice, chưa đủ để xác nhận competitive/unassisted evidence.
 
 ## CORE-002 — Shared learning round lifecycle
 
-Owner/task: cùng branch CORE-001. Word Link và Grammar Repair dùng chung hook
-khôi phục, khóa submit/retry, loại response cũ và owner-scoped reference; UI giữ
-A1–C2 và campaign packs. Trạng thái in_review đến khi browser/API thật xác minh.
+Owner/task: cùng PR #4/commit `238c931` của CORE-001. Word Link và Grammar Repair
+dùng chung hook khôi phục, khóa submit/retry, loại response cũ và owner-scoped
+reference; UI giữ A1–C2 và campaign packs. CI 94 đã xác minh browser/API thật cho
+cả hai trò, gồm response bị mất sau commit, reload, đổi tài khoản; ba UI fault tests
+kiểm tra retry identity, pending input, expired round và giữ level sau reload.
+Hai adapter hiện không có hint hoặc đồng hồ tính điểm: pause/assistance chưa áp
+dụng, không được tự coi adapter sau này đã đáp ứng. TTL 24 giờ là hạn lưu lượt,
+không phải phép đo tốc độ. Mở rộng adapter/assistance tiếp tục trong CORE-003/004.
 
 **Cần làm:** tách controller/reducer hoặc module tương đương cho vòng đời
 ready → active → submitting → feedback → finished; mỗi hoạt động cung cấp adapter
