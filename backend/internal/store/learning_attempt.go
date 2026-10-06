@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/learning"
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 )
 
@@ -171,7 +172,8 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			return learningAttemptResult(rec), nil
 		}
 
-		correct := sameAnswer(rec.CorrectAnswer, answer)
+		actual := learningAnswerText(rec, answer)
+		correct := sameAnswer(rec.CorrectAnswer, actual)
 		applied := false
 		if userID != "" {
 			claim, err := tx.ExecContext(ctx, `INSERT INTO learning_daily_rewards(user_id,item_key,content_version,reward_day,attempt_id) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, userID, rec.ItemKey, rec.ContentVersion, time.Now().UTC().Format("2006-01-02"), rec.ID)
@@ -222,7 +224,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 					return model.LearningAttemptResult{}, err
 				}
 			}
-			if _, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,grading_source,content_version,rules_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,0,'server-objective',$9,$10)`, rec.ID, userID, rec.Skill, rec.Activity, rec.ItemKey, rec.Prompt, answer, accuracy, rec.ContentVersion, rec.RulesVersion); err != nil {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,grading_source,content_version,rules_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,0,'server-objective',$9,$10)`, rec.ID, userID, rec.Skill, rec.Activity, rec.ItemKey, rec.Prompt, actual, accuracy, rec.ContentVersion, rec.RulesVersion); err != nil {
 				return model.LearningAttemptResult{}, err
 			}
 		}
@@ -265,7 +267,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	}
 	key := fmt.Sprintf("%s:%s:%s:%s", userID, rec.ItemKey, rec.ContentVersion, time.Now().UTC().Format("2006-01-02"))
 	applied := userID != "" && !s.learningRewards[key]
-	correct := sameAnswer(rec.CorrectAnswer, answer)
+	correct := sameAnswer(rec.CorrectAnswer, learningAnswerText(rec, answer))
 	accuracy, xp := 0.0, 0
 	if correct {
 		accuracy = 1
@@ -339,7 +341,7 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 		AttemptID: rec.ID, Status: rec.Status, Correct: rec.Correct, CorrectAnswer: rec.CorrectAnswer,
 		Feedback: rec.Feedback, XPDelta: rec.XPDelta, NewConfidence: rec.ResultConfidence,
 		Level: rec.ResultLevel, ReviewAdded: rec.ReviewAdded, ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion,
-		ActualAnswer: rec.SubmittedAnswer, ProgressionApplied: rec.ProgressionApplied, Evidence: "server-objective",
+		ActualAnswer: learningAnswerText(rec, rec.SubmittedAnswer), ProgressionApplied: rec.ProgressionApplied, Evidence: "server-objective",
 	}
 }
 
@@ -353,6 +355,7 @@ func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snap
 	return rec.Activity == activity && rec.CEFRLevel == level && string(left) == string(right)
 }
 func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
+	rec.Snapshot.Prompt.Chunks = append([]model.SentenceChunk(nil), rec.Snapshot.Prompt.Chunks...)
 	rec.Snapshot.Prompt.Options = append([]string(nil), rec.Snapshot.Prompt.Options...)
 	rec.Snapshot.Input.ExcludeItemKeys = append([]string(nil), rec.Snapshot.Input.ExcludeItemKeys...)
 	return rec
@@ -367,6 +370,15 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
 	}
+	if rec.Activity == "sentence-builder" {
+		if rec.RulesVersion != learning.SentenceRulesVersion {
+			return ErrAttemptInput
+		}
+		if _, err := learning.ResolveSentenceAnswer(rec.Snapshot.Prompt.Chunks, answer); err != nil {
+			return ErrAttemptInput
+		}
+		return nil
+	}
 	if len(versions) > 0 {
 		for _, option := range rec.Snapshot.Prompt.Options {
 			if sameAnswer(option, answer) {
@@ -376,6 +388,16 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 		return ErrAttemptInput
 	}
 	return nil
+}
+
+// Keep the immutable wire answer for retries; show/store language, not opaque IDs,
+// in the verdict and learning evidence. Resolve only against the saved snapshot.
+func learningAnswerText(rec LearningAttemptRecord, answer string) string {
+	if rec.Activity == "sentence-builder" {
+		text, _ := learning.ResolveSentenceAnswer(rec.Snapshot.Prompt.Chunks, answer)
+		return text
+	}
+	return answer
 }
 func (s *Store) GetLearningAttempt(ctx context.Context, userID, id string) (LearningAttemptRecord, error) {
 	if s.db != nil {

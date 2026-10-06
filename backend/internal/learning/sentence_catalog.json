@@ -1,0 +1,372 @@
+{
+  "contentVersion": "2026-10-07.1",
+  "items": [
+    {
+      "id": "sentence-a1-1",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "question": "Tell a new friend your favourite drink. Start with I.",
+      "chunks": [
+        "I",
+        "like",
+        "tea"
+      ],
+      "feedback": "Use subject + verb + object: I like tea."
+    },
+    {
+      "id": "sentence-a1-2",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "question": "Say where your friend lives. Start with She.",
+      "chunks": [
+        "She",
+        "lives",
+        "near",
+        "the park"
+      ],
+      "feedback": "With she in the present simple, use lives. Near introduces the place."
+    },
+    {
+      "id": "sentence-a1-3",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "question": "Describe what the cat owns. Start with The cat and name the ball before the bed.",
+      "chunks": [
+        "The cat",
+        "has",
+        "a",
+        "ball",
+        "and",
+        "a",
+        "bed"
+      ],
+      "feedback": "Each singular countable noun needs its own article: a ball and a bed. Use both a pieces."
+    },
+    {
+      "id": "sentence-a2-1",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "question": "Ask a friend about a weekend activity. Start with Would.",
+      "chunks": [
+        "Would",
+        "you",
+        "like to",
+        "visit",
+        "the museum"
+      ],
+      "feedback": "A polite invitation uses Would + subject + like to + base verb."
+    },
+    {
+      "id": "sentence-a2-2",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "question": "Describe your dinner plan. Start with We.",
+      "chunks": [
+        "We",
+        "are going to",
+        "cook",
+        "dinner",
+        "tonight"
+      ],
+      "feedback": "Be going to + base verb expresses a plan. Put tonight at the end here."
+    },
+    {
+      "id": "sentence-a2-3",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "question": "Compare two ways to travel. Start with This bus.",
+      "chunks": [
+        "This bus",
+        "is",
+        "slower than",
+        "the train"
+      ],
+      "feedback": "Use a comparative adjective + than to compare two things."
+    },
+    {
+      "id": "sentence-b1-1",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "question": "Explain your transport preference. Give the preference before the reason.",
+      "chunks": [
+        "I prefer",
+        "public transport",
+        "because",
+        "it",
+        "is",
+        "more sustainable"
+      ],
+      "feedback": "State the preference first, then use because + subject + verb to give a reason."
+    },
+    {
+      "id": "sentence-b1-2",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "question": "Describe what remote workers value. Start with People.",
+      "chunks": [
+        "People",
+        "who work remotely",
+        "often value",
+        "flexible schedules"
+      ],
+      "feedback": "The relative clause who work remotely follows People and describes which people you mean."
+    },
+    {
+      "id": "sentence-b1-3",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "question": "Report an unfinished task. Start with I and end with yet.",
+      "chunks": [
+        "I",
+        "have not",
+        "finished",
+        "the report",
+        "yet"
+      ],
+      "feedback": "Present perfect negative uses have not + past participle. Yet usually comes at the end."
+    },
+    {
+      "id": "sentence-b2-1",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "question": "The flight left before you reached the gate. Start with The flight.",
+      "chunks": [
+        "The flight",
+        "had already left",
+        "when",
+        "I arrived at",
+        "the gate"
+      ],
+      "feedback": "Past perfect marks the earlier event; past simple marks the later arrival."
+    },
+    {
+      "id": "sentence-b2-2",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "question": "Explain the condition for a delivery. Put the result before the condition.",
+      "chunks": [
+        "We can",
+        "deliver on time",
+        "provided that",
+        "the scope",
+        "remains unchanged"
+      ],
+      "feedback": "Provided that introduces a condition. The result clause comes first in this requested structure."
+    },
+    {
+      "id": "sentence-b2-3",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "question": "Ask politely about a delay. Start with Could you.",
+      "chunks": [
+        "Could you",
+        "explain",
+        "why",
+        "the delivery",
+        "was delayed"
+      ],
+      "feedback": "An indirect question uses statement order: why the delivery was delayed, not why was the delivery delayed."
+    },
+    {
+      "id": "sentence-c1-1",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "question": "Emphasise an unexpected problem. Start with Not only.",
+      "chunks": [
+        "Not only",
+        "did",
+        "the launch",
+        "fail,",
+        "but it also",
+        "damaged trust"
+      ],
+      "feedback": "Initial Not only triggers auxiliary-subject inversion: did the launch fail."
+    },
+    {
+      "id": "sentence-c1-2",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "question": "Describe a missed chance to prevent a delay. Start with Had.",
+      "chunks": [
+        "Had",
+        "we identified",
+        "the risk earlier,",
+        "we could have",
+        "avoided",
+        "the delay"
+      ],
+      "feedback": "Had we identified is an inverted third conditional. The result uses could have + past participle."
+    },
+    {
+      "id": "sentence-c1-3",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "question": "Emphasise the evidence the team needs. Start with What.",
+      "chunks": [
+        "What",
+        "the team needs",
+        "is",
+        "reliable evidence,",
+        "not",
+        "another promise"
+      ],
+      "feedback": "A what-cleft highlights the focus after is; not introduces the contrasting alternative."
+    },
+    {
+      "id": "sentence-c2-1",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "question": "Express a recommendation as a formal necessity. Start with It.",
+      "chunks": [
+        "It",
+        "is essential",
+        "that",
+        "every applicant",
+        "be given",
+        "an equal opportunity"
+      ],
+      "feedback": "The mandative subjunctive uses the base form be after it is essential that."
+    },
+    {
+      "id": "sentence-c2-2",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "question": "Describe two events in immediate succession. Start with Scarcely.",
+      "chunks": [
+        "Scarcely",
+        "had",
+        "the meeting begun",
+        "when",
+        "the power",
+        "went out"
+      ],
+      "feedback": "Initial Scarcely takes inversion and pairs with when: Scarcely had ... when ..."
+    },
+    {
+      "id": "sentence-c2-3",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "question": "State the main issue while rejecting a distraction. Start with The issue.",
+      "chunks": [
+        "The issue",
+        "is not so much",
+        "whether the plan is ambitious",
+        "as",
+        "whether it is feasible"
+      ],
+      "feedback": "Not so much X as Y shifts emphasis from X to the more relevant issue Y."
+    },
+    {
+      "id": "sentence-plans-1",
+      "pack": "conversation-plans",
+      "cefrLevel": "A2",
+      "question": "Suggest a film outing. Start with How about and end with the day.",
+      "chunks": [
+        "How about",
+        "going to the cinema",
+        "on Saturday"
+      ],
+      "feedback": "How about takes an -ing form when suggesting an activity."
+    },
+    {
+      "id": "sentence-plans-2",
+      "pack": "conversation-plans",
+      "cefrLevel": "A2",
+      "question": "Suggest a meeting. Put the cafe and its location before the time.",
+      "chunks": [
+        "We could meet",
+        "at the cafe",
+        "near the lake",
+        "at three o'clock"
+      ],
+      "feedback": "Could + base verb makes a suggestion. Near the lake identifies which cafe."
+    },
+    {
+      "id": "sentence-plans-3",
+      "pack": "conversation-plans",
+      "cefrLevel": "A2",
+      "question": "Accept the plan, then say goodbye. Start with Sounds good.",
+      "chunks": [
+        "Sounds good,",
+        "I'll",
+        "see you",
+        "then"
+      ],
+      "feedback": "I'll is I will. See you then refers back to the agreed time."
+    },
+    {
+      "id": "sentence-standup-1",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "question": "Report yesterday's finished task. Put the time first.",
+      "chunks": [
+        "Yesterday",
+        "I fixed",
+        "the login bug"
+      ],
+      "feedback": "Use the past simple for a finished task: fixed. The time comes first here."
+    },
+    {
+      "id": "sentence-standup-2",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "question": "State today's next task. Put the time first.",
+      "chunks": [
+        "Today",
+        "I will add",
+        "integration tests"
+      ],
+      "feedback": "Will + base verb states your next action. The object follows add."
+    },
+    {
+      "id": "sentence-standup-3",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "question": "Report that nothing is blocking you. Put the time last.",
+      "chunks": [
+        "I have",
+        "no blockers",
+        "right now"
+      ],
+      "feedback": "No + plural noun expresses absence. Right now makes the status current."
+    },
+    {
+      "id": "sentence-deadline-1",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "question": "Explain the risk created by the deadline. Start with The Friday deadline.",
+      "chunks": [
+        "The Friday deadline",
+        "creates",
+        "a testing risk"
+      ],
+      "feedback": "Name the constraint as the subject, then describe its consequence with creates."
+    },
+    {
+      "id": "sentence-deadline-2",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "question": "Offer a quality trade-off. Put the result before the if-clause.",
+      "chunks": [
+        "We can protect",
+        "quality",
+        "if",
+        "we reduce scope"
+      ],
+      "feedback": "The result is protecting quality; the if-clause states the required scope reduction."
+    },
+    {
+      "id": "sentence-deadline-3",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "question": "Propose a smaller delivery. Start with I propose and put the date last.",
+      "chunks": [
+        "I propose",
+        "delivering",
+        "the core flow",
+        "on Friday"
+      ],
+      "feedback": "Propose takes an -ing form. Name the deliverable before the delivery date."
+    }
+  ]
+}

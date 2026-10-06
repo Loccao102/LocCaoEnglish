@@ -10,7 +10,7 @@ import {
 
 export type VerifiedRoundPhase = "loading" | "active" | "submitting" | "feedback" | "load-error" | "submit-error";
 type Context = { level: CEFRLevel; pack: string; round: number; score: number; streak: number; seen: string[] };
-type Reference = { requestId: string; attemptId?: string; pending?: string; context: Context };
+type Reference = { requestId: string; attemptId?: string; pending?: string; draft?: string; context: Context };
 const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const key = (owner: string, activity: string, pack: string) => `loccao.verified-round.v1.${owner}.${activity}.${pack}`;
 
@@ -23,7 +23,8 @@ function readReference(storageKey: string): Reference | null {
     ![ctx.round, ctx.score, ctx.streak].every(n => Number.isSafeInteger(n) && n >= 0) ||
     !Array.isArray(ctx.seen) || ctx.seen.length > 20 || ctx.seen.some(item => typeof item !== "string") ||
     ref.attemptId !== undefined && !/^[a-f0-9]{32}$/.test(ref.attemptId) ||
-    ref.pending !== undefined && (!ref.attemptId || typeof ref.pending !== "string" || ref.pending.length > 2048)) {
+    ref.pending !== undefined && (!ref.attemptId || typeof ref.pending !== "string" || ref.pending.length > 2048) ||
+    ref.draft !== undefined && (typeof ref.draft !== "string" || ref.draft.length > 2048)) {
     throw new Error("The saved round could not be read. Start a new round to continue.");
   }
   return ref;
@@ -34,6 +35,7 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
   const [context, setContext] = useState<Context>(initial);
   const [attempt, setAttempt] = useState<LearningAttempt | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
   const [phase, setPhase] = useState<VerifiedRoundPhase>("loading");
   const [message, setMessage] = useState(""), [storageWarning, setStorageWarning] = useState("");
   const [canRestart, setCanRestart] = useState(false);
@@ -48,7 +50,7 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
   }
   const open = useCallback(async (fresh?: Context) => {
     const seq = ++sequence.current, token = getAuthToken();
-    locked.current = true; setAttempt(null); setSelected(null); setPhase("loading"); setMessage(""); setCanRestart(false);
+    locked.current = true; setAttempt(null); setSelected(null); setDraft(""); setPhase("loading"); setMessage(""); setCanRestart(false);
     try {
       let owner = "guest";
       if (token) {
@@ -77,6 +79,7 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
       }
       keep({ ...ref, attemptId: next.attemptId, ...(next.result ? { pending: undefined } : {}) });
       setAttempt(next); setSelected(next.result?.actualAnswer || ref.pending || null);
+      setDraft(ref.pending || ref.draft || "");
       if (!next.result && Date.parse(next.expiresAt) <= Date.now()) {
         setCanRestart(true); throw new Error("This round expired. Start a new round to continue.");
       }
@@ -130,9 +133,13 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
       seen: completed ? [] : [...new Set([...ctx.seen, attempt.itemKey])].slice(-20) });
   }
   function changeLevel(level: CEFRLevel) { void open({ level, pack: "cefr-core", round: 0, score: 0, streak: 0, seen: [] }); }
+  function updateDraft(value: string) {
+    if (locked.current || phase !== "active" || !reference.current || value.length > 2048 || !current(sequence.current, identity.current.token)) return;
+    keep({ ...reference.current, draft: value }); setDraft(value);
+  }
   const result = attempt?.result || null;
   const score = context.score + (result?.xpDelta || 0), streak = result ? result.correct ? context.streak + 1 : 0 : context.streak;
-  return { attempt, result, selected, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel,
+  return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel,
     retry: () => reference.current?.pending && attempt ? void submit(reference.current.pending) : void open(),
     restart: () => void open({ ...context, score: 0, streak: 0 }),
   };

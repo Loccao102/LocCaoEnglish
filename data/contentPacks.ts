@@ -1,17 +1,12 @@
-export type SentenceRound={chunks:string[];answer:string};
 export type GrammarRound={prompt:string;answer:string;options:string[]};
 export type ListeningRound={audio:string;q:string;answer:string;options:string[]};
 export type WordLinkRound={word:string;relation:string;answer:string;options:string[];note:string};
-export type LearningPack={label:string;sentenceRounds:SentenceRound[];grammarRounds:GrammarRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
+export type LearningPack={label:string;grammarRounds:GrammarRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
 type PackOverride=Partial<Omit<LearningPack,"label">>&{label:string};
 
 const base:LearningPack={
  label:"CORE ENGLISH",
- sentenceRounds:[
-  {chunks:["because","public transport","is","more sustainable","I prefer","it"],answer:"I prefer public transport because it is more sustainable"},
-  {chunks:["had already left","when","the gate","I arrived at","the flight"],answer:"The flight had already left when I arrived at the gate"},
-  {chunks:["people","who work remotely","often value","flexible schedules"],answer:"People who work remotely often value flexible schedules"},
- ],
+
  grammarRounds:[
   {prompt:"Choose the grammatically correct sentence.",answer:"Many people believe that public transport should be improved.",options:["Many people believes that public transport should be improved.","Many people believe that public transport should be improved.","Many people believing public transport should improved."]},
   {prompt:"Repair the conditional.",answer:"If I had left earlier, I would not have missed the flight.",options:["If I left earlier, I would not missed the flight.","If I had left earlier, I would not have missed the flight.","If I have left earlier, I would not missed the flight."]},
@@ -57,11 +52,7 @@ const packs:Record<string,PackOverride>={
   {audio:"I work nearby, but I usually come to this cafe after class because it is quieter in the evening.",q:"Why does the speaker come in the evening?",answer:"It is quieter",options:["It is cheaper","It is quieter","It closes later","Friends work there"]},
   {audio:"I am really into badminton and films, but lately I have been learning photography too.",q:"What new interest does the speaker mention?",answer:"Photography",options:["Badminton","Films","Photography","Cooking"]},
  ],speakingPrompts:["Hi, my name is Loc. I don't think we've met before.","What about you? What do you usually do after work or class?","It was nice to meet you. Would you like to grab coffee again sometime?"]},
- "conversation-plans":{label:"CONVERSATION · MAKE PLANS",sentenceRounds:[
-  {chunks:["going to the cinema","How about","on Saturday"],answer:"How about going to the cinema on Saturday"},
-  {chunks:["at three o'clock","We could meet","near the lake","at the cafe"],answer:"We could meet at the cafe near the lake at three o'clock"},
-  {chunks:["then","Sounds good","see you","I'll"],answer:"Sounds good I'll see you then"},
- ],listeningRounds:[
+ "conversation-plans":{label:"CONVERSATION · MAKE PLANS",listeningRounds:[
   {audio:"Saturday afternoon works for me, but I need to leave before six because I have dinner with my family.",q:"What restriction does the speaker have?",answer:"They must leave before six",options:["They cannot meet Saturday","They must leave before six","They need to meet at six","They have work all day"]},
   {audio:"Let's meet outside the cinema at three fifteen rather than at the cafe, because the cafe gets crowded.",q:"Where will they meet?",answer:"Outside the cinema",options:["Inside the cafe","At the station","Outside the cinema","Near the lake"]},
  ],speakingPrompts:["How about going to the cinema this Saturday?","Would three o'clock at the cafe near the lake work for you?","Perfect. So we meet there at three. See you then."]},
@@ -70,11 +61,7 @@ const packs:Record<string,PackOverride>={
   {prompt:"Choose the clearest rephrase.",answer:"What I mean is that I may arrive later, not that I am cancelling.",options:["I mean later not cancel maybe.","What I mean is that I may arrive later, not that I am cancelling.","My meaning is no cancel but late."]},
   {prompt:"Choose the natural confirmation.",answer:"So you mean the plan is still on, but the time may change?",options:["So you mean the plan is still on, but the time may change?","You mean plan still but time?","So the time change plan yes?"]},
  ],speakingPrompts:["Sorry, I'm not sure what you mean. Could you explain that again?","What I mean is that I may arrive later, not that I am cancelling.","Got it. So the plan is still on, but the time may change."]},
- "work-standup":{label:"WORK · STAND-UP",sentenceRounds:[
-  {chunks:["the login bug","Yesterday","I fixed"],answer:"Yesterday I fixed the login bug"},
-  {chunks:["Today","integration tests","I will add"],answer:"Today I will add integration tests"},
-  {chunks:["no blockers","I have","right now"],answer:"I have no blockers right now"},
- ],speakingPrompts:["Yesterday I finished the authentication fix.","Today I will add integration tests and review the API changes.","I have no blockers right now, but I may need the product owner to confirm one edge case."]},
+ "work-standup":{label:"WORK · STAND-UP",speakingPrompts:["Yesterday I finished the authentication fix.","Today I will add integration tests and review the API changes.","I have no blockers right now, but I may need the product owner to confirm one edge case."]},
  "work-requirements":{label:"WORK · REQUIREMENTS",grammarRounds:[
   {prompt:"Choose the clearest clarification question.",answer:"What exactly should happen when the search returns no results?",options:["What exactly should happen when the search returns no results?","What happen search no result?","Should what happen no results?"]},
   {prompt:"Choose the natural confirmation.",answer:"So the requirement is to show suggestions when there are no exact matches, correct?",options:["So requirement suggestions no match correct?","So the requirement is to show suggestions when there are no exact matches, correct?","The requirement is suggestions when not match is it?"]},
@@ -83,11 +70,7 @@ const packs:Record<string,PackOverride>={
   {audio:"For this release, faster means the common search results should appear within one second, and exact title matches should rank first.",q:"What is the response-time target?",answer:"Within one second",options:["Within half a second","Within one second","Within three seconds","No target was given"]},
   {audio:"If there are no exact matches, show up to five related suggestions rather than an empty state.",q:"What should happen when there is no exact match?",answer:"Show up to five related suggestions",options:["Show an error","Show up to five related suggestions","Reload automatically","Hide the search box"]},
  ],speakingPrompts:["The phrase 'better results' is unclear. Could we define what ranking behavior we expect?","What exactly should happen when a search returns no exact matches?","So the acceptance condition is one-second response time and exact title matches ranked first, correct?"]},
- "work-deadline":{label:"WORK · DELIVERY",sentenceRounds:[
-  {chunks:["creates","a testing risk","The Friday deadline"],answer:"The Friday deadline creates a testing risk"},
-  {chunks:["we reduce scope","quality","We can protect","if"],answer:"We can protect quality if we reduce scope"},
-  {chunks:["on Friday","the core flow","I propose","delivering"],answer:"I propose delivering the core flow on Friday"},
- ],grammarRounds:[
+ "work-deadline":{label:"WORK · DELIVERY",grammarRounds:[
   {prompt:"Choose the calmest constraint statement.",answer:"I can commit to Friday for the core flow, but the full scope would put testing at risk.",options:["Friday is impossible and I won't do it.","I can commit to Friday for the core flow, but the full scope would put testing at risk.","Maybe Friday but testing no."]},
   {prompt:"Choose the clearest trade-off.",answer:"If we keep the full scope, we either need more time or we reduce the testing window.",options:["If full scope then something must change.","If we keep the full scope, we either need more time or we reduce the testing window.","Full scope means testing bad maybe."]},
  ],speakingPrompts:["The Friday deadline creates a testing risk for the full scope.","If we keep the quality bar, reducing scope is the safer trade-off.","I propose a phased delivery: the core flow on Friday and reporting in the next release."]}

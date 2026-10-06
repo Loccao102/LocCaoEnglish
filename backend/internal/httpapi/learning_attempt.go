@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"net/http"
 	"regexp"
@@ -67,6 +69,23 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "sentence-builder":
+		item, err := learning.PickSentence(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Grammar", item.ID
+		contentVersion, rulesVersion = learning.SentenceContentVersion(), learning.SentenceRulesVersion
+		promptText, correctAnswer, feedback = item.Question, strings.Join(item.Chunks, " "), item.Feedback
+		// A client knows its request ID. Do not derive solution-position IDs from
+		// that public seed. Persist the shuffled chunks, never this private seed.
+		var privateSeed [32]byte
+		if _, err := rand.Read(privateSeed[:]); err != nil {
+			problem(w, 500, "could not open this sentence; retry the same request")
+			return
+		}
+		publicPrompt = model.LearningAttemptPrompt{Question: item.Question, Options: []string{}, Chunks: learning.ShuffledSentenceChunks(item, hex.EncodeToString(privateSeed[:]))}
 	case "word-link":
 		if pack != "cefr-core" && pack != "travel-airport" {
 			problem(w, 400, "unsupported word-link pack")
@@ -148,7 +167,8 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 	if rec.UserID == "" {
 		base.Mode = "guest"
 	}
-	return base, base.Pack == requestedPack && len(base.Prompt.Options) > 0
+	return base, base.Pack == requestedPack && (len(base.Prompt.Options) > 0 ||
+		base.Activity == "sentence-builder" && base.RulesVersion == learning.SentenceRulesVersion && len(base.Prompt.Chunks) > 1)
 }
 
 func supportedGrammarPack(pack string) bool {
