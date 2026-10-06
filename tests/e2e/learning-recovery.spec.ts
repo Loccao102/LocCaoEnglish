@@ -3,6 +3,7 @@ import { test, expect, type APIRequestContext, type Page } from "@playwright/tes
 import type { LearningAttempt } from "../../lib/learning-attempt";
 import words from "../../backend/internal/learning/catalog.json";
 import grammar from "../../backend/internal/learning/grammar_catalog.json";
+import collocations from "../../backend/internal/learning/collocation_catalog.json";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080", base = `${API}/v1/learning/attempts`;
 async function account(request: APIRequestContext) {
@@ -15,7 +16,7 @@ async function signIn(page: Page, token: string) {
   await page.evaluate(value => { localStorage.setItem("loccao_token", value); window.dispatchEvent(new Event("loccao-auth-change")); }, token);
 }
 const issued = (page: Page) => page.waitForResponse(response => response.url().endsWith("/v1/learning/attempts") && response.request().method() === "POST");
-const answerFor = (attempt: LearningAttempt) => [...words.items, ...grammar.items].find(item => item.id === attempt.itemKey)!.correctAnswer;
+const answerFor = (attempt: LearningAttempt) => [...words.items, ...grammar.items, ...collocations.items].find(item => item.id === attempt.itemKey)!.correctAnswer;
 
 test("guest finishes Word Link and restores the exact round and feedback", async ({ page }) => {
   let response = issued(page);
@@ -38,7 +39,7 @@ test("guest finishes Word Link and restores the exact round and feedback", async
   await expect(page.getByText("Round 1/5", { exact: true })).toBeVisible();
 });
 
-for (const activity of ["word-link", "grammar-repair"] as const) {
+for (const activity of ["word-link", "grammar-repair", "collocation-factory"] as const) {
   test(`${activity} restores a lost committed result and keeps account progress isolated`, async ({ page, request }) => {
     const user = await account(request), headers = { Authorization: `Bearer ${user.token}` };
     await signIn(page, user.token);
@@ -87,5 +88,5 @@ test("wrong answer review, daily practice cap and tampered payloads use real API
   const replay: LearningAttempt = await (await request.post(base, { headers, data: { ...input, requestId: randomUUID() } })).json();
   const result = await (await request.post(`${base}/${replay.attemptId}/submit`, { headers, data: { ...payload, answer: answerFor(replay) } })).json();
   expect(result).toMatchObject({ correct: true, xpDelta: 0, progressionApplied: false });
-  for (const activity of ["word-link", "grammar-repair"]) expect((await request.post(`${API}/v1/attempts`, { headers, data: { skill: "Vocabulary", activity, itemKey: "fake", accuracy: 1 } })).status()).toBe(409);
+  for (const activity of ["word-link", "grammar-repair", "collocation-factory", " COLLOCATION-FACTORY "]) expect((await request.post(`${API}/v1/attempts`, { headers, data: { skill: "Vocabulary", activity, itemKey: "fake", accuracy: 1 } })).status()).toBe(409);
 });

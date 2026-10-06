@@ -107,8 +107,8 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		}
 		skill, itemKey = "Vocabulary", item.ID
 		contentVersion, rulesVersion = learning.CollocationContentVersion(), collocationRulesVersion
-		promptText, correctAnswer, feedback = item.Core+" + ?", item.CorrectAnswer, item.Feedback
-		publicPrompt = model.LearningAttemptPrompt{Word: item.Core, Relation: "Complete the natural collocation", Options: learning.ShuffledCollocationOptions(item, in.RequestID)}
+		promptText, correctAnswer, feedback = item.Question+" — "+item.Core+" + ?", item.CorrectAnswer, item.Feedback
+		publicPrompt = model.LearningAttemptPrompt{Word: item.Core, Question: item.Question, Relation: "Complete the natural collocation", Options: learning.ShuffledCollocationOptions(item, in.RequestID)}
 	default:
 		problem(w, 400, "activity is not supported by the verified learning engine")
 		return

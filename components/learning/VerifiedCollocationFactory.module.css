@@ -1,0 +1,32 @@
+.card {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.card :global(.mini-head) { gap: 12px; flex-wrap: wrap; }
+.card :global(.eyebrow), .card :global(.mini-head) > b { font-size: 13px; }
+.card > h2 { font-size: clamp(20px, 3vw, 26px); line-height: 1.4; margin: 24px 0 16px; }
+.card > progress { display: block; width: 100%; height: 10px; accent-color: #18755e; }
+.card :global(.game-caption) { font-size: 14px; line-height: 1.6; }
+.toolbar { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
+.toolbar label { display: flex; align-items: center; gap: 10px; }
+.toolbar select { font: inherit; min-height: 44px; border: 1px solid #78998e; border-radius: 10px; padding: 6px 12px; background: white; }
+.card :global(.factory-core) { width: 100%; height: auto; min-height: 118px; padding: 20px; margin: 18px 0; }
+.card :global(.factory-core) small { font-size: 12px; }
+.card :global(.factory-core) strong { font-size: clamp(28px, 5vw, 40px); overflow-wrap: anywhere; }
+.card :global(.factory-options) button { font-size: 18px; min-height: 56px; padding: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.card :global(.factory-options) button:disabled { cursor: default; }
+.card :global(.factory-options) button:global(.muted) { opacity: .7; }
+.card :global(.mini-feedback-box) { display: flex; flex-direction: column; align-items: stretch; padding: 20px; gap: 16px; }
+.card :global(.mini-feedback-box) span { font-size: 16px; }
+.card :global(.mini-feedback-box) strong { font-size: 22px; }
+.verdict { display: grid; gap: 8px; }
+.verdict p { margin: 0; }
+.card :global(.button) { font-size: 16px; min-height: 48px; white-space: normal; text-align: center; }
+.card button:focus-visible, .card select:focus-visible { outline: 3px solid #9f5a1b; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .card { padding: 18px; }
+  .card :global(.factory-options) { grid-template-columns: 1fr; }
+  .card :global(.feedback-box) { flex-wrap: wrap; }
+}

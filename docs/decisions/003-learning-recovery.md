@@ -22,7 +22,7 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link and Grammar Repair reject generic client-accuracy submissions.
+- Word Link, Grammar Repair and Collocation Factory reject generic client-accuracy submissions.
   Other learning/competitive routes remain CORE-003/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
@@ -43,3 +43,13 @@ Use HTTP, memory/PostgreSQL concurrency tests and real browser/API flows. Cover
 lost committed responses, invalid owner/version, daily replay, correct review
 answers, auth changes, level/pack transitions and reload. Mocked browser transport
 tests validate recovery UI only and are reported separately from integration.
+
+## Collocation extension — 2026-10-06
+
+Reuse the optional snapshot question field for a situation that disambiguates the
+word pair. No new grading engine, schema or assistance mode is introduced. The
+versioned server catalog is the only Collocation answer source; the old browser
+catalog and scoring implementation are removed. The UI supports old pair-only
+snapshots, locks choices after submission and blocks level changes while an answer
+is awaiting confirmation. This is untimed practice with feedback, not a claim of
+unassisted mastery. See API for content-version rollout and daily claim semantics.

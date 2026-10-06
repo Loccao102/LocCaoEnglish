@@ -80,7 +80,7 @@ func TestVerifiedLearningRecoveryHTTP(t *testing.T) {
 	if !strings.Contains(w.Body.String(), `"result"`) {
 		t.Fatal("completed resume lost result")
 	}
-	for _, activity := range []string{"word-link", "grammar-repair"} {
+	for _, activity := range []string{"word-link", "grammar-repair", "collocation-factory", " COLLOCATION-FACTORY "} {
 		w = call("POST", "/v1/attempts", `{"activity":"`+activity+`","skill":"Vocabulary","itemKey":"fake","accuracy":1}`, token)
 		if w.Code != 409 {
 			t.Fatal("legacy bypass", activity, w.Code)
