@@ -234,6 +234,10 @@ changing SQL schema, rewards or the existing three activity contracts.
 - Added memory/PostgreSQL tests for same-ID concurrent retries, daily replay,
   actual sentence evidence versus review answer, snapshot copying and store
   reconnection. PostgreSQL/race and full browser suite remain pending CI here.
+- Review follow-up: completed sentence retries now compare the stored ID-array
+  string exactly, rather than applying the choice games' case-insensitive text
+  comparison. Store/HTTP tests and vet passed again, including changed ID case
+  and changed array serialization conflicts. Full CI must target this follow-up.
 
 No production deployment. Local API verification uses temporary memory storage,
 not durable account persistence. Deploy API before web; retain the sentence v1

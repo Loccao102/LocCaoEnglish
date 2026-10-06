@@ -85,6 +85,11 @@ func TestSentenceAttemptsMemoryAndPostgres(t *testing.T) {
 			if _, err := s.SubmitLearningAttempt(ctx, user.ID, a.ID, wrong, versions); !errors.Is(err, ErrAttemptConflict) {
 				t.Fatal("regraded after feedback", err)
 			}
+			for _, changed := range []string{`["X","y","z"]`, `["x", "y", "z"]`} {
+				if _, err := s.SubmitLearningAttempt(ctx, user.ID, a.ID, changed, versions); !errors.Is(err, ErrAttemptConflict) {
+					t.Fatal("changed wire answer treated as an identical retry", changed, err)
+				}
+			}
 			// Distinct attempts for the same item still cannot claim another reward.
 			b := start(user.ID, "second", "sentence-one")
 			v, err := s.SubmitLearningAttempt(ctx, user.ID, b.ID, correct, versions)

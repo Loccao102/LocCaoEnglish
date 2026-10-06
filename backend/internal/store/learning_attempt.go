@@ -166,7 +166,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			return model.LearningAttemptResult{}, err
 		}
 		if rec.Status == "completed" {
-			if !sameAnswer(rec.SubmittedAnswer, answer) {
+			if !sameSubmittedAnswer(rec, answer) {
 				return model.LearningAttemptResult{}, ErrAttemptConflict
 			}
 			return learningAttemptResult(rec), nil
@@ -257,7 +257,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		return model.LearningAttemptResult{}, err
 	}
 	if rec.Status == "completed" {
-		if !sameAnswer(rec.SubmittedAnswer, answer) {
+		if !sameSubmittedAnswer(rec, answer) {
 			return model.LearningAttemptResult{}, ErrAttemptConflict
 		}
 		return learningAttemptResult(rec), nil
@@ -347,6 +347,13 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 
 func sameAnswer(left, right string) bool {
 	return strings.EqualFold(strings.TrimSpace(left), strings.TrimSpace(right))
+}
+
+func sameSubmittedAnswer(rec LearningAttemptRecord, answer string) bool {
+	if rec.Activity == "sentence-builder" {
+		return rec.SubmittedAnswer == answer
+	}
+	return sameAnswer(rec.SubmittedAnswer, answer)
 }
 
 func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snapshot LearningSnapshot) bool {
