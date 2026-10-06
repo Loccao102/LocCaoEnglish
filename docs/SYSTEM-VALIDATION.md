@@ -194,7 +194,17 @@ Scope: CORE-003 follow-up to PR #5, branch `codex/collocation-depth`.
   answer positions, unsupported pairs and exhausted-bank replay.
 - Added real browser/API checks for three campaign rounds, wrong-answer reload,
   two short-phone layouts, and Collocation lost committed response/account isolation.
-  CI result and merge evidence will be recorded after those checks complete.
+  These checks passed in CI run 99.
+
+Final evidence, confirmed 2026-10-07 (Asia/Bangkok):
+[CI run 99](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37468179572)
+passed all six jobs on runtime `56c5715b2d3438592325fe169c4b2e1c0c9d516c`:
+backend PostgreSQL/race, frontend build, AI service, compose, integration and E2E.
+The browser log reports **59 passed (15.8m)**.
+[PR #6](https://github.com/Loccao102/LocCaoEnglish/pull/6) merged as `2efffc4`.
+The subsequent roadmap/evidence commit changes documentation only; application
+code remains the tested revision. Document links and diff are checked without
+rerunning application tests for prose changes.
 
 No store/schema change or production deployment. The API must be updated before
 the frontend. CEFR tier calibration and player enjoyment still require playtesting.

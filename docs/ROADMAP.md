@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-06, main `7beb176` (PR #5). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-07, main `2efffc4` (PR #6). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -113,11 +113,15 @@ chuyển Collocation Factory sang attempt server-owned: catalog/version, lựa c
 [PR #5](https://github.com/Loccao102/LocCaoEnglish/pull/5), commit `7beb176`,
 [CI 97](https://github.com/Loccao102/LocCaoEnglish/actions/runs/36454145790) đạt 6 jobs.
 
-Tiếp nối 2026-10-06: Codex, branch `codex/collocation-depth`, `in_progress`.
+Tiếp nối 2026-10-06: Codex, branch `codex/collocation-depth`, `done` cho lát cắt này.
 Phạm vi: chặn accuracy Collocation ở API legacy; câu hỏi có ngữ cảnh, mỗi level
 core và level mở đầu campaign có ít nhất 3 câu riêng; chữ/nút đủ lớn và feedback
 đầy đủ. Giữ snapshot/retry cũ, không đổi schema/luật thưởng. Nghiệm thu bằng test
 đúng/sai/retry/guest/account và browser ba câu không lặp, reload, màn 390px.
+Đã merge qua [PR #6](https://github.com/Loccao102/LocCaoEnglish/pull/6), commit
+`2efffc4`; xác nhận ngày 2026-10-07 (Asia/Bangkok).
+[CI 99](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37468179572) đạt đủ
+6 jobs trên runtime `56c5715`, gồm PostgreSQL/race và 59 E2E browser.
 Các hoạt động còn lại vẫn là migration debt; toàn CORE-003 chưa done.
 
 Di chuyển theo lát cắt nhỏ; mỗi hoạt động phải đáp ứng CORE-001/002, không chỉ đổi UI.
