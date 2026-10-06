@@ -1,27 +1,575 @@
 {
-  "contentVersion": "2026-09-28.1",
+  "contentVersion": "2026-10-06.1",
   "items": [
-    {"id":"core-have-breakfast","pack":"cefr-core","cefrLevel":"A1","core":"have","options":["breakfast","a decision","a threat","research"],"correctAnswer":"breakfast","feedback":"Have breakfast is a basic, natural daily routine phrase."},
-    {"id":"core-take-break","pack":"cefr-core","cefrLevel":"A2","core":"take","options":["a break","effective","a threat","a decision"],"correctAnswer":"a break","feedback":"Take a break means stop working or studying for a short time."},
-    {"id":"core-make-decision","pack":"cefr-core","cefrLevel":"B1","core":"make","options":["a decision","a rain","a traffic","a research"],"correctAnswer":"a decision","feedback":"Make a decision is the natural collocation."},
-    {"id":"core-highly-effective","pack":"cefr-core","cefrLevel":"B1","core":"highly","options":["effective","rain","traffic","journey"],"correctAnswer":"effective","feedback":"Highly effective is a common adjective combination."},
-    {"id":"core-pose-threat","pack":"cefr-core","cefrLevel":"B2","core":"pose","options":["a threat","a homework","a transport","a weather"],"correctAnswer":"a threat","feedback":"Pose a threat means create a possible danger."},
-    {"id":"core-deeply-rooted","pack":"cefr-core","cefrLevel":"C1","core":"deeply","options":["rooted","a ticket","effective","a deadline"],"correctAnswer":"rooted","feedback":"Deeply rooted describes something firmly established over time."},
-    {"id":"core-raise-objection","pack":"cefr-core","cefrLevel":"C2","core":"raise","options":["an objection","a ticket","a break","a train"],"correctAnswer":"an objection","feedback":"Raise an objection means formally express disagreement with a proposal."},
-    {"id":"transit-change-lines","pack":"travel-transit","cefrLevel":"B1","core":"change","options":["lines","tickets","stations late","a platform number"],"correctAnswer":"lines","feedback":"Passengers change lines when they move between routes."},
-    {"id":"transit-last-train","pack":"travel-transit","cefrLevel":"B1","core":"last","options":["train","route quickly","ticket office","platform map"],"correctAnswer":"train","feedback":"The last train is the final service of the day."},
-    {"id":"transit-valid-ticket","pack":"travel-transit","cefrLevel":"A2","core":"valid","options":["ticket","traffic","station","direction"],"correctAnswer":"ticket","feedback":"A valid ticket is accepted for travel."},
-    {"id":"cafe-nice-meet","pack":"conversation-cafe","cefrLevel":"A2","core":"nice to","options":["meet you","see a coffee","know your name","talk a seat"],"correctAnswer":"meet you","feedback":"Nice to meet you is a natural first greeting."},
-    {"id":"cafe-come-often","pack":"conversation-cafe","cefrLevel":"A2","core":"come here","options":["often","friendly","coffee","weekend plan"],"correctAnswer":"often","feedback":"Come here often is a friendly way to ask about visits."},
-    {"id":"cafe-keep-touch","pack":"conversation-cafe","cefrLevel":"B1","core":"keep in","options":["touch","talking","meeting","question"],"correctAnswer":"touch","feedback":"Keep in touch means continue communicating."},
-    {"id":"clarity-clear-up","pack":"conversation-clarity","cefrLevel":"B1","core":"clear up","options":["a misunderstanding","a sentence loudly","a meeting time fast","a grammar"],"correctAnswer":"a misunderstanding","feedback":"Clear up a misunderstanding means explain it so the confusion ends."},
-    {"id":"clarity-rephrase-idea","pack":"conversation-clarity","cefrLevel":"B2","core":"rephrase","options":["an idea","a listener","a coffee","a schedule late"],"correctAnswer":"an idea","feedback":"You rephrase an idea when you say it in different words."},
-    {"id":"clarity-make-clear","pack":"conversation-clarity","cefrLevel":"B1","core":"make yourself","options":["clear","understand","meaning","repeat"],"correctAnswer":"clear","feedback":"Make yourself clear means communicate your meaning successfully."},
-    {"id":"standup-fix-bug","pack":"work-standup","cefrLevel":"B1","core":"fix","options":["a bug","a deadline","a meeting","a blocker person"],"correctAnswer":"a bug","feedback":"Developers fix a bug when they remove an error."},
-    {"id":"standup-run-tests","pack":"work-standup","cefrLevel":"B1","core":"run","options":["tests","a requirement","a code review late","a progress"],"correctAnswer":"tests","feedback":"Run tests means execute automated or manual checks."},
-    {"id":"standup-raise-blocker","pack":"work-standup","cefrLevel":"B2","core":"raise","options":["a blocker","a feature done","a stand-up","a branch fast"],"correctAnswer":"a blocker","feedback":"Raise a blocker means tell the team about an issue stopping progress."},
-    {"id":"deadline-meet","pack":"work-deadline","cefrLevel":"B2","core":"meet","options":["a deadline","a risk","a scope","a testing"],"correctAnswer":"a deadline","feedback":"Meet a deadline means finish by the agreed time."},
-    {"id":"deadline-reduce-scope","pack":"work-deadline","cefrLevel":"B2","core":"reduce","options":["scope","a deadline meet","a release date long","a blocker"],"correctAnswer":"scope","feedback":"Reduce scope means deliver fewer requirements to protect quality."},
-    {"id":"deadline-phased-delivery","pack":"work-deadline","cefrLevel":"B2","core":"phased","options":["delivery","deadline","testing risk","priority task"],"correctAnswer":"delivery","feedback":"Phased delivery releases work in planned stages."}
+    {
+      "id": "core-have-breakfast",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "core": "have",
+      "options": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "dessert"
+      ],
+      "correctAnswer": "breakfast",
+      "feedback": "Have breakfast means eat the morning meal. Lunch and dinner are later meals.",
+      "question": "It is seven in the morning. Before school, I have ___."
+    },
+    {
+      "id": "core-take-break",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "core": "take",
+      "options": [
+        "a break",
+        "a seat",
+        "a photo",
+        "a shower"
+      ],
+      "correctAnswer": "a break",
+      "feedback": "Take a break means pause an activity to rest. The time spent working is the clue.",
+      "question": "We have worked for two hours. Let's stop for ten minutes and take ___."
+    },
+    {
+      "id": "core-make-decision",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "core": "make",
+      "options": [
+        "a decision",
+        "an effort",
+        "a promise",
+        "an excuse"
+      ],
+      "correctAnswer": "a decision",
+      "feedback": "Make a decision means choose after considering options. The other pairs do not mean choose.",
+      "question": "We have compared both offers. Now we must choose one and make ___."
+    },
+    {
+      "id": "core-highly-effective",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "core": "highly",
+      "options": [
+        "effective",
+        "unlikely",
+        "controversial",
+        "dependent"
+      ],
+      "correctAnswer": "effective",
+      "feedback": "Highly effective describes a method that works very well. Reliable results are the clue.",
+      "question": "The new method solves the problem reliably. It is highly ___."
+    },
+    {
+      "id": "core-pose-threat",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "core": "pose",
+      "options": [
+        "a threat",
+        "a question",
+        "for a portrait",
+        "as a tourist"
+      ],
+      "correctAnswer": "a threat",
+      "feedback": "Pose a threat means present a danger. The other uses describe asking or appearance.",
+      "question": "The unstable cliff could injure walkers. It may pose ___."
+    },
+    {
+      "id": "core-deeply-rooted",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "core": "deeply",
+      "options": [
+        "rooted",
+        "divided",
+        "indebted",
+        "troubled"
+      ],
+      "correctAnswer": "rooted",
+      "feedback": "Deeply rooted means firmly established over time. Long history is the clue.",
+      "question": "This belief has shaped the community for generations; it is deeply ___."
+    },
+    {
+      "id": "core-raise-objection",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "core": "raise",
+      "options": [
+        "an objection",
+        "expectations",
+        "the stakes",
+        "awareness"
+      ],
+      "correctAnswer": "an objection",
+      "feedback": "Raise an objection formally challenges a proposal or procedure. The other phrases concern hopes, consequences or public knowledge.",
+      "question": "The delegate formally challenged the admissibility of the evidence. She chose to raise ___."
+    },
+    {
+      "id": "transit-change-lines",
+      "pack": "travel-transit",
+      "cefrLevel": "B1",
+      "core": "change",
+      "options": [
+        "lines",
+        "your mind",
+        "the subject",
+        "seats"
+      ],
+      "correctAnswer": "lines",
+      "feedback": "Change lines means move to another metro route. Moving seats does not change your route.",
+      "question": "The museum is on another metro route. At Central, change ___."
+    },
+    {
+      "id": "transit-last-train",
+      "pack": "travel-transit",
+      "cefrLevel": "B1",
+      "core": "last",
+      "options": [
+        "train",
+        "resort",
+        "straw",
+        "word"
+      ],
+      "correctAnswer": "train",
+      "feedback": "The last train is the final rail service of the day. Last resort means a final option, not a scheduled service.",
+      "question": "No rail services run after midnight. The 11:50 service is the last ___."
+    },
+    {
+      "id": "transit-valid-ticket",
+      "pack": "travel-transit",
+      "cefrLevel": "A2",
+      "core": "valid",
+      "options": [
+        "ticket",
+        "passport",
+        "reason",
+        "argument"
+      ],
+      "correctAnswer": "ticket",
+      "feedback": "A valid ticket is accepted for this journey. A passport identifies you but does not show you paid the fare.",
+      "question": "The inspector checks your proof of payment. You need a valid ___."
+    },
+    {
+      "id": "cafe-nice-meet",
+      "pack": "conversation-cafe",
+      "cefrLevel": "A2",
+      "core": "nice to",
+      "options": [
+        "meet you",
+        "see you again",
+        "hear from you",
+        "have you back"
+      ],
+      "correctAnswer": "meet you",
+      "feedback": "Nice to meet you is a first greeting. Again and back suggest that you already know the person.",
+      "question": "A friend introduces someone you have never met. You say, 'Nice to ___.'"
+    },
+    {
+      "id": "cafe-come-often",
+      "pack": "conversation-cafe",
+      "cefrLevel": "A2",
+      "core": "come here",
+      "options": [
+        "often",
+        "alone",
+        "early",
+        "on foot"
+      ],
+      "correctAnswer": "often",
+      "feedback": "Often asks about frequency. Alone asks about company, early about time and on foot about travel.",
+      "question": "Ask how frequently a neighbour visits this cafe: 'Do you come here ___?'"
+    },
+    {
+      "id": "cafe-keep-touch",
+      "pack": "conversation-cafe",
+      "cefrLevel": "B1",
+      "core": "keep in",
+      "options": [
+        "touch",
+        "mind",
+        "shape",
+        "line"
+      ],
+      "correctAnswer": "touch",
+      "feedback": "Keep in touch means continue communicating. Keep in mind means remember something.",
+      "question": "We will live in different cities but want to stay in contact. Let's keep in ___."
+    },
+    {
+      "id": "clarity-clear-up",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "core": "clear up",
+      "options": [
+        "a misunderstanding",
+        "a reservation",
+        "an appointment",
+        "a timetable"
+      ],
+      "correctAnswer": "a misunderstanding",
+      "feedback": "Clear up a misunderstanding means remove confusion by explaining what happened.",
+      "question": "We each thought the other person had booked the room. We need to clear up ___."
+    },
+    {
+      "id": "clarity-rephrase-idea",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B2",
+      "core": "rephrase",
+      "options": [
+        "an idea",
+        "a listener",
+        "a meeting",
+        "a deadline"
+      ],
+      "correctAnswer": "an idea",
+      "feedback": "Rephrase an idea means express its meaning in different words; the message changes wording, not the listener.",
+      "question": "The audience did not understand your point. Use different words to rephrase ___."
+    },
+    {
+      "id": "clarity-make-clear",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "core": "make yourself",
+      "options": [
+        "clear",
+        "comfortable",
+        "available",
+        "at home"
+      ],
+      "correctAnswer": "clear",
+      "feedback": "Make yourself clear means communicate your meaning successfully. Comfortable concerns how you feel.",
+      "question": "State your meaning so nobody is confused. Make yourself ___."
+    },
+    {
+      "id": "standup-fix-bug",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "core": "fix",
+      "options": [
+        "a bug",
+        "a date",
+        "a price",
+        "a meeting time"
+      ],
+      "correctAnswer": "a bug",
+      "feedback": "Fix a bug means remove a software error. Fix a date or price means decide it, which is a different use of fix.",
+      "question": "The login form crashes when the password is empty. Today I will fix ___."
+    },
+    {
+      "id": "standup-run-tests",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "core": "run",
+      "options": [
+        "tests",
+        "a meeting",
+        "a business",
+        "an advertisement"
+      ],
+      "correctAnswer": "tests",
+      "feedback": "Run tests means execute checks. A meeting may discuss the code but does not itself verify its behaviour.",
+      "question": "Before merging, we need to check that the code still works. Let's run ___."
+    },
+    {
+      "id": "standup-raise-blocker",
+      "pack": "work-standup",
+      "cefrLevel": "B2",
+      "core": "raise",
+      "options": [
+        "a blocker",
+        "an estimate",
+        "the standard",
+        "expectations"
+      ],
+      "correctAnswer": "a blocker",
+      "feedback": "Raise a blocker means report an issue stopping progress so someone can help remove it.",
+      "question": "A missing permission prevents any further work. Tell the team and raise ___."
+    },
+    {
+      "id": "deadline-meet",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "core": "meet",
+      "options": [
+        "a deadline",
+        "a colleague",
+        "resistance",
+        "a requirement"
+      ],
+      "correctAnswer": "a deadline",
+      "feedback": "Meet a deadline means finish by an agreed time. Meeting a requirement concerns what is delivered, not when.",
+      "question": "The client expects the finished work by Friday. We must meet ___."
+    },
+    {
+      "id": "deadline-reduce-scope",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "core": "reduce",
+      "options": [
+        "scope",
+        "quality",
+        "staffing",
+        "the price"
+      ],
+      "correctAnswer": "scope",
+      "feedback": "Reduce scope means deliver fewer requirements. Reducing quality would weaken the work instead of changing its size.",
+      "question": "Keep the release date and quality, but deliver fewer features. We should reduce ___."
+    },
+    {
+      "id": "deadline-phased-delivery",
+      "pack": "work-deadline",
+      "cefrLevel": "B2",
+      "core": "phased",
+      "options": [
+        "delivery",
+        "withdrawal",
+        "retirement",
+        "closure"
+      ],
+      "correctAnswer": "delivery",
+      "feedback": "Phased delivery introduces work in stages. Withdrawal and closure describe removing or ending something.",
+      "question": "Release essential features first and add the rest in planned stages. Use phased ___."
+    },
+    {
+      "id": "core-a1-brush",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "core": "brush",
+      "question": "After eating, use a toothbrush to brush ___.",
+      "options": [
+        "your teeth",
+        "your shoes",
+        "your hands",
+        "your face"
+      ],
+      "correctAnswer": "your teeth",
+      "feedback": "Brush your teeth with a toothbrush. We wash our hands and face."
+    },
+    {
+      "id": "core-a1-go",
+      "pack": "cefr-core",
+      "cefrLevel": "A1",
+      "core": "go",
+      "question": "I feel sleepy. At night, I go ___.",
+      "options": [
+        "to bed",
+        "to school",
+        "shopping",
+        "swimming"
+      ],
+      "correctAnswer": "to bed",
+      "feedback": "Go to bed means get into bed to sleep."
+    },
+    {
+      "id": "core-a2-catch",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "core": "catch",
+      "question": "Hurry to the bus stop! We need to catch ___.",
+      "options": [
+        "the bus",
+        "a cold",
+        "a ball",
+        "a fish"
+      ],
+      "correctAnswer": "the bus",
+      "feedback": "Catch the bus means get on it before it leaves. The setting tells you which meaning fits."
+    },
+    {
+      "id": "core-a2-do",
+      "pack": "cefr-core",
+      "cefrLevel": "A2",
+      "core": "do",
+      "question": "The teacher gave us exercises to finish at home. I need to do ___.",
+      "options": [
+        "my homework",
+        "a mistake",
+        "a decision",
+        "a photo"
+      ],
+      "correctAnswer": "my homework",
+      "feedback": "Do homework is the natural pair. We make a mistake or decision, and take a photo."
+    },
+    {
+      "id": "core-b1-pay",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "core": "pay",
+      "question": "The guide is explaining the emergency exits. Listen carefully and pay ___.",
+      "options": [
+        "attention",
+        "a visit",
+        "a compliment",
+        "the bill"
+      ],
+      "correctAnswer": "attention",
+      "feedback": "Pay attention means focus on what someone is saying. The other choices describe different actions."
+    },
+    {
+      "id": "core-b2-strike",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "core": "strike",
+      "question": "We need enough checks to stay safe without making every task slow. We must strike ___.",
+      "options": [
+        "a balance",
+        "a deal",
+        "a match",
+        "a chord"
+      ],
+      "correctAnswer": "a balance",
+      "feedback": "Strike a balance means find a workable middle ground between competing needs."
+    },
+    {
+      "id": "core-b2-draw",
+      "pack": "cefr-core",
+      "cefrLevel": "B2",
+      "core": "draw",
+      "question": "The report compares the two systems to explain how they differ. It aims to draw ___.",
+      "options": [
+        "a distinction",
+        "a crowd",
+        "a breath",
+        "a blank"
+      ],
+      "correctAnswer": "a distinction",
+      "feedback": "Draw a distinction means show a difference. Draw a blank means fail to remember or find an answer."
+    },
+    {
+      "id": "core-c1-compelling",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "core": "compelling",
+      "question": "Several independent studies strongly support the claim. Together they provide compelling ___.",
+      "options": [
+        "evidence",
+        "obligations",
+        "distractions",
+        "reservations"
+      ],
+      "correctAnswer": "evidence",
+      "feedback": "Compelling evidence is convincing support for a claim. Reservations express doubts instead."
+    },
+    {
+      "id": "core-c1-reach",
+      "pack": "cefr-core",
+      "cefrLevel": "C1",
+      "core": "reach",
+      "question": "After resolving their differences, all delegates supported the same position. They managed to reach ___.",
+      "options": [
+        "a consensus",
+        "an impasse",
+        "a verdict",
+        "a destination"
+      ],
+      "correctAnswer": "a consensus",
+      "feedback": "Reach a consensus means arrive at broad agreement. An impasse means talks cannot move forward; a verdict is a judgment."
+    },
+    {
+      "id": "core-c2-tacit",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "core": "tacit",
+      "question": "Nobody voiced approval, but the committee allowed the plan to proceed. The chair interpreted this as tacit ___.",
+      "options": [
+        "consent",
+        "opposition",
+        "reservations",
+        "disapproval"
+      ],
+      "correctAnswer": "consent",
+      "feedback": "Tacit consent is approval conveyed without an explicit statement. Tacit opposition would suggest resistance instead."
+    },
+    {
+      "id": "core-c2-foregone",
+      "pack": "cefr-core",
+      "cefrLevel": "C2",
+      "core": "foregone",
+      "question": "With every delegate publicly committed before the vote, the result seemed a foregone ___.",
+      "options": [
+        "conclusion",
+        "assumption",
+        "inference",
+        "presumption"
+      ],
+      "correctAnswer": "conclusion",
+      "feedback": "A foregone conclusion is an outcome regarded as inevitable before it happens; this fixed expression uses conclusion."
+    },
+    {
+      "id": "transit-a2-return",
+      "pack": "travel-transit",
+      "cefrLevel": "A2",
+      "core": "return",
+      "question": "I will travel there today and come back tomorrow. I need to buy a return ___.",
+      "options": [
+        "ticket",
+        "address",
+        "journey",
+        "visit"
+      ],
+      "correctAnswer": "ticket",
+      "feedback": "A return ticket pays for both outward and inward travel. A return journey is the trip back, not what you buy."
+    },
+    {
+      "id": "transit-a2-miss",
+      "pack": "travel-transit",
+      "cefrLevel": "A2",
+      "core": "miss",
+      "question": "The train leaves in one minute. Run, or we will miss ___.",
+      "options": [
+        "the train",
+        "the point",
+        "our friends",
+        "the news"
+      ],
+      "correctAnswer": "the train",
+      "feedback": "Miss the train means arrive too late to board. The departure time tells you which meaning fits."
+    },
+    {
+      "id": "cafe-a2-take",
+      "pack": "conversation-cafe",
+      "cefrLevel": "A2",
+      "core": "take",
+      "question": "Your new friend is standing beside an empty chair. You say, 'Please take ___.'",
+      "options": [
+        "a seat",
+        "a break",
+        "a look",
+        "a turn"
+      ],
+      "correctAnswer": "a seat",
+      "feedback": "Take a seat is a polite invitation to sit down. The empty chair provides the context."
+    },
+    {
+      "id": "clarity-b1-get",
+      "pack": "conversation-clarity",
+      "cefrLevel": "B1",
+      "core": "get",
+      "question": "Even after two explanations, nobody understands the main point. Try another example to get ___.",
+      "options": [
+        "your message across",
+        "carried away",
+        "back to work",
+        "in touch"
+      ],
+      "correctAnswer": "your message across",
+      "feedback": "Get your message across means make people understand your meaning. Contacting them is not enough."
+    },
+    {
+      "id": "standup-b1-give",
+      "pack": "work-standup",
+      "cefrLevel": "B1",
+      "core": "give",
+      "question": "At the daily meeting, briefly tell the team what has changed since yesterday. Give ___.",
+      "options": [
+        "an update",
+        "a warning",
+        "permission",
+        "an excuse"
+      ],
+      "correctAnswer": "an update",
+      "feedback": "Give an update means share recent progress or changes. A warning specifically signals danger or a problem."
+    }
   ]
 }

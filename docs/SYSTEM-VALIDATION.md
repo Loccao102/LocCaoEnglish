@@ -171,3 +171,30 @@ AI, compose and integration passed. [PR #4](https://github.com/Loccao102/LocCaoE
 merged as `238c931` on 2026-09-28. The subsequent roadmap/evidence update changes
 documentation only; runtime remains exactly the tested revision. Its document
 links and diff are checked without rerunning application tests for prose changes.
+
+## Collocation integrity and contextual practice — 2026-10-06
+
+Scope: CORE-003 follow-up to PR #5, branch `codex/collocation-depth`.
+
+- `go test ./...` and `go vet ./...` passed locally. This invocation uses memory
+  storage; PostgreSQL/race validation belongs to CI. The earlier Windows blocking
+  limitation did not occur in this test run.
+- `npm run build` and `npm run typecheck` passed. No dependency changes.
+- Three local Playwright UI fault fixtures passed at 1280 × 800, 390 × 551 and
+  390 × 844, covering pair-only old snapshots, wrong-answer feedback, keyboard
+  input, locked pending answers, retry after reload and matching retry payloads.
+  Screenshots in `test-results/collocation-ui-*/collocation.png` were inspected:
+  readable choices and feedback, no horizontal overflow. These fixtures simulate
+  transport and do not establish real API persistence.
+- HTTP tests cover correct/wrong account and guest results, unchanged creation/
+  submit retries, snapshot resume, owner isolation, invalid options/versions,
+  review teaching the correct answer, daily progression cap and legacy rejection.
+- Catalog tests check three distinct questions for each selectable starting level,
+  valid unique options, stable shuffle without mutating the bank, varied correct
+  answer positions, unsupported pairs and exhausted-bank replay.
+- Added real browser/API checks for three campaign rounds, wrong-answer reload,
+  two short-phone layouts, and Collocation lost committed response/account isolation.
+  CI result and merge evidence will be recorded after those checks complete.
+
+No store/schema change or production deployment. The API must be updated before
+the frontend. CEFR tier calibration and player enjoyment still require playtesting.

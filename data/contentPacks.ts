@@ -1,9 +1,8 @@
 export type SentenceRound={chunks:string[];answer:string};
 export type GrammarRound={prompt:string;answer:string;options:string[]};
-export type CollocationRound={core:string;answer:string;options:string[]};
 export type ListeningRound={audio:string;q:string;answer:string;options:string[]};
 export type WordLinkRound={word:string;relation:string;answer:string;options:string[];note:string};
-export type LearningPack={label:string;sentenceRounds:SentenceRound[];grammarRounds:GrammarRound[];collocations:CollocationRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
+export type LearningPack={label:string;sentenceRounds:SentenceRound[];grammarRounds:GrammarRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
 type PackOverride=Partial<Omit<LearningPack,"label">>&{label:string};
 
 const base:LearningPack={
@@ -18,11 +17,7 @@ const base:LearningPack={
   {prompt:"Repair the conditional.",answer:"If I had left earlier, I would not have missed the flight.",options:["If I left earlier, I would not missed the flight.","If I had left earlier, I would not have missed the flight.","If I have left earlier, I would not missed the flight."]},
   {prompt:"Choose the natural relative clause.",answer:"The hotel that we booked was close to the station.",options:["The hotel what we booked was close to station.","The hotel that we booked was close to the station.","The hotel we booked it was close to the station."]},
  ],
- collocations:[
-  {core:"make",answer:"a decision",options:["a decision","a rain","a traffic","a research"]},
-  {core:"highly",answer:"effective",options:["effective","rain","traffic","journey"]},
-  {core:"pose",answer:"a threat",options:["a threat","a homework","a transport","a weather"]},
- ],
+
  listeningRounds:[
   {audio:"Attention passengers. Flight VN218 to Da Nang will now depart from gate twelve instead of gate eight.",q:"What changed?",answer:"The departure gate",options:["The destination","The departure gate","The flight number","The airline"]},
   {audio:"The museum closes at six, but the last guided tour begins at four thirty in the afternoon.",q:"When does the last guided tour begin?",answer:"4:30 p.m.",options:["4:00 p.m.","4:30 p.m.","5:30 p.m.","6:00 p.m."]},
@@ -54,19 +49,11 @@ const packs:Record<string,PackOverride>={
   {prompt:"Repair the present perfect sentence.",answer:"I have already received a confirmation email.",options:["I already receive a confirmation email.","I have already received a confirmation email.","I have already receive confirmation email."]},
   {prompt:"Choose the natural indirect question.",answer:"Could you tell me whether breakfast is included?",options:["Could you tell me is breakfast included?","Could you tell me whether breakfast is included?","Tell me whether is breakfast included?"]},
  ],speakingPrompts:["I have a confirmed reservation, but I think it may be under my middle name.","Could you check this confirmation number again, please?","Could you tell me whether breakfast is included and what time checkout is?"]},
- "travel-transit":{label:"TRAVEL · TRANSIT",collocations:[
-  {core:"change",answer:"lines",options:["lines","tickets","stations late","a platform number"]},
-  {core:"last",answer:"train",options:["train","route quickly","ticket office","platform map"]},
-  {core:"valid",answer:"ticket",options:["ticket","traffic","station","direction"]},
- ],listeningRounds:[
+ "travel-transit":{label:"TRAVEL · TRANSIT",listeningRounds:[
   {audio:"The last green-line train leaves Central at eleven twenty. Passengers from the blue line should change at platform four.",q:"Where should blue-line passengers change?",answer:"Platform four",options:["Platform two","Platform four","Platform seven","At the ticket office"]},
   {audio:"Because of maintenance, trains toward Riverside will skip East Market tonight.",q:"Which stop will be skipped?",answer:"East Market",options:["Central","Riverside","East Market","West Park"]},
  ],speakingPrompts:["What is the fastest route to Central Station?","Where do I change from the blue line to the green line?","Which platform do I need, and how many minutes do I have before the last train?"]},
- "conversation-cafe":{label:"CONVERSATION · CAFE",collocations:[
-  {core:"nice to",answer:"meet you",options:["meet you","see a coffee","know your name","talk a seat"]},
-  {core:"come here",answer:"often",options:["often","friendly","coffee","weekend plan"]},
-  {core:"keep in",answer:"touch",options:["touch","talking","meeting","question"]},
- ],listeningRounds:[
+ "conversation-cafe":{label:"CONVERSATION · CAFE",listeningRounds:[
   {audio:"I work nearby, but I usually come to this cafe after class because it is quieter in the evening.",q:"Why does the speaker come in the evening?",answer:"It is quieter",options:["It is cheaper","It is quieter","It closes later","Friends work there"]},
   {audio:"I am really into badminton and films, but lately I have been learning photography too.",q:"What new interest does the speaker mention?",answer:"Photography",options:["Badminton","Films","Photography","Cooking"]},
  ],speakingPrompts:["Hi, my name is Loc. I don't think we've met before.","What about you? What do you usually do after work or class?","It was nice to meet you. Would you like to grab coffee again sometime?"]},
@@ -82,19 +69,11 @@ const packs:Record<string,PackOverride>={
   {prompt:"Choose the most natural clarification.",answer:"Sorry, I'm not sure what you mean. Could you explain that again?",options:["Sorry, I'm not sure what you mean. Could you explain that again?","I don't understand you meaning.","Explain again because wrong."]},
   {prompt:"Choose the clearest rephrase.",answer:"What I mean is that I may arrive later, not that I am cancelling.",options:["I mean later not cancel maybe.","What I mean is that I may arrive later, not that I am cancelling.","My meaning is no cancel but late."]},
   {prompt:"Choose the natural confirmation.",answer:"So you mean the plan is still on, but the time may change?",options:["So you mean the plan is still on, but the time may change?","You mean plan still but time?","So the time change plan yes?"]},
- ],collocations:[
-  {core:"clear up",answer:"a misunderstanding",options:["a misunderstanding","a sentence loudly","a meeting time fast","a grammar"]},
-  {core:"rephrase",answer:"an idea",options:["an idea","a listener","a coffee","a schedule late"]},
-  {core:"make yourself",answer:"clear",options:["clear","understand","meaning","repeat"]},
  ],speakingPrompts:["Sorry, I'm not sure what you mean. Could you explain that again?","What I mean is that I may arrive later, not that I am cancelling.","Got it. So the plan is still on, but the time may change."]},
  "work-standup":{label:"WORK · STAND-UP",sentenceRounds:[
   {chunks:["the login bug","Yesterday","I fixed"],answer:"Yesterday I fixed the login bug"},
   {chunks:["Today","integration tests","I will add"],answer:"Today I will add integration tests"},
   {chunks:["no blockers","I have","right now"],answer:"I have no blockers right now"},
- ],collocations:[
-  {core:"fix",answer:"a bug",options:["a bug","a deadline","a meeting","a blocker person"]},
-  {core:"run",answer:"tests",options:["tests","a requirement","a code review late","a progress"]},
-  {core:"raise",answer:"a blocker",options:["a blocker","a feature done","a stand-up","a branch fast"]},
  ],speakingPrompts:["Yesterday I finished the authentication fix.","Today I will add integration tests and review the API changes.","I have no blockers right now, but I may need the product owner to confirm one edge case."]},
  "work-requirements":{label:"WORK · REQUIREMENTS",grammarRounds:[
   {prompt:"Choose the clearest clarification question.",answer:"What exactly should happen when the search returns no results?",options:["What exactly should happen when the search returns no results?","What happen search no result?","Should what happen no results?"]},
@@ -111,10 +90,6 @@ const packs:Record<string,PackOverride>={
  ],grammarRounds:[
   {prompt:"Choose the calmest constraint statement.",answer:"I can commit to Friday for the core flow, but the full scope would put testing at risk.",options:["Friday is impossible and I won't do it.","I can commit to Friday for the core flow, but the full scope would put testing at risk.","Maybe Friday but testing no."]},
   {prompt:"Choose the clearest trade-off.",answer:"If we keep the full scope, we either need more time or we reduce the testing window.",options:["If full scope then something must change.","If we keep the full scope, we either need more time or we reduce the testing window.","Full scope means testing bad maybe."]},
- ],collocations:[
-  {core:"meet",answer:"a deadline",options:["a deadline","a risk","a scope","a testing"]},
-  {core:"reduce",answer:"scope",options:["scope","a deadline meet","a release date long","a blocker"]},
-  {core:"phased",answer:"delivery",options:["delivery","deadline","testing risk","priority task"]},
  ],speakingPrompts:["The Friday deadline creates a testing risk for the full scope.","If we keep the quality bar, reducing scope is the safer trade-off.","I propose a phased delivery: the core flow on Friday and reporting in the next release."]}
 };
 

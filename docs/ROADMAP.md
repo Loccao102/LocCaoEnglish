@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-09-28, runtime `cf13e2f`, merge `238c931`. Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-06, main `7beb176` (PR #5). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link và Grammar Repair dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair và Collocation Factory dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -109,8 +109,16 @@ input/render/chấm phù hợp. Tên trạng thái là đề xuất, phải ch�
 
 Owner/task: Codex, branch `codex/core003-collocation`, 2026-09-28. Lát cắt đầu tiên
 chuyển Collocation Factory sang attempt server-owned: catalog/version, lựa chọn
-được trộn bằng seed, chấm actual answer và retry/resume dùng chung. Đang chờ CI
-và review trước khi ghi nhận done; các hoạt động còn lại vẫn là migration debt.
+được trộn bằng seed, chấm actual answer và retry/resume dùng chung. Đã merge qua
+[PR #5](https://github.com/Loccao102/LocCaoEnglish/pull/5), commit `7beb176`,
+[CI 97](https://github.com/Loccao102/LocCaoEnglish/actions/runs/36454145790) đạt 6 jobs.
+
+Tiếp nối 2026-10-06: Codex, branch `codex/collocation-depth`, `in_progress`.
+Phạm vi: chặn accuracy Collocation ở API legacy; câu hỏi có ngữ cảnh, mỗi level
+core và level mở đầu campaign có ít nhất 3 câu riêng; chữ/nút đủ lớn và feedback
+đầy đủ. Giữ snapshot/retry cũ, không đổi schema/luật thưởng. Nghiệm thu bằng test
+đúng/sai/retry/guest/account và browser ba câu không lặp, reload, màn 390px.
+Các hoạt động còn lại vẫn là migration debt; toàn CORE-003 chưa done.
 
 Di chuyển theo lát cắt nhỏ; mỗi hoạt động phải đáp ứng CORE-001/002, không chỉ đổi UI.
 

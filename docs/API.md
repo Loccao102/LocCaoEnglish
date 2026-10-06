@@ -22,17 +22,18 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
-Client-reported accuracy remains a limitation for unmigrated activities. Word Link
-and Grammar Repair reject this route with 409; use server-owned attempts below.
+Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
+Grammar Repair and Collocation Factory reject this route with 409, including
+case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
 ```json
 {
   "skill": "Vocabulary",
-  "activity": "collocation-factory",
-  "itemKey": "collocation:example",
-  "prompt": "significant — choose the closest synonym",
-  "answer": "substantial",
+  "activity": "reading-race",
+  "itemKey": "reading:example",
+  "prompt": "What does the passage say?",
+  "answer": "The reader's choice",
   "accuracy": 1,
   "durationSec": 8
 }
@@ -50,12 +51,23 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 
 Activities: `word-link`, `grammar-repair`, `collocation-factory`; CEFR A1–C2. Default pack `cefr-core`.
 Word Link also accepts `travel-airport` (B1). Grammar accepts `travel-hotel`,
-`conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2). Unsupported
+`conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2).
 `collocation-factory` accepts `travel-transit`, `conversation-cafe`,
 `conversation-clarity`, `work-standup` and `work-deadline` campaign packs. Unsupported
 level/pack pairs return 400. Exclusion lists are limited to 20 item keys; when a
 bank is exhausted, practice can repeat. Catalogs remain server-only JSON files in
 `backend/internal/learning`; content versions must change with material bank edits.
+
+Collocation catalog `2026-10-06.1` supplies 38 contextual questions. Each core
+level and each campaign's starting level has three distinct items for a three-round
+set: transit/cafe A2, clarity/standup B1, deadline B2. Additional retained campaign
+levels can be requested through the API but are not yet selectable in the UI.
+CEFR labels are editorial practice tiers, not measured proficiency certification.
+Collocation uses `prompt.question` for the situation and `prompt.word` for the
+pair starter. Content/option edits bump the content version; grading remains
+`collocation-factory.v1`. A new content version can earn a fresh daily claim under
+the existing policy. Three-round exclusion is practice variety, not an anti-cheat
+guarantee; the server may repeat once the requested bank is exhausted.
 
 Start/GET return `attemptId`, `activity`, `pack`, `itemKey`, `cefrLevel`,
 `contentVersion`, `rulesVersion`, `status`, `prompt` (word/relation or question,
@@ -94,6 +106,12 @@ Old active rounds without a prompt snapshot require a fresh round; completed row
 remain stored and answer retries remain idempotent. Do not re-enable client accuracy
 on rollback. The shared frontend preserves owner/activity/pack-scoped references,
 pending answers and set context; stale responses cannot populate another account.
+
+The Collocation update requires no schema migration. Deploy the API before the
+web. Existing snapshots keep their original prompt/options/answer/content version;
+the web supports older snapshots without a situation by showing the pair prompt.
+Retired client-scored Collocation clients must refresh on 409. Rollback must retain
+the legacy-route rejection; never restore client-reported progress to recover UI.
 
 ## Review queue
 

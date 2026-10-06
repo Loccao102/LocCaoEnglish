@@ -3,6 +3,9 @@
 import { type CEFRLevel } from "@/lib/learning-attempt";
 import useVerifiedLearningRound from "./useVerifiedLearningRound";
 import LearningRoundNotice from "./LearningRoundNotice";
+import styles from "./VerifiedCollocationFactory.module.css";
+
+const SET_SIZE = 3;
 
 const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const campaignLevels: Record<string, CEFRLevel> = {
@@ -21,32 +24,41 @@ const campaignLabels: Record<string, string> = {
 };
 
 export default function VerifiedCollocationFactory({ pack = "default" }: { pack?: string }) {
-  const normalized = pack === "cefr-core" || campaignLevels[pack] ? pack : "cefr-core";
+  const normalized = Object.hasOwn(campaignLevels, pack) ? pack : "cefr-core";
   return <CollocationRound key={normalized} pack={normalized} />;
 }
 
 function CollocationRound({ pack }: { pack: string }) {
-  const verified = useVerifiedLearningRound("collocation-factory", pack, campaignLevels[pack] || "A1", 3);
+  const verified = useVerifiedLearningRound("collocation-factory", pack, campaignLevels[pack] || "A1", SET_SIZE);
   const { attempt, result, selected, phase, context, score } = verified;
   const campaign = context.pack !== "cefr-core";
   const label = campaign ? campaignLabels[context.pack] || context.pack.replaceAll("-", " ").toUpperCase() : "A1 → C2";
 
-  return <section className="mini-card factory">
-    <div className="mini-head"><span className="eyebrow">COLLOCATION FACTORY · {label}</span><b>Round {context.round + 1}/3</b></div>
-    <div className="factory-toolbar" aria-live="polite">
-      {!campaign ? <label>CEFR <select aria-label="Collocation CEFR level" value={context.level} disabled={phase === "submitting" || phase === "loading"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}
-      <strong>{attempt?.mode === "guest" ? "Guest practice" : `${score} XP this set`}</strong>
+  return <section className={`mini-card factory ${styles.card}`} aria-label="Collocation practice">
+    <div className="mini-head"><span className="eyebrow">COLLOCATION FACTORY · {label}</span><b>Round {context.round + 1}/{SET_SIZE}</b></div>
+    <div className={styles.toolbar}>
+      {!campaign ? <label>CEFR <select aria-label="Collocation CEFR level" value={context.level} disabled={phase !== "active" && phase !== "feedback"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}
+      <strong>{!attempt ? "Practice" : attempt.mode === "guest" ? "Guest practice" : `${score} XP this set`}</strong>
     </div>
+    <progress aria-label="Set progress" max={SET_SIZE} value={context.round + Number(!!result)} />
     <LearningRoundNotice round={verified} />
     {attempt && <>
-      <div className="factory-core"><small>{attempt.cefrLevel} · {attempt.prompt.relation}</small><strong>{attempt.prompt.word} + ?</strong></div>
-      <div className="factory-options">{attempt.prompt.options.map(option => {
+      <h2 id="collocation-scenario">{attempt.prompt.question || "Choose the natural word pair."}</h2>
+      <div className="factory-core"><small>BUILD A NATURAL PAIR</small><strong>{attempt.prompt.word} + ?</strong></div>
+      <div className="factory-options" role="group" aria-labelledby="collocation-scenario">{attempt.prompt.options.map(option => {
         const state = result ? option === result.correctAnswer ? "correct" : option === selected ? "wrong" : "muted" : selected === option ? "muted" : "";
         return <button key={option} disabled={phase !== "active"} aria-pressed={selected === option} className={state} onClick={() => void verified.submit(option)}>{option}</button>;
       })}</div>
       {result && phase === "feedback" && <div className={`mini-feedback-box ${result.correct ? "success" : "error"}`}>
-        <span>{result.correct ? "✓ Natural pair" : "Review this collocation"}</span><strong>{result.correctAnswer}</strong><p>{result.feedback}</p>
-        <button className="button primary" onClick={verified.next}>{context.round === 2 ? "Play another set" : "Next collocation →"}</button>
+        <div role="status" className={styles.verdict}>
+          <span>{result.correct ? "✓ Natural pair" : "Review this collocation"}</span>
+          <strong>{attempt.prompt.word} {result.correctAnswer}</strong>
+          {!result.correct && <p>Your choice: {result.actualAnswer}</p>}
+          <p>{result.feedback}</p>
+          {result.reviewAdded && <p>Added to your review queue.</p>}
+          {context.round === SET_SIZE - 1 && <p>Set complete. Ready for another three?</p>}
+        </div>
+        <button className="button primary" onClick={verified.next}>{context.round === SET_SIZE - 1 ? "Play another set" : "Next collocation →"}</button>
       </div>}
     </>}
   </section>;

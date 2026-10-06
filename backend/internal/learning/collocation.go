@@ -17,6 +17,7 @@ type CollocationItem struct {
 	Pack          string   `json:"pack"`
 	CEFRLevel     string   `json:"cefrLevel"`
 	Core          string   `json:"core"`
+	Question      string   `json:"question"`
 	Options       []string `json:"options"`
 	CorrectAnswer string   `json:"correctAnswer"`
 	Feedback      string   `json:"feedback"`
