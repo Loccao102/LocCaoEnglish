@@ -253,3 +253,36 @@ not durable account persistence. Deploy API before web; retain the sentence v1
 grader and legacy rejection on rollback. Existing snapshots/history remain intact.
 CEFR labels need calibration through player trials; automated tests do not prove
 that every difficulty tier is balanced or that the entire learning migration is done.
+
+## Word Graph study and verified practice — 2026-10-07
+
+Scope: CORE-003, branch `codex/core003-word-graph`, based on main `f58ddb8`.
+Exploration never scores; a separate practice route uses the shared attempt
+contract, a server-owned graph catalog and contextual relation questions. No
+store/schema/reward-policy changes and no new assets/dependencies.
+
+- `go test ./...` and `go vet ./...` passed locally (memory storage). New catalog
+  tests check all nine relations, answer membership, option diversity, independent
+  copies, seeded shuffle, exclusion/exhaustion and supported level/pack. HTTP tests
+  cover correct/wrong guest/account, private field omission, create/submit retry,
+  owner/version/option validation, post-feedback conflict, daily cap, correct
+  review answer and legacy bypass rejection.
+- `npm run build` passed with 58 routes. No Word Graph feedback text was found in
+  compiled client chunks; the server page passes only the exploration projection.
+- 11 targeted browser/API tests passed using production web and local Go memory
+  API. Coverage includes all five migrated activities' lost committed response /
+  account isolation, Word Graph study with zero attempt writes, hidden study UI
+  during practice, three distinct questions, wrong feedback/reload and pending
+  retry retaining the original payload.
+- Desktop and 390 × 551 / 390 × 844 renders inspected. Phone study nodes use a
+  grid with no overlap; choices have at least 44px targets and 16px text. Browser
+  keyboard submission and horizontal-overflow checks passed. A final layout
+  adjustment moves the central study node away from unrelated crossing edges.
+  Build and all four Word Graph browser scenarios passed again after that change.
+- Full PostgreSQL/race, integration and browser suite remain pending CI.
+
+No production deployment. Local memory results are not durable account storage.
+The public study map is intentionally available for learning; practice does not
+prove unaided recall. Only the travel-network A2 tier is supported in this slice;
+content depth and CEFR calibration remain open. API first, then web; keep legacy
+rejection and saved-round support on rollback.

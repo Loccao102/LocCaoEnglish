@@ -69,6 +69,16 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "word-graph":
+		item, err := learning.PickWordGraph(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Vocabulary", item.ID
+		contentVersion, rulesVersion = learning.WordGraphContentVersion(), "word-graph.v1"
+		promptText, correctAnswer, feedback = item.Question, item.CorrectAnswer, item.Feedback
+		publicPrompt = model.LearningAttemptPrompt{Word: item.Word, Relation: item.Relation, Question: item.Question, Options: learning.ShuffledWordGraphOptions(item, in.RequestID)}
 	case "sentence-builder":
 		item, err := learning.PickSentence(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {

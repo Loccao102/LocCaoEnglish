@@ -1,0 +1,30 @@
+.explorer { max-width: 1120px; margin: auto; }
+.toolbar { display: flex; justify-content: space-between; gap: 24px; align-items: center; flex-wrap: wrap; }
+.toolbar h1 { font-size: clamp(28px, 4vw, 38px); margin: 10px 0; }
+.toolbar p, .notice { line-height: 1.6; }
+.notice { padding: 14px 18px; background: #fff4da; border: 1px solid #ead7a5; border-radius: 14px; margin: 22px 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 18px; }
+.canvas { position: relative; min-height: 570px; background: radial-gradient(circle, #e2f4e9, #f7faf2); border: 1px solid #c9dfd4; border-radius: 24px; overflow: hidden; }
+.canvas svg { position: absolute; width: 100%; height: 100%; inset: 0; }
+.canvas line { stroke: #91b8a6; stroke-width: .3; }
+.node { position: absolute; transform: translate(-50%, -50%); min-height: 70px; width: 128px; border: 1px solid #b9d4c6; background: white; border-radius: 18px; padding: 12px; color: #234637; cursor: pointer; box-shadow: 0 5px 15px #18463210; }
+.node small, .node strong { display: block; }
+.node small { font-size: 12px; margin-bottom: 5px; }
+.node strong { font-size: 17px; }
+.node[aria-pressed="true"] { background: #176b55; border-color: #176b55; color: white; }
+.inspector { border: 1px solid #d5e3da; background: white; border-radius: 22px; padding: 22px; }
+.inspector h2 { font-size: 28px; margin: 14px 0 4px; }
+.inspector > p { font-size: 17px; line-height: 1.6; }
+.connections { display: grid; gap: 10px; margin-top: 24px; }
+.connections h3 { font-size: 18px; margin: 0; }
+.connections button { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; text-align: left; font-size: 16px; min-height: 48px; background: #f4faf6; border: 1px solid #c8ded0; border-radius: 12px; padding: 12px; cursor: pointer; }
+.connections span { font-size: 14px; color: #466854; }
+.explorer button:focus-visible, .explorer a:focus-visible { outline: 3px solid #a06722; outline-offset: 3px; }
+.toolbar > a { min-height: 48px; font-size: 16px; }
+@media (max-width: 1000px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 540px) {
+  .canvas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; gap: 12px; padding: 16px; }
+  .canvas svg { display: none; }
+  .node { position: static; transform: none; width: auto; min-width: 0; }
+  .toolbar > a { width: 100%; }
+}

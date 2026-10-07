@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair, Collocation Factory và Sentence Builder dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder và bài luyện Word Graph dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -137,6 +137,15 @@ guest/account, daily cap, PostgreSQL/concurrency và browser desktop/390px.
 đạt đủ 6 jobs trên runtime `e27f0f0`, gồm PostgreSQL/race và 64 E2E browser.
 Không đổi schema, chưa deploy production; chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md).
 Các luồng học còn lại và toàn CORE-003 vẫn `in_progress`.
+
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-word-graph`, `in_review`.
+Phạm vi: bản đồ chỉ để khám phá, không chấm/XP; bài luyện quan hệ ở route riêng
+không hiển thị edges/Connections/định nghĩa đáp án. Dùng catalog graph chung phía
+server, snapshot/retry/owner/daily cap hiện có và chặn accuracy Word Graph cũ.
+Giữ 9 node/9 quan hệ travel; sửa nhãn quan hệ boarding cho đúng thứ tự thực tế.
+Nghiệm thu: không lộ key/feedback trong đề, không có submit khi khám phá,
+đúng/sai/retry/reload/account, ba câu riêng và chữ/nút đủ lớn ở 390px.
+Kiểm tra local đạt; còn chờ CI đầy đủ trước merge. Toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
