@@ -6,6 +6,7 @@ import grammar from "../../backend/internal/learning/grammar_catalog.json";
 import collocations from "../../backend/internal/learning/collocation_catalog.json";
 import sentences from "../../backend/internal/learning/sentence_catalog.json";
 import graph from "../../backend/internal/learning/word_graph_catalog.json";
+import readings from "../../backend/internal/learning/reading_catalog.json";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080", base = `${API}/v1/learning/attempts`;
 async function account(request: APIRequestContext) {
@@ -21,7 +22,7 @@ const issued = (page: Page) => page.waitForResponse(response => response.url().e
 const answerFor = (attempt: LearningAttempt) => attempt.activity === "sentence-builder"
   ? sentences.items.find(item => item.id === attempt.itemKey)!.chunks.join(" ")
   : attempt.activity === "word-graph" ? graph.nodes.find(n => n.id === graph.edges.find(e => e.id === attempt.itemKey)!.to)!.label
-  : [...words.items, ...grammar.items, ...collocations.items].find(item => item.id === attempt.itemKey)!.correctAnswer;
+  : [...words.items, ...grammar.items, ...collocations.items, ...readings.items].find(item => item.id === attempt.itemKey)!.correctAnswer;
 
 test("guest finishes Word Link and restores the exact round and feedback", async ({ page }) => {
   let response = issued(page);
@@ -44,12 +45,12 @@ test("guest finishes Word Link and restores the exact round and feedback", async
   await expect(page.getByText("Round 1/5", { exact: true })).toBeVisible();
 });
 
-for (const activity of ["word-link", "grammar-repair", "collocation-factory", "sentence-builder", "word-graph"] as const) {
+for (const activity of ["word-link", "grammar-repair", "collocation-factory", "sentence-builder", "word-graph", "reading-race"] as const) {
   test(`${activity} restores a lost committed result and keeps account progress isolated`, async ({ page, request }) => {
     const user = await account(request), headers = { Authorization: `Bearer ${user.token}` };
     await signIn(page, user.token);
     const opened = issued(page);
-    await page.goto(activity === "word-graph" ? "/word-graph/practice" : `/games/${activity}`);
+    await page.goto(activity === "word-graph" ? "/word-graph/practice" : activity === "reading-race" ? "/reading" : `/games/${activity}`);
     const attempt: LearningAttempt = await (await opened).json();
     let payload: object = {};
     await page.route("**/v1/learning/attempts/*/submit", async route => {
@@ -100,5 +101,5 @@ test("wrong answer review, daily practice cap and tampered payloads use real API
   const replay: LearningAttempt = await (await request.post(base, { headers, data: { ...input, requestId: randomUUID() } })).json();
   const result = await (await request.post(`${base}/${replay.attemptId}/submit`, { headers, data: { ...payload, answer: answerFor(replay) } })).json();
   expect(result).toMatchObject({ correct: true, xpDelta: 0, progressionApplied: false });
-  for (const activity of ["word-link", "grammar-repair", "collocation-factory", " COLLOCATION-FACTORY ", "sentence-builder", " SENTENCE-BUILDER ", "word-graph", " WORD-GRAPH "]) expect((await request.post(`${API}/v1/attempts`, { headers, data: { skill: "Vocabulary", activity, itemKey: "fake", accuracy: 1 } })).status()).toBe(409);
+  for (const activity of ["word-link", "grammar-repair", "collocation-factory", " COLLOCATION-FACTORY ", "sentence-builder", " SENTENCE-BUILDER ", "word-graph", " WORD-GRAPH ", "reading-race", " READING-RACE "]) expect((await request.post(`${API}/v1/attempts`, { headers, data: { skill: "Vocabulary", activity, itemKey: "fake", accuracy: 1 } })).status()).toBe(409);
 });

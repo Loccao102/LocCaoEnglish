@@ -293,3 +293,38 @@ The public study map is intentionally available for learning; practice does not
 prove unaided recall. Only the travel-network A2 tier is supported in this slice;
 content depth and CEFR calibration remain open. API first, then web; keep legacy
 rejection and saved-round support on rollback.
+
+## Reading Race snapshots and evidence — 2026-10-07
+
+Scope: CORE-003, branch `codex/core003-reading-race`, based on main `80d4133`.
+Nine passages across editorial A2/B1/B2, three distinct passages per set, private
+grading and post-submit excerpts. The original two passages remain in the B2 bank.
+Title and passage are optional public prompt fields; no SQL/schema/reward-policy
+change. Reviews retain passage context and actual choices remain separate from
+the correct answer. Legacy client accuracy is rejected for Reading Race.
+
+- `go test ./...` and `go vet ./...` passed locally using memory storage. Catalog
+  tests validate evidence excerpts, choices, level coverage, seeded selection,
+  non-repetition and independent slices. HTTP tests cover correct/wrong outcomes,
+  guests/accounts, private-field omission, retries, versions, owner boundaries,
+  daily claims, legacy aliases and review context.
+- New memory/PostgreSQL snapshot test checks title/passage retention, independent
+  returned values, old-version grading, feedback/retry identity and review text.
+  The PostgreSQL variant reconnects through a second store; it awaits Linux CI.
+- `npm run build` passed (58 routes). Private explanation text is absent from
+  client chunks; the client does not import the catalog.
+- 12 targeted Playwright tests passed (22.5s) on production web + real local Go
+  memory API. All six migrated activities retain lost committed responses and
+  account isolation. Reading scenarios complete every offered tier, restore a
+  pending wrong choice through reload, lock input while retrying, restore final
+  feedback/level, and restart a completed set.
+- Desktop and 390 × 551 / 390 × 844 screenshots inspected. Passage text is at
+  least 18px, options at least 16px with 44px targets; keyboard submission and
+  horizontal-overflow checks passed. No assets/dependencies changed.
+- Full CI, including PostgreSQL/race and the entire browser suite, pending.
+
+No production deployment. Local memory storage is temporary. API before web;
+rollback must keep title/passage decoding, saved-round support and legacy
+rejection. The source remains available during questions, so results measure
+practice comprehension, not unaided recall or reading speed. Wider content,
+CEFR calibration and timed modes remain outside this slice.

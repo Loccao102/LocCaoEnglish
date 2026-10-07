@@ -69,6 +69,18 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "reading-race":
+		item, err := learning.PickReading(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Reading", item.ID
+		contentVersion, rulesVersion = learning.ReadingContentVersion(), "reading-race.v1"
+		// Reviews retain the passage, not an unanswerable question in isolation.
+		promptText = item.Title + "\n\n" + item.Passage + "\n\n" + item.Question
+		correctAnswer, feedback = item.CorrectAnswer, learning.ReadingFeedback(item)
+		publicPrompt = model.LearningAttemptPrompt{Title: item.Title, Passage: item.Passage, Question: item.Question, Options: learning.ShuffledReadingOptions(item, in.RequestID)}
 	case "word-graph":
 		item, err := learning.PickWordGraph(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {

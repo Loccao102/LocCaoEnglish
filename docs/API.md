@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder and Word Graph reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph and Reading Race reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,9 +49,10 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`.
-Core banks support CEFR A1–C2; Word Graph currently supports only the travel-network
-pack at A2. Default pack `cefr-core` is not a Word Graph pack.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`.
+Word Link, Grammar, Collocation and Sentence core banks support CEFR A1–C2.
+Word Graph supports only travel-network at A2. Reading Race supports only
+cefr-core at A2/B1/B2. Default pack `cefr-core` is not a Word Graph pack.
 Word Link also accepts `travel-airport` (B1). Grammar accepts `travel-hotel`,
 `conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2).
 `collocation-factory` accepts `travel-transit`, `conversation-cafe`,
@@ -170,6 +171,25 @@ assisted correction submission is introduced. A replay remains capped practice.
 Word Graph needs no schema change. API before web; old Link Mode clients receive
 409 on the legacy score route and must refresh. Preserve stored rounds and the
 legacy rejection on rollback. Existing legacy history is not reclassified.
+
+Reading Race adds optional `title` and `passage` strings to the public prompt.
+Catalog `2026-10-07.1` contains three distinct passages per A2/B1/B2 level;
+rules are `reading-race.v1`. Default UI level is B1; unsupported pack/level
+pairs return 400. POST creates a snapshot of title, passage, question and shuffled
+options; the private answer and evidence explanation are stored at creation.
+Submit the actual option text. Only after grading does `feedback` quote the
+supporting sentence(s) and explain the conclusion. The passage itself stays
+available while choosing; this is untimed reading comprehension practice, not
+a memory test or proof of reading speed. CEFR tiers are editorial, not calibrated.
+
+Review records contain title + passage + question so wrong answers remain
+answerable in the review queue. Completed rounds cannot be edited/regraded;
+reload and retries use their stored passage, options and feedback even after a
+catalog update. Three-question sets avoid repeats until bank exhaustion. Existing
+daily claims and 20/0 correct/wrong XP apply; no new reward policy or SQL migration.
+Deploy API before web. On rollback keep the new prompt fields, saved-round support
+and legacy rejection (including case/whitespace aliases), or disable new rounds;
+do not restore client accuracy or reclassify legacy history.
 
 ## Review queue
 

@@ -11,6 +11,8 @@ type LearningAttemptStartInput struct {
 }
 
 type LearningAttemptPrompt struct {
+	Title    string          `json:"title,omitempty"`
+	Passage  string          `json:"passage,omitempty"`
 	Word     string          `json:"word,omitempty"`
 	Relation string          `json:"relation,omitempty"`
 	Question string          `json:"question,omitempty"`

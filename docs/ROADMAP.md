@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder và bài luyện Word Graph dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph và Reading Race dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -150,12 +150,20 @@ Nghiệm thu: không lộ key/feedback trong đề, không có submit khi khám 
 đạt đủ 6 jobs trên runtime `8bbc2f9`, gồm PostgreSQL/race và 69 E2E browser.
 Không đổi schema, chưa deploy production. Toàn CORE-003 vẫn `in_progress`.
 
-Lát cắt kế tiếp đã xác định, chưa triển khai: Reading Race tại `/reading`
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-reading-race`, `in_review`.
+Phạm vi: Reading Race tại `/reading`
 (`components/MiniGames.tsx`). Chuyển passage/question/options vào snapshot có
 version; server chấm lựa chọn thật, giải thích bằng câu dẫn chứng sau submit,
 trộn lựa chọn và tránh lặp trong bộ bài. Chặn `reading-race` ở đường accuracy cũ;
 giữ retry/reload/account boundary dùng chung. Chỉ mở level có nội dung
 được biên soạn và kiểm tra; chưa thêm timer trước khi contract kết quả vững.
+Contract: `reading-race.v1`, catalog `2026-10-07.1`, core A2/B1/B2,
+ba đoạn riêng mỗi level. Prompt thêm title/passage; feedback dẫn chứng chỉ sau
+submit. Snapshot JSON hiện có đủ lưu trữ, không đổi schema hoặc dữ liệu cũ.
+Nghiệm thu: đúng/sai, payload/version/owner, daily cap, lost response/reload,
+ba câu không lặp, đổi level, review giữ ngữ cảnh bài đọc và mobile 390px.
+Go tests/vet, build và 12 browser/API scenarios đạt local. PostgreSQL/race và
+toàn bộ browser suite còn chờ CI trước merge; toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

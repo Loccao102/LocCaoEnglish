@@ -22,7 +22,7 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder and Word Graph reject generic client-accuracy submissions.
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, Word Graph and Reading Race reject generic client-accuracy submissions.
   Other learning/competitive routes remain CORE-003/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
@@ -94,3 +94,19 @@ No hint/timer/correction mode or schema change. Exploring this publicly availabl
 map is studying, not recall evidence. Practice results never claim unaided mastery:
 the system does not prove whether the map was viewed in another tab or earlier.
 API before web; on rollback keep the legacy rejection and saved-round support.
+
+## Reading Race extension — 2026-10-07
+
+Add optional title/passage strings to the public prompt JSON, preserving existing
+activities and snapshots. One server-owned catalog supplies contextual questions,
+four choices, the private correct answer and exact supporting excerpts. Store all
+of these at creation; grading and recovery never fetch a newer catalog. Result
+feedback combines evidence and explanation only after submission. Review prompts
+retain the title, passage and question rather than an isolated question.
+
+Use reading-race.v1 with core A2/B1/B2 (three distinct items each); the existing
+choice grader and lifecycle handle selected text, owner, version, retry, expiry
+and daily claims. The text remains visible: this assesses comprehension with the
+source available, not unaided recall or reading speed. No timer, hint bonus or
+schema change. Keep the new prompt fields, saved-round grading and legacy rejection
+when rolling back. Old client accuracy receives 409; refresh after API-first rollout.

@@ -1,0 +1,170 @@
+{
+  "contentVersion": "2026-10-07.1",
+  "items": [
+    {
+      "id": "reading-a2-01",
+      "cefrLevel": "A2",
+      "title": "A library notice",
+      "passage": "The town library is open from nine to six on weekdays. On Saturday it closes at two. This Saturday, the children's room is being painted, but visitors can still borrow books from the main room. Please use the side door because the front entrance is closed.",
+      "question": "How can a visitor borrow books this Saturday?",
+      "options": [
+        "Use the side door and visit the main room before two.",
+        "Use the front entrance and visit the main room before six.",
+        "Use the side door and visit the children's room before two.",
+        "Wait until Monday because all rooms are closed."
+      ],
+      "correctAnswer": "Use the side door and visit the main room before two.",
+      "evidence": "On Saturday it closes at two.",
+      "evidence2": "Please use the side door because the front entrance is closed.",
+      "feedback": "The shorter Saturday hours still apply. Only the children's room and front entrance are closed; borrowing from the main room is available.",
+      "kind": "detail",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-a2-02",
+      "cefrLevel": "A2",
+      "title": "A message about lunch",
+      "passage": "Hi Ben, the cafe next to our office is full today. Let's meet at the park instead. I will bring sandwiches for both of us, so you only need to bring drinks. My meeting finishes at twelve, but I need fifteen minutes to walk there. See you by the blue bench! Maya",
+      "question": "Which plan follows Maya's message?",
+      "options": [
+        "Meet at the blue bench at 12:15 and bring drinks.",
+        "Meet at the cafe at 12:00 and bring drinks.",
+        "Meet at the blue bench at 12:00 and bring sandwiches.",
+        "Meet at the office at 12:15 and buy lunch together."
+      ],
+      "correctAnswer": "Meet at the blue bench at 12:15 and bring drinks.",
+      "evidence": "My meeting finishes at twelve, but I need fifteen minutes to walk there.",
+      "evidence2": "I will bring sandwiches for both of us, so you only need to bring drinks.",
+      "feedback": "Add the walking time to the end of the meeting. Maya supplies the food, while Ben brings drinks to the park.",
+      "kind": "detail",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-a2-03",
+      "cefrLevel": "A2",
+      "title": "The school garden",
+      "passage": "Last year, students planted vegetables behind their school. At first, only one class worked in the garden. Now every class has a small area to look after. Teachers use the garden for science lessons, and the kitchen uses some of the vegetables for lunch. Students say they enjoy learning outside.",
+      "question": "What is the main idea of this text?",
+      "options": [
+        "The garden has become useful to more people at the school.",
+        "The school kitchen grows all its own food.",
+        "Only one class is allowed to learn in the garden.",
+        "Students want to replace every science lesson with gardening."
+      ],
+      "correctAnswer": "The garden has become useful to more people at the school.",
+      "evidence": "Now every class has a small area to look after.",
+      "evidence2": "Teachers use the garden for science lessons, and the kitchen uses some of the vegetables for lunch.",
+      "feedback": "The text describes several uses and more classes taking part. It says some vegetables are used for lunch, not all food, and it does not propose replacing every lesson.",
+      "kind": "main-idea",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b1-01",
+      "cefrLevel": "B1",
+      "title": "The repair club",
+      "passage": "When a repair club opened at the community centre, its organisers expected visitors to bring broken electrical appliances. In fact, most arrived with torn clothes. The club invited two local tailors to help, while keeping an electrician available once a month. The organisers now ask visitors to describe their items when booking so that the right volunteers can attend.",
+      "question": "Why did the club change its booking process?",
+      "options": [
+        "To match volunteer skills to the items visitors bring.",
+        "To stop accepting clothes and focus on electrical repairs.",
+        "To ensure that every volunteer attends every meeting.",
+        "To let visitors repair electrical items without supervision."
+      ],
+      "correctAnswer": "To match volunteer skills to the items visitors bring.",
+      "evidence": "The organisers now ask visitors to describe their items when booking so that the right volunteers can attend.",
+      "feedback": "The club adapted to actual demand. It still offers electrical help, but advance information makes it easier to arrange suitable volunteers.",
+      "kind": "purpose",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b1-02",
+      "cefrLevel": "B1",
+      "title": "A walking bus",
+      "passage": "Parents at Oak Street School wanted fewer cars near the entrance. They organised a walking bus: children meet at agreed stops and walk together with adult volunteers. During the first month, participation was low on rainy days. The school then provided waterproof capes and a covered meeting point. More families joined, although parents who start work very early still found the schedule difficult.",
+      "question": "Which conclusion is best supported by the passage?",
+      "options": [
+        "Removing practical obstacles helped, but the scheme still does not suit every family.",
+        "Providing capes solved every reason why families could not join.",
+        "Most parents preferred driving because they disliked walking with others.",
+        "The scheme failed because no families joined after the first month."
+      ],
+      "correctAnswer": "Removing practical obstacles helped, but the scheme still does not suit every family.",
+      "evidence": "More families joined, although parents who start work very early still found the schedule difficult.",
+      "feedback": "Participation improved after help with wet weather. The final clause limits that success: timing remains a problem for some parents.",
+      "kind": "inference",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b1-03",
+      "cefrLevel": "B1",
+      "title": "Weekend deliveries",
+      "passage": "A bookshop tested free weekend delivery for local customers. Orders increased, but staff spent so much time packing small purchases that they struggled to serve people in the shop. Rather than end delivery, the owner introduced a minimum order value and packed parcels after closing. Sales remained above their earlier level, while daytime queues became shorter.",
+      "question": "What was the owner's main response to the trial?",
+      "options": [
+        "Keep the useful service while changing how it operates.",
+        "End the service because online orders were falling.",
+        "Hire more daytime staff to pack every small order.",
+        "Give priority to delivery customers by closing the shop."
+      ],
+      "correctAnswer": "Keep the useful service while changing how it operates.",
+      "evidence": "Rather than end delivery, the owner introduced a minimum order value and packed parcels after closing.",
+      "feedback": "The owner addressed workload without abandoning delivery. Increased sales and shorter queues suggest the adjustments helped both parts of the business.",
+      "kind": "main-idea",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b2-01",
+      "cefrLevel": "B2",
+      "title": "Car-free streets",
+      "passage": "Cities around the world are experimenting with car-free zones. Supporters argue that restricting private vehicles can reduce air pollution and make streets safer for pedestrians. Critics, however, worry that small businesses may lose customers if access becomes less convenient. Early studies suggest the effect depends heavily on public transport quality and how gradually the policy is introduced.",
+      "question": "Which conclusion best reflects the author's account of car-free zones?",
+      "options": [
+        "Their impact depends on transport alternatives and how the change is introduced.",
+        "They inevitably harm small businesses even when public transport is reliable.",
+        "They reduce pollution only if all businesses move outside the zone.",
+        "Their success has already been established regardless of local conditions."
+      ],
+      "correctAnswer": "Their impact depends on transport alternatives and how the change is introduced.",
+      "evidence": "Early studies suggest the effect depends heavily on public transport quality and how gradually the policy is introduced.",
+      "feedback": "The author presents benefits and concerns, then qualifies the conclusion. 'Early studies suggest' and 'depends' do not support a universal guarantee or inevitable failure.",
+      "kind": "qualified-conclusion",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b2-02",
+      "cefrLevel": "B2",
+      "title": "Learning in remote teams",
+      "passage": "Remote work can give employees more control over their schedules, but it also changes how teams share informal knowledge. New employees may find it harder to learn unwritten routines when they rarely observe experienced colleagues. Some companies respond by pairing new staff with mentors and scheduling short, optional social sessions rather than adding more formal meetings.",
+      "question": "What problem are mentoring and optional social sessions intended to address?",
+      "options": [
+        "Reduced opportunities for newcomers to learn through informal contact.",
+        "Employees having too much freedom to choose their working hours.",
+        "A shortage of formal meetings about written company procedures.",
+        "Experienced colleagues needing to relearn their established routines."
+      ],
+      "correctAnswer": "Reduced opportunities for newcomers to learn through informal contact.",
+      "evidence": "New employees may find it harder to learn unwritten routines when they rarely observe experienced colleagues.",
+      "feedback": "The response targets informal learning, not schedule control. The contrast with adding formal meetings shows why more meetings alone may not address the problem.",
+      "kind": "purpose",
+      "pack": "cefr-core"
+    },
+    {
+      "id": "reading-b2-03",
+      "cefrLevel": "B2",
+      "title": "Measuring a transport trial",
+      "passage": "A city reported a rise in bus use after making fares free for three months. Officials attributed the change to the fare policy. However, the trial coincided with major roadworks that reduced parking in the centre, and passenger counts were taken only during weekday mornings. Researchers welcomed the increase but argued that the available figures could not establish how much of it was caused by the lower fares or whether it would persist.",
+      "question": "Why do the researchers qualify the officials' conclusion?",
+      "options": [
+        "Other changes and limited sampling make the policy's independent effect uncertain.",
+        "The counts prove that lower fares had no effect on passenger numbers.",
+        "The trial collected reliable figures for every time and day of the week.",
+        "The increase must disappear as soon as roadworks are completed."
+      ],
+      "correctAnswer": "Other changes and limited sampling make the policy's independent effect uncertain.",
+      "evidence": "However, the trial coincided with major roadworks that reduced parking in the centre, and passenger counts were taken only during weekday mornings.",
+      "feedback": "The researchers question causal certainty and the range of observations. They do not deny the increase or prove that free fares had no effect.",
+      "kind": "evaluation",
+      "pack": "cefr-core"
+    }
+  ]
+}
