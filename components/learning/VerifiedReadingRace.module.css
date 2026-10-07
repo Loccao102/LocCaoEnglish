@@ -1,0 +1,24 @@
+.reader { max-width: 1120px; margin: auto; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.toolbar label { display: flex; gap: 12px; align-items: center; }
+.toolbar select { font: inherit; min-height: 44px; border: 1px solid #bad2c5; border-radius: 10px; background: white; padding: 8px 12px; }
+.reader progress { width: 100%; height: 10px; accent-color: #237f61; margin-bottom: 18px; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.passage, .question { min-width: 0; padding: 28px; border-radius: 22px; border: 1px solid #d2dfd3; background: white; }
+.passage { background: #fffaf0; }
+.reader h2 { font-size: clamp(21px, 2.4vw, 27px); line-height: 1.4; margin: 12px 0 20px; }
+.passage p { font-size: 19px; line-height: 1.9; white-space: pre-line; margin-bottom: 24px; }
+.passage small { color: #536b5c; font-size: 14px; line-height: 1.6; }
+.options { display: grid; gap: 12px; }
+.options button { font: inherit; font-size: 17px; line-height: 1.6; text-align: left; padding: 16px 18px; min-height: 56px; border-radius: 14px; border: 1px solid #bdd4c7; background: #fafdfa; color: #234735; cursor: pointer; overflow-wrap: anywhere; }
+.options button[data-verdict="correct"] { background: #e6f6e9; border-color: #4b9460; }
+.options button[data-verdict="wrong"] { background: #fff0e7; border-color: #bf6d48; }
+.options button:disabled { cursor: default; }
+.reader button:focus-visible, .reader select:focus-visible { outline: 3px solid #aa702d; outline-offset: 3px; }
+.feedback { background: #f3f8ee; border: 1px solid #caddc5; border-radius: 16px; padding: 20px; margin-top: 22px; }
+.feedback strong { font-size: 21px; }
+.feedback p { line-height: 1.7; overflow-wrap: anywhere; }
+.evidence { white-space: pre-line; }
+.feedback button { font-size: 16px; min-height: 48px; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 540px) { .passage, .question { padding: 20px; } .passage p { font-size: 18px; } .feedback { padding: 16px; } .feedback button { width: 100%; } }
