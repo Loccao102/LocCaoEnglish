@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-07, main `2efffc4` (PR #6). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-07, main `e84c1c1` (PR #7). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -126,13 +126,16 @@ Các hoạt động còn lại vẫn là migration debt; toàn CORE-003 chưa do
 
 Di chuyển theo lát cắt nhỏ; mỗi hoạt động phải đáp ứng CORE-001/002, không chỉ đổi UI.
 
-Tiếp nối 2026-10-07: Codex, branch `codex/core003-sentence-builder`, `in_review`.
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-sentence-builder`, `done` cho lát cắt này.
 Phạm vi: chuyển Sentence Builder sang snapshot server, mảnh câu có ID riêng và
 trộn theo seed; chấm thứ tự người chơi gửi, giữ bản nháp/retry/reload, chặn API
 accuracy cũ. Giữ ba campaign đang dùng, thêm bộ core A1–C2 và giải thích cấu trúc.
 Nghiệm thu: từ lặp, câu đúng/sai, payload không hợp lệ, không chấm lại sau feedback,
 guest/account, daily cap, PostgreSQL/concurrency và browser desktop/390px.
-Code và kiểm tra local đã có; còn chờ PostgreSQL/race và toàn bộ CI trước merge.
+Đã merge qua [PR #7](https://github.com/Loccao102/LocCaoEnglish/pull/7), commit
+`e84c1c1`. [CI 103](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37528956984)
+đạt đủ 6 jobs trên runtime `e27f0f0`, gồm PostgreSQL/race và 64 E2E browser.
+Không đổi schema, chưa deploy production; chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md).
 Các luồng học còn lại và toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |

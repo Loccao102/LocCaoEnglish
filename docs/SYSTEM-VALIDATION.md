@@ -233,11 +233,20 @@ changing SQL schema, rewards or the existing three activity contracts.
   at least 44px targets; mobile has no horizontal overflow.
 - Added memory/PostgreSQL tests for same-ID concurrent retries, daily replay,
   actual sentence evidence versus review answer, snapshot copying and store
-  reconnection. PostgreSQL/race and full browser suite remain pending CI here.
+  reconnection. PostgreSQL/race and the full browser suite passed in CI 103.
 - Review follow-up: completed sentence retries now compare the stored ID-array
   string exactly, rather than applying the choice games' case-insensitive text
   comparison. Store/HTTP tests and vet passed again, including changed ID case
-  and changed array serialization conflicts. Full CI must target this follow-up.
+  and changed array serialization conflicts. CI 103 targets this follow-up.
+
+Final evidence, 2026-10-07:
+[CI 103](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37528956984) passed
+all six jobs on runtime `e27f0f086c3039fce6e630f7ca3ba32fb706e8c4`: frontend,
+backend PostgreSQL/race, AI service, compose, integration and E2E. The browser log
+reports **64 passed (15.6m)**. [PR #7](https://github.com/Loccao102/LocCaoEnglish/pull/7)
+merged as `e84c1c1`. The acceptance update changes documentation only; application
+code remains the tested revision. Links and diff are checked without rerunning
+gameplay tests for prose-only changes.
 
 No production deployment. Local API verification uses temporary memory storage,
 not durable account persistence. Deploy API before web; retain the sentence v1
