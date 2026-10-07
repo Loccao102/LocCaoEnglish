@@ -11,10 +11,16 @@ type LearningAttemptStartInput struct {
 }
 
 type LearningAttemptPrompt struct {
-	Word     string   `json:"word,omitempty"`
-	Relation string   `json:"relation,omitempty"`
-	Question string   `json:"question,omitempty"`
-	Options  []string `json:"options"`
+	Word     string          `json:"word,omitempty"`
+	Relation string          `json:"relation,omitempty"`
+	Question string          `json:"question,omitempty"`
+	Options  []string        `json:"options"`
+	Chunks   []SentenceChunk `json:"chunks,omitempty"`
+}
+
+type SentenceChunk struct {
+	ID   string `json:"id"`
+	Text string `json:"text"`
 }
 
 type LearningAttemptStart struct {

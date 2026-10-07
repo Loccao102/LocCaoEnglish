@@ -208,3 +208,39 @@ rerunning application tests for prose changes.
 
 No store/schema change or production deployment. The API must be updated before
 the frontend. CEFR tier calibration and player enjoyment still require playtesting.
+
+## Sentence Builder verified rounds — 2026-10-07
+
+Scope: CORE-003, branch `codex/core003-sentence-builder`, based on main `d286447`.
+Adds server-owned chunk permutations and readable actual-answer evidence without
+changing SQL schema, rewards or the existing three activity contracts.
+
+- `go test ./...` and `go vet ./...` passed locally, including HTTP guest/account,
+  server grading, immutable retry, invalid IDs/version, legacy bypass, catalog
+  solvability and repeated-word coverage. Local store tests use memory.
+- `npm run build` passed (57 routes), including TypeScript. No dependencies added.
+- 16 targeted Playwright scenarios passed against the production frontend and
+  local Go API (memory): 10 real API/browser scenarios and six transport fixtures
+  covering older activities' recovery UI. The first integration run exposed a
+  missing localhost:3102 CORS setting in the test API process; configuring its
+  explicit local origins resolved it without changing application CORS policy.
+- After switching sentence IDs to a private server seed, the five sentence
+  browser/API scenarios passed again, verifying lost committed responses, account isolation,
+  draft reload, wrong-order feedback, three different rounds, repeated words,
+  keyboard, level persistence, locked pending order and identical retries.
+- Screenshots at desktop and 390 × 551 / 390 × 844 are inspected from
+  `test-results/sentence-builder-*/sentence-*.png`. Controls use readable text and
+  at least 44px targets; mobile has no horizontal overflow.
+- Added memory/PostgreSQL tests for same-ID concurrent retries, daily replay,
+  actual sentence evidence versus review answer, snapshot copying and store
+  reconnection. PostgreSQL/race and full browser suite remain pending CI here.
+- Review follow-up: completed sentence retries now compare the stored ID-array
+  string exactly, rather than applying the choice games' case-insensitive text
+  comparison. Store/HTTP tests and vet passed again, including changed ID case
+  and changed array serialization conflicts. Full CI must target this follow-up.
+
+No production deployment. Local API verification uses temporary memory storage,
+not durable account persistence. Deploy API before web; retain the sentence v1
+grader and legacy rejection on rollback. Existing snapshots/history remain intact.
+CEFR labels need calibration through player trials; automated tests do not prove
+that every difficulty tier is balanced or that the entire learning migration is done.

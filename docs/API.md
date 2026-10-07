@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair and Collocation Factory reject this route with 409, including
+Grammar Repair, Collocation Factory and Sentence Builder reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -39,7 +39,7 @@ Do not extend the legacy trust model to new rewards/ranking.
 }
 ```
 
-## Verified learning attempts — Word Link, Grammar Repair and Collocation Factory
+## Verified learning attempts — Word Link, Grammar Repair, Collocation and Sentence Builder
 
 Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisions/003-learning-recovery.md).
 
@@ -49,7 +49,7 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`; CEFR A1–C2. Default pack `cefr-core`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`; CEFR A1–C2. Default pack `cefr-core`.
 Word Link also accepts `travel-airport` (B1). Grammar accepts `travel-hotel`,
 `conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2).
 `collocation-factory` accepts `travel-transit`, `conversation-cafe`,
@@ -69,15 +69,42 @@ pair starter. Content/option edits bump the content version; grading remains
 the existing policy. Three-round exclusion is practice variety, not an anti-cheat
 guarantee; the server may repeat once the requested bank is exhausted.
 
+Sentence catalog `2026-10-07.1` supplies 27 questions: three per core CEFR tier,
+plus three each for `conversation-plans` (A2), `work-standup` (B1) and
+`work-deadline` (B2). The existing campaign topics are retained. CEFR tiers are
+editorial and need playtesting, not a certification claim. Prompts specify the
+intended clause/phrase placement, with feedback explaining the pattern.
+
+Sentence rules are `sentence-builder.v1`. `prompt.question` gives the task,
+`prompt.chunks` contains shuffled `{id,text}` pieces, and `prompt.options` is
+empty (clients must tolerate empty/null options for this activity). IDs do not
+encode the solution position and each repeated word gets a different ID. A private
+server seed generates IDs/order; the public request UUID cannot derive them. The
+shown order is never already the solution. Submit the ordered IDs as a JSON
+string in the existing `answer` field, for example:
+
+```json
+{"answer":"[\"opaque-id-b\",\"opaque-id-a\",\"opaque-id-c\"]","contentVersion":"2026-10-07.1","rulesVersion":"sentence-builder.v1"}
+```
+
+Every offered ID must appear exactly once. Missing, duplicate, unknown IDs and
+free text receive 400. Server resolves the sequence against the saved snapshot;
+case-insensitive exact sentence comparison determines the result. Interchanging
+identical-text pieces is valid. The original wire string is kept for retries, so
+clients must resend it unchanged; results and compatibility evidence contain the
+actual readable sentence, while review contains the correct sentence. Feedback
+closes the round: editing/resetting after seeing the answer cannot regrade it.
+
 Start/GET return `attemptId`, `activity`, `pack`, `itemKey`, `cefrLevel`,
 `contentVersion`, `rulesVersion`, `status`, `prompt` (word/relation or question,
-plus options), `mode: guest|account`, `expiresAt` and optional `result`. The public
+plus options or sentence chunks), `mode: guest|account`, `expiresAt` and optional `result`. The public
 prompt/order and private answer are snapshotted together; replay does not re-read
 the current catalog. No answer key/feedback is sent before completion.
 
 Result contains `correct`, `actualAnswer`, `correctAnswer`, `feedback`, `xpDelta`,
 `newConfidence`, `level`, `reviewAdded`, `progressionApplied`, `evidence:
-server-objective`, attempt/status and versions. Only offered answers are accepted;
+server-objective`, attempt/status and versions. Only offered answers (or a complete
+sentence chunk permutation as described above) are accepted;
 comparison ignores surrounding whitespace and case. Wrong answers are retained as
 actual responses, while review teaches the correct answer. Guests and daily repeats
 have no progression update; confidence/level in those results are zero placeholders,
@@ -112,6 +139,14 @@ web. Existing snapshots keep their original prompt/options/answer/content versio
 the web supports older snapshots without a situation by showing the pair prompt.
 Retired client-scored Collocation clients must refresh on 409. Rollback must retain
 the legacy-route rejection; never restore client-reported progress to recover UI.
+
+Sentence Builder also requires no SQL migration. Deploy API before web and keep
+the sentence v1 grader available for saved snapshots on rollback. Old client-score
+submissions receive 409 and require refresh; old legacy records are not reclassified
+as verified. The shared local reference has an optional `draft` string scoped to
+owner/activity/pack. Draft editing is allowed only before submission; pending
+order and level changes stay locked until confirmation. No timer, hint reward or
+assisted correction submission is introduced. A replay remains capped practice.
 
 ## Review queue
 

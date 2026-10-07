@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair và Collocation Factory dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair, Collocation Factory và Sentence Builder dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -125,6 +125,15 @@ core và level mở đầu campaign có ít nhất 3 câu riêng; chữ/nút đ�
 Các hoạt động còn lại vẫn là migration debt; toàn CORE-003 chưa done.
 
 Di chuyển theo lát cắt nhỏ; mỗi hoạt động phải đáp ứng CORE-001/002, không chỉ đổi UI.
+
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-sentence-builder`, `in_review`.
+Phạm vi: chuyển Sentence Builder sang snapshot server, mảnh câu có ID riêng và
+trộn theo seed; chấm thứ tự người chơi gửi, giữ bản nháp/retry/reload, chặn API
+accuracy cũ. Giữ ba campaign đang dùng, thêm bộ core A1–C2 và giải thích cấu trúc.
+Nghiệm thu: từ lặp, câu đúng/sai, payload không hợp lệ, không chấm lại sau feedback,
+guest/account, daily cap, PostgreSQL/concurrency và browser desktop/390px.
+Code và kiểm tra local đã có; còn chờ PostgreSQL/race và toàn bộ CI trước merge.
+Các luồng học còn lại và toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

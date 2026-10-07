@@ -22,7 +22,7 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link, Grammar Repair and Collocation Factory reject generic client-accuracy submissions.
+- Word Link, Grammar Repair, Collocation Factory and Sentence Builder reject generic client-accuracy submissions.
   Other learning/competitive routes remain CORE-003/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
@@ -53,3 +53,26 @@ catalog and scoring implementation are removed. The UI supports old pair-only
 snapshots, locks choices after submission and blocks level changes while an answer
 is awaiting confirmation. This is untimed practice with feedback, not a claim of
 unassisted mastery. See API for content-version rollout and daily claim semantics.
+
+## Sentence Builder extension — 2026-10-07
+
+Add optional `chunks: [{id,text}]` to the existing public prompt snapshot. IDs are
+opaque and unique per occurrence (including repeated words), and shuffled with a
+server-private random seed. The client request UUID must not reveal position IDs.
+The stored chunk snapshot reproduces the round. The private correct answer remains natural sentence text. Submit
+`answer` as a JSON-encoded array of chunk IDs, each offered ID exactly once. The
+server resolves that order from the saved snapshot, compares sentence text, and
+stores the submitted ID sequence for immutable retries; result/evidence/review
+use readable actual/correct sentences. No current-catalog lookup during grading.
+
+Rules `sentence-builder.v1` use case-insensitive exact sentence comparison; prompts
+specify the intended structure where movable phrases permit alternatives. No free
+text grading, hint or time bonus. Feedback closes the attempt; reset only edits an
+unsubmitted draft. Replaying is practice subject to the existing daily cap, never
+a claim of unassisted mastery. Owner-scoped local references gain an optional draft
+field; old references and the existing three activities remain compatible.
+
+No SQL schema change: JSON snapshots and submitted-answer text already support
+this contract. Deploy API before web. On rollback keep the legacy score rejection
+and the v1 sentence grader for existing snapshots, or explicitly disable this
+activity; never restore client-reported XP. Existing legacy history is unchanged.

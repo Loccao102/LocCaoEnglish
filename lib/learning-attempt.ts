@@ -1,11 +1,11 @@
 import {apiFetch} from "./api";
 
 export type CEFRLevel="A1"|"A2"|"B1"|"B2"|"C1"|"C2";
-export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory";
+export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory"|"sentence-builder";
 export type LearningAttempt={
   attemptId:string;activity:VerifiedLearningActivity;pack:string;itemKey:string;cefrLevel:CEFRLevel;
   contentVersion:string;rulesVersion:string;status:string;
-  prompt:{word?:string;relation?:string;question?:string;options:string[]};
+  prompt:{word?:string;relation?:string;question?:string;options:string[];chunks?:{id:string;text:string}[]};
   mode:"guest"|"account";expiresAt:string;result?:LearningAttemptResult;
 };
 export type LearningAttemptResult={
