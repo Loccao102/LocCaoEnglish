@@ -1,0 +1,207 @@
+{
+  "contentVersion": "2026-10-07.1",
+  "pack": "travel-network",
+  "cefrLevel": "A2",
+  "nodes": [
+    {
+      "id": "travel",
+      "label": "TRAVEL",
+      "x": 50,
+      "y": 42,
+      "kind": "topic",
+      "definition": "Movement from one place to another."
+    },
+    {
+      "id": "airport",
+      "label": "airport",
+      "x": 18,
+      "y": 18,
+      "kind": "place",
+      "definition": "A place where aircraft take off and land."
+    },
+    {
+      "id": "flight",
+      "label": "flight",
+      "x": 82,
+      "y": 18,
+      "kind": "noun",
+      "definition": "A journey made by air."
+    },
+    {
+      "id": "delay",
+      "label": "delay",
+      "x": 18,
+      "y": 82,
+      "kind": "noun / verb",
+      "definition": "A period of waiting caused by something being late."
+    },
+    {
+      "id": "boarding",
+      "label": "boarding",
+      "x": 82,
+      "y": 82,
+      "kind": "process",
+      "definition": "The process of getting onto an aircraft."
+    },
+    {
+      "id": "gate",
+      "label": "gate",
+      "x": 50,
+      "y": 14,
+      "kind": "place",
+      "definition": "The area where passengers board a flight."
+    },
+    {
+      "id": "miss",
+      "label": "miss a flight",
+      "x": 50,
+      "y": 86,
+      "kind": "collocation",
+      "definition": "Fail to catch a scheduled flight."
+    },
+    {
+      "id": "departure",
+      "label": "departure",
+      "x": 18,
+      "y": 50,
+      "kind": "noun",
+      "definition": "The act of leaving a place."
+    },
+    {
+      "id": "arrival",
+      "label": "arrival",
+      "x": 82,
+      "y": 50,
+      "kind": "noun",
+      "definition": "The act of reaching a destination."
+    }
+  ],
+  "edges": [
+    {
+      "id": "graph-q01",
+      "from": "travel",
+      "to": "airport",
+      "label": "travel place",
+      "question": "You need a place where aircraft take off and land. Which travel place fits?",
+      "options": [
+        "airport",
+        "gate",
+        "boarding",
+        "arrival"
+      ],
+      "feedback": "An airport is the whole place for air travel. A gate is only one area inside it."
+    },
+    {
+      "id": "graph-q02",
+      "from": "travel",
+      "to": "flight",
+      "label": "air journey",
+      "question": "Your travel includes a journey made by air. Which word names that journey?",
+      "options": [
+        "flight",
+        "boarding",
+        "departure",
+        "arrival"
+      ],
+      "feedback": "A flight is the air journey itself. Boarding, departure and arrival name stages around that journey."
+    },
+    {
+      "id": "graph-q03",
+      "from": "airport",
+      "to": "gate",
+      "label": "contains",
+      "question": "Inside the airport, where do passengers wait to board their particular aircraft?",
+      "options": [
+        "gate",
+        "arrival",
+        "delay",
+        "flight"
+      ],
+      "feedback": "An airport contains gates. A gate identifies the boarding area for a particular flight."
+    },
+    {
+      "id": "graph-q04",
+      "from": "flight",
+      "to": "boarding",
+      "label": "pre-flight process",
+      "question": "Before your flight takes off, passengers get onto the aircraft. What is this process called?",
+      "options": [
+        "boarding",
+        "arrival",
+        "delay",
+        "departure"
+      ],
+      "feedback": "Boarding means getting onto the aircraft. It happens before take-off; arrival is at the destination."
+    },
+    {
+      "id": "graph-q05",
+      "from": "flight",
+      "to": "delay",
+      "label": "can have",
+      "question": "Your flight is now leaving forty minutes later than scheduled. What does it have?",
+      "options": [
+        "delay",
+        "arrival",
+        "gate",
+        "boarding"
+      ],
+      "feedback": "A delay is extra waiting because something is late. It is different from a gate change or the boarding process."
+    },
+    {
+      "id": "graph-q06",
+      "from": "flight",
+      "to": "miss",
+      "label": "collocation",
+      "question": "You reach the airport after your aircraft has left. Which phrase describes the problem?",
+      "options": [
+        "miss a flight",
+        "boarding",
+        "arrival",
+        "departure"
+      ],
+      "feedback": "Miss a flight means fail to catch the scheduled aircraft. A delay means the aircraft is late instead."
+    },
+    {
+      "id": "graph-q07",
+      "from": "flight",
+      "to": "departure",
+      "label": "starts with",
+      "question": "The flight leaves its starting airport. Which word describes this stage?",
+      "options": [
+        "departure",
+        "arrival",
+        "boarding",
+        "delay"
+      ],
+      "feedback": "Departure is leaving the starting place. Boarding happens earlier, and arrival is reaching the destination."
+    },
+    {
+      "id": "graph-q08",
+      "from": "flight",
+      "to": "arrival",
+      "label": "ends with",
+      "question": "The flight reaches its destination. Which word describes this stage?",
+      "options": [
+        "arrival",
+        "departure",
+        "boarding",
+        "delay"
+      ],
+      "feedback": "Arrival means reaching the destination. Departure means leaving the starting point."
+    },
+    {
+      "id": "graph-q09",
+      "from": "departure",
+      "to": "arrival",
+      "label": "opposites",
+      "question": "Departure means leaving a place. Which word expresses reaching a place instead?",
+      "options": [
+        "arrival",
+        "boarding",
+        "delay",
+        "flight"
+      ],
+      "feedback": "Departure and arrival contrast leaving and reaching a place. They are opposite stages of a journey."
+    }
+  ]
+}

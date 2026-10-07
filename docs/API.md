@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory and Sentence Builder reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder and Word Graph reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -39,7 +39,7 @@ Do not extend the legacy trust model to new rewards/ranking.
 }
 ```
 
-## Verified learning attempts — Word Link, Grammar Repair, Collocation and Sentence Builder
+## Verified learning attempts
 
 Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisions/003-learning-recovery.md).
 
@@ -49,7 +49,9 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`; CEFR A1–C2. Default pack `cefr-core`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`.
+Core banks support CEFR A1–C2; Word Graph currently supports only the travel-network
+pack at A2. Default pack `cefr-core` is not a Word Graph pack.
 Word Link also accepts `travel-airport` (B1). Grammar accepts `travel-hotel`,
 `conversation-clarity` (B1), `work-requirements`, `work-deadline` (B2).
 `collocation-factory` accepts `travel-transit`, `conversation-cafe`,
@@ -94,6 +96,23 @@ identical-text pieces is valid. The original wire string is kept for retries, so
 clients must resend it unchanged; results and compatibility evidence contain the
 actual readable sentence, while review contains the correct sentence. Feedback
 closes the round: editing/resetting after seeing the answer cannot regrade it.
+
+Word Graph catalog `2026-10-07.1` retains nine travel nodes and nine directed
+relations. Rules `word-graph.v1` ask one contextual question about a relation;
+the correct answer is derived from its target node in the same catalog. Creation
+requires `pack: travel-network`, `cefrLevel: A2`. Other level/pack pairs get 400.
+The public prompt contains only `word`, `relation`, `question` and shuffled
+`options`. Opaque question keys do not spell out the target word. Submit the
+chosen node label in `answer`; no edges, definitions, answer keys or feedback
+are included before completion. Three-question sets exclude completed item keys.
+
+`/word-graph` is public study content: the server page projects node descriptions
+and labelled edges without private questions/feedback. Selecting nodes never
+creates attempts, changes confidence or awards XP. `/word-graph/practice` is a
+separate client entry using verified rounds; it does not import the study graph
+or show the Connections inspector. These are guided practice results, not proof
+of unaided recall: the system cannot prove whether a learner studied the public
+map earlier or in another tab. No hint or competitive scoring is added.
 
 Start/GET return `attemptId`, `activity`, `pack`, `itemKey`, `cefrLevel`,
 `contentVersion`, `rulesVersion`, `status`, `prompt` (word/relation or question,
@@ -147,6 +166,10 @@ as verified. The shared local reference has an optional `draft` string scoped to
 owner/activity/pack. Draft editing is allowed only before submission; pending
 order and level changes stay locked until confirmation. No timer, hint reward or
 assisted correction submission is introduced. A replay remains capped practice.
+
+Word Graph needs no schema change. API before web; old Link Mode clients receive
+409 on the legacy score route and must refresh. Preserve stored rounds and the
+legacy rejection on rollback. Existing legacy history is not reclassified.
 
 ## Review queue
 

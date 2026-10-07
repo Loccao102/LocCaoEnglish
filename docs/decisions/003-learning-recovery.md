@@ -22,7 +22,7 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link, Grammar Repair, Collocation Factory and Sentence Builder reject generic client-accuracy submissions.
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder and Word Graph reject generic client-accuracy submissions.
   Other learning/competitive routes remain CORE-003/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
@@ -76,3 +76,21 @@ No SQL schema change: JSON snapshots and submitted-answer text already support
 this contract. Deploy API before web. On rollback keep the legacy score rejection
 and the v1 sentence grader for existing snapshots, or explicitly disable this
 activity; never restore client-reported XP. Existing legacy history is unchanged.
+
+## Word Graph extension — 2026-10-07
+
+Separate `/word-graph` exploration from `/word-graph/practice` rounds. Exploration
+shows definitions and labelled connections but never creates attempts or awards
+XP. The server page projects only public nodes/edges from one server-owned graph
+catalog; the practice route receives only its issued prompt/options. Do not bundle
+the graph answer bank into the practice component or show a connection inspector
+during an active round. The same graph catalog derives the private target answer
+and relation-specific question, preventing a second independent answer source.
+
+Use `word-graph.v1`, travel-network pack at editorial A2, three-question sets,
+the shared verified choice lifecycle and existing daily reward policy. Submit the
+chosen node label as the actual answer; the relation is not the player's answer.
+No hint/timer/correction mode or schema change. Exploring this publicly available
+map is studying, not recall evidence. Practice results never claim unaided mastery:
+the system does not prove whether the map was viewed in another tab or earlier.
+API before web; on rollback keep the legacy rejection and saved-round support.
