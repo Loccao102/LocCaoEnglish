@@ -1,0 +1,145 @@
+{
+  "contentVersion": "2026-10-08.1",
+  "pack": "hotel-check-in",
+  "cefrLevel": "B1",
+  "start": "arrival",
+  "title": "A room for two nights",
+  "nodes": [
+    {
+      "id": "arrival",
+      "title": "A missing reservation",
+      "text": "It is 11:30 p.m. You paid for two nights at the hotel and have a confirmation email. The receptionist cannot find a reservation under your surname.",
+      "question": "What is an effective first step before making another payment?",
+      "choices": [
+        {
+          "label": "Show the confirmation email and ask the receptionist to search its booking number.",
+          "good": true,
+          "next": "details",
+          "feedback": "The booking number leads to your paid reservation under your middle name."
+        },
+        {
+          "label": "Ask whether the reservation was entered under your full name, including your middle name.",
+          "good": true,
+          "next": "identity",
+          "feedback": "The name search finds two similar records. The receptionist now needs a unique reference."
+        },
+        {
+          "label": "Reserve another room now and leave the original payment for tomorrow.",
+          "good": false,
+          "next": "payment",
+          "feedback": "A second reservation would create another charge. The original paid booking has not been checked yet."
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "title": "Two similar names",
+      "text": "The receptionist finds two guests with similar full names. Both arrive tonight. You still have your confirmation email.",
+      "question": "Which response reliably identifies your own reservation?",
+      "choices": [
+        {
+          "label": "Give the booking number from the email and ask them to match it.",
+          "good": true,
+          "next": "details",
+          "feedback": "The unique booking number identifies your reservation, so the receptionist can check its details."
+        },
+        {
+          "label": "Accept the first record because the surname and arrival date match.",
+          "good": false,
+          "next": "wrong-record",
+          "feedback": "A matching name and date do not distinguish the two bookings. The receptionist cannot safely check you into that record."
+        }
+      ]
+    },
+    {
+      "id": "payment",
+      "title": "Before a second charge",
+      "text": "The receptionist offers a new reservation, but it would charge your card again. Your original confirmation shows that payment was received.",
+      "question": "How can you recover the situation without paying twice?",
+      "choices": [
+        {
+          "label": "Pause the new payment and ask them to trace the paid booking using the confirmation number.",
+          "good": true,
+          "next": "details",
+          "feedback": "You stop the second charge in time. The receptionist locates the original paid booking."
+        },
+        {
+          "label": "Authorise the new payment without checking whether the first booking can be used.",
+          "good": false,
+          "next": "duplicate",
+          "feedback": "The new booking is charged while the original payment is still unresolved. You now have two charges to sort out."
+        }
+      ]
+    },
+    {
+      "id": "details",
+      "title": "Check the stay",
+      "text": "Your paid reservation has been found. The receptionist offers a key and says you will check out tomorrow. Your confirmation is for two nights, with checkout the following day.",
+      "question": "Which response resolves the remaining mismatch before you take the key?",
+      "choices": [
+        {
+          "label": "Point to the two-night dates in the email and ask them to confirm the checkout date.",
+          "good": true,
+          "next": "confirmed",
+          "feedback": "The receptionist corrects the checkout date and confirms both paid nights before handing over the key."
+        },
+        {
+          "label": "Take the key and assume the checkout date will correct itself overnight.",
+          "good": false,
+          "next": "short-stay",
+          "feedback": "The record still shows checkout tomorrow. Taking the key has not resolved the missing second night."
+        },
+        {
+          "label": "Ask whether breakfast is included without mentioning the checkout date.",
+          "good": false,
+          "next": "clarify",
+          "feedback": "You get the breakfast information, but the checkout mismatch remains. The receptionist asks whether tomorrow is the right departure date."
+        }
+      ]
+    },
+    {
+      "id": "clarify",
+      "title": "One more chance to clarify",
+      "text": "The receptionist asks, 'So you leave tomorrow?' Your email shows a two-night stay. The key is ready, but the dates have not been corrected.",
+      "question": "Which reply makes the required correction explicit?",
+      "choices": [
+        {
+          "label": "Say, 'My confirmation is for two nights. Could you update checkout to the following day?'",
+          "good": true,
+          "next": "confirmed",
+          "feedback": "You state the specific mismatch and requested correction. Both nights are now confirmed."
+        },
+        {
+          "label": "Say, 'Yes, that is fine,' and plan to discuss the extra night after checkout.",
+          "good": false,
+          "next": "short-stay",
+          "feedback": "Agreeing confirms the wrong departure date. The second night remains unresolved."
+        }
+      ]
+    },
+    {
+      "id": "confirmed",
+      "title": "Both nights confirmed",
+      "text": "You check in using the original payment, with the correct checkout date. You verified the booking and resolved the practical problem.",
+      "ending": "success"
+    },
+    {
+      "id": "short-stay",
+      "title": "A night still missing",
+      "text": "The booking still ends tomorrow. You reached a room but did not secure the full stay you paid for. Practise again and clarify the dates before accepting the key.",
+      "ending": "unresolved"
+    },
+    {
+      "id": "wrong-record",
+      "title": "Identity not confirmed",
+      "text": "The receptionist cannot safely use someone else's booking. The conversation ends without confirming your reservation.",
+      "ending": "unresolved"
+    },
+    {
+      "id": "duplicate",
+      "title": "An avoidable second charge",
+      "text": "You have a new room booking, but the original payment remains unresolved. The immediate choice created a second payment problem.",
+      "ending": "unresolved"
+    }
+  ]
+}

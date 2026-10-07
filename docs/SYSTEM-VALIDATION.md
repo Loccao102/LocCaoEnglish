@@ -335,3 +335,40 @@ rollback must keep title/passage decoding, saved-round support and legacy
 rejection. The source remains available during questions, so results measure
 practice comprehension, not unaided recall or reading speed. Wider content,
 CEFR calibration and timed modes remain outside this slice.
+
+## Story Choice server-owned branches — 2026-10-08
+
+Scope: CORE-003, branch `codex/core003-story-choice`, based on main `be0f63d`.
+Five decision scenes and four endings replace the browser's score/branch graph.
+Multiple opening choices can be effective. Each decision is a shared learning
+attempt; the next scene is derived from its committed answer and private saved
+definition. Continue uses a reserved request key and existing owner/request
+uniqueness. No SQL migration, new reward ledger, dependencies or assets.
+
+- `go test ./...` and `go vet ./...` passed locally with memory storage. Domain
+  tests traverse every branch, reject cycles/unreachable scenes, verify effective
+  alternatives and shuffled options. HTTP tests check private-field omission,
+  guest/account wrong choices, version/option checks, start/submit/continue retries,
+  rejection of client-selected destinations and legacy aliases.
+- Store tests cover parallel continue calls producing one child, account boundary,
+  changed-answer conflicts, daily caps, immutable graph/history copies, inherited
+  expiry, terminal rejection and saved-version continuation. The PostgreSQL variant
+  reconnects through another store; it still awaits Linux CI.
+- `npm run build` passed with 58 routes. Private consequence text was absent from
+  client chunks; the old client-side graph and grading code were removed.
+- 13 Playwright browser/API scenarios passed locally (initial run 19.6s) using
+  production web and real memory API. Coverage includes seven activities' lost
+  committed results/account isolation, Story Choice lost continue response/reload,
+  immutable pending wrong choice, unresolved and successful endings, branch
+  history and explicit replay. Build and these scenarios were repeated after the
+  final shared-reference recovery guard.
+- Desktop and 390 × 551 / 390 × 844 screenshots inspected. Scene text >=18px,
+  option text >=16px, targets >=44px; keyboard and no-horizontal-overflow checks
+  passed. The story uses normal scrolling without shrinking the content.
+- Full CI including PostgreSQL/race and the full browser suite is pending.
+
+No production deployment. Local memory results are temporary. API first; retain
+story-choice.v1 snapshot decoding, grading, continuation and legacy rejection on
+rollback. This is scenario-based guided practice, separate from Adventure rewards;
+no unassisted/competitive claim, ending bonus or timer. More scenarios and B1
+difficulty calibration need playtesting. CORE-003 is not complete.

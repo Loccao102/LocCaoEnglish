@@ -1,20 +1,25 @@
 import {apiFetch} from "./api";
 
 export type CEFRLevel="A1"|"A2"|"B1"|"B2"|"C1"|"C2";
-export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory"|"sentence-builder"|"word-graph"|"reading-race";
+export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory"|"sentence-builder"|"word-graph"|"reading-race"|"story-choice";
 export type LearningAttempt={
+  story?:{runId:string;step:number;history:{scene:string;answer:string;consequence:string;xp:number}[]};
   attemptId:string;activity:VerifiedLearningActivity;pack:string;itemKey:string;cefrLevel:CEFRLevel;
   contentVersion:string;rulesVersion:string;status:string;
   prompt:{word?:string;relation?:string;question?:string;title?:string;passage?:string;options:string[];chunks?:{id:string;text:string}[]};
   mode:"guest"|"account";expiresAt:string;result?:LearningAttemptResult;
 };
 export type LearningAttemptResult={
+  story?:{consequence:string;canContinue:boolean;ending?:string;title?:string;text?:string};
   attemptId:string;status:string;correct:boolean;correctAnswer:string;feedback:string;xpDelta:number;
   newConfidence:number;level:number;reviewAdded:boolean;contentVersion:string;rulesVersion:string;
   actualAnswer:string;progressionApplied:boolean;evidence:"server-objective";
 };
 
 const auth=(token:string)=>({Authorization:token?`Bearer ${token}`:""});
+export function continueStoryAttempt(parentId:string,token:string){
+  return apiFetch<LearningAttempt>(`/v1/learning/attempts/${encodeURIComponent(parentId)}/continue`,{method:"POST",headers:auth(token),body:"{}"});
+}
 export function startLearningAttempt(input:{requestId:string;activity:VerifiedLearningActivity;cefrLevel:CEFRLevel;pack?:string;excludeItemKeys?:string[]},token=""){
   return apiFetch<LearningAttempt>("/v1/learning/attempts",{method:"POST",headers:auth(token),body:JSON.stringify({
     requestId:input.requestId,activity:input.activity,pack:input.pack||"cefr-core",

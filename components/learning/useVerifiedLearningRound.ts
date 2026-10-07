@@ -5,12 +5,12 @@ import { apiFetch, APIError } from "@/lib/api";
 import { AUTH_EVENT, getAuthToken } from "@/lib/session";
 import {
   type CEFRLevel, type LearningAttempt, type VerifiedLearningActivity,
-  startLearningAttempt, resumeLearningAttempt, submitLearningAttempt,
+  startLearningAttempt, resumeLearningAttempt, submitLearningAttempt, continueStoryAttempt,
 } from "@/lib/learning-attempt";
 
 export type VerifiedRoundPhase = "loading" | "active" | "submitting" | "feedback" | "load-error" | "submit-error";
 type Context = { level: CEFRLevel; pack: string; round: number; score: number; streak: number; seen: string[] };
-type Reference = { requestId: string; attemptId?: string; pending?: string; draft?: string; context: Context };
+type Reference = { requestId: string; attemptId?: string; parentAttemptId?: string; pending?: string; draft?: string; context: Context };
 const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const key = (owner: string, activity: string, pack: string) => `loccao.verified-round.v1.${owner}.${activity}.${pack}`;
 
@@ -23,6 +23,7 @@ function readReference(storageKey: string): Reference | null {
     ![ctx.round, ctx.score, ctx.streak].every(n => Number.isSafeInteger(n) && n >= 0) ||
     !Array.isArray(ctx.seen) || ctx.seen.length > 20 || ctx.seen.some(item => typeof item !== "string") ||
     ref.attemptId !== undefined && !/^[a-f0-9]{32}$/.test(ref.attemptId) ||
+    ref.parentAttemptId !== undefined && !/^[a-f0-9]{32}$/.test(ref.parentAttemptId) ||
     ref.pending !== undefined && (!ref.attemptId || typeof ref.pending !== "string" || ref.pending.length > 2048) ||
     ref.draft !== undefined && (typeof ref.draft !== "string" || ref.draft.length > 2048)) {
     throw new Error("The saved round could not be read. Start a new round to continue.");
@@ -48,7 +49,7 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
     try { localStorage.setItem(key(identity.current.owner, activity, routePack), JSON.stringify(ref)); setStorageWarning(""); }
     catch { setStorageWarning("Browser storage is unavailable. Keep this tab open to retry or finish this round."); }
   }
-  const open = useCallback(async (fresh?: Context) => {
+  const open = useCallback(async (fresh?: Context, parentAttemptId?: string) => {
     const seq = ++sequence.current, token = getAuthToken();
     locked.current = true; setAttempt(null); setSelected(null); setDraft(""); setPhase("loading"); setMessage(""); setCanRestart(false);
     try {
@@ -68,9 +69,12 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
           setStorageWarning("Browser storage is unavailable. Keep this tab open to finish.");
         }
       }
-      ref ??= { requestId: crypto.randomUUID(), context: fresh || initial() };
+      ref ??= { requestId: crypto.randomUUID(), context: fresh || initial(), ...(parentAttemptId ? { parentAttemptId } : {}) };
+      if (ref.parentAttemptId && activity !== "story-choice") {
+        setCanRestart(true); throw new Error("This saved continuation belongs to a different activity.");
+      }
       keep(ref); setContext(ref.context);
-      const next = ref.attemptId ? await resumeLearningAttempt(ref.attemptId, token) : await startLearningAttempt({
+      const next = ref.attemptId ? await resumeLearningAttempt(ref.attemptId, token) : ref.parentAttemptId ? await continueStoryAttempt(ref.parentAttemptId, token) : await startLearningAttempt({
         requestId: ref.requestId, activity, pack: ref.context.pack, cefrLevel: ref.context.level, excludeItemKeys: ref.context.seen,
       }, token);
       if (!current(seq, token)) return;
@@ -127,6 +131,11 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
   function next() {
     if (locked.current || !attempt?.result) return;
     const ctx = reference.current!.context, result = attempt.result;
+    if (activity === "story-choice") {
+      if (result.story?.canContinue) void open({ ...ctx, round: ctx.round + 1 }, attempt.attemptId);
+      else if (result.story?.ending) void open(initial());
+      return;
+    }
     const completed = setSize !== undefined && ctx.round + 1 >= setSize;
     void open({ ...ctx, round: completed ? 0 : ctx.round + 1, score: completed ? 0 : ctx.score + result.xpDelta,
       streak: completed ? 0 : result.correct ? ctx.streak + 1 : 0,
@@ -141,6 +150,6 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
   const score = context.score + (result?.xpDelta || 0), streak = result ? result.correct ? context.streak + 1 : 0 : context.streak;
   return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel,
     retry: () => reference.current?.pending && attempt ? void submit(reference.current.pending) : void open(),
-    restart: () => void open({ ...context, score: 0, streak: 0 }),
+    restart: () => void open(activity === "story-choice" ? initial() : { ...context, score: 0, streak: 0 }),
   };
 }
