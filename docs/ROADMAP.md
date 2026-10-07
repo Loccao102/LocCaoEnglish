@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-07, main `e84c1c1` (PR #7). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-07, main `cac8c34` (PR #8). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -138,14 +138,24 @@ guest/account, daily cap, PostgreSQL/concurrency và browser desktop/390px.
 Không đổi schema, chưa deploy production; chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md).
 Các luồng học còn lại và toàn CORE-003 vẫn `in_progress`.
 
-Tiếp nối 2026-10-07: Codex, branch `codex/core003-word-graph`, `in_review`.
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-word-graph`, `done` cho lát cắt này.
 Phạm vi: bản đồ chỉ để khám phá, không chấm/XP; bài luyện quan hệ ở route riêng
 không hiển thị edges/Connections/định nghĩa đáp án. Dùng catalog graph chung phía
 server, snapshot/retry/owner/daily cap hiện có và chặn accuracy Word Graph cũ.
 Giữ 9 node/9 quan hệ travel; sửa nhãn quan hệ boarding cho đúng thứ tự thực tế.
 Nghiệm thu: không lộ key/feedback trong đề, không có submit khi khám phá,
 đúng/sai/retry/reload/account, ba câu riêng và chữ/nút đủ lớn ở 390px.
-Kiểm tra local đạt; còn chờ CI đầy đủ trước merge. Toàn CORE-003 vẫn `in_progress`.
+Đã merge qua [PR #8](https://github.com/Loccao102/LocCaoEnglish/pull/8), commit
+`cac8c34`. [CI 106](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37559631886)
+đạt đủ 6 jobs trên runtime `8bbc2f9`, gồm PostgreSQL/race và 69 E2E browser.
+Không đổi schema, chưa deploy production. Toàn CORE-003 vẫn `in_progress`.
+
+Lát cắt kế tiếp đã xác định, chưa triển khai: Reading Race tại `/reading`
+(`components/MiniGames.tsx`). Chuyển passage/question/options vào snapshot có
+version; server chấm lựa chọn thật, giải thích bằng câu dẫn chứng sau submit,
+trộn lựa chọn và tránh lặp trong bộ bài. Chặn `reading-race` ở đường accuracy cũ;
+giữ retry/reload/account boundary dùng chung. Chỉ mở level có nội dung
+được biên soạn và kiểm tra; chưa thêm timer trước khi contract kết quả vững.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

@@ -279,7 +279,14 @@ store/schema/reward-policy changes and no new assets/dependencies.
   keyboard submission and horizontal-overflow checks passed. A final layout
   adjustment moves the central study node away from unrelated crossing edges.
   Build and all four Word Graph browser scenarios passed again after that change.
-- Full PostgreSQL/race, integration and browser suite remain pending CI.
+- Full PostgreSQL/race, integration and browser suite passed in CI 106.
+
+Final evidence: [CI 106](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37559631886)
+passed all six jobs on runtime `8bbc2f9406d5fb54eb1f45ffc7933d5bdc3e502f`.
+The browser log reports **69 passed (15.0m)**. [PR #8](https://github.com/Loccao102/LocCaoEnglish/pull/8)
+merged as `cac8c34`. This acceptance follow-up changes documentation only; the
+application remains the tested revision. Links and diff are checked without
+rerunning gameplay tests for prose-only changes.
 
 No production deployment. Local memory results are not durable account storage.
 The public study map is intentionally available for learning; practice does not
