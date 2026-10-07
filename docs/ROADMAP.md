@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-07, main `cac8c34` (PR #8). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-07, main `ad6a5cf` (PR #9). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -150,9 +150,10 @@ Nghiệm thu: không lộ key/feedback trong đề, không có submit khi khám 
 đạt đủ 6 jobs trên runtime `8bbc2f9`, gồm PostgreSQL/race và 69 E2E browser.
 Không đổi schema, chưa deploy production. Toàn CORE-003 vẫn `in_progress`.
 
-Tiếp nối 2026-10-07: Codex, branch `codex/core003-reading-race`, `in_review`.
+Tiếp nối 2026-10-07: Codex, branch `codex/core003-reading-race`, `done` cho lát cắt này.
 Phạm vi: Reading Race tại `/reading`
-(`components/MiniGames.tsx`). Chuyển passage/question/options vào snapshot có
+(`components/learning/VerifiedReadingRace.tsx`; export cũ trong MiniGames trỏ về đây).
+Chuyển passage/question/options vào snapshot có
 version; server chấm lựa chọn thật, giải thích bằng câu dẫn chứng sau submit,
 trộn lựa chọn và tránh lặp trong bộ bài. Chặn `reading-race` ở đường accuracy cũ;
 giữ retry/reload/account boundary dùng chung. Chỉ mở level có nội dung
@@ -162,8 +163,13 @@ ba đoạn riêng mỗi level. Prompt thêm title/passage; feedback dẫn chứn
 submit. Snapshot JSON hiện có đủ lưu trữ, không đổi schema hoặc dữ liệu cũ.
 Nghiệm thu: đúng/sai, payload/version/owner, daily cap, lost response/reload,
 ba câu không lặp, đổi level, review giữ ngữ cảnh bài đọc và mobile 390px.
-Go tests/vet, build và 12 browser/API scenarios đạt local. PostgreSQL/race và
-toàn bộ browser suite còn chờ CI trước merge; toàn CORE-003 vẫn `in_progress`.
+Go tests/vet, build và 12 browser/API scenarios đạt local. Đã merge qua
+[PR #9](https://github.com/Loccao102/LocCaoEnglish/pull/9), commit `ad6a5cf`.
+[CI 109](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37578203639) đạt
+đủ 6 jobs trên runtime `32e1d68`, gồm PostgreSQL/race và 74 E2E browser.
+Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
+Story Choice: server quyết định lựa chọn/hậu quả và đường đi của từng lượt,
+giữ retry/reload và không thưởng lặp; sau đó tiếp tục hai luồng nghe/chép chính tả.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

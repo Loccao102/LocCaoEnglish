@@ -310,7 +310,7 @@ the correct answer. Legacy client accuracy is rejected for Reading Race.
   daily claims, legacy aliases and review context.
 - New memory/PostgreSQL snapshot test checks title/passage retention, independent
   returned values, old-version grading, feedback/retry identity and review text.
-  The PostgreSQL variant reconnects through a second store; it awaits Linux CI.
+  The PostgreSQL variant reconnects through a second store; it passed in Linux CI 109.
 - `npm run build` passed (58 routes). Private explanation text is absent from
   client chunks; the client does not import the catalog.
 - 12 targeted Playwright tests passed (22.5s) on production web + real local Go
@@ -321,7 +321,14 @@ the correct answer. Legacy client accuracy is rejected for Reading Race.
 - Desktop and 390 × 551 / 390 × 844 screenshots inspected. Passage text is at
   least 18px, options at least 16px with 44px targets; keyboard submission and
   horizontal-overflow checks passed. No assets/dependencies changed.
-- Full CI, including PostgreSQL/race and the entire browser suite, pending.
+- Full CI, including PostgreSQL/race and the entire browser suite, passed.
+
+Final evidence: [CI 109](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37578203639)
+passed all six jobs on runtime `32e1d68583f01d424a2b99209101b71901919faf`.
+The browser log reports **74 passed (12.7m)**. [PR #9](https://github.com/Loccao102/LocCaoEnglish/pull/9)
+merged as `ad6a5cf`. The acceptance follow-up changes documentation only; the
+application code remains the tested revision. Relative links and diff were
+checked without rerunning gameplay tests for documentation-only changes.
 
 No production deployment. Local memory storage is temporary. API before web;
 rollback must keep title/passage decoding, saved-round support and legacy
