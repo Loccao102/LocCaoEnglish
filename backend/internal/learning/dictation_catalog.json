@@ -1,0 +1,14 @@
+{
+  "contentVersion": "dictation-core.2026-10-09.v1",
+  "items": [
+    {"id":"dictation-a2-coffee","cefrLevel":"A2","transcript":"Would you like to have a cup of coffee?","feedback":"Listen for the short words: to have a cup of."},
+    {"id":"dictation-a2-shop","cefrLevel":"A2","transcript":"The little shop closes at six on Sundays.","feedback":"Check the final sounds in closes and Sundays."},
+    {"id":"dictation-a2-ticket","cefrLevel":"A2","transcript":"Please keep your ticket until the end of the trip.","feedback":"Keep your ticket is the instruction; until tells you how long."},
+    {"id":"dictation-b1-caffeine","cefrLevel":"B1","transcript":"I've been trying to cut down on caffeine lately.","feedback":"I've is a contraction. Cut down on means reduce how much you consume."},
+    {"id":"dictation-b1-flight","cefrLevel":"B1","transcript":"The flight has been delayed due to severe weather conditions.","feedback":"Has been delayed is passive. Due to introduces the reason."},
+    {"id":"dictation-b1-meeting","cefrLevel":"B1","transcript":"We haven't decided whether to move the meeting to Friday.","feedback":"Keep the negative contraction haven't; whether introduces the decision."},
+    {"id":"dictation-b2-transport","cefrLevel":"B2","transcript":"Although public transport is convenient, it can become overcrowded during rush hour.","feedback":"Although introduces a contrast. Check the spelling of overcrowded."},
+    {"id":"dictation-b2-resources","cefrLevel":"B2","transcript":"Governments should allocate more resources to improve access to higher education.","feedback":"Allocate resources means decide how to use them. Listen for both occurrences of to."},
+    {"id":"dictation-b2-proposal","cefrLevel":"B2","transcript":"Unless the proposal is revised, the committee is unlikely to approve it.","feedback":"Unless gives a condition. Unlikely changes the meaning of the final clause."}
+  ]
+}

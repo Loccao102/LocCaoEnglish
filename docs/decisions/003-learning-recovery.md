@@ -172,3 +172,24 @@ practice interaction, not anti-cheat evidence. Mark result and attempt provenanc
 Replay/slow listening have no bonus or penalty, and existing daily claims remain.
 API first; retain snapshot/audio/grader support and legacy rejection on rollback.
 Dictation alignment and its scoring contract remain a separate CORE-003 slice.
+
+## Dictation extension — 2026-10-09
+
+Reuse the same listening snapshot/journal, lifecycle and reward transaction.
+`dictation.v1` aligns normalized word sequences using unit-cost Levenshtein edits;
+an insertion/deletion no longer shifts every following word. Penalize extra tail
+words as well. See [API](../API.md) for normalization, tie-break and score rules.
+Store the actual typed answer and use fractional accuracy in confidence/history,
+but grant XP only for zero edits under the existing first-attempt daily claim.
+
+Derive the alignment report deterministically from the saved reference, actual
+answer and retained v1 grader. No catalog lookup on grade/retry and no SQL change.
+Future rules must add a versioned grader rather than change v1 behavior. Completed
+payloads are immutable even if a later correction normalizes to the same tokens.
+
+The existing owner-scoped draft/pending reference preserves typing and transport
+retries. Feedback makes the textarea read-only. Audio support and its limits match
+Listen & Pick: source exposure for browser synthesis and client-reported playback
+mean `server-objective-guided-dictation`, never independent listening evidence.
+Roll out API first; rollback retains snapshot decoding, v1 grader and old-route
+rejection. Legacy client-only rounds had no saved server snapshot to migrate.

@@ -438,3 +438,37 @@ a modified client and never prove unaided listening. Results and saved attempt
 provenance identify guided listening. API first; keep snapshot/audio/grader support
 and legacy rejection on rollback. B1 calibration and more levels require player
 trials; Dictation Rush and the rest of CORE-003 remain open.
+
+## CORE-003 Dictation Rush — 2026-10-09
+
+Runtime branch `codex/core003-dictation`; acceptance is pending full CI. The
+`/dictation` route now uses server-owned attempts and the existing audio journal.
+Nine sentences (including the original five) supply three-round A2/B1/B2 sets.
+V1 alignment penalizes missing, extra and substituted tokens, saves the typed
+response and locks feedback. Drafts and failed submissions reuse owner-scoped
+recovery; the legacy client-accuracy route rejects dictation.
+
+- `go test ./...` and `go vet ./...` passed locally. Alignment cases cover middle
+  omission/insertion, extra tail, substitution, repeated words, negation,
+  contractions, punctuation/case and zero-clamped accuracy. HTTP checks cover
+  private projection, fallback, failure gating, forged accuracy, immutable retry
+  and legacy rejection. Store tests cover partial confidence, concurrent submit,
+  owner/version/expiry, retired content, daily cap and exact payload retries.
+- PostgreSQL cases additionally check reconnect, actual history/accuracy/source
+  and a single review mutation. They await Linux CI with a dedicated test DB;
+  local store verification used memory only.
+- `npm run build` passed (58 routes). Twelve real browser/API scenarios passed
+  (37.1s): five dictation cases and seven listening regression cases. Coverage
+  includes draft reload, failed audio, pending/committed response loss, owner
+  separation, cancelled media, three distinct sentences, difficulty retention,
+  keyboard controls and 390 × 551 / 390 × 844. Speech callbacks are simulated in
+  headless tests; this does not validate Azure voice configuration.
+- A separate native Chromium speech check completed a sentence and enabled
+  submission without media mocks. Desktop and both phone screenshots inspected;
+  input text is 18px, controls at least 48px, no horizontal overflow.
+
+No production deployment, SQL migration or user data reset. API-first rollout;
+retain the v1 alignment/audio contract on rollback. Partial accuracy is a server
+text comparison under guided practice, not proof of unaided listening. Editorial
+tiers and the small bank still need player trials and later content expansion.
+Overall CORE-003 remains open pending its cross-activity acceptance audit.

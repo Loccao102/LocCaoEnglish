@@ -1,0 +1,12 @@
+.level { display:grid; gap:8px; max-width:100%; }
+.level select { font:inherit; min-height:48px; max-width:100%; border:1px solid #8db6a1; border-radius:12px; padding:10px; background:white; color:#234b3b; }
+.label { display:block; font-size:22px; font-weight:700; margin-top:24px; }
+.answer { width:100%; min-height:150px; padding:18px; font:inherit; font-size:18px; line-height:1.7; border:1px solid #8db6a1; border-radius:16px; resize:vertical; margin:12px 0; color:#234b3b; background:white; }
+.answer:read-only { background:#f1f4ee; }
+.answer:focus-visible,.level select:focus-visible { outline:3px solid #ad7433; outline-offset:3px; }
+.score { font-size:24px; font-weight:700; }
+.words { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+.words li { padding:8px 12px; background:#edf4e7; border:1px solid #c9dbc1; border-radius:10px; overflow-wrap:anywhere; max-width:100%; font-size:18px; }
+.words span { display:block; font-size:13px; font-weight:700; }
+.words li[data-kind="missing"],.words li[data-kind="substitute"] { background:#fff0d6; border-color:#bf9447; }
+.words li[data-kind="extra"] { background:#fbe5df; border-color:#ba7d6c; }

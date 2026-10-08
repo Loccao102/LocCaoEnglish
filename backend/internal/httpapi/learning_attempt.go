@@ -70,6 +70,17 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "dictation":
+		item, err := learning.PickDictation(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Dictation", item.ID
+		contentVersion, rulesVersion = learning.DictationContentVersion(), learning.DictationRulesVersion
+		promptText, correctAnswer, feedback = "Write the sentence you hear.", item.Transcript, item.Feedback
+		publicPrompt = model.LearningAttemptPrompt{Question: promptText, Options: []string{}}
+		listeningSnapshot = &store.ListeningSnapshot{Transcript: item.Transcript, Events: []model.ListeningPlayback{}}
 	case "listen-pick":
 		item, err := learning.PickListening(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {
@@ -221,6 +232,7 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 		base.Mode = "guest"
 	}
 	return base, base.Pack == requestedPack && (len(base.Prompt.Options) > 0 ||
+		base.Activity == "dictation" && base.RulesVersion == learning.DictationRulesVersion && rec.Snapshot.Listening != nil ||
 		base.Activity == "sentence-builder" && base.RulesVersion == learning.SentenceRulesVersion && len(base.Prompt.Chunks) > 1)
 }
 

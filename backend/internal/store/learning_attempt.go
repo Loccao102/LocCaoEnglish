@@ -191,7 +191,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			}
 			applied = n == 1
 		}
-		accuracy, xp := 0.0, 0
+		accuracy, xp := learningAccuracy(rec, answer, correct), 0
 		if correct {
 			accuracy = 1
 			if applied {
@@ -273,7 +273,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	key := fmt.Sprintf("%s:%s:%s:%s", userID, rec.ItemKey, rec.ContentVersion, time.Now().UTC().Format("2006-01-02"))
 	applied := userID != "" && !s.learningRewards[key]
 	correct := learningCorrect(rec, answer)
-	accuracy, xp := 0.0, 0
+	accuracy, xp := learningAccuracy(rec, answer, correct), 0
 	if correct {
 		accuracy = 1
 		if applied {
@@ -348,6 +348,7 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 	}
 	evidence := learningEvidence(rec)
 	return model.LearningAttemptResult{
+		Dictation: dictationResult(rec),
 		Listening: ListeningEvidenceOf(rec, true),
 		Story:     story,
 		AttemptID: rec.ID, Status: rec.Status, Correct: rec.Correct, CorrectAnswer: rec.CorrectAnswer,
@@ -362,7 +363,7 @@ func sameAnswer(left, right string) bool {
 }
 
 func sameSubmittedAnswer(rec LearningAttemptRecord, answer string) bool {
-	if rec.Activity == "sentence-builder" {
+	if rec.Activity == "sentence-builder" || rec.Activity == "dictation" {
 		return rec.SubmittedAnswer == answer
 	}
 	return sameAnswer(rec.SubmittedAnswer, answer)
@@ -382,6 +383,9 @@ func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
 	return rec
 }
 func validateLearningSubmission(rec LearningAttemptRecord, answer string, versions []model.LearningAttemptSubmitInput) error {
+	if rec.Activity == "dictation" && (rec.RulesVersion != learning.DictationRulesVersion || len(answer) > 2048 || len(learning.DictationTokens(answer)) == 0) {
+		return ErrAttemptInput
+	}
 	if len(versions) > 0 && (versions[0].ContentVersion != rec.ContentVersion || versions[0].RulesVersion != rec.RulesVersion) {
 		return ErrAttemptInput
 	}
@@ -391,9 +395,12 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
 	}
-	if rec.Activity == "listen-pick" {
-		if rec.RulesVersion != learning.ListeningRulesVersion || !listeningReady(rec) {
+	if rec.Activity == "listen-pick" || rec.Activity == "dictation" {
+		if !supportedAudioAttempt(rec) || !listeningReady(rec) {
 			return ErrAttemptConflict
+		}
+		if rec.Activity == "dictation" {
+			return nil
 		}
 	}
 	if rec.Activity == "story-choice" {
@@ -419,6 +426,22 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 		return ErrAttemptInput
 	}
 	return nil
+}
+
+func dictationResult(rec LearningAttemptRecord) *model.DictationGrade {
+	if rec.Activity != "dictation" || rec.Status != "completed" || rec.RulesVersion != learning.DictationRulesVersion {
+		return nil
+	}
+	return learning.GradeDictation(rec.CorrectAnswer, rec.SubmittedAnswer)
+}
+func learningAccuracy(rec LearningAttemptRecord, answer string, correct bool) float64 {
+	if rec.Activity == "dictation" {
+		return learning.GradeDictation(rec.CorrectAnswer, answer).Accuracy
+	}
+	if correct {
+		return 1
+	}
+	return 0
 }
 
 // Keep the immutable wire answer for retries; show/store language, not opaque IDs,
