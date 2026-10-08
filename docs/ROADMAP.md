@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-07, main `ad6a5cf` (PR #9). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-08, main `31d842e` (PR #10). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -167,11 +167,10 @@ Go tests/vet, build và 12 browser/API scenarios đạt local. Đã merge qua
 [PR #9](https://github.com/Loccao102/LocCaoEnglish/pull/9), commit `ad6a5cf`.
 [CI 109](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37578203639) đạt
 đủ 6 jobs trên runtime `32e1d68`, gồm PostgreSQL/race và 74 E2E browser.
-Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
-Story Choice: server quyết định lựa chọn/hậu quả và đường đi của từng lượt,
-giữ retry/reload và không thưởng lặp; sau đó tiếp tục hai luồng nghe/chép chính tả.
+Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Tiếp nối bằng lát cắt
+Story Choice bên dưới, sau đó tiếp tục hai luồng nghe/chép chính tả.
 
-Tiếp nối 2026-10-08: Codex, branch `codex/core003-story-choice`, `in_review`.
+Tiếp nối 2026-10-08: Codex, branch `codex/core003-story-choice`, `done` cho lát cắt này.
 Story Choice dùng chuỗi learning attempts liên kết do server cấp. Mỗi cảnh chấm
 lựa chọn thực tế; chỉ mở cảnh tiếp từ kết quả đã lưu, cùng parent luôn trả cùng
 child kể cả request đồng thời. Snapshot riêng giữ toàn bộ graph/version, deadline
@@ -181,8 +180,13 @@ thúc khác nhau. Giữ daily cap theo cảnh, không thêm thưởng kết thú
 được mở rộng nhưng không đổi SQL; chặn story-choice ở API accuracy cũ.
 Nghiệm thu: mọi nhánh kết thúc, owner/version/retry, không nhảy cảnh, concurrent
 continue, snapshot qua đổi catalog/reconnect, reload/lost response và mobile.
-Local Go tests/vet, build và 13 browser/API scenarios đạt; còn chờ CI đầy đủ,
-gồm PostgreSQL/race trước merge. Toàn CORE-003 vẫn `in_progress`.
+Local Go tests/vet, build và 13 browser/API scenarios đạt. Đã merge qua
+[PR #10](https://github.com/Loccao102/LocCaoEnglish/pull/10), commit `31d842e`.
+[CI 112](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37667016258) đạt
+đủ 6 jobs trên runtime `7d2482a`, gồm PostgreSQL/race và 79 E2E browser (16.3m).
+Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
+Listen & Pick và Dictation Rush: chấm ở server, lưu câu trả lời thật và giữ
+retry/reload theo lifecycle chung; chưa mở rộng số lượng trò chơi.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

@@ -353,7 +353,7 @@ uniqueness. No SQL migration, new reward ledger, dependencies or assets.
 - Store tests cover parallel continue calls producing one child, account boundary,
   changed-answer conflicts, daily caps, immutable graph/history copies, inherited
   expiry, terminal rejection and saved-version continuation. The PostgreSQL variant
-  reconnects through another store; it still awaits Linux CI.
+  reconnects through another store; it passed in Linux CI 112.
 - `npm run build` passed with 58 routes. Private consequence text was absent from
   client chunks; the old client-side graph and grading code were removed.
 - 13 Playwright browser/API scenarios passed locally (initial run 19.6s) using
@@ -365,7 +365,16 @@ uniqueness. No SQL migration, new reward ledger, dependencies or assets.
 - Desktop and 390 × 551 / 390 × 844 screenshots inspected. Scene text >=18px,
   option text >=16px, targets >=44px; keyboard and no-horizontal-overflow checks
   passed. The story uses normal scrolling without shrinking the content.
-- Full CI including PostgreSQL/race and the full browser suite is pending.
+- Full CI including PostgreSQL/race and the full browser suite passed in CI 112.
+
+Final evidence, 2026-10-08 (Asia/Bangkok):
+[CI 112](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37667016258)
+passed all six jobs on runtime `7d2482ae024c96119508fc2a1919d1be08ac9fb2`.
+The browser log reports **79 passed (16.3m)**.
+[PR #10](https://github.com/Loccao102/LocCaoEnglish/pull/10) merged as `31d842e`.
+The acceptance follow-up changes documentation only; application code remains
+the tested revision. Relative links and diff were checked without rerunning
+gameplay tests for documentation-only changes.
 
 No production deployment. Local memory results are temporary. API first; retain
 story-choice.v1 snapshot decoding, grading, continuation and legacy rejection on
