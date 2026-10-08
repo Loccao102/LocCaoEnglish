@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph, Reading Race và Story Choice dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph, Reading Race, Story Choice và Listen & Pick dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -187,6 +187,18 @@ Local Go tests/vet, build và 13 browser/API scenarios đạt. Đã merge qua
 Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
 Listen & Pick và Dictation Rush: chấm ở server, lưu câu trả lời thật và giữ
 retry/reload theo lifecycle chung; chưa mở rộng số lượng trò chơi.
+
+Tiếp nối 2026-10-08: Codex, branch `codex/core003-listen-pick`, `in_review`.
+Phạm vi: Listen & Pick ở `/listening` dùng catalog/snapshot và chấm lựa chọn thật
+tại server; giữ các campaign nghe đang có. Ghi yêu cầu phát, tốc độ và kết quả
+phát do browser báo trong snapshot; retry không đếm lặp, reload giữ hỗ trợ.
+Chỉ mở chọn đáp án sau khi xác nhận phát xong; lỗi/fallback không giả làm đã nghe.
+Nghiệm thu: owner/version/expiry, đúng/sai, daily cap, replay/slow, audio lỗi,
+mất phản hồi, chuyển tài khoản, snapshot cũ và mobile. Đây là guided practice,
+không chứng minh người chơi đã nghe thật hoặc làm bài không hỗ trợ. Dictation
+Rush là lát cắt riêng sau khi luồng âm thanh này đã được nghiệm thu.
+Go tests/vet, build và 16 browser/API scenarios đạt local; đã phát thử giọng đọc
+thật của browser và kiểm tra màn 390px. Chờ full CI/PostgreSQL trước merge.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

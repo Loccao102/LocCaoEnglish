@@ -18,7 +18,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request) {
 	}
 	// Migrated activities must not award progress through the older accuracy API.
 	switch strings.ToLower(strings.TrimSpace(in.Activity)) {
-	case "word-link", "grammar-repair", "collocation-factory", "sentence-builder", "word-graph", "reading-race", "story-choice":
+	case "word-link", "grammar-repair", "collocation-factory", "sentence-builder", "word-graph", "reading-race", "story-choice", "listen-pick":
 		problem(w, http.StatusConflict, "use server-owned learning attempts for this activity")
 		return
 	}

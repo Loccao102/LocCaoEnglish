@@ -147,8 +147,16 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
     keep({ ...reference.current, draft: value }); setDraft(value);
   }
   const result = attempt?.result || null;
+ function acceptAudioUpdate(next: LearningAttempt, token: string) {
+   if (token !== getAuthToken() || next.activity !== activity || reference.current?.attemptId !== next.attemptId) return;
+   setAttempt(previous => previous?.attemptId === next.attemptId && !previous.result ? next : previous);
+   if (next.result) {
+     keep({ ...reference.current, pending: undefined });
+     setSelected(next.result.actualAnswer); setPhase("feedback");
+   }
+ }
   const score = context.score + (result?.xpDelta || 0), streak = result ? result.correct ? context.streak + 1 : 0 : context.streak;
-  return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel,
+  return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel, acceptAudioUpdate,
     retry: () => reference.current?.pending && attempt ? void submit(reference.current.pending) : void open(),
     restart: () => void open(activity === "story-choice" ? initial() : { ...context, score: 0, streak: 0 }),
   };

@@ -19,9 +19,10 @@ var ErrAttemptExpired = errors.New("this round expired; start a new round")
 var ErrAttemptInput = errors.New("invalid answer or content/rules version; refresh and try again")
 
 type LearningSnapshot struct {
-	Story  *StorySnapshot                  `json:"story,omitempty"`
-	Input  model.LearningAttemptStartInput `json:"input"`
-	Prompt model.LearningAttemptPrompt     `json:"prompt"`
+	Listening *ListeningSnapshot              `json:"listening,omitempty"`
+	Story     *StorySnapshot                  `json:"story,omitempty"`
+	Input     model.LearningAttemptStartInput `json:"input"`
+	Prompt    model.LearningAttemptPrompt     `json:"prompt"`
 }
 
 type LearningAttemptRecord struct {
@@ -228,7 +229,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 					return model.LearningAttemptResult{}, err
 				}
 			}
-			if _, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,grading_source,content_version,rules_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,0,'server-objective',$9,$10)`, rec.ID, userID, rec.Skill, rec.Activity, rec.ItemKey, rec.Prompt, actual, accuracy, rec.ContentVersion, rec.RulesVersion); err != nil {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,grading_source,content_version,rules_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,0,$11,$9,$10)`, rec.ID, userID, rec.Skill, rec.Activity, rec.ItemKey, rec.Prompt, actual, accuracy, rec.ContentVersion, rec.RulesVersion, learningEvidence(rec)); err != nil {
 				return model.LearningAttemptResult{}, err
 			}
 		}
@@ -345,12 +346,14 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 	if story != nil {
 		rec.Feedback = story.Consequence
 	}
+	evidence := learningEvidence(rec)
 	return model.LearningAttemptResult{
+		Listening: ListeningEvidenceOf(rec, true),
 		Story:     story,
 		AttemptID: rec.ID, Status: rec.Status, Correct: rec.Correct, CorrectAnswer: rec.CorrectAnswer,
 		Feedback: rec.Feedback, XPDelta: rec.XPDelta, NewConfidence: rec.ResultConfidence,
 		Level: rec.ResultLevel, ReviewAdded: rec.ReviewAdded, ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion,
-		ActualAnswer: learningAnswerText(rec, rec.SubmittedAnswer), ProgressionApplied: rec.ProgressionApplied, Evidence: "server-objective",
+		ActualAnswer: learningAnswerText(rec, rec.SubmittedAnswer), ProgressionApplied: rec.ProgressionApplied, Evidence: evidence,
 	}
 }
 
@@ -371,6 +374,7 @@ func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snap
 	return rec.Activity == activity && rec.CEFRLevel == level && string(left) == string(right)
 }
 func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
+	rec.Snapshot.Listening = cloneListening(rec.Snapshot.Listening)
 	rec.Snapshot.Story = cloneStory(rec.Snapshot.Story)
 	rec.Snapshot.Prompt.Chunks = append([]model.SentenceChunk(nil), rec.Snapshot.Prompt.Chunks...)
 	rec.Snapshot.Prompt.Options = append([]string(nil), rec.Snapshot.Prompt.Options...)
@@ -386,6 +390,11 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	}
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
+	}
+	if rec.Activity == "listen-pick" {
+		if rec.RulesVersion != learning.ListeningRulesVersion || !listeningReady(rec) {
+			return ErrAttemptConflict
+		}
 	}
 	if rec.Activity == "story-choice" {
 		if _, ok := storyChoiceOf(rec, answer); !ok || rec.RulesVersion != learning.StoryRulesVersion {

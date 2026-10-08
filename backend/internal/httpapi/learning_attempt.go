@@ -66,9 +66,21 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var publicPrompt model.LearningAttemptPrompt
+	var listeningSnapshot *store.ListeningSnapshot
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "listen-pick":
+		item, err := learning.PickListening(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Listening", item.ID
+		contentVersion, rulesVersion = learning.ListeningContentVersion(), learning.ListeningRulesVersion
+		promptText, correctAnswer, feedback = item.Transcript+"\n\n"+item.Question, item.CorrectAnswer, item.Feedback
+		publicPrompt = model.LearningAttemptPrompt{Question: item.Question, Options: learning.ShuffledListeningOptions(item, in.RequestID)}
+		listeningSnapshot = &store.ListeningSnapshot{Transcript: item.Transcript, Events: []model.ListeningPlayback{}}
 	case "story-choice":
 		rec, created, err := s.store.StartStoryChoice(r.Context(), userID, in)
 		if err != nil {
@@ -175,7 +187,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 	rec, created, err := s.store.StartLearningAttempt(
 		r.Context(), userID, in.RequestID, in.Activity, skill, itemKey, level,
 		contentVersion, rulesVersion, promptText, correctAnswer, feedback,
-		store.LearningSnapshot{Input: in, Prompt: publicPrompt},
+		store.LearningSnapshot{Input: in, Prompt: publicPrompt, Listening: listeningSnapshot},
 	)
 	if err != nil {
 		learningError(w, err)
@@ -199,6 +211,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack string) (model.LearningAttemptStart, bool) {
 	base := model.LearningAttemptStart{
+		Listening: store.ListeningEvidenceOf(rec, false),
 		Story:     store.StoryRoundOf(rec),
 		AttemptID: rec.ID, Activity: rec.Activity, ItemKey: rec.ItemKey, CEFRLevel: rec.CEFRLevel,
 		ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, Status: rec.Status,

@@ -140,3 +140,35 @@ that edge; pending choices and account isolation keep the existing behavior.
 Previous reference formats and non-story activities remain compatible. API-first
 rollout; retain the story snapshot decoder/grader/continue path and legacy rejection
 on rollback. Saved graph versions remain readable; do not delete user progress.
+
+## Listen & Pick extension — 2026-10-08
+
+Keep the transcript in a private listening snapshot; public prompts project only
+question and shuffled choices. Audio preparation uses the saved transcript, never
+client-supplied text or a newer catalog. The existing AI service is attempted with
+an eight-second deadline. Neural bytes are returned without transcript; unavailable
+neural audio explicitly falls back to browser synthesis, which requires text.
+This fallback is intentional source exposure, so every result is guided practice.
+
+The private snapshot has a bounded audio journal: stable request UUID, rate,
+requested/completed/failed state and reported provider. Preparation persists before
+calling TTS; media callbacks determine the browser's completion/failure report.
+Store audio changes under the same row/memory lock as grade, freezing assistance
+with the final verdict. Terminal reports are immutable and idempotent, including
+after grade. Repeated preparation does not create another event. Incomplete events
+from interruptions remain requested and do not imply playback succeeded.
+
+Persist the pending audio operation by attempt ID before sending; persist a terminal
+report before acknowledging it. Reload retries that operation, and a lost committed
+report restores from the server without replaying. Cleanup cancels active media on
+route/account change and ignores stale responses. Submitted answers continue using
+the shared owner-scoped lifecycle. No SQL schema or second reward engine is added.
+
+Grade actual offered choices, require a completed report, reveal transcript and
+explanation only in feedback, and reject the legacy accuracy route. Playback
+callbacks/provider claims can be forged by a modified client; the gate is a guided
+practice interaction, not anti-cheat evidence. Mark result and attempt provenance
+`server-objective-guided-listening`; never upgrade it to verified unaided listening.
+Replay/slow listening have no bonus or penalty, and existing daily claims remain.
+API first; retain snapshot/audio/grader support and legacy rejection on rollback.
+Dictation alignment and its scoring contract remain a separate CORE-003 slice.

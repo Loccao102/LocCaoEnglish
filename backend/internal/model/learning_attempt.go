@@ -26,6 +26,7 @@ type SentenceChunk struct {
 }
 
 type LearningAttemptStart struct {
+	Listening      *ListeningEvidence     `json:"listening,omitempty"`
 	Story          *StoryRound            `json:"story,omitempty"`
 	AttemptID      string                 `json:"attemptId"`
 	Activity       string                 `json:"activity"`
@@ -48,21 +49,35 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
-	Story              *StoryOutcome `json:"story,omitempty"`
-	AttemptID          string        `json:"attemptId"`
-	Status             string        `json:"status"`
-	Correct            bool          `json:"correct"`
-	CorrectAnswer      string        `json:"correctAnswer"`
-	Feedback           string        `json:"feedback"`
-	XPDelta            int           `json:"xpDelta"`
-	NewConfidence      float64       `json:"newConfidence"`
-	Level              int           `json:"level"`
-	ReviewAdded        bool          `json:"reviewAdded"`
-	ContentVersion     string        `json:"contentVersion"`
-	RulesVersion       string        `json:"rulesVersion"`
-	ActualAnswer       string        `json:"actualAnswer"`
-	ProgressionApplied bool          `json:"progressionApplied"`
-	Evidence           string        `json:"evidence"`
+	Listening          *ListeningEvidence `json:"listening,omitempty"`
+	Story              *StoryOutcome      `json:"story,omitempty"`
+	AttemptID          string             `json:"attemptId"`
+	Status             string             `json:"status"`
+	Correct            bool               `json:"correct"`
+	CorrectAnswer      string             `json:"correctAnswer"`
+	Feedback           string             `json:"feedback"`
+	XPDelta            int                `json:"xpDelta"`
+	NewConfidence      float64            `json:"newConfidence"`
+	Level              int                `json:"level"`
+	ReviewAdded        bool               `json:"reviewAdded"`
+	ContentVersion     string             `json:"contentVersion"`
+	RulesVersion       string             `json:"rulesVersion"`
+	ActualAnswer       string             `json:"actualAnswer"`
+	ProgressionApplied bool               `json:"progressionApplied"`
+	Evidence           string             `json:"evidence"`
+}
+
+// Playback completion is reported by the browser, never proof that a human heard it.
+type ListeningPlayback struct {
+	RequestID string  `json:"requestId"`
+	Rate      float64 `json:"rate"`
+	Status    string  `json:"status"`
+	Provider  string  `json:"provider,omitempty"`
+}
+type ListeningEvidence struct {
+	Events     []ListeningPlayback `json:"events"`
+	Source     string              `json:"source"`
+	Transcript string              `json:"transcript,omitempty"`
 }
 
 type StoryDecision struct {
