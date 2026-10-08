@@ -26,6 +26,7 @@ type SentenceChunk struct {
 }
 
 type LearningAttemptStart struct {
+	Story          *StoryRound            `json:"story,omitempty"`
 	AttemptID      string                 `json:"attemptId"`
 	Activity       string                 `json:"activity"`
 	Pack           string                 `json:"pack"`
@@ -47,18 +48,38 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
-	AttemptID          string  `json:"attemptId"`
-	Status             string  `json:"status"`
-	Correct            bool    `json:"correct"`
-	CorrectAnswer      string  `json:"correctAnswer"`
-	Feedback           string  `json:"feedback"`
-	XPDelta            int     `json:"xpDelta"`
-	NewConfidence      float64 `json:"newConfidence"`
-	Level              int     `json:"level"`
-	ReviewAdded        bool    `json:"reviewAdded"`
-	ContentVersion     string  `json:"contentVersion"`
-	RulesVersion       string  `json:"rulesVersion"`
-	ActualAnswer       string  `json:"actualAnswer"`
-	ProgressionApplied bool    `json:"progressionApplied"`
-	Evidence           string  `json:"evidence"`
+	Story              *StoryOutcome `json:"story,omitempty"`
+	AttemptID          string        `json:"attemptId"`
+	Status             string        `json:"status"`
+	Correct            bool          `json:"correct"`
+	CorrectAnswer      string        `json:"correctAnswer"`
+	Feedback           string        `json:"feedback"`
+	XPDelta            int           `json:"xpDelta"`
+	NewConfidence      float64       `json:"newConfidence"`
+	Level              int           `json:"level"`
+	ReviewAdded        bool          `json:"reviewAdded"`
+	ContentVersion     string        `json:"contentVersion"`
+	RulesVersion       string        `json:"rulesVersion"`
+	ActualAnswer       string        `json:"actualAnswer"`
+	ProgressionApplied bool          `json:"progressionApplied"`
+	Evidence           string        `json:"evidence"`
+}
+
+type StoryDecision struct {
+	Scene       string `json:"scene"`
+	Answer      string `json:"answer"`
+	Consequence string `json:"consequence"`
+	XP          int    `json:"xp"`
+}
+type StoryRound struct {
+	RunID   string          `json:"runId"`
+	Step    int             `json:"step"`
+	History []StoryDecision `json:"history"`
+}
+type StoryOutcome struct {
+	Consequence string `json:"consequence"`
+	CanContinue bool   `json:"canContinue"`
+	Ending      string `json:"ending,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Text        string `json:"text,omitempty"`
 }

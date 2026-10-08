@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph and Reading Race reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race and Story Choice reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,7 +49,7 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`.
 Word Link, Grammar, Collocation and Sentence core banks support CEFR A1–C2.
 Word Graph supports only travel-network at A2. Reading Race supports only
 cefr-core at A2/B1/B2. Default pack `cefr-core` is not a Word Graph pack.
@@ -190,6 +190,50 @@ daily claims and 20/0 correct/wrong XP apply; no new reward policy or SQL migrat
 Deploy API before web. On rollback keep the new prompt fields, saved-round support
 and legacy rejection (including case/whitespace aliases), or disable new rounds;
 do not restore client accuracy or reclassify legacy history.
+
+### Story Choice chains
+
+Start with activity `story-choice`, pack `hotel-check-in`, level `B1`, a UUIDv4
+requestId and no exclusions. Catalog `2026-10-08.1` / rules `story-choice.v1`
+contain five decision scenes and four endings. Multiple opening responses are
+effective; validity is the authored scenario rubric, not universal language mastery.
+The usual start/get/submit endpoints handle each decision. Submit actual option
+text, never a score, destination or complete path. Wrong choices may reach a
+recovery scene or an unresolved ending; success depends on confirming both nights.
+
+The prompt contains title/passage/question/options. Top-level `story` contains
+runId, one-based step and prior committed history (scene/answer/consequence/xp).
+No private definition, destination, per-choice verdict or future scene is sent.
+After submission `result.story` contains consequence, canContinue, and optional
+ending (`success`/`unresolved`), title and text. `correctAnswer` lists effective
+responses with OR; it is a review reference, not a client grading key.
+
+`POST /v1/learning/attempts/{parentId}/continue` with exactly `{}` returns 200
+for the unique child of a completed nonterminal Story Choice decision. Ownership
+is checked; incomplete, non-story and terminal parents return 409. The private
+snapshot determines the destination. A reserved internal request key plus the
+existing owner/request uniqueness constraint ensures repeated/concurrent calls
+return one child, even if its result is already completed. Public start accepts
+only UUIDv4 and cannot occupy this reserved key. Foreign owners receive 404.
+
+Each node retains the root's 24-hour deadline. Creating a child after that deadline
+returns 410; an already-created child can still be retrieved and completed-result
+retries remain valid. The full graph/version and decision history are stored in
+private snapshot JSON. Later nodes use that saved graph even after catalog updates.
+Browser references optionally keep parentAttemptId before continuing, so a lost
+continue response or reload retries the same edge rather than opening a new root.
+
+The existing daily claim applies per scene/content-version/UTC day: effective
+choices give 20 XP when eligible, others 0. There is no ending bonus or separate
+reward ledger; these are learning practice rewards, not Adventure story rewards.
+Path XP comes from the server's recorded history. Replaying another path may
+encounter a new scene but cannot re-award an already claimed scene that day.
+
+No SQL migration; existing snapshots omit the optional story fields. Deploy API
+before web. On rollback retain the story-choice.v1 snapshot decoder, grader, continuation
+handler and legacy rejection, or disable new story roots while keeping saved
+rounds readable. Do not roll back to client accuracy. Old clients need refresh;
+legacy history is unchanged. No timer, hints or competitive certification added.
 
 ## Review queue
 

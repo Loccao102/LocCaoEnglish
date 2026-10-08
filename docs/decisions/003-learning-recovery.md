@@ -22,7 +22,7 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, Word Graph and Reading Race reject generic client-accuracy submissions.
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race and Story Choice reject generic client-accuracy submissions.
   Other learning/competitive routes remain CORE-003/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
@@ -110,3 +110,33 @@ and daily claims. The text remains visible: this assesses comprehension with the
 source available, not unaided recall or reading speed. No timer, hint bonus or
 schema change. Keep the new prompt fields, saved-round grading and legacy rejection
 when rolling back. Old client accuracy receives 409; refresh after API-first rollout.
+
+## Story Choice extension — 2026-10-08
+
+Represent each decision as an ordinary immutable learning attempt, connected by
+a server-only parent/child edge. Retain the graph, node, root deadline and committed
+history in a private snapshot field. Public prompts contain only the current scene;
+public history contains only decisions already made. This keeps the existing
+owner checks, atomic grade/progression transaction and daily claims instead of
+introducing a second reward engine or SQL table.
+
+Continue accepts a completed parent ID and an empty body. Its persisted choice
+selects the next node from the saved definition. The reserved request key
+`story-next:<parent ID>` and existing owner/request constraint guarantee one child
+under retries/concurrency. Public starts require UUIDv4, so clients cannot preempt
+that namespace. A terminal/ungraded parent cannot continue. Existing children are
+returned unchanged; fresh children inherit the root deadline, not a renewed TTL.
+
+The story-choice.v1 adapter permits multiple effective options according to the
+authored scenario rubric. Result feedback describes the chosen consequence and
+an ending when reached. The canonical answer is a review reference listing valid
+options, not a separate scoring authority. Practice rewards stay capped per scene;
+endings add no bonus. This is distinct from Adventure quest rewards and does not
+claim unaided or competitive evidence. Reopening a root is explicit replay.
+
+The shared frontend lifecycle persists an optional parentAttemptId before a
+continue request, then stores the returned child ID. Reload/network failure retries
+that edge; pending choices and account isolation keep the existing behavior.
+Previous reference formats and non-story activities remain compatible. API-first
+rollout; retain the story snapshot decoder/grader/continue path and legacy rejection
+on rollback. Saved graph versions remain readable; do not delete user progress.

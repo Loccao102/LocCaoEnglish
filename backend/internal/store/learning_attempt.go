@@ -19,6 +19,7 @@ var ErrAttemptExpired = errors.New("this round expired; start a new round")
 var ErrAttemptInput = errors.New("invalid answer or content/rules version; refresh and try again")
 
 type LearningSnapshot struct {
+	Story  *StorySnapshot                  `json:"story,omitempty"`
 	Input  model.LearningAttemptStartInput `json:"input"`
 	Prompt model.LearningAttemptPrompt     `json:"prompt"`
 }
@@ -102,6 +103,9 @@ func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, act
 		return LearningAttemptRecord{}, false, err
 	}
 	expires := time.Now().UTC().Add(24 * time.Hour)
+	if snapshot.Story != nil {
+		expires = snapshot.Story.Deadline
+	}
 	if s.db != nil {
 		id := newID()
 		result, err := s.db.ExecContext(ctx, `
@@ -173,7 +177,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		}
 
 		actual := learningAnswerText(rec, answer)
-		correct := sameAnswer(rec.CorrectAnswer, actual)
+		correct := learningCorrect(rec, answer)
 		applied := false
 		if userID != "" {
 			claim, err := tx.ExecContext(ctx, `INSERT INTO learning_daily_rewards(user_id,item_key,content_version,reward_day,attempt_id) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, userID, rec.ItemKey, rec.ContentVersion, time.Now().UTC().Format("2006-01-02"), rec.ID)
@@ -267,7 +271,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	}
 	key := fmt.Sprintf("%s:%s:%s:%s", userID, rec.ItemKey, rec.ContentVersion, time.Now().UTC().Format("2006-01-02"))
 	applied := userID != "" && !s.learningRewards[key]
-	correct := sameAnswer(rec.CorrectAnswer, learningAnswerText(rec, answer))
+	correct := learningCorrect(rec, answer)
 	accuracy, xp := 0.0, 0
 	if correct {
 		accuracy = 1
@@ -337,7 +341,12 @@ func learningAttemptFromRow(row learningRow) (LearningAttemptRecord, error) {
 }
 
 func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResult {
+	story := storyOutcome(rec)
+	if story != nil {
+		rec.Feedback = story.Consequence
+	}
 	return model.LearningAttemptResult{
+		Story:     story,
 		AttemptID: rec.ID, Status: rec.Status, Correct: rec.Correct, CorrectAnswer: rec.CorrectAnswer,
 		Feedback: rec.Feedback, XPDelta: rec.XPDelta, NewConfidence: rec.ResultConfidence,
 		Level: rec.ResultLevel, ReviewAdded: rec.ReviewAdded, ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion,
@@ -362,6 +371,7 @@ func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snap
 	return rec.Activity == activity && rec.CEFRLevel == level && string(left) == string(right)
 }
 func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
+	rec.Snapshot.Story = cloneStory(rec.Snapshot.Story)
 	rec.Snapshot.Prompt.Chunks = append([]model.SentenceChunk(nil), rec.Snapshot.Prompt.Chunks...)
 	rec.Snapshot.Prompt.Options = append([]string(nil), rec.Snapshot.Prompt.Options...)
 	rec.Snapshot.Input.ExcludeItemKeys = append([]string(nil), rec.Snapshot.Input.ExcludeItemKeys...)
@@ -376,6 +386,11 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	}
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
+	}
+	if rec.Activity == "story-choice" {
+		if _, ok := storyChoiceOf(rec, answer); !ok || rec.RulesVersion != learning.StoryRulesVersion {
+			return ErrAttemptInput
+		}
 	}
 	if rec.Activity == "sentence-builder" {
 		if rec.RulesVersion != learning.SentenceRulesVersion {

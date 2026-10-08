@@ -11,7 +11,7 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph và Reading Race dùng chung server attempts và lifecycle khôi phục;
+- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph, Reading Race và Story Choice dùng chung server attempts và lifecycle khôi phục;
   các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
@@ -170,6 +170,19 @@ Go tests/vet, build và 12 browser/API scenarios đạt local. Đã merge qua
 Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
 Story Choice: server quyết định lựa chọn/hậu quả và đường đi của từng lượt,
 giữ retry/reload và không thưởng lặp; sau đó tiếp tục hai luồng nghe/chép chính tả.
+
+Tiếp nối 2026-10-08: Codex, branch `codex/core003-story-choice`, `in_review`.
+Story Choice dùng chuỗi learning attempts liên kết do server cấp. Mỗi cảnh chấm
+lựa chọn thực tế; chỉ mở cảnh tiếp từ kết quả đã lưu, cùng parent luôn trả cùng
+child kể cả request đồng thời. Snapshot riêng giữ toàn bộ graph/version, deadline
+và lịch sử quyết định; API chỉ công khai cảnh hiện tại, hậu quả sau submit.
+Pack hotel-check-in B1, nhiều lựa chọn hợp lý ở cảnh mở đầu, nhánh sửa sai và kết
+thúc khác nhau. Giữ daily cap theo cảnh, không thêm thưởng kết thúc. JSON snapshot
+được mở rộng nhưng không đổi SQL; chặn story-choice ở API accuracy cũ.
+Nghiệm thu: mọi nhánh kết thúc, owner/version/retry, không nhảy cảnh, concurrent
+continue, snapshot qua đổi catalog/reconnect, reload/lost response và mobile.
+Local Go tests/vet, build và 13 browser/API scenarios đạt; còn chờ CI đầy đủ,
+gồm PostgreSQL/race trước merge. Toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |

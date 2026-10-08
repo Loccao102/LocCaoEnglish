@@ -69,6 +69,23 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "story-choice":
+		rec, created, err := s.store.StartStoryChoice(r.Context(), userID, in)
+		if err != nil {
+			learningError(w, err)
+			return
+		}
+		response, ok := learningAttemptResponse(rec, pack)
+		if !ok {
+			problem(w, 409, "story snapshot unavailable")
+			return
+		}
+		status := http.StatusOK
+		if created {
+			status = http.StatusCreated
+		}
+		write(w, status, response)
+		return
 	case "reading-race":
 		item, err := learning.PickReading(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {
@@ -182,6 +199,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack string) (model.LearningAttemptStart, bool) {
 	base := model.LearningAttemptStart{
+		Story:     store.StoryRoundOf(rec),
 		AttemptID: rec.ID, Activity: rec.Activity, ItemKey: rec.ItemKey, CEFRLevel: rec.CEFRLevel,
 		ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, Status: rec.Status,
 		Pack: rec.Snapshot.Input.Pack, Prompt: rec.Snapshot.Prompt, ExpiresAt: rec.ExpiresAt, Result: store.LearningResult(rec), Mode: "account",
