@@ -381,3 +381,51 @@ story-choice.v1 snapshot decoding, grading, continuation and legacy rejection on
 rollback. This is scenario-based guided practice, separate from Adventure rewards;
 no unassisted/competitive claim, ending bonus or timer. More scenarios and B1
 difficulty calibration need playtesting. CORE-003 is not complete.
+
+## Listen & Pick grading and playback recovery — 2026-10-08
+
+Scope: CORE-003, branch `codex/core003-listen-pick`, based on main `bf25b18`.
+Eighteen B1 clips across core and five existing campaign packs; private server
+catalog, shuffled choices, actual-answer grading and shared recovery. Removed
+the duplicate browser bank and consolidated the obsolete ListeningPick export.
+Playback preparation and client completion/failure reports use an idempotent
+journal in the existing snapshot JSON, serialized with grading. No SQL migration,
+new reward ledger, assets or dependencies.
+
+- `go test ./...` and `go vet ./...` passed locally (memory). Domain checks cover
+  all packs, distinct clips, answer membership, shuffle and independent copies.
+  HTTP checks cover guest/account, correct/wrong, transcript/key projection,
+  private audio source, fallback versus neural response, requested/failed gating,
+  input/version/owner, immutable retry/reload, review and legacy rejection.
+- Memory/PostgreSQL tests cover concurrent preparation, immutable terminal
+  reports, report retry after grade, catalog-independent saved transcript/version,
+  independent event copies, expiry, reconnect, daily cap and grading provenance.
+  PostgreSQL/race passed in Linux CI 115.
+- `npm run build` passed (58 routes), including TypeScript. Transcript and
+  feedback sentinels are absent from compiled client chunks. Browser synthesis
+  deliberately receives source text at playback time, so this is guided practice.
+- 16 targeted browser/API scenarios passed (35.1s) on production frontend and
+  real local Go memory API: existing seven activities' recovery plus listening
+  start/end gating, slow replay, both lost-report boundaries, failed audio,
+  pending wrong answer, lost committed grade, cross-tab completion recovery, account isolation/media cleanup,
+  three non-repeating clips, keyboard and both small-phone sizes. These tests
+  simulate speech/media callbacks because headless CI has no installed voice;
+  one neural media test also substitutes its audio payload. They are not proof
+  of configured Azure synthesis.
+- A separate local Chromium check used the native browser speech engine without
+  media mocks. It completed a real clip and then unlocked all four choices.
+  Desktop and 390 × 551 / 390 × 844 screenshots inspected; choices use 18px text,
+  controls at least 48px high and no horizontal overflow.
+- CI 115 on `2458345` passed five jobs including PostgreSQL/race; browser suite
+  reported 85 passed and one failed campaign label check. The new listening
+  toolbar had replaced the established `WORK · REQUIREMENTS` label. Restored
+  consistent campaign labels; retained the regression assertion. Build and all
+  14 core/listening browser tests passed again locally (27.1s). Full CI on the
+  follow-up revision remains pending.
+
+No production deployment. Local memory is temporary; Azure credentials/service
+were not configured for the native-audio check. Playback reports can be forged by
+a modified client and never prove unaided listening. Results and saved attempt
+provenance identify guided listening. API first; keep snapshot/audio/grader support
+and legacy rejection on rollback. B1 calibration and more levels require player
+trials; Dictation Rush and the rest of CORE-003 remain open.

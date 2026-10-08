@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race and Story Choice reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice and Listen & Pick reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,7 +49,45 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`.
+Listen & Pick uses `listen-pick.v1`, catalog `2026-10-08.1`: B1 only, three clips
+each in `cefr-core`, `travel-airport`, `travel-transit`, `conversation-cafe`,
+`conversation-plans`, and `work-requirements`. Start/resume prompts contain question
+and shuffled choices, never the transcript, key or feedback. Listening metadata is
+`{events:[{requestId,rate,status,provider?}],source:"client-reported-playback"}`.
+
+`POST /v1/learning/attempts/{id}/audio` accepts
+`{requestId: UUIDv4, rate: 1|0.72, status: "requested"|"completed"|"failed", provider?, contentVersion, rulesVersion}`.
+For `requested`, omit provider. The server reserves one event and returns
+`{attempt, audio?: {provider,rate,audioBase64?,mimeType?,text?}}`. A configured
+neural provider returns audio/mpeg; timeout/unavailability returns the saved
+transcript for browser synthesis with provider `browser-speech-synthesis`.
+That text is intentional fallback assistance, not a hidden-assessment guarantee.
+No answer key or verdict is returned by the audio route. A repeated preparation
+for an event already completed/failed returns the attempt without another clip.
+
+The browser reports `completed` only after playback start and end callbacks;
+rejection, stop, unsupported voice and playback timeout report `failed`. Reports
+include provider `browser-speech-synthesis` or `azure-speech-neural-tts`. Providers
+and completion are client observations, not trusted proof of human listening.
+Both operations reuse their UUID on transport failure. A terminal event is
+immutable; identical report retries work even after grading. Conflicting reports
+or rates return 409, wrong owner 404, version/input errors 400, new events on an
+expired attempt 410. At most 32 events per round, no renewed TTL. Requested events
+may remain unfinished after a closed tab; they never count as completed listens.
+
+At least one completed report is required to submit (otherwise 409). The existing
+grade transaction locks the same row as audio updates and freezes the evidence.
+Result `listening` includes the transcript plus events; `evidence` and persisted
+`grading_source` are `server-objective-guided-listening`. Completed event count,
+`max(0, completed - 1)` replays, completed events at .72, failed events and provider
+are retained on reload. These are recorded observations, not exhaustive real-world
+listening counts. All rounds are guided practice: no unassisted/competitive claim
+or speed bonus. Existing per-item/version/UTC-day XP and review rules apply.
+Old saved activities need no migration; listening extends private JSON snapshots.
+Deploy API first. Rollback must retain listening snapshot decoding, audio operations,
+grading and legacy rejection, or disable new roots while supporting saved rounds.
+
 Word Link, Grammar, Collocation and Sentence core banks support CEFR A1–C2.
 Word Graph supports only travel-network at A2. Reading Race supports only
 cefr-core at A2/B1/B2. Default pack `cefr-core` is not a Word Graph pack.
@@ -123,7 +161,8 @@ the current catalog. No answer key/feedback is sent before completion.
 
 Result contains `correct`, `actualAnswer`, `correctAnswer`, `feedback`, `xpDelta`,
 `newConfidence`, `level`, `reviewAdded`, `progressionApplied`, `evidence:
-server-objective`, attempt/status and versions. Only offered answers (or a complete
+server-objective` (or `server-objective-guided-listening` for Listen & Pick),
+attempt/status and versions. Only offered answers (or a complete
 sentence chunk permutation as described above) are accepted;
 comparison ignores surrounding whitespace and case. Wrong answers are retained as
 actual responses, while review teaches the correct answer. Guests and daily repeats

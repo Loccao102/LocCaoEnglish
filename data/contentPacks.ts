@@ -1,7 +1,6 @@
 export type GrammarRound={prompt:string;answer:string;options:string[]};
-export type ListeningRound={audio:string;q:string;answer:string;options:string[]};
 export type WordLinkRound={word:string;relation:string;answer:string;options:string[];note:string};
-export type LearningPack={label:string;grammarRounds:GrammarRound[];listeningRounds:ListeningRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
+export type LearningPack={label:string;grammarRounds:GrammarRound[];speakingPrompts:string[];wordLinkRounds:WordLinkRound[]};
 type PackOverride=Partial<Omit<LearningPack,"label">>&{label:string};
 
 const base:LearningPack={
@@ -13,11 +12,7 @@ const base:LearningPack={
   {prompt:"Choose the natural relative clause.",answer:"The hotel that we booked was close to the station.",options:["The hotel what we booked was close to station.","The hotel that we booked was close to the station.","The hotel we booked it was close to the station."]},
  ],
 
- listeningRounds:[
-  {audio:"Attention passengers. Flight VN218 to Da Nang will now depart from gate twelve instead of gate eight.",q:"What changed?",answer:"The departure gate",options:["The destination","The departure gate","The flight number","The airline"]},
-  {audio:"The museum closes at six, but the last guided tour begins at four thirty in the afternoon.",q:"When does the last guided tour begin?",answer:"4:30 p.m.",options:["4:00 p.m.","4:30 p.m.","5:30 p.m.","6:00 p.m."]},
-  {audio:"Due to engineering work, trains to Oxford will leave from platform six until noon, then return to platform three.",q:"Where do Oxford trains leave from before noon?",answer:"Platform six",options:["Platform three","Platform four","Platform six","Platform nine"]},
- ],
+
  speakingPrompts:["Could I have a window seat, please?","I usually prefer travelling by train because it is more comfortable.","One of the main reasons people move to large cities is the availability of better job opportunities."],
  wordLinkRounds:[
   {word:"significant",relation:"Choose the closest synonym",answer:"substantial",options:["minor","substantial","temporary","ordinary"],note:"Significant and substantial can both describe something large or important in degree."},
@@ -35,27 +30,15 @@ const packs:Record<string,PackOverride>={
   {word:"rebook",relation:"Choose the best meaning",answer:"book a replacement journey",options:["cancel all travel","book a replacement journey","check a suitcase","change currency"],note:"Rebook means arrange another booking, often after disruption."},
   {word:"miss",relation:"Choose the natural collocation",answer:"miss a flight",options:["miss a flight","miss a luggage","miss a passport","miss a gate number"],note:"Miss a flight is the natural collocation when you arrive too late."},
   {word:"connection",relation:"Choose the travel meaning",answer:"a linked onward flight",options:["a linked onward flight","a security officer","a seat upgrade","a baggage label"],note:"A connection is an onward flight linked to your journey."},
- ],listeningRounds:[
-  {audio:"Passengers for flight LC218 should proceed to gate C12. Boarding begins at seven oh five, twenty minutes earlier than scheduled.",q:"What should the passenger remember?",answer:"Gate C12 and 7:05 boarding",options:["Gate C12 and 7:05 boarding","Gate C7 and 7:20 boarding","Baggage claim C12","Check-in closes at 7:05"]},
-  {audio:"Your replacement flight leaves at seven forty and has one short connection in Singapore.",q:"What is special about the replacement flight?",answer:"It has one connection",options:["It is direct","It has one connection","It leaves tomorrow","It has no seats"]},
  ],speakingPrompts:["I missed my flight. Could you help me rebook, please?","I would prefer the earliest available flight, even if it has a short connection.","Could you confirm the gate and the boarding time for me?"]},
  "travel-hotel":{label:"TRAVEL · HOTEL",grammarRounds:[
   {prompt:"Choose the most natural polite request.",answer:"Could you check the reservation number again, please?",options:["You check reservation again.","Could you check the reservation number again, please?","Can checking my reservation now?"]},
   {prompt:"Repair the present perfect sentence.",answer:"I have already received a confirmation email.",options:["I already receive a confirmation email.","I have already received a confirmation email.","I have already receive confirmation email."]},
   {prompt:"Choose the natural indirect question.",answer:"Could you tell me whether breakfast is included?",options:["Could you tell me is breakfast included?","Could you tell me whether breakfast is included?","Tell me whether is breakfast included?"]},
  ],speakingPrompts:["I have a confirmed reservation, but I think it may be under my middle name.","Could you check this confirmation number again, please?","Could you tell me whether breakfast is included and what time checkout is?"]},
- "travel-transit":{label:"TRAVEL · TRANSIT",listeningRounds:[
-  {audio:"The last green-line train leaves Central at eleven twenty. Passengers from the blue line should change at platform four.",q:"Where should blue-line passengers change?",answer:"Platform four",options:["Platform two","Platform four","Platform seven","At the ticket office"]},
-  {audio:"Because of maintenance, trains toward Riverside will skip East Market tonight.",q:"Which stop will be skipped?",answer:"East Market",options:["Central","Riverside","East Market","West Park"]},
- ],speakingPrompts:["What is the fastest route to Central Station?","Where do I change from the blue line to the green line?","Which platform do I need, and how many minutes do I have before the last train?"]},
- "conversation-cafe":{label:"CONVERSATION · CAFE",listeningRounds:[
-  {audio:"I work nearby, but I usually come to this cafe after class because it is quieter in the evening.",q:"Why does the speaker come in the evening?",answer:"It is quieter",options:["It is cheaper","It is quieter","It closes later","Friends work there"]},
-  {audio:"I am really into badminton and films, but lately I have been learning photography too.",q:"What new interest does the speaker mention?",answer:"Photography",options:["Badminton","Films","Photography","Cooking"]},
- ],speakingPrompts:["Hi, my name is Loc. I don't think we've met before.","What about you? What do you usually do after work or class?","It was nice to meet you. Would you like to grab coffee again sometime?"]},
- "conversation-plans":{label:"CONVERSATION · MAKE PLANS",listeningRounds:[
-  {audio:"Saturday afternoon works for me, but I need to leave before six because I have dinner with my family.",q:"What restriction does the speaker have?",answer:"They must leave before six",options:["They cannot meet Saturday","They must leave before six","They need to meet at six","They have work all day"]},
-  {audio:"Let's meet outside the cinema at three fifteen rather than at the cafe, because the cafe gets crowded.",q:"Where will they meet?",answer:"Outside the cinema",options:["Inside the cafe","At the station","Outside the cinema","Near the lake"]},
- ],speakingPrompts:["How about going to the cinema this Saturday?","Would three o'clock at the cafe near the lake work for you?","Perfect. So we meet there at three. See you then."]},
+ "travel-transit":{label:"TRAVEL · TRANSIT",speakingPrompts:["What is the fastest route to Central Station?","Where do I change from the blue line to the green line?","Which platform do I need, and how many minutes do I have before the last train?"]},
+ "conversation-cafe":{label:"CONVERSATION · CAFE",speakingPrompts:["Hi, my name is Loc. I don't think we've met before.","What about you? What do you usually do after work or class?","It was nice to meet you. Would you like to grab coffee again sometime?"]},
+ "conversation-plans":{label:"CONVERSATION · MAKE PLANS",speakingPrompts:["How about going to the cinema this Saturday?","Would three o'clock at the cafe near the lake work for you?","Perfect. So we meet there at three. See you then."]},
  "conversation-clarity":{label:"CONVERSATION · CLARITY",grammarRounds:[
   {prompt:"Choose the most natural clarification.",answer:"Sorry, I'm not sure what you mean. Could you explain that again?",options:["Sorry, I'm not sure what you mean. Could you explain that again?","I don't understand you meaning.","Explain again because wrong."]},
   {prompt:"Choose the clearest rephrase.",answer:"What I mean is that I may arrive later, not that I am cancelling.",options:["I mean later not cancel maybe.","What I mean is that I may arrive later, not that I am cancelling.","My meaning is no cancel but late."]},
@@ -66,9 +49,6 @@ const packs:Record<string,PackOverride>={
   {prompt:"Choose the clearest clarification question.",answer:"What exactly should happen when the search returns no results?",options:["What exactly should happen when the search returns no results?","What happen search no result?","Should what happen no results?"]},
   {prompt:"Choose the natural confirmation.",answer:"So the requirement is to show suggestions when there are no exact matches, correct?",options:["So requirement suggestions no match correct?","So the requirement is to show suggestions when there are no exact matches, correct?","The requirement is suggestions when not match is it?"]},
   {prompt:"Repair the ambiguity statement.",answer:"The phrase 'better results' is unclear because it does not define the ranking rule.",options:["Better results unclear because no ranking rule define.","The phrase 'better results' is unclear because it does not define the ranking rule.","Better results is not clarity ranking."]},
- ],listeningRounds:[
-  {audio:"For this release, faster means the common search results should appear within one second, and exact title matches should rank first.",q:"What is the response-time target?",answer:"Within one second",options:["Within half a second","Within one second","Within three seconds","No target was given"]},
-  {audio:"If there are no exact matches, show up to five related suggestions rather than an empty state.",q:"What should happen when there is no exact match?",answer:"Show up to five related suggestions",options:["Show an error","Show up to five related suggestions","Reload automatically","Hide the search box"]},
  ],speakingPrompts:["The phrase 'better results' is unclear. Could we define what ranking behavior we expect?","What exactly should happen when a search returns no exact matches?","So the acceptance condition is one-second response time and exact title matches ranked first, correct?"]},
  "work-deadline":{label:"WORK · DELIVERY",grammarRounds:[
   {prompt:"Choose the calmest constraint statement.",answer:"I can commit to Friday for the core flow, but the full scope would put testing at risk.",options:["Friday is impossible and I won't do it.","I can commit to Friday for the core flow, but the full scope would put testing at risk.","Maybe Friday but testing no."]},

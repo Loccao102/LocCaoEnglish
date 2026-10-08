@@ -21,7 +21,7 @@ that all learning activities received a full manual playthrough in this pass.
 | Grammar Repair | A1–C2 and campaign content now use the same server attempts/recovery hook as Word Link | Preserve varied distractors and level/pack identity; validate depth through playtests |
 | Reading Race | Server snapshots replace client accuracy; nine A2–B2 passages, actual selections and post-submit evidence explanations | Three distinct passages per set, shared recovery, full passage in review and legacy rejection; CEFR calibration, wider content and optional pacing still need work |
 | Story Choice | Server-owned five-scene decision graph with four endings, multiple effective opening choices and recovery branches; immutable decisions and one child per parent | Snapshot graph/history, owner/retry/expiry, readable controls and legacy rejection replace client scoring; more scenarios and B1 calibration need playtests |
-| Listen & Pick | Active route uses `ListeningPractice`; fixed options and unrestricted replays | Track replay assistance, broaden listening tasks and make fallback behavior explicit |
+| Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | Positional comparison ignores extra trailing words; editing after feedback permits repeated attempts | Token alignment and one submission per attempt; keep correction practice separate from new evidence |
 | Shadow Me | Transcript matching and optional acoustic assessment represent different evidence; repeated analysis can submit again | Typed evidence provenance and attempt idempotency; do not treat transcript matching as pronunciation mastery |
 | IELTS Lab | Multi-section practice hub, not one minigame; writing/speaking include coach estimates | Preserve estimate labels and separate objective scores from heuristic/acoustic evidence |
@@ -58,5 +58,6 @@ Keep readable labels and pause support while adding pressure.
 `app/missions/airport/page.tsx` renders `TravelMission`, and the current backend
 requires evaluated objectives for a claim. The old component is not evidence
 that the current route auto-wins after three arbitrary messages. Likewise,
-`MiniGames.ListeningPick` is not the active `/listening` implementation. Remove
-or consolidate these obsolete paths during the learning-engine migration.
+`MiniGames.ListeningPick` now re-exports the active `ListeningPractice`; the obsolete
+client grader and duplicate listening bank were removed in CORE-003. The older
+AirportMission component remains separate debt for the mission migration.

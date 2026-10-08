@@ -1,0 +1,275 @@
+{
+  "contentVersion": "2026-10-08.1",
+  "items": [
+    {
+      "id": "listen-cefr-core-1",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "transcript": "Attention passengers. Flight VN218 to Da Nang will now depart from gate twelve instead of gate eight.",
+      "question": "What changed?",
+      "correctAnswer": "The departure gate",
+      "options": [
+        "The destination",
+        "The departure gate",
+        "The flight number",
+        "The airline"
+      ],
+      "feedback": "The announcement replaces gate eight with gate twelve. The destination and flight number stay the same."
+    },
+    {
+      "id": "listen-cefr-core-2",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "transcript": "The museum closes at six, but the last guided tour begins at four thirty in the afternoon.",
+      "question": "When does the last guided tour begin?",
+      "correctAnswer": "4:30 p.m.",
+      "options": [
+        "4:00 p.m.",
+        "4:30 p.m.",
+        "5:30 p.m.",
+        "6:00 p.m."
+      ],
+      "feedback": "Four thirty is the tour start; six is the museum closing time. Listen for which event the question asks about."
+    },
+    {
+      "id": "listen-cefr-core-3",
+      "pack": "cefr-core",
+      "cefrLevel": "B1",
+      "transcript": "Due to engineering work, trains to Oxford will leave from platform six until noon, then return to platform three.",
+      "question": "Where do Oxford trains leave from before noon?",
+      "correctAnswer": "Platform six",
+      "options": [
+        "Platform three",
+        "Platform four",
+        "Platform six",
+        "Platform nine"
+      ],
+      "feedback": "The temporary platform is six before noon. Platform three only applies after noon."
+    },
+    {
+      "id": "listen-travel-airport-1",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "transcript": "Passengers for flight LC218 should proceed to gate C12. Boarding begins at seven oh five, twenty minutes earlier than scheduled.",
+      "question": "What should the passenger remember?",
+      "correctAnswer": "Gate C12 and 7:05 boarding",
+      "options": [
+        "Gate C12 and 7:05 boarding",
+        "Gate C7 and 7:20 boarding",
+        "Baggage claim C12",
+        "Check-in closes at 7:05"
+      ],
+      "feedback": "Remember both details together: C12 is the gate and seven oh five is the boarding time. Twenty minutes describes the change, not the time."
+    },
+    {
+      "id": "listen-travel-airport-2",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "transcript": "Your replacement flight leaves at seven forty and has one short connection in Singapore.",
+      "question": "What is special about the replacement flight?",
+      "correctAnswer": "It has one connection",
+      "options": [
+        "It is direct",
+        "It has one connection",
+        "It leaves tomorrow",
+        "It has no seats"
+      ],
+      "feedback": "One short connection means a transfer in Singapore. It is not a direct flight."
+    },
+    {
+      "id": "listen-travel-airport-3",
+      "pack": "travel-airport",
+      "cefrLevel": "B1",
+      "transcript": "Your checked bag will go directly to Hanoi. In Singapore, keep your hand luggage with you and follow the signs for transfers.",
+      "question": "What should you carry during the connection?",
+      "correctAnswer": "Your hand luggage",
+      "options": [
+        "Your checked bag",
+        "Your hand luggage",
+        "Both bags from baggage claim",
+        "No luggage"
+      ],
+      "feedback": "The checked bag goes through to Hanoi. Only hand luggage stays with the passenger during the transfer."
+    },
+    {
+      "id": "listen-travel-transit-1",
+      "pack": "travel-transit",
+      "cefrLevel": "B1",
+      "transcript": "The last green-line train leaves Central at eleven twenty. Passengers from the blue line should change at platform four.",
+      "question": "Where should blue-line passengers change?",
+      "correctAnswer": "Platform four",
+      "options": [
+        "Platform two",
+        "Platform four",
+        "Platform seven",
+        "At the ticket office"
+      ],
+      "feedback": "Platform four is the transfer point. Eleven twenty is the departure time, not the platform."
+    },
+    {
+      "id": "listen-travel-transit-2",
+      "pack": "travel-transit",
+      "cefrLevel": "B1",
+      "transcript": "Because of maintenance, trains toward Riverside will skip East Market tonight.",
+      "question": "Which stop will be skipped?",
+      "correctAnswer": "East Market",
+      "options": [
+        "Central",
+        "Riverside",
+        "East Market",
+        "West Park"
+      ],
+      "feedback": "East Market is the skipped stop. Riverside is the direction of travel."
+    },
+    {
+      "id": "listen-travel-transit-3",
+      "pack": "travel-transit",
+      "cefrLevel": "B1",
+      "transcript": "The express bus costs six pounds, while the local bus costs four. Both stop at the library, but only the local bus stops at the hospital.",
+      "question": "Which bus should a hospital visitor take?",
+      "correctAnswer": "The local bus",
+      "options": [
+        "The express bus",
+        "The local bus",
+        "Either bus",
+        "Neither bus"
+      ],
+      "feedback": "Only the local bus stops at the hospital. The cheaper fare alone is not the reason to choose it."
+    },
+    {
+      "id": "listen-conversation-cafe-1",
+      "pack": "conversation-cafe",
+      "cefrLevel": "B1",
+      "transcript": "I work nearby, but I usually come to this cafe after class because it is quieter in the evening.",
+      "question": "Why does the speaker come in the evening?",
+      "correctAnswer": "It is quieter",
+      "options": [
+        "It is cheaper",
+        "It is quieter",
+        "It closes later",
+        "Friends work there"
+      ],
+      "feedback": "The speaker explicitly says the cafe is quieter in the evening. Working nearby does not explain the time of the visit."
+    },
+    {
+      "id": "listen-conversation-cafe-2",
+      "pack": "conversation-cafe",
+      "cefrLevel": "B1",
+      "transcript": "I am really into badminton and films, but lately I have been learning photography too.",
+      "question": "What new interest does the speaker mention?",
+      "correctAnswer": "Photography",
+      "options": [
+        "Badminton",
+        "Films",
+        "Photography",
+        "Cooking"
+      ],
+      "feedback": "Photography follows “lately I have been learning”. Badminton and films are existing interests."
+    },
+    {
+      "id": "listen-conversation-cafe-3",
+      "pack": "conversation-cafe",
+      "cefrLevel": "B1",
+      "transcript": "I used to order coffee here, but it keeps me awake. Now I have mint tea unless they have run out; then I choose water.",
+      "question": "What is the speaker's first choice now?",
+      "correctAnswer": "Mint tea",
+      "options": [
+        "Coffee",
+        "Mint tea",
+        "Water",
+        "Hot chocolate"
+      ],
+      "feedback": "“Now” marks the change to mint tea. Water is the backup, and coffee is the old choice."
+    },
+    {
+      "id": "listen-conversation-plans-1",
+      "pack": "conversation-plans",
+      "cefrLevel": "B1",
+      "transcript": "Saturday afternoon works for me, but I need to leave before six because I have dinner with my family.",
+      "question": "What restriction does the speaker have?",
+      "correctAnswer": "They must leave before six",
+      "options": [
+        "They cannot meet Saturday",
+        "They must leave before six",
+        "They need to meet at six",
+        "They have work all day"
+      ],
+      "feedback": "The meeting can happen on Saturday, but leaving before six is a constraint. Six is not the meeting time."
+    },
+    {
+      "id": "listen-conversation-plans-2",
+      "pack": "conversation-plans",
+      "cefrLevel": "B1",
+      "transcript": "Let's meet outside the cinema at three fifteen rather than at the cafe, because the cafe gets crowded.",
+      "question": "Where will they meet?",
+      "correctAnswer": "Outside the cinema",
+      "options": [
+        "Inside the cafe",
+        "At the station",
+        "Outside the cinema",
+        "Near the lake"
+      ],
+      "feedback": "“Rather than” replaces the cafe with the space outside the cinema."
+    },
+    {
+      "id": "listen-conversation-plans-3",
+      "pack": "conversation-plans",
+      "cefrLevel": "B1",
+      "transcript": "If it rains, we will visit the gallery instead of the park. Either way, meet me at the station at ten.",
+      "question": "What stays the same if it rains?",
+      "correctAnswer": "The meeting place and time",
+      "options": [
+        "The afternoon activity",
+        "The meeting place and time",
+        "The visit to the park",
+        "The weather forecast"
+      ],
+      "feedback": "“Either way” keeps the station and ten o’clock fixed. Only the activity changes with the weather."
+    },
+    {
+      "id": "listen-work-requirements-1",
+      "pack": "work-requirements",
+      "cefrLevel": "B1",
+      "transcript": "For this release, faster means the common search results should appear within one second, and exact title matches should rank first.",
+      "question": "What is the response-time target?",
+      "correctAnswer": "Within one second",
+      "options": [
+        "Within half a second",
+        "Within one second",
+        "Within three seconds",
+        "No target was given"
+      ],
+      "feedback": "Within one second is the performance target. Ranking exact matches first is a separate requirement."
+    },
+    {
+      "id": "listen-work-requirements-2",
+      "pack": "work-requirements",
+      "cefrLevel": "B1",
+      "transcript": "If there are no exact matches, show up to five related suggestions rather than an empty state.",
+      "question": "What should happen when there is no exact match?",
+      "correctAnswer": "Show up to five related suggestions",
+      "options": [
+        "Show an error",
+        "Show up to five related suggestions",
+        "Reload automatically",
+        "Hide the search box"
+      ],
+      "feedback": "The instruction allows up to five suggestions instead of an empty state. It does not require exactly five every time."
+    },
+    {
+      "id": "listen-work-requirements-3",
+      "pack": "work-requirements",
+      "cefrLevel": "B1",
+      "transcript": "Keep the current filters when a search returns no results. Show related suggestions below them, but do not change the filters automatically.",
+      "question": "What must the application keep unchanged?",
+      "correctAnswer": "The current filters",
+      "options": [
+        "The result count",
+        "The current filters",
+        "The loading message",
+        "The suggestion order"
+      ],
+      "feedback": "The current filters must remain unchanged. Suggestions are shown without silently changing the user’s selection."
+    }
+  ]
+}
