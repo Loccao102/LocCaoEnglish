@@ -400,7 +400,7 @@ new reward ledger, assets or dependencies.
 - Memory/PostgreSQL tests cover concurrent preparation, immutable terminal
   reports, report retry after grade, catalog-independent saved transcript/version,
   independent event copies, expiry, reconnect, daily cap and grading provenance.
-  PostgreSQL/race remains pending full Linux CI.
+  PostgreSQL/race passed in Linux CI 115.
 - `npm run build` passed (58 routes), including TypeScript. Transcript and
   feedback sentinels are absent from compiled client chunks. Browser synthesis
   deliberately receives source text at playback time, so this is guided practice.
@@ -416,7 +416,12 @@ new reward ledger, assets or dependencies.
   media mocks. It completed a real clip and then unlocked all four choices.
   Desktop and 390 × 551 / 390 × 844 screenshots inspected; choices use 18px text,
   controls at least 48px high and no horizontal overflow.
-- Full CI, including PostgreSQL/race and the entire browser suite, is pending.
+- CI 115 on `2458345` passed five jobs including PostgreSQL/race; browser suite
+  reported 85 passed and one failed campaign label check. The new listening
+  toolbar had replaced the established `WORK · REQUIREMENTS` label. Restored
+  consistent campaign labels; retained the regression assertion. Build and all
+  14 core/listening browser tests passed again locally (27.1s). Full CI on the
+  follow-up revision remains pending.
 
 No production deployment. Local memory is temporary; Azure credentials/service
 were not configured for the native-audio check. Playback reports can be forged by

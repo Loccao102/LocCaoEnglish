@@ -5,7 +5,7 @@ import useListeningPlayback from "./learning/useListeningPlayback";
 import LearningRoundNotice from "./learning/LearningRoundNotice";
 import styles from "./learning/VerifiedListening.module.css";
 
-const labels:Record<string,string>={"cefr-core":"Everyday details","travel-airport":"At the airport","travel-transit":"Getting around","conversation-cafe":"At the cafe","conversation-plans":"Making plans","work-requirements":"Work requirements"};
+const labels:Record<string,string>={"cefr-core":"Everyday details","travel-airport":"TRAVEL · AIRPORT","travel-transit":"TRAVEL · TRANSIT","conversation-cafe":"CONVERSATION · CAFE","conversation-plans":"CONVERSATION · MAKE PLANS","work-requirements":"WORK · REQUIREMENTS"};
 export default function ListeningPractice({pack="default"}:{pack?:string}) {
  const routePack=pack==="default" || !pack ? "cefr-core" : pack;
  const round=useVerifiedLearningRound("listen-pick",routePack,"B1",3);
