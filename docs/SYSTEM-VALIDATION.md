@@ -400,7 +400,7 @@ new reward ledger, assets or dependencies.
 - Memory/PostgreSQL tests cover concurrent preparation, immutable terminal
   reports, report retry after grade, catalog-independent saved transcript/version,
   independent event copies, expiry, reconnect, daily cap and grading provenance.
-  PostgreSQL/race passed in Linux CI 115.
+  PostgreSQL/race passed in Linux CI 115 and final CI 116.
 - `npm run build` passed (58 routes), including TypeScript. Transcript and
   feedback sentinels are absent from compiled client chunks. Browser synthesis
   deliberately receives source text at playback time, so this is guided practice.
@@ -421,7 +421,16 @@ new reward ledger, assets or dependencies.
   toolbar had replaced the established `WORK · REQUIREMENTS` label. Restored
   consistent campaign labels; retained the regression assertion. Build and all
   14 core/listening browser tests passed again locally (27.1s). Full CI on the
-  follow-up revision remains pending.
+  follow-up revision passed as CI 116.
+
+Final evidence, 2026-10-08 (Asia/Bangkok):
+[CI 116](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37776731516)
+passed all six jobs on runtime `956a11fa96722510dd7fbd3d217cc73c72a53c9b`.
+The browser log reports **86 passed (10.1m)**.
+[PR #11](https://github.com/Loccao102/LocCaoEnglish/pull/11) merged as `8f69fe0`.
+This acceptance update changes documentation only; application code remains the
+tested revision. Relative document links and diff are checked without rerunning
+gameplay tests for documentation-only changes.
 
 No production deployment. Local memory is temporary; Azure credentials/service
 were not configured for the native-audio check. Playback reports can be forged by

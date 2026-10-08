@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-08, main `31d842e` (PR #10). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-08, main `8f69fe0` (PR #11). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -184,11 +184,10 @@ Local Go tests/vet, build và 13 browser/API scenarios đạt. Đã merge qua
 [PR #10](https://github.com/Loccao102/LocCaoEnglish/pull/10), commit `31d842e`.
 [CI 112](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37667016258) đạt
 đủ 6 jobs trên runtime `7d2482a`, gồm PostgreSQL/race và 79 E2E browser (16.3m).
-Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Lát cắt tiếp theo là
-Listen & Pick và Dictation Rush: chấm ở server, lưu câu trả lời thật và giữ
-retry/reload theo lifecycle chung; chưa mở rộng số lượng trò chơi.
+Chưa deploy production; toàn CORE-003 vẫn `in_progress`. Tiếp nối bằng Listen &
+Pick bên dưới, rồi Dictation Rush; chưa mở rộng số lượng trò chơi.
 
-Tiếp nối 2026-10-08: Codex, branch `codex/core003-listen-pick`, `in_review`.
+Tiếp nối 2026-10-08: Codex, branch `codex/core003-listen-pick`, `done` cho lát cắt này.
 Phạm vi: Listen & Pick ở `/listening` dùng catalog/snapshot và chấm lựa chọn thật
 tại server; giữ các campaign nghe đang có. Ghi yêu cầu phát, tốc độ và kết quả
 phát do browser báo trong snapshot; retry không đếm lặp, reload giữ hỗ trợ.
@@ -198,7 +197,13 @@ mất phản hồi, chuyển tài khoản, snapshot cũ và mobile. Đây là gu
 không chứng minh người chơi đã nghe thật hoặc làm bài không hỗ trợ. Dictation
 Rush là lát cắt riêng sau khi luồng âm thanh này đã được nghiệm thu.
 Go tests/vet, build và 16 browser/API scenarios đạt local; đã phát thử giọng đọc
-thật của browser và kiểm tra màn 390px. Chờ full CI/PostgreSQL trước merge.
+thật của browser và kiểm tra màn 390px. Đã merge qua
+[PR #11](https://github.com/Loccao102/LocCaoEnglish/pull/11), commit `8f69fe0`.
+[CI 116](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37776731516) đạt
+đủ 6 jobs trên runtime `956a11f`, gồm PostgreSQL/race và 86 E2E browser (10.1m).
+Lỗi nhãn campaign từ CI 115 đã được sửa, giữ nguyên assertion và kiểm tra lại.
+Chưa deploy production. Tiếp theo là Dictation Rush: alignment thừa/thiếu/thay từ,
+server grading, actual response và khóa feedback; toàn CORE-003 vẫn `in_progress`.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
