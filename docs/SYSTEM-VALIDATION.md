@@ -441,7 +441,7 @@ trials; Dictation Rush and the rest of CORE-003 remain open.
 
 ## CORE-003 Dictation Rush — 2026-10-09
 
-Runtime branch `codex/core003-dictation`; acceptance is pending full CI. The
+Runtime branch `codex/core003-dictation`; merged through PR #12 as `49eddbd`. The
 `/dictation` route now uses server-owned attempts and the existing audio journal.
 Nine sentences (including the original five) supply three-round A2/B1/B2 sets.
 V1 alignment penalizes missing, extra and substituted tokens, saves the typed
@@ -455,8 +455,8 @@ recovery; the legacy client-accuracy route rejects dictation.
   and legacy rejection. Store tests cover partial confidence, concurrent submit,
   owner/version/expiry, retired content, daily cap and exact payload retries.
 - PostgreSQL cases additionally check reconnect, actual history/accuracy/source
-  and a single review mutation. They await Linux CI with a dedicated test DB;
-  local store verification used memory only.
+  and a single review mutation. These passed Linux CI 119 with a dedicated test
+  DB and race detector; local store verification used memory only.
 - `npm run build` passed (58 routes). Twelve real browser/API scenarios passed
   (37.1s): five dictation cases and seven listening regression cases. Coverage
   includes draft reload, failed audio, pending/committed response loss, owner
@@ -472,3 +472,12 @@ retain the v1 alignment/audio contract on rollback. Partial accuracy is a server
 text comparison under guided practice, not proof of unaided listening. Editorial
 tiers and the small bank still need player trials and later content expansion.
 Overall CORE-003 remains open pending its cross-activity acceptance audit.
+
+Final evidence, 2026-10-09 (Asia/Bangkok):
+[CI 119](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37818092697)
+passed all six jobs on runtime `abd2d7aaffb493e5bb25a10e077d506f9040edf2`.
+The browser log reports **91 passed (16.1m)**.
+[PR #12](https://github.com/Loccao102/LocCaoEnglish/pull/12) merged as `49eddbd`.
+This acceptance update only changes documentation; runtime is the tested code.
+Relative links and diff checked without repeating gameplay tests for docs-only
+changes. No production deployment.

@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-08, main `8f69fe0` (PR #11). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-09, main `49eddbd` (PR #12). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -205,7 +205,7 @@ Lỗi nhãn campaign từ CI 115 đã được sửa, giữ nguyên assertion v�
 Chưa deploy production. Tiếp theo là Dictation Rush: alignment thừa/thiếu/thay từ,
 server grading, actual response và khóa feedback; toàn CORE-003 vẫn `in_progress`.
 
-Tiếp nối 2026-10-09: Codex, branch `codex/core003-dictation`, `in_review`.
+Tiếp nối 2026-10-09: Codex, branch `codex/core003-dictation`, `done` cho lát cắt này.
 Phạm vi: Dictation Rush dùng attempt/audio journal chung, catalog 9 câu giữ 5 câu cũ
 trên server, đối chiếu từ bằng edit distance phiên bản `dictation.v1`. Bỏ qua
 hoa/thường và dấu câu; giữ contractions, không coi “don't” là “do not”. Accuracy
@@ -218,7 +218,12 @@ guided practice; không đặt giới hạn thời gian hay coi browser playback
 chứng đã nghe thật. Không đổi schema SQL; phải triển khai API trước UI.
 Go tests/vet, production build và 12 browser/API scenarios đạt local (37.1s),
 bao gồm hồi quy Listen & Pick. Đã phát thử bằng giọng browser thật và xem ảnh
-desktop, 390 × 551, 390 × 844. Chờ CI PostgreSQL/race và toàn bộ E2E trước merge.
+desktop, 390 × 551, 390 × 844. Đã merge qua
+[PR #12](https://github.com/Loccao102/LocCaoEnglish/pull/12), commit `49eddbd`.
+[CI 119](https://github.com/Loccao102/LocCaoEnglish/actions/runs/37818092697)
+đạt đủ 6 jobs trên runtime `abd2d7a`, gồm PostgreSQL/race và 91 E2E (16.1m).
+Chưa deploy production. Toàn CORE-003 vẫn `in_progress`: tiếp theo rà nghiệm thu
+chéo đủ chín hoạt động và liên kết bằng chứng trước chuyển CORE-004.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
