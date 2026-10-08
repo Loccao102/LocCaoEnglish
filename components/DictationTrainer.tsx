@@ -1,17 +1,81 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { recordAttempt } from "@/lib/api";
-import { playLearningAudio } from "@/lib/tts";
-
-const lines = ["Would you like to have a cup of coffee?","I've been trying to cut down on caffeine lately.","The flight has been delayed due to severe weather conditions.","Although public transport is convenient, it can become overcrowded during rush hour.","Governments should allocate more resources to improve access to higher education."];
-const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9' ]/g, "").replace(/\s+/g, " ").trim();
-function compare(expectedText:string,actualText:string){const expected=normalize(expectedText).split(" ");const actual=normalize(actualText).split(" ");let matched=0;expected.forEach((word,i)=>{if(actual[i]===word)matched+=1});return Math.round(matched/expected.length*100)}
+import type { CEFRLevel } from "@/lib/learning-attempt";
+import useVerifiedLearningRound from "./learning/useVerifiedLearningRound";
+import useListeningPlayback from "./learning/useListeningPlayback";
+import LearningRoundNotice from "./learning/LearningRoundNotice";
+import styles from "./learning/VerifiedListening.module.css";
+import dictation from "./learning/VerifiedDictation.module.css";
 
 export default function DictationTrainer() {
-  const [index,setIndex]=useState(0);const [answer,setAnswer]=useState("");const [checked,setChecked]=useState(false);const [sync,setSync]=useState("");const [audioProvider,setAudioProvider]=useState("");const [playing,setPlaying]=useState(false);const current=lines[index];const accuracy=useMemo(()=>checked?compare(current,answer):0,[answer,checked,current]);
-  async function speak(rate=.9){setPlaying(true);try{setAudioProvider(await playLearningAudio(current,rate))}catch{setAudioProvider("audio unavailable")}finally{setPlaying(false)}}
-  function check(){const value=compare(current,answer);setChecked(true);setSync("saving…");recordAttempt({skill:"Dictation",activity:"dictation",itemKey:`dictation:${index}:${current.slice(0,24)}`,prompt:current,answer:current,accuracy:value/100}).then(()=>setSync("synced")).catch(()=>setSync("offline"))}
-  function next(){setIndex((v)=>(v+1)%lines.length);setAnswer("");setChecked(false);setSync("");setAudioProvider("")}
-  return <section className="trainer-card"><div className="trainer-toolbar"><span className="level-chip">Level {index+1}</span><span>{index+1} / {lines.length}</span></div><div className="audio-orb"><button disabled={playing} onClick={()=>void speak()} aria-label="Play sentence">▶</button><div><strong>Listen to the sentence</strong><small>{audioProvider?`Audio: ${audioProvider}`:"Neural TTS when configured · browser fallback otherwise"}</small></div><button className="speed-button" disabled={playing} onClick={()=>void speak(.68)}>0.68×</button></div><label className="answer-label" htmlFor="dictation-answer">Type exactly what you hear</label><textarea id="dictation-answer" className="practice-textarea short" value={answer} onChange={(e)=>{setAnswer(e.target.value);setChecked(false)}} placeholder="Start typing here…" />{!checked?<button className="button primary wide" onClick={check} disabled={!answer.trim()}>Check answer</button>:<div className={`dictation-result ${accuracy>=80?"success":"error"}`}><div className="accuracy-ring"><strong>{accuracy}%</strong><small>accuracy</small></div><div><strong>{accuracy===100?"Perfect dictation.":accuracy>=80?"Very close.":"Added to your review queue."}</strong><p>{current} · {sync}</p></div><button className="button primary" onClick={next}>Next →</button></div>}</section>;
+  const round = useVerifiedLearningRound("dictation", "cefr-core", "B1", 3);
+  const audio = useListeningPlayback(round);
+  const { attempt, result, phase, context } = round;
+  const events = attempt?.listening?.events || [];
+  const completed = events.filter(event => event.status === "completed");
+  const busy = audio.phase !== "idle";
+  const ready = completed.length > 0 && !audio.pending && !busy;
+  const grade = result?.dictation;
+  const answer = result?.actualAnswer ?? round.draft;
+  const answerBytes = new TextEncoder().encode(answer).length;
+
+  return <section className={styles.card} aria-label="Dictation practice">
+    <div className={styles.toolbar}>
+      <label className={dictation.level}>Difficulty
+        <select aria-label="Dictation difficulty" value={context.level}
+          disabled={busy || !["active", "feedback"].includes(phase)}
+          onChange={event => round.changeLevel(event.target.value as CEFRLevel)}>
+          <option value="A2">A2 · Everyday sentences</option>
+          <option value="B1">B1 · Connected speech</option>
+          <option value="B2">B2 · Complex sentences</option>
+        </select>
+      </label>
+      <b>Round {context.round + 1}/3</b>
+      <span>{attempt?.mode === "account" ? `${round.score} XP this set` : "Guest practice"}</span>
+    </div>
+    <progress aria-label="Set progress" max={3} value={context.round + Number(!!result)} />
+    <LearningRoundNotice round={round} />
+    {attempt && <>
+      <div className={styles.audio}>
+        <span className={styles.icon} aria-hidden="true">♫</span>
+        <div><h2>Catch every word</h2><p>Listen to the whole sentence. Replay or slow it down whenever you need.</p></div>
+        {phase === "active" && <div className={styles.controls}>
+          {audio.pending && !busy ? <button onClick={() => void audio.play()}>Retry audio request</button> : <>
+            <button disabled={busy} onClick={() => void audio.play(1)}>{completed.length ? "Replay audio" : "Play audio"}</button>
+            <button disabled={busy} onClick={() => void audio.play(.72)}>Listen slowly · 0.72×</button>
+          </>}
+          {busy && <button onClick={audio.stop} disabled={audio.phase === "saving"}>Stop audio</button>}
+        </div>}
+        <p role="status" className={styles.status}>{audio.phase === "loading" ? "Preparing audio…" : audio.phase === "playing" ? "Playing — listen to the end…" : audio.phase === "saving" ? "Confirming playback…" : audio.message || (completed.length ? "Playback restored. Your sentence is ready to check." : "Play the sentence before checking your answer.")}</p>
+        {audio.warning && <p role="alert">{audio.warning}</p>}
+        {audio.message && !busy && !ready && phase === "active" && <button className={styles.reset} onClick={round.restart}>Start a new round</button>}
+        <p className={styles.caption}>{completed.length} completed · {Math.max(0, completed.length - 1)} replays · {completed.filter(event => event.rate < 1).length} slow listens · {events.filter(event => event.status === "failed").length} failed</p>
+        {events.some(event => event.provider === "browser-speech-synthesis") && <p className={styles.caption}>Using your browser&apos;s English voice.</p>}
+      </div>
+      <label className={dictation.label} htmlFor="dictation-answer">Type the sentence you hear</label>
+      <p id="dictation-help">Capital letters and punctuation do not affect your score. Keep contractions as spoken, such as “I&apos;ve”.</p>
+      <textarea id="dictation-answer" className={dictation.answer} aria-describedby="dictation-help"
+        value={answer} readOnly={phase !== "active"} spellCheck={false} autoComplete="off" autoCorrect="off" autoCapitalize="off"
+        maxLength={2048} onChange={event => round.updateDraft(event.target.value)} placeholder="Write your sentence here…" />
+      {answerBytes > 2048 && <p role="alert">This answer is too long. Shorten it before checking.</p>}
+      {phase === "active" && <button disabled={!ready || !/[\p{L}\p{N}]/u.test(answer) || answerBytes > 2048}
+        onClick={() => void round.submit(answer)}>Check answer</button>}
+      {result && grade && phase === "feedback" && <div className={styles.feedback}>
+        <div role="status"><strong>{result.correct ? "✓ Perfect dictation" : "Compare your sentence"}</strong>
+          <p className={dictation.score}>{Math.floor(grade.accuracy * 100 + 1e-8)}% word accuracy</p>
+          <p>{grade.matched} matched · {grade.missing} missing · {grade.extra} extra · {grade.substituted} replaced</p>
+        </div>
+        <p><b>Sentence you heard</b></p><blockquote>{result.correctAnswer}</blockquote>
+        <ol className={dictation.words} aria-label="Word comparison">
+          {grade.words.map((word, index) => <li key={index} data-kind={word.kind}>
+            {word.kind === "match" ? <><span>Matched</span> {word.actual}</> : word.kind === "missing" ? <><span>Missing</span> {word.expected}</> : word.kind === "extra" ? <><span>Extra</span> {word.actual}</> : <><span>Replace</span> {word.actual} → {word.expected}</>}
+          </li>)}
+        </ol>
+        <p>{result.feedback}</p>
+        {result.reviewAdded && <p>This sentence was added to your review queue.</p>}
+        <button onClick={round.next}>{context.round === 2 ? "Play another set" : "Next sentence →"}</button>
+      </div>}
+    </>}
+    <p className={styles.caption}>Guided dictation · Three sentences per set, at your own pace. Every missing, extra or replaced word reduces accuracy. A complete match can earn 20 XP on your first attempt at that sentence today.</p>
+  </section>;
 }

@@ -57,7 +57,7 @@ export default function useListeningPlayback(round:ReturnType<typeof useVerified
    // A Stop action aborts media, but still records its failure with a fresh request.
    const saved=await recordListeningPlayback(attempt,event,token);if(!current())return;
    round.acceptAudioUpdate(saved.attempt,token);keep(null);
-   if(event.status==="completed")setMessage("Playback finished. Choose the detail you heard.");
+   if(event.status==="completed")setMessage(attempt.activity==="dictation"?"Playback finished. Type the sentence you heard.":"Playback finished. Choose the detail you heard.");
   }catch(error){if(current())setMessage(error instanceof Error?error.message:"Could not confirm playback. Retry the same audio request.");}
   finally{if(current()){busy.current=false;setPhase("idle");}}
  }

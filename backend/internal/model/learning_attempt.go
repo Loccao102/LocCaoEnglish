@@ -49,6 +49,7 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
+	Dictation          *DictationGrade    `json:"dictation,omitempty"`
 	Listening          *ListeningEvidence `json:"listening,omitempty"`
 	Story              *StoryOutcome      `json:"story,omitempty"`
 	AttemptID          string             `json:"attemptId"`
@@ -65,6 +66,21 @@ type LearningAttemptResult struct {
 	ActualAnswer       string             `json:"actualAnswer"`
 	ProgressionApplied bool               `json:"progressionApplied"`
 	Evidence           string             `json:"evidence"`
+}
+
+type DictationWord struct {
+	Kind     string `json:"kind"`
+	Expected string `json:"expected,omitempty"`
+	Actual   string `json:"actual,omitempty"`
+}
+type DictationGrade struct {
+	Accuracy      float64         `json:"accuracy"`
+	ExpectedWords int             `json:"expectedWords"`
+	Matched       int             `json:"matched"`
+	Missing       int             `json:"missing"`
+	Extra         int             `json:"extra"`
+	Substituted   int             `json:"substituted"`
+	Words         []DictationWord `json:"words"`
 }
 
 // Playback completion is reported by the browser, never proof that a human heard it.

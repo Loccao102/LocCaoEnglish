@@ -205,6 +205,21 @@ Lỗi nhãn campaign từ CI 115 đã được sửa, giữ nguyên assertion v�
 Chưa deploy production. Tiếp theo là Dictation Rush: alignment thừa/thiếu/thay từ,
 server grading, actual response và khóa feedback; toàn CORE-003 vẫn `in_progress`.
 
+Tiếp nối 2026-10-09: Codex, branch `codex/core003-dictation`, `in_review`.
+Phạm vi: Dictation Rush dùng attempt/audio journal chung, catalog 9 câu giữ 5 câu cũ
+trên server, đối chiếu từ bằng edit distance phiên bản `dictation.v1`. Bỏ qua
+hoa/thường và dấu câu; giữ contractions, không coi “don't” là “do not”. Accuracy
+là `max(0, 1 - (thừa + thiếu + thay)/số từ chuẩn)`; chỉ không có lỗi từ mới đúng
+và đủ điều kiện 20 XP theo daily cap. Confidence dùng accuracy thực từ server.
+Giữ bản nháp theo owner, khóa bài sau submit, hiện từng lỗi và actual response.
+Nghiệm thu: alignment, retry/owner/expiry, audio failure, snapshot cũ/reconnect,
+PostgreSQL/concurrency, browser reload/lost response và hai màn mobile. Đây là
+guided practice; không đặt giới hạn thời gian hay coi browser playback là bằng
+chứng đã nghe thật. Không đổi schema SQL; phải triển khai API trước UI.
+Go tests/vet, production build và 12 browser/API scenarios đạt local (37.1s),
+bao gồm hồi quy Listen & Pick. Đã phát thử bằng giọng browser thật và xem ảnh
+desktop, 390 × 551, 390 × 844. Chờ CI PostgreSQL/race và toàn bộ E2E trước merge.
+
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
 | Word Link | Hoàn thiện bank/adapter sau pilot | Trộn vị trí; score thuộc attempt; replay không tự khai điểm duel |

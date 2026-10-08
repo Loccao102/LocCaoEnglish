@@ -17,10 +17,17 @@ type ListeningSnapshot struct {
 }
 
 func learningEvidence(rec LearningAttemptRecord) string {
+	if rec.Activity == "dictation" {
+		return "server-objective-guided-dictation"
+	}
 	if rec.Activity == "listen-pick" {
 		return "server-objective-guided-listening"
 	}
 	return "server-objective"
+}
+func supportedAudioAttempt(rec LearningAttemptRecord) bool {
+	return rec.Activity == "listen-pick" && rec.RulesVersion == learning.ListeningRulesVersion ||
+		rec.Activity == "dictation" && rec.RulesVersion == learning.DictationRulesVersion
 }
 func cloneListening(value *ListeningSnapshot) *ListeningSnapshot {
 	if value == nil {
@@ -59,7 +66,7 @@ func (s *Store) RecordListeningPlayback(ctx context.Context, owner, id, contentV
 		if rec.UserID != owner {
 			return rec, ErrAttemptOwner
 		}
-		if rec.Activity != "listen-pick" || rec.RulesVersion != learning.ListeningRulesVersion || rulesVersion != rec.RulesVersion || contentVersion != rec.ContentVersion || rec.Snapshot.Listening == nil {
+		if !supportedAudioAttempt(rec) || rulesVersion != rec.RulesVersion || contentVersion != rec.ContentVersion || rec.Snapshot.Listening == nil {
 			return rec, ErrAttemptInput
 		}
 		if event.RequestID == "" || (event.Rate != 1 && event.Rate != 0.72) {

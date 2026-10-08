@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice and Listen & Pick reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick and Dictation Rush reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,7 +49,39 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`.
+
+Dictation uses `dictation.v1`, content `dictation-core.2026-10-09.v1`: three
+sentences each at A2/B1/B2 in `cefr-core`, including the five original sentences.
+These are editorial tiers, not proficiency certification. Start returns a generic
+instruction and empty options; only audio preparation receives the saved transcript.
+The audio journal/protocol below also applies to dictation. Browser fallback exposes
+the reference text for synthesis; results are guided practice, not unaided assessment.
+
+Submit actual typed text (1–2048 UTF-8 bytes, at least one letter/digit token).
+V1 lowercases Unicode letters, maps curly apostrophes to straight apostrophes,
+keeps internal apostrophes and splits other punctuation/whitespace. It does not
+expand contractions, equate digits with spelled numbers or forgive spelling errors.
+Unit-cost Levenshtein alignment counts missing, extra and substituted words;
+ties prefer match, substitution, missing, extra in reverse traversal. Accuracy is
+`max(0, 1 - edits / expectedWords)`. Display floors the percentage; correctness
+requires zero edits, never a rounded percentage or the former 80% threshold.
+Result `dictation` contains `accuracy`, `expectedWords`, `matched`, `missing`,
+`extra`, `substituted`, and ordered `words: [{kind, expected?, actual?}]`.
+The actual response is retained separately from `correctAnswer`. Retry compares
+the exact trimmed original payload, including case/punctuation; changing it after
+feedback returns 409 even when both spellings would grade identically.
+
+Only an exact normalized match can receive 20 XP. Existing first-submission
+per-item/content-version/UTC-day claims apply even on an incorrect attempt.
+Confidence and persisted history use the server's fractional accuracy; an imperfect
+first account answer adds the reference sentence to review. Guest/repeated practice
+does not grant progression. Provenance is `server-objective-guided-dictation`.
+Draft and pending submit reuse the owner-scoped v1 local reference; saved v1
+transcripts and normalization remain supported independently of current catalogs.
+No SQL migration. Deploy API first; retain v1 grading/audio and legacy rejection
+on rollback. Pre-migration client-only rounds had no durable attempt to migrate.
+
 Listen & Pick uses `listen-pick.v1`, catalog `2026-10-08.1`: B1 only, three clips
 each in `cefr-core`, `travel-airport`, `travel-transit`, `conversation-cafe`,
 `conversation-plans`, and `work-requirements`. Start/resume prompts contain question
@@ -79,7 +111,8 @@ may remain unfinished after a closed tab; they never count as completed listens.
 At least one completed report is required to submit (otherwise 409). The existing
 grade transaction locks the same row as audio updates and freezes the evidence.
 Result `listening` includes the transcript plus events; `evidence` and persisted
-`grading_source` are `server-objective-guided-listening`. Completed event count,
+`grading_source` are `server-objective-guided-listening` for Listen & Pick and
+`server-objective-guided-dictation` for Dictation Rush. Completed event count,
 `max(0, completed - 1)` replays, completed events at .72, failed events and provider
 are retained on reload. These are recorded observations, not exhaustive real-world
 listening counts. All rounds are guided practice: no unassisted/competitive claim
@@ -161,10 +194,11 @@ the current catalog. No answer key/feedback is sent before completion.
 
 Result contains `correct`, `actualAnswer`, `correctAnswer`, `feedback`, `xpDelta`,
 `newConfidence`, `level`, `reviewAdded`, `progressionApplied`, `evidence:
-server-objective` (or `server-objective-guided-listening` for Listen & Pick),
-attempt/status and versions. Only offered answers (or a complete
-sentence chunk permutation as described above) are accepted;
-comparison ignores surrounding whitespace and case. Wrong answers are retained as
+server-objective` (or the guided listening/dictation provenance above),
+attempt/status and versions. Choice activities accept only offered answers;
+Sentence Builder accepts a complete chunk permutation and Dictation accepts bounded
+typed text under its normalization/retry rules above. Choice comparison ignores
+surrounding whitespace and case. Wrong answers are retained as
 actual responses, while review teaches the correct answer. Guests and daily repeats
 have no progression update; confidence/level in those results are zero placeholders,
 not an account assessment. The UI must not display them as account skill levels.
