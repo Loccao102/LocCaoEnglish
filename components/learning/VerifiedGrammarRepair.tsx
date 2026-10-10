@@ -19,7 +19,7 @@ function GrammarRound({ pack }: { pack: string }) {
   return <section className="mini-card verified-grammar-card">
     <div className="mini-head"><span className="eyebrow">GRAMMAR REPAIR · {campaign ? context.pack.replaceAll("-", " ").toUpperCase() : "A1 → C2"}</span><b>Round {context.round + 1}</b></div>
     <div className={`${styles.scene} ${sceneState}`} aria-hidden="true"><div className={styles.orbit}><i /><i /><span>ABC</span></div></div>
-    <div className={styles.toolbar}>{!campaign ? <label>CEFR <select aria-label="Grammar CEFR level" value={context.level} disabled={phase === "submitting" || phase === "loading"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}<strong>{attempt?.mode === "guest" ? "Guest practice" : `${score} XP this session`}</strong></div>
+    <div className={styles.toolbar}>{!campaign ? <label>CEFR <select aria-label="Grammar CEFR level" value={context.level} disabled={!verified.canChangeLevel} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}<strong>{attempt?.mode === "guest" ? "Guest practice" : `${score} XP this session`}</strong></div>
     <LearningRoundNotice round={verified} />
     {attempt && <><h2>{attempt.prompt.question}</h2><div className="choice-stack">{attempt.prompt.options.map(option => {
       const state = result ? option === result.correctAnswer ? "correct" : option === selected ? "wrong" : "muted" : selected === option ? "muted" : "";

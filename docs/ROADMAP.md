@@ -225,6 +225,21 @@ desktop, 390 × 551, 390 × 844. Đã merge qua
 Chưa deploy production. Toàn CORE-003 vẫn `in_progress`: tiếp theo rà nghiệm thu
 chéo đủ chín hoạt động và liên kết bằng chứng trước chuyển CORE-004.
 
+Nghiệm thu chéo 2026-10-09: Codex, branch `codex/core003-recovery-audit`,
+`in_review` (cập nhật 2026-10-11). Rà route → adapter → snapshot/grader → recovery và bằng chứng cho
+chín hoạt động. Phát hiện Word Link/Grammar vẫn cho đổi CEFR khi submit bị mất
+phản hồi, làm ghi đè reference chứa câu trả lời đang chờ. Sửa quyền đổi level tại
+hook chung và đồng bộ mọi selector; không bỏ pending payload để mở câu khác.
+Nghiệm thu: tái hiện lỗi trước sửa, pending create/submit qua reload và retry,
+không tạo attempt mới khi chưa xác nhận, đổi level sau feedback vẫn hoạt động;
+giữ đường phục hồi cho attempt hết hạn. Không đổi API/save v1 hoặc luật thưởng.
+Rà thêm compatibility export `MiniGames.GrammarRepair`: thay bản chấm client cũ
+bằng adapter đang dùng; bỏ các bank Word Link/Grammar trùng trong contentPacks.
+Giữ nguyên mọi nhãn và câu mẫu Speaking, kiểm tra cấu trúc trước/sau chuyển đổi.
+Build đạt; 26 browser/recovery/core scenarios đạt (32.8s), thêm ma trận API 9
+hoạt động đúng/sai/actual answer/retry/owner/legacy rejection đạt (1.2s). Chờ CI
+đầy đủ và merge trước chốt `done` cho toàn CORE-003.
+
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
 | Word Link | Hoàn thiện bank/adapter sau pilot | Trộn vị trí; score thuộc attempt; replay không tự khai điểm duel |
@@ -239,6 +254,31 @@ chéo đủ chín hoạt động và liên kết bằng chứng trước chuyể
 
 Mỗi hàng cần test đúng/sai/assisted/retry và browser flow. Chỉ done CORE-003 khi
 cả 9 hàng có liên kết bằng chứng; không gộp một pilot thành “đã migrate toàn bộ”.
+
+### Ma trận nghiệm thu CORE-003
+
+Mọi hàng dùng [ma trận API đúng/sai](../tests/e2e/learning-contracts.spec.ts)
+và [recovery chung](../tests/e2e/learning-recovery.spec.ts). Các ca audio báo cáo
+phát ở ma trận chỉ kiểm tra contract; browser nghe thật/fallback có bằng chứng
+riêng trong các đợt Listen/Dictation. Không có hint trước submit ở các bài chọn
+đáp án; correction là feedback đóng attempt, không phải lượt chấm mới.
+
+| Hoạt động / route | Adapter, luật và bằng chứng bổ sung | Trợ giúp / giới hạn |
+| --- | --- | --- |
+| Word Link · `/games/word-link` | [Adapter](../components/WordLinkGame.tsx), [catalog tests](../backend/internal/learning/wordlink_test.go), [store recovery](../backend/internal/store/learning_recovery_test.go), [PR #4](https://github.com/Loccao102/LocCaoEnglish/pull/4) | Options trộn; practice duel không gửi điểm bảng xếp hạng; bank nhỏ cần mở rộng sau core |
+| Grammar Repair · `/games/grammar-repair` | [Adapter](../components/learning/VerifiedGrammarRepair.tsx), [catalog tests](../backend/internal/learning/grammar_test.go), [browser](../tests/e2e/core.spec.ts), [PR #4](https://github.com/Loccao102/LocCaoEnglish/pull/4) | Giải thích sau submit; level không bỏ pending answer; compatibility export dùng cùng adapter |
+| Collocation · `/games/collocation-factory` | [Adapter](../components/learning/VerifiedCollocationFactory.tsx), [HTTP](../backend/internal/httpapi/collocation_attempt_test.go), [browser](../tests/e2e/collocation.spec.ts), [PR #6](https://github.com/Loccao102/LocCaoEnglish/pull/6) | Câu hỏi ngữ cảnh, untimed, ba câu không lặp; CEFR chưa hiệu chỉnh qua playtest |
+| Sentence Builder · `/games/sentence-builder` | [Adapter](../components/learning/VerifiedSentenceBuilder.tsx), [store](../backend/internal/store/sentence_attempt_test.go), [browser](../tests/e2e/sentence-builder.spec.ts), [PR #7](https://github.com/Loccao102/LocCaoEnglish/pull/7) | Chunk IDs xử lý từ lặp; reset chỉ sửa draft chưa gửi; feedback đóng bài |
+| Word Graph · `/word-graph/practice` | [Adapter](../components/learning/VerifiedWordGraph.tsx), [HTTP](../backend/internal/httpapi/word_graph_attempt_test.go), [browser](../tests/e2e/word-graph.spec.ts), [PR #8](https://github.com/Loccao102/LocCaoEnglish/pull/8) | Explore tách assessment, không có XP; bản đồ học công khai không bảo đảm recall độc lập |
+| Reading Race · `/reading` | [Adapter](../components/learning/VerifiedReadingRace.tsx), [store](../backend/internal/store/reading_attempt_test.go), [browser](../tests/e2e/reading-race.spec.ts), [PR #9](https://github.com/Loccao102/LocCaoEnglish/pull/9) | Câu hỏi theo passage và evidence; không giả định tính giờ/speed bonus |
+| Story Choice · `/games/story-choice` | [Adapter](../components/learning/VerifiedStoryChoice.tsx), [store](../backend/internal/store/story_attempt_test.go), [browser](../tests/e2e/story-choice.spec.ts), [PR #10](https://github.com/Loccao102/LocCaoEnglish/pull/10) | Có nhiều lựa chọn hiệu quả; hậu quả, recovery branch và bốn ending; snapshot giữ graph/history |
+| Listen & Pick · `/listening` | [Adapter](../components/ListeningPractice.tsx), [store](../backend/internal/store/listening_attempt_test.go), [browser](../tests/e2e/listening.spec.ts), [PR #11](https://github.com/Loccao102/LocCaoEnglish/pull/11) | Guided listening: replay/slow/failure journal; giọng browser cần source text |
+| Dictation Rush · `/dictation` | [Adapter](../components/DictationTrainer.tsx), [alignment](../backend/internal/learning/dictation_test.go), [browser](../tests/e2e/dictation.spec.ts), [PR #12](https://github.com/Loccao102/LocCaoEnglish/pull/12) | Guided dictation; tính thừa/thiếu/thay từ; actual response/draft và feedback bất biến |
+
+Phạm vi đóng CORE-003 là migration, tính đúng của chấm bài và recovery đã nêu.
+Speaking/mission/IELTS thuộc CORE-004, trust/rank toàn hệ thống thuộc CORE-005;
+khôi phục xuyên miền thuộc CORE-006, đo độ khó/thú vị và nội dung thuộc CORE-007/
+CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an toàn từ ma trận này.
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 

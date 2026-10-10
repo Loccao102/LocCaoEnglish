@@ -23,7 +23,7 @@ export default function DictationTrainer() {
     <div className={styles.toolbar}>
       <label className={dictation.level}>Difficulty
         <select aria-label="Dictation difficulty" value={context.level}
-          disabled={busy || !["active", "feedback"].includes(phase)}
+          disabled={busy || !round.canChangeLevel}
           onChange={event => round.changeLevel(event.target.value as CEFRLevel)}>
           <option value="A2">A2 · Everyday sentences</option>
           <option value="B1">B1 · Connected speech</option>

@@ -218,7 +218,14 @@ Identical submit retry returns the original XP delta; it does **not** award it
 again. Verdict, claim, compatibility attempt evidence, XP, confidence and review
 commit atomically in PostgreSQL. Memory mode is temporary. These are practice
 results, not evidence of unaided competitive mastery; generic rank/other legacy
-learning routes remain CORE-003/005 work.
+learning routes remain CORE-004/005 work.
+
+The shared browser lifecycle owns permission to change level (`canChangeLevel`).
+Creation/loading and unresolved submission errors retain their original reference
+and keep level selectors disabled. The action itself checks the pending payload,
+operation lock and owner token, so a stale control cannot overwrite recovery state.
+After feedback, normal level changes work again. Expired/invalid rounds retain the
+explicit new-round recovery action. This adds no API or local-reference version.
 
 Migration 016 extends 014/015 without deleting history. Deploy API/schema before
 the frontend. Old clients missing submit versions receive a refresh-required 400.

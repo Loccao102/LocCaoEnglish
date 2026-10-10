@@ -37,7 +37,7 @@ function CollocationRound({ pack }: { pack: string }) {
   return <section className={`mini-card factory ${styles.card}`} aria-label="Collocation practice">
     <div className="mini-head"><span className="eyebrow">COLLOCATION FACTORY · {label}</span><b>Round {context.round + 1}/{SET_SIZE}</b></div>
     <div className={styles.toolbar}>
-      {!campaign ? <label>CEFR <select aria-label="Collocation CEFR level" value={context.level} disabled={phase !== "active" && phase !== "feedback"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}
+      {!campaign ? <label>CEFR <select aria-label="Collocation CEFR level" value={context.level} disabled={!verified.canChangeLevel} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label> : <span>{context.level} campaign practice</span>}
       <strong>{!attempt ? "Practice" : attempt.mode === "guest" ? "Guest practice" : `${score} XP this set`}</strong>
     </div>
     <progress aria-label="Set progress" max={SET_SIZE} value={context.round + Number(!!result)} />

@@ -22,8 +22,9 @@ a parallel Word Link-only engine or replace their catalogs with a smaller bank.
   review once; correct answers earn the existing 20 XP, wrong answers earn 0.
   Further attempts remain playable practice. Verdict, evidence and claim commit
   in one PostgreSQL transaction. This is practice evidence, not anti-cheat/rank.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race and Story Choice reject generic client-accuracy submissions.
-  Other learning/competitive routes remain CORE-003/005 migration debt.
+- All nine CORE-003 activities reject generic client-accuracy submissions,
+  including Listen & Pick and Dictation Rush. Speaking, conversation, IELTS and
+  competitive routes remain CORE-004/005 migration debt.
 - The shared frontend hook stores an owner/activity/pack-scoped round reference,
   selected answer and set context. Network retries preserve IDs and locked input.
   Account, route, level and unmount changes invalidate old responses synchronously.
@@ -76,6 +77,22 @@ No SQL schema change: JSON snapshots and submitted-answer text already support
 this contract. Deploy API before web. On rollback keep the legacy score rejection
 and the v1 sentence grader for existing snapshots, or explicitly disable this
 activity; never restore client-reported XP. Existing legacy history is unchanged.
+
+## Cross-activity recovery audit — 2026-10-11
+
+Level selectors must consume the shared hook's `canChangeLevel` permission.
+Word Link and Grammar previously disabled them only during network requests;
+after a failed submit, changing level replaced the pending reference. Allow level
+changes only in active/feedback states without a pending answer or a recovery
+error. Also check the synchronous operation lock, pending reference and current
+owner inside the action; a stale/enabled control is not authority to discard work.
+Keep explicit recovery for expired/invalid rounds. No API/save migration.
+
+All compatibility exports in MiniGames now resolve to the active adapters.
+Remove the unused client Word Link/Grammar banks from contentPacks; keep its
+Speaking labels and prompts unchanged. The nine objective catalogs/graders
+remain server-owned. Public study maps, speaking examples and browser TTS text
+remain teaching material, so no claim of secret content or unaided mastery is made.
 
 ## Word Graph extension — 2026-10-07
 

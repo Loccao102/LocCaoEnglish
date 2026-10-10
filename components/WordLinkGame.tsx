@@ -21,7 +21,7 @@ function WordLinkRound({ pack, challenge }: { pack: string; challenge: boolean }
   return <div className="play-shell">
     {challenge && <div className="challenge-banner">Practice duel · leaderboard submission is paused while ranked scoring is being updated.</div>}
     <div className="play-top"><div><span className="eyebrow">WORD LINK · {context.pack === "travel-airport" ? "TRAVEL · AIRPORT" : "VOCABULARY"}</span><strong>Round {context.round + 1}/{ROUNDS}</strong></div>
-      <label className="mode-badge">CEFR <select aria-label="CEFR level" value={context.level} disabled={phase === "submitting" || phase === "loading"} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label>
+      <label className="mode-badge">CEFR <select aria-label="CEFR level" value={context.level} disabled={!verified.canChangeLevel} onChange={e => verified.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label>
       <div className="play-score"><span>🔥 {streak}</span><b>{attempt?.mode === "guest" ? "Guest practice" : `${score} XP this set`}</b></div>
     </div>
     <div className="progress large"><i style={{ width: `${progress}%` }} /></div>

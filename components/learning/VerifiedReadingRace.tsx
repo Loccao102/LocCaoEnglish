@@ -15,7 +15,7 @@ export default function VerifiedReadingRace() {
   return <section className={styles.reader} aria-label="Reading practice">
     <div className={styles.toolbar}>
       <label>Reading level <select aria-label="Reading level" value={context.level}
-        disabled={phase !== "active" && phase !== "feedback"}
+        disabled={!round.canChangeLevel}
         onChange={e => round.changeLevel(e.target.value as CEFRLevel)}>
         {LEVELS.map(level => <option key={level}>{level}</option>)}
       </select></label>
