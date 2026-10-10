@@ -141,7 +141,13 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
       streak: completed ? 0 : result.correct ? ctx.streak + 1 : 0,
       seen: completed ? [] : [...new Set([...ctx.seen, attempt.itemKey])].slice(-20) });
   }
-  function changeLevel(level: CEFRLevel) { void open({ level, pack: "cefr-core", round: 0, score: 0, streak: 0, seen: [] }); }
+  const canChangeLevel = (phase === "active" || phase === "feedback") && !canRestart && !reference.current?.pending;
+  function changeLevel(level: CEFRLevel) {
+    // Preserve the request/pending answer until recovery resolves it. Check refs
+    // as well as rendered state so a stale control cannot discard a submission.
+    if (locked.current || !canChangeLevel || reference.current?.pending || !current(sequence.current, identity.current.token)) return;
+    void open({ level, pack: "cefr-core", round: 0, score: 0, streak: 0, seen: [] });
+  }
   function updateDraft(value: string) {
     if (locked.current || phase !== "active" || !reference.current || value.length > 2048 || !current(sequence.current, identity.current.token)) return;
     keep({ ...reference.current, draft: value }); setDraft(value);
@@ -156,7 +162,7 @@ export default function useVerifiedLearningRound(activity: VerifiedLearningActiv
    }
  }
   const score = context.score + (result?.xpDelta || 0), streak = result ? result.correct ? context.streak + 1 : 0 : context.streak;
-  return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, context, score, streak, submit, next, changeLevel, acceptAudioUpdate,
+  return { attempt, result, selected, draft, updateDraft, phase, message, storageWarning, canRestart, canChangeLevel, context, score, streak, submit, next, changeLevel, acceptAudioUpdate,
     retry: () => reference.current?.pending && attempt ? void submit(reference.current.pending) : void open(),
     restart: () => void open(activity === "story-choice" ? initial() : { ...context, score: 0, streak: 0 }),
   };

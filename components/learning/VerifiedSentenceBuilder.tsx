@@ -34,7 +34,7 @@ function SentenceRound({ pack }: { pack: string }) {
   return <section className={`mini-card ${styles.card}`} aria-label="Sentence practice">
     <div className="mini-head"><span className="eyebrow">SENTENCE BUILDER · {campaign ? campaigns[context.pack]?.label : "A1 → C2"}</span><b>Round {context.round + 1}/{SET_SIZE}</b></div>
     <div className={styles.toolbar}>
-      {campaign ? <span>{context.level} campaign practice</span> : <label>CEFR <select aria-label="Sentence CEFR level" value={context.level} disabled={!editable && phase !== "feedback"} onChange={e => round.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label>}
+      {campaign ? <span>{context.level} campaign practice</span> : <label>CEFR <select aria-label="Sentence CEFR level" value={context.level} disabled={!round.canChangeLevel} onChange={e => round.changeLevel(e.target.value as CEFRLevel)}>{LEVELS.map(level => <option key={level}>{level}</option>)}</select></label>}
       <strong>{attempt?.mode === "account" ? `${round.score} XP this set` : "Guest practice"}</strong>
     </div>
     <progress aria-label="Set progress" max={SET_SIZE} value={context.round + Number(!!result)} />

@@ -481,3 +481,48 @@ The browser log reports **91 passed (16.1m)**.
 This acceptance update only changes documentation; runtime is the tested code.
 Relative links and diff checked without repeating gameplay tests for docs-only
 changes. No production deployment.
+
+## CORE-003 cross-activity acceptance audit — 2026-10-11
+
+Branch `codex/core003-recovery-audit`, pending full CI and merge. Audit scope is
+the nine objective-learning routes, their actual adapters and compatibility
+exports; [ROADMAP](ROADMAP.md#ma-trận-nghiệm-thu-core-003) maps every activity to
+its grader/store/browser evidence and assistance limits.
+
+Found and fixed: Word Link and Grammar enabled CEFR changes after a transport
+failure, allowing a fresh round to overwrite the unconfirmed answer reference.
+All six level selectors now consume one hook permission. The action separately
+checks pending state, operation lock and account token, including a stale control
+that becomes enabled outside normal rendering. Successful feedback restores level
+changes; expired-round recovery still works. No API/save/SQL version change.
+
+Removed the obsolete client-graded Grammar compatibility export and unused
+Word Link/Grammar banks in contentPacks. An AST-based conversion compared retained
+labels and speaking prompt arrays for the base plus all nine campaigns exactly;
+only unused objective fields were removed. Speaking behavior is not migrated here.
+
+Local evidence on this runtime:
+
+- Two new browser cases failed against the prior production build with the exact
+  expected defect: level selectors stayed enabled after a lost submit.
+- `npm run build` passed (58 routes). After the fix, 26 core/recovery/dictation
+  browser cases passed (32.8s), including failure/reload, identical retry, forced
+  stale control, post-feedback level change, campaign labels and mobile regressions.
+- The additional real API matrix passed all nine activities (1.2s), with separate
+  learners for right/wrong responses: actual answer, authoritative reference,
+  feedback, XP once, review, owner boundary, immutable retry, audio journal gate,
+  forged accuracy rejection and legacy-route rejection. Catalogs are test fixtures
+  only; the server performs actual grading. Audio reports in this matrix do not
+  simulate or prove a human listening; dedicated browser audio tests cover media.
+- During matrix development, corrected a test assumption to expect all effective
+  Story Choice answers joined by OR, as its established contract requires. A burst
+  of test registrations reached the existing 20/minute auth limit; the final
+  matrix uses two learners across activities instead of creating eighteen accounts.
+  Rate limits and assertions remain intact; no user data or services were reset.
+- Obsolete objective bank fields/sentinels are absent from compiled client chunks.
+  No layout/assets/backend changes in this audit; the existing browser cases cover
+  affected controls. PostgreSQL/race and the full suite await CI.
+
+No deployment. This closes only the CORE-003 migration/grade/recovery scope after
+final CI acceptance. Broader reward trust, speaking/mission evidence, cross-domain
+recovery, measured difficulty and expanded content remain their roadmap items.

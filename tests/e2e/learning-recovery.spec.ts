@@ -26,6 +26,40 @@ const answerFor = (attempt: LearningAttempt) => attempt.activity === "sentence-b
   : attempt.activity === "story-choice" ? story.nodes.find(n => n.id === story.start)!.choices!.find(c => c.good)!.label
   : [...words.items, ...grammar.items, ...collocations.items, ...readings.items].find(item => item.id === attempt.itemKey)!.correctAnswer;
 
+for (const activity of ["word-link", "grammar-repair"] as const) {
+  test(`${activity} preserves an unconfirmed answer across attempted level changes`, async ({ page }) => {
+    const opened = issued(page);
+    await page.goto(`/games/${activity}`);
+    const attempt: LearningAttempt = await (await opened).json();
+    const choice = answerFor(attempt);
+    let pending: unknown;
+    await page.route("**/v1/learning/attempts/*/submit", async route => {
+      pending = route.request().postDataJSON();
+      await route.abort("failed");
+    }, { times: 1 });
+    await page.getByRole("button", { name: choice, exact: activity === "grammar-repair" }).click();
+    await expect(page.getByRole("button", { name: "Retry same answer" })).toBeVisible();
+    const level = page.getByRole("combobox");
+    await expect(level).toBeDisabled();
+    // Fault injection: even an adapter that accidentally enables its control
+    // must not bypass the shared pending-answer guard.
+    await level.evaluate(element => { (element as HTMLSelectElement).disabled = false; });
+    await level.selectOption("B2");
+    await page.reload();
+    await expect(page.getByRole("combobox")).toHaveValue(attempt.cefrLevel);
+    await expect(page.getByRole("combobox")).toBeDisabled();
+    const retried = page.waitForRequest(r => r.url().endsWith(`/${attempt.attemptId}/submit`));
+    await page.getByRole("button", { name: "Retry same answer" }).click();
+    expect((await retried).postDataJSON()).toEqual(pending);
+    await expect(page.getByRole("combobox")).toBeEnabled();
+    const next = issued(page);
+    await page.getByRole("combobox").selectOption("B2");
+    const changed: LearningAttempt = await (await next).json();
+    expect(changed.attemptId).not.toBe(attempt.attemptId);
+    expect(changed.cefrLevel).toBe("B2");
+  });
+}
+
 test("guest finishes Word Link and restores the exact round and feedback", async ({ page }) => {
   let response = issued(page);
   await page.goto("/games/word-link?pack=travel-airport");
@@ -69,6 +103,9 @@ for (const activity of ["word-link", "grammar-repair", "collocation-factory", "s
       await page.getByRole("button", { name: "Check sentence" }).click();
     } else await page.getByRole("button", { name: answerFor(attempt), exact: activity === "grammar-repair" }).click();
     await expect(page.getByRole("button", { name: "Retry same answer" })).toBeVisible();
+    if (["word-link", "grammar-repair", "collocation-factory", "sentence-builder", "reading-race"].includes(activity)) {
+      await expect(page.getByRole("combobox")).toBeDisabled();
+    }
     await page.reload();
     await expect(page.getByText("+20 XP · Progress saved.", { exact: true })).toBeVisible();
     const repeated = await request.post(`${base}/${attempt.attemptId}/submit`, { headers, data: payload });

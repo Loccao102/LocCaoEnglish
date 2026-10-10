@@ -16,6 +16,8 @@ test("creation failure keeps request identity and mobile options are readable", 
     if (requests.length === 1) await route.abort("failed"); else await route.fulfill({ json: attempt });
   });
   await page.goto("/games/word-link");
+  await expect(page.getByRole("button", { name: "Retry same request", exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox")).toBeDisabled();
   await page.getByRole("button", { name: "Retry same request", exact: true }).click();
   await expect(page.getByRole("button", { name: "glad" })).toBeEnabled();
   expect(requests).toHaveLength(2); expect(requests[0]).toEqual(requests[1]);

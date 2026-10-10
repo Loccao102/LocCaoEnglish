@@ -29,6 +29,14 @@ that all learning activities received a full manual playthrough in this pass.
 
 ## Cross-system priorities
 
+Update 2026-10-11: the nine CORE-003 routes and compatibility exports now share
+the verified attempt lifecycle. A cross-activity audit found that Word Link and
+Grammar could abandon a pending answer through their level selectors. The shared
+hook now owns that permission and rejects stale transitions. Obsolete Grammar
+client grading and duplicate Word Link/Grammar banks have been removed; Speaking
+prompts are preserved. Acceptance evidence is linked in [ROADMAP](ROADMAP.md).
+The original findings below remain historical context for CORE-004/005/007.
+
 **P0 — learning evidence integrity.** The generic attempt API accepts reported
 accuracy; several clients send the expected answer as the `answer` field. A
 shared server-graded attempt model is needed before using these values for
