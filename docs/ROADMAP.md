@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-09, main `49eddbd` (PR #12). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-11, main `3beef1f` (PR #13). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -11,8 +11,10 @@ trước khi các contract core liên quan đã vững.
 - Fair có 3 mức khó, session dùng chung, seed/version, checkpoint, assistance,
   ledger chống ghi lặp và records theo mức khó. Xem [contract](GAMEPLAY-FOUNDATION.md).
 - Story, Fair, learning XP và IELTS estimates vẫn là các miền khác nhau.
-- Word Link, Grammar Repair, Collocation Factory, Sentence Builder, bài luyện Word Graph, Reading Race, Story Choice và Listen & Pick dùng chung server attempts và lifecycle khôi phục;
-  các hoạt động còn lại chưa được chuyển đồng bộ sang contract này.
+- Chín hoạt động khách quan (Word Link, Grammar Repair, Collocation Factory,
+  Sentence Builder, bài luyện Word Graph, Reading Race, Story Choice, Listen & Pick,
+  Dictation Rush) dùng chung server attempts và lifecycle khôi phục; CORE-003 đã
+  nghiệm thu. Speaking/mission/IELTS tiếp tục theo CORE-004.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
   Đây không phải xác nhận CI/production cho mọi revision sau này.
@@ -28,7 +30,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | --- | --- | --- | --- | --- |
 | CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | done |
 | CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | done |
-| CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | in_progress |
+| CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | done |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | planned |
@@ -106,6 +108,16 @@ input/render/chấm phù hợp. Tên trạng thái là đề xuất, phải ch�
 - Feedback có lỗi, retry và đường đi tiếp rõ ràng; không mất câu trả lời vì request lỗi.
 
 ## CORE-003 — Hoạt động khách quan và answer leakage
+
+Đã nghiệm thu ngày 2026-10-11 qua [PR #13](https://github.com/Loccao102/LocCaoEnglish/pull/13),
+main `3beef1f`. [CI 122](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38074216860)
+đạt đủ 6 jobs trên runtime `c604aca`, gồm PostgreSQL/race và 102 E2E (16.4m).
+Phạm vi hoàn tất và giới hạn nằm trong ma trận bên dưới; chưa deploy production.
+
+### Lịch sử các lát cắt
+
+Các trạng thái trong từng đợt bên dưới phản ánh thời điểm đợt đó hoàn tất;
+trạng thái hiện tại là `done` cho phạm vi CORE-003 đã nghiệm thu ở trên.
 
 Owner/task: Codex, branch `codex/core003-collocation`, 2026-09-28. Lát cắt đầu tiên
 chuyển Collocation Factory sang attempt server-owned: catalog/version, lựa chọn
@@ -226,7 +238,7 @@ Chưa deploy production. Toàn CORE-003 vẫn `in_progress`: tiếp theo rà ngh
 chéo đủ chín hoạt động và liên kết bằng chứng trước chuyển CORE-004.
 
 Nghiệm thu chéo 2026-10-09: Codex, branch `codex/core003-recovery-audit`,
-`in_review` (cập nhật 2026-10-11). Rà route → adapter → snapshot/grader → recovery và bằng chứng cho
+`done` (nghiệm thu 2026-10-11 qua PR #13). Rà route → adapter → snapshot/grader → recovery và bằng chứng cho
 chín hoạt động. Phát hiện Word Link/Grammar vẫn cho đổi CEFR khi submit bị mất
 phản hồi, làm ghi đè reference chứa câu trả lời đang chờ. Sửa quyền đổi level tại
 hook chung và đồng bộ mọi selector; không bỏ pending payload để mở câu khác.
@@ -237,8 +249,9 @@ Rà thêm compatibility export `MiniGames.GrammarRepair`: thay bản chấm clie
 bằng adapter đang dùng; bỏ các bank Word Link/Grammar trùng trong contentPacks.
 Giữ nguyên mọi nhãn và câu mẫu Speaking, kiểm tra cấu trúc trước/sau chuyển đổi.
 Build đạt; 26 browser/recovery/core scenarios đạt (32.8s), thêm ma trận API 9
-hoạt động đúng/sai/actual answer/retry/owner/legacy rejection đạt (1.2s). Chờ CI
-đầy đủ và merge trước chốt `done` cho toàn CORE-003.
+hoạt động đúng/sai/actual answer/retry/owner/legacy rejection đạt (1.2s).
+CI 122 đạt đủ 6 jobs và 102 E2E (16.4m), đã merge `3beef1f`; toàn CORE-003
+được chốt `done` trong phạm vi migration/chấm bài/recovery. Chưa deploy production.
 
 | Hoạt động | Việc cần xử lý | Nghiệm thu đặc thù |
 | --- | --- | --- |
@@ -281,6 +294,14 @@ khôi phục xuyên miền thuộc CORE-006, đo độ khó/thú vị và nội 
 CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an toàn từ ma trận này.
 
 ## CORE-004 — Speaking, mission và IELTS evidence
+
+Điểm vào đã rà ngày 2026-10-11; chưa bắt đầu triển khai: `/speaking` và
+`/ielts/speaking` cùng dùng [SpeakingPractice](../components/SpeakingPractice.tsx).
+Component còn gửi câu mẫu trong `answer` và có thể ghi lại mỗi lần Analyze;
+lát cắt đầu cần lưu actual transcript, provenance và attempt/retry ổn định.
+Các route `/missions/*` dùng [TravelMission](../components/TravelMission.tsx),
+còn báo accuracy `.85`; xử lý cùng contract đánh giá hội thoại, không chép cách
+cấp thưởng này vào luồng mới. CORE-004 vẫn `planned` cho tới khi nhận lát cắt cụ thể.
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

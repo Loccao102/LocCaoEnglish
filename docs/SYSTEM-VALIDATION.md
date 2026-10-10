@@ -484,7 +484,9 @@ changes. No production deployment.
 
 ## CORE-003 cross-activity acceptance audit — 2026-10-11
 
-Branch `codex/core003-recovery-audit`, pending full CI and merge. Audit scope is
+Branch `codex/core003-recovery-audit`, runtime `c604aca`, merged through
+[PR #13](https://github.com/Loccao102/LocCaoEnglish/pull/13) as `3beef1f`.
+Audit scope is
 the nine objective-learning routes, their actual adapters and compatibility
 exports; [ROADMAP](ROADMAP.md#ma-trận-nghiệm-thu-core-003) maps every activity to
 its grader/store/browser evidence and assistance limits.
@@ -521,8 +523,16 @@ Local evidence on this runtime:
   Rate limits and assertions remain intact; no user data or services were reset.
 - Obsolete objective bank fields/sentinels are absent from compiled client chunks.
   No layout/assets/backend changes in this audit; the existing browser cases cover
-  affected controls. PostgreSQL/race and the full suite await CI.
+  affected controls. PostgreSQL/race and the full suite passed on CI below.
 
-No deployment. This closes only the CORE-003 migration/grade/recovery scope after
-final CI acceptance. Broader reward trust, speaking/mission evidence, cross-domain
+Final acceptance on 2026-10-11 (Asia/Bangkok):
+[CI 122](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38074216860)
+passed all six jobs for runtime `c604aca`: frontend/build/assets, backend
+PostgreSQL/race and vet, AI service, compose, integration, and E2E. The E2E job
+`114277822378` reports **102 passed (16.4m)**, with no failed/flaky summary.
+The PR head matched this revision at merge; no review submissions or unresolved
+review threads were present. The acceptance follow-up changes docs only.
+
+No deployment. This closes only the CORE-003 migration/grade/recovery scope.
+Broader reward trust, speaking/mission evidence, cross-domain
 recovery, measured difficulty and expanded content remain their roadmap items.
