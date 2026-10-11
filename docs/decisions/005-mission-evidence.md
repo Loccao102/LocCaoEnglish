@@ -54,7 +54,9 @@ prompt/verdict contract rather than silently changing this rubric.
   and boss. Reload checks the server first, including after a committed response
   is lost. Pending claims cannot be restarted or edited. Auth changes invalidate
   old responses; failed requests keep the pending dialogue. Corrupt storage is
-  kept until an explicit restart. Storage failure is disclosed in the UI.
+  kept until an explicit restart. Storage failure is disclosed in the UI; in-app
+  state reload retains the same owner's in-memory draft/pending claim. A full
+  browser refresh or page close cannot recover memory when storage is blocked.
 
 Campaign XP still contributes to the existing total and rankings. Broader trust
 policy and migration of legacy prerequisite evidence remain CORE-005. Existing

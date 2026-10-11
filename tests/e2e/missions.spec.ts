@@ -130,6 +130,16 @@ test("mission remains playable with an explicit warning when draft storage is un
   await signIn(page, user.token); await expect(input(page)).toBeEnabled();
   await expect(page.getByText(/Browser storage is unavailable/)).toBeVisible();
   await send(page, lines[0]); await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
+  await page.getByRole("button", { name: "Reload saved state" }).click();
+  await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
+  await send(page, lines[1]); await send(page, lines[2]);
+  await page.route("**/bosses/airport-crisis/complete", async route => { await route.abort("failed"); }, { times: 1 });
+  await page.getByRole("button", { name: "Save chapter completion" }).click();
+  await expect(page.getByRole("button", { name: "Retry same completion" })).toBeVisible();
+  await page.getByRole("button", { name: "Reload saved state" }).click();
+  await expect(page.getByRole("button", { name: "Restart dialogue" })).toBeDisabled();
+  await page.getByRole("button", { name: "Retry same completion" }).click();
+  await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
 });
 
 for (const height of [551, 844]) test(`mission is readable and usable on 390x${height}`, async ({ page, request }) => {

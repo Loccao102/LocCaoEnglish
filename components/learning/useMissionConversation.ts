@@ -7,8 +7,8 @@ import { claimBoss, evaluateBoss, getMissionReceipt, MISSION_RULES, type BossEva
 
 type Draft = { version: string; messages: string[]; text: string; pending?: "evaluate" | "claim" };
 const fresh = (): Draft => ({ version: MISSION_RULES, messages: [], text: "" });
-function read(key: string): Draft {
-  const raw = localStorage.getItem(key); if (!raw) return fresh();
+function read(key: string): Draft | null {
+  const raw = localStorage.getItem(key); if (!raw) return null;
   const invalid = () => new Error("This saved dialogue could not be read. Its data has been kept; restart this mission to begin again.");
   let d: Draft;
   try { d = JSON.parse(raw) as Draft; } catch { throw invalid(); }
@@ -27,9 +27,11 @@ export default function useMissionConversation(bossId: string) {
   const [signedIn, setSignedIn] = useState(false), [brokenDraft, setBrokenDraft] = useState(false);
   const seq = useRef(0), locked = useRef(false), data = useRef<Draft>(fresh());
   const identity = useRef({ token: "", key: "" });
+  const memoryDraft = useRef<{ key: string; value: Draft } | null>(null);
   const current = (n: number, token: string) => n === seq.current && token === getAuthToken();
   function keep(next: Draft) {
     data.current = next; setDraft(next);
+    memoryDraft.current = { key: identity.current.key, value: next };
     try { localStorage.setItem(identity.current.key, JSON.stringify(next)); setStorageWarning(""); }
     catch { setStorageWarning("Browser storage is unavailable. Keep this tab open until you save your chapter."); }
   }
@@ -51,10 +53,11 @@ export default function useMissionConversation(bossId: string) {
         setReceipt(saved); setVerdict(saved.evaluation || null); keep({ ...fresh(), messages: saved.messages });
       } else {
         let saved: Draft;
-        try { saved = read(identity.current.key); }
+        const cached = memoryDraft.current?.key === identity.current.key ? memoryDraft.current.value : null;
+        try { const stored = read(identity.current.key); saved = cached || stored || fresh(); }
         catch (e) {
           if (e instanceof Error && e.message.includes("saved dialogue")) { setBrokenDraft(true); throw e; }
-          saved = fresh(); setStorageWarning("Browser storage is unavailable. Keep this tab open until you save your chapter.");
+          saved = cached || fresh(); setStorageWarning("Browser storage is unavailable. Keep this tab open until you save your chapter.");
         }
         keep(saved);
         if (found?.unlocked) {

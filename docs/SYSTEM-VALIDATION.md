@@ -640,3 +640,13 @@ classification remain CORE-005/006. Unfinished dialogue is device-local, while
 completion receipts persist in PostgreSQL; the local API preview uses temporary
 memory. Roll out migration/API before frontend, preserve receipts and the v2
 grader on rollback. No production deployment; CORE-004 remains in progress.
+
+Pre-merge review found that the in-app "Reload saved state" action could discard
+the in-memory dialogue when browser storage was blocked. The hook now keeps an
+owner-keyed in-memory copy for that action, including an unresolved claim. The
+storage warning still applies to full page refresh/closing the page. An expanded
+browser case verifies continued turns, lost claim, in-app reload and identical
+retry while both storage reads and writes fail. After this correction, build
+passed (58 routes) and all eight mission browser/API cases passed (13.7s).
+The earlier 24-case result belongs to runtime `02ec29a`; final CI must use the
+new PR head containing this correction.
