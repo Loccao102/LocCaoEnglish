@@ -70,6 +70,17 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "shadowing":
+		item, label, err := learning.PickShadowing(level, pack, in.RequestID, in.ExcludeItemKeys)
+		if err != nil {
+			problem(w, 400, err.Error())
+			return
+		}
+		skill, itemKey = "Speaking", item.ID
+		contentVersion, rulesVersion = learning.ShadowingContentVersion(), learning.ShadowingRulesVersion
+		promptText, correctAnswer = item.Text, item.Text
+		feedback = "This compares your reported transcript with the visible practice phrase. It is not a pronunciation score or proof of unaided speaking."
+		publicPrompt = model.LearningAttemptPrompt{Title: label, Question: item.Text, Options: []string{}}
 	case "dictation":
 		item, err := learning.PickDictation(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {
@@ -232,6 +243,7 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 		base.Mode = "guest"
 	}
 	return base, base.Pack == requestedPack && (len(base.Prompt.Options) > 0 ||
+		base.Activity == "shadowing" && base.RulesVersion == learning.ShadowingRulesVersion && base.Prompt.Question != "" ||
 		base.Activity == "dictation" && base.RulesVersion == learning.DictationRulesVersion && rec.Snapshot.Listening != nil ||
 		base.Activity == "sentence-builder" && base.RulesVersion == learning.SentenceRulesVersion && len(base.Prompt.Chunks) > 1)
 }

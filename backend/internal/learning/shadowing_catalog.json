@@ -1,0 +1,195 @@
+{
+  "contentVersion": "2026-10-11.1",
+  "packs": [
+    {
+      "id": "cefr-core",
+      "label": "CORE ENGLISH",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:cefr-core:1",
+          "text": "Could I have a window seat, please?"
+        },
+        {
+          "id": "shadowing:cefr-core:2",
+          "text": "I usually prefer travelling by train because it is more comfortable."
+        },
+        {
+          "id": "shadowing:cefr-core:3",
+          "text": "One of the main reasons people move to large cities is the availability of better job opportunities."
+        }
+      ]
+    },
+    {
+      "id": "travel-airport",
+      "label": "TRAVEL · AIRPORT",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:travel-airport:1",
+          "text": "I missed my flight. Could you help me rebook, please?"
+        },
+        {
+          "id": "shadowing:travel-airport:2",
+          "text": "I would prefer the earliest available flight, even if it has a short connection."
+        },
+        {
+          "id": "shadowing:travel-airport:3",
+          "text": "Could you confirm the gate and the boarding time for me?"
+        }
+      ]
+    },
+    {
+      "id": "travel-hotel",
+      "label": "TRAVEL · HOTEL",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:travel-hotel:1",
+          "text": "I have a confirmed reservation, but I think it may be under my middle name."
+        },
+        {
+          "id": "shadowing:travel-hotel:2",
+          "text": "Could you check this confirmation number again, please?"
+        },
+        {
+          "id": "shadowing:travel-hotel:3",
+          "text": "Could you tell me whether breakfast is included and what time checkout is?"
+        }
+      ]
+    },
+    {
+      "id": "travel-transit",
+      "label": "TRAVEL · TRANSIT",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:travel-transit:1",
+          "text": "What is the fastest route to Central Station?"
+        },
+        {
+          "id": "shadowing:travel-transit:2",
+          "text": "Where do I change from the blue line to the green line?"
+        },
+        {
+          "id": "shadowing:travel-transit:3",
+          "text": "Which platform do I need, and how many minutes do I have before the last train?"
+        }
+      ]
+    },
+    {
+      "id": "conversation-cafe",
+      "label": "CONVERSATION · CAFE",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:conversation-cafe:1",
+          "text": "Hi, my name is Loc. I don't think we've met before."
+        },
+        {
+          "id": "shadowing:conversation-cafe:2",
+          "text": "What about you? What do you usually do after work or class?"
+        },
+        {
+          "id": "shadowing:conversation-cafe:3",
+          "text": "It was nice to meet you. Would you like to grab coffee again sometime?"
+        }
+      ]
+    },
+    {
+      "id": "conversation-plans",
+      "label": "CONVERSATION · MAKE PLANS",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:conversation-plans:1",
+          "text": "How about going to the cinema this Saturday?"
+        },
+        {
+          "id": "shadowing:conversation-plans:2",
+          "text": "Would three o'clock at the cafe near the lake work for you?"
+        },
+        {
+          "id": "shadowing:conversation-plans:3",
+          "text": "Perfect. So we meet there at three. See you then."
+        }
+      ]
+    },
+    {
+      "id": "conversation-clarity",
+      "label": "CONVERSATION · CLARITY",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:conversation-clarity:1",
+          "text": "Sorry, I'm not sure what you mean. Could you explain that again?"
+        },
+        {
+          "id": "shadowing:conversation-clarity:2",
+          "text": "What I mean is that I may arrive later, not that I am cancelling."
+        },
+        {
+          "id": "shadowing:conversation-clarity:3",
+          "text": "Got it. So the plan is still on, but the time may change."
+        }
+      ]
+    },
+    {
+      "id": "work-standup",
+      "label": "WORK · STAND-UP",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:work-standup:1",
+          "text": "Yesterday I finished the authentication fix."
+        },
+        {
+          "id": "shadowing:work-standup:2",
+          "text": "Today I will add integration tests and review the API changes."
+        },
+        {
+          "id": "shadowing:work-standup:3",
+          "text": "I have no blockers right now, but I may need the product owner to confirm one edge case."
+        }
+      ]
+    },
+    {
+      "id": "work-requirements",
+      "label": "WORK · REQUIREMENTS",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:work-requirements:1",
+          "text": "The phrase 'better results' is unclear. Could we define what ranking behavior we expect?"
+        },
+        {
+          "id": "shadowing:work-requirements:2",
+          "text": "What exactly should happen when a search returns no exact matches?"
+        },
+        {
+          "id": "shadowing:work-requirements:3",
+          "text": "So the acceptance condition is one-second response time and exact title matches ranked first, correct?"
+        }
+      ]
+    },
+    {
+      "id": "work-deadline",
+      "label": "WORK · DELIVERY",
+      "cefrLevel": "B1",
+      "items": [
+        {
+          "id": "shadowing:work-deadline:1",
+          "text": "The Friday deadline creates a testing risk for the full scope."
+        },
+        {
+          "id": "shadowing:work-deadline:2",
+          "text": "If we keep the quality bar, reducing scope is the safer trade-off."
+        },
+        {
+          "id": "shadowing:work-deadline:3",
+          "text": "I propose a phased delivery: the core flow on Friday and reporting in the next release."
+        }
+      ]
+    }
+  ]
+}
