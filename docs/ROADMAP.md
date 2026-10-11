@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-11, main `3beef1f` (PR #13). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-11, main `d8ccd86` (PR #14). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -14,7 +14,8 @@ trước khi các contract core liên quan đã vững.
 - Chín hoạt động khách quan (Word Link, Grammar Repair, Collocation Factory,
   Sentence Builder, bài luyện Word Graph, Reading Race, Story Choice, Listen & Pick,
   Dictation Rush) dùng chung server attempts và lifecycle khôi phục; CORE-003 đã
-  nghiệm thu. Speaking/mission/IELTS tiếp tục theo CORE-004.
+  nghiệm thu. Shadow Me đã lưu guided transcript qua shared attempts, tách coach
+  khỏi XP. Mission/acoustic receipts/IELTS tiếp tục theo CORE-004.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
   Đây không phải xác nhận CI/production cho mọi revision sau này.
@@ -296,7 +297,7 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 ## CORE-004 — Speaking, mission và IELTS evidence
 
 Lát cắt Shadow Me: Codex, `codex/core004-shadowing-evidence`, 2026-10-11,
-`in_review`. Chuyển 30 câu mẫu hiện có thành catalog server; dùng shared attempts
+`done` trong phạm vi guided transcript và coach tách riêng. Chuyển 30 câu mẫu hiện có thành catalog server; dùng shared attempts
 để lưu/chấm actual transcript theo `shadowing.v1`, giữ draft/retry/owner và daily
 claim. Reference hiện trước khi nói nên đây là guided transcript practice, không
 phải chứng minh phát âm hoặc recall độc lập. Coach/acoustic feedback tách riêng,
@@ -307,7 +308,12 @@ frontend, giữ grader/snapshot và legacy rejection khi rollback. Nghiệm thu 
 provider lỗi/không cấu hình, phản hồi cũ và mobile. Mission/IELTS còn ngoài lát cắt.
 Local Go tests/vet, build 58 routes và typecheck đạt. 19 browser/API scenarios
 đạt (29.3s); xem bằng chứng và giới hạn tại [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md).
-Chờ PostgreSQL/race và ma trận CI đầy đủ trước nghiệm thu/merge.
+Đã merge [PR #14](https://github.com/Loccao102/LocCaoEnglish/pull/14), `d8ccd86`.
+Runtime `5666bc2` đạt đủ 6 jobs tại
+[CI 126](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38109616712),
+gồm PostgreSQL/race và **111 E2E (16.8m)**. Bản sửa lời nhắc âm thanh cũng đạt
+build và 9 Speaking cases local (12.2s). Chưa deploy production; chưa thử micro
+vật lý hoặc provider acoustic production. Toàn CORE-004 vẫn `in_progress`.
 
 Điểm vào đã rà ngày 2026-10-11: `/speaking` và
 `/ielts/speaking` cùng dùng [SpeakingPractice](../components/SpeakingPractice.tsx).

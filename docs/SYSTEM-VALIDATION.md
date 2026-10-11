@@ -539,7 +539,8 @@ recovery, measured difficulty and expanded content remain their roadmap items.
 
 ## CORE-004 Shadow Me transcript evidence — 2026-10-11
 
-Branch `codex/core004-shadowing-evidence`, based on main `f97cbcb`; pending CI/merge.
+Branch `codex/core004-shadowing-evidence`, based on main `f97cbcb`; merged through
+[PR #14](https://github.com/Loccao102/LocCaoEnglish/pull/14) as `d8ccd86`.
 Shared `/speaking` and `/ielts/speaking` now save actual transcripts through server
 attempts. `shadowing.v1` aligns words against the deliberately visible phrase and
 returns `server-guided-transcript-match`, not acoustic evidence. One catalog keeps
@@ -583,5 +584,14 @@ Pre-merge review corrected the recording notice: the app's WAV is submitted only
 for explicit coaching, but browser speech recognition may use an online service.
 The UI now states that distinction before recording, with an assertion for the
 notice. No speech API behavior or reward rule changed in this copy correction.
-The revised UI rebuilt successfully; all nine Speaking browser/API cases were
-rerun successfully, including the notice assertion and both mobile captures.
+The revised UI rebuilt successfully on `5666bc2`; all nine Speaking browser/API
+cases passed (12.2s), including the notice assertion and both mobile captures.
+
+Final acceptance on 2026-10-11 (Asia/Bangkok):
+[CI 126](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38109616712)
+passed all six jobs for runtime `5666bc2`: frontend/build/assets, backend
+PostgreSQL/race and vet, AI service, compose, integration, and E2E. Job
+`114382385432` reports **111 passed (16.8m)**, with no failed/flaky summary.
+The PR head matched this revision at merge; no review submissions or unresolved
+review threads were present. This acceptance follow-up changes docs only.
+No production deployment; only the guided Shadow Me slice is complete.
