@@ -100,6 +100,7 @@ test("Coach failures preserve independent feedback without fabricating scores or
     else await route.fulfill({ json: { provider: "not-configured", acousticAssessment: false, overall: 99, scores: {}, words: [] } });
   });
   await page.goto("/ielts/speaking");
+  await expect(card(page).getByText(/Browser speech recognition may use an online service/)).toBeVisible();
   await card(page).getByRole("button", { name: "Record your voice" }).click();
   await expect(field(page)).toHaveValue("I said something different.");
   await card(page).getByRole("button", { name: "Stop recording" }).click();
@@ -112,7 +113,7 @@ test("Coach failures preserve independent feedback without fabricating scores or
   await expect(card(page).getByRole("button", { name: "Feedback received" })).toBeDisabled();
   expect(coachCalls).toBe(1); expect(acousticCalls).toBe(2); expect(rewards).toBe(0);
   await page.reload(); await expect(field(page)).toHaveValue("I said something different.");
-  await expect(card(page).getByText(/Audio stays in this tab/)).toBeVisible();
+  await expect(card(page).getByText(/Recordings are not restored after reload/)).toBeVisible();
 });
 
 test("Acoustic feedback validates the provider score, including a real zero, without grading text", async ({ page }) => {

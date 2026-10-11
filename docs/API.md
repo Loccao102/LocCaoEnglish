@@ -74,8 +74,11 @@ never a pronunciation proxy or IELTS band. An acoustic score is shown only for
 an explicitly acoustic response with a finite 0–100 overall. Failed/unconfigured
 providers never create a substitute score; retry retains the other successful
 feedback. Coach results are transient, not server-owned learning evidence.
-Raw microphone audio is in-memory only, sent on explicit coach request and lost
-on reload/owner change/navigation. Text drafts and pending submissions use the
+The app's WAV recording is in-memory only, sent on explicit coach request and lost
+on reload/owner change/navigation. Separately, browser speech recognition started
+by the Record action may stream audio to the browser vendor's online service;
+the pre-record UI explains this and does not promise offline/on-device recognition.
+Text drafts and pending submissions use the
 shared owner-scoped browser reference; committed text is stored by the server.
 Capture stops on hide, unmount, account change or ten seconds, including late
 permission grants. See [ADR 004](decisions/004-speaking-evidence.md) for limits.

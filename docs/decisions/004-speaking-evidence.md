@@ -45,8 +45,12 @@ keeps successful feedback; retry only requests missing feedback. Completion disa
 repeat analysis for the same sample. Old asynchronous responses are ignored after
 sample, attempt or owner changes; requests are aborted on cleanup.
 
-Record audio only after a microphone action; send it only after a coach action.
-Keep WAV bytes in memory, not browser storage, snapshots or logs. Save transcript
+Capture the app's WAV only after a microphone action; send that recording only
+after a coach action. Keep WAV bytes in memory, not browser storage, snapshots or
+logs. Separately, starting browser SpeechRecognition can send audio to its online
+recognition service, as [MDN documents](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
+State this before recording; do not promise all speech processing is on-device.
+Save transcript
 drafts under the existing owner key. Stop capture on hide, navigation, account
 change and the ten-second limit; release a stream granted after cancellation.
 After reload the text remains, but audio/coach results require a new recording/request.

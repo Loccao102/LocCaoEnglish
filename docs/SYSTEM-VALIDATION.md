@@ -555,7 +555,7 @@ Local evidence:
   The same test uses a second PostgreSQL connection on CI; local did not run PG/race.
 - `npm run build` passed all 58 routes; `npx tsc --noEmit` and diff checks passed.
 - Playwright `speaking.spec.ts`, `core.spec.ts`, `learning-recovery-ui.spec.ts`:
-  **19 passed (29.3s)** on the final runtime. Real APIs cover pending/committed
+  **19 passed (29.3s)** on `14b9162`. Real APIs cover pending/committed
   response loss, reload, owner isolation, fake accuracy/legacy rejection and XP once.
 - Simulated microphone/recognition and provider responses cover denied/delayed
   permission, partial provider failures, unconfigured/invalid acoustic results,
@@ -578,3 +578,10 @@ learning evidence. Existing AI endpoints' legacy numeric proxies are ignored by
 this UI. No production deployment. CORE-004 remains in progress for persistent
 acoustic receipts, mission dialogue evaluation and IELTS provenance/history;
 CORE-005 still owns comprehensive reward/rank integrity and legacy classification.
+
+Pre-merge review corrected the recording notice: the app's WAV is submitted only
+for explicit coaching, but browser speech recognition may use an online service.
+The UI now states that distinction before recording, with an assertion for the
+notice. No speech API behavior or reward rule changed in this copy correction.
+The revised UI rebuilt successfully; all nine Speaking browser/API cases were
+rerun successfully, including the notice assertion and both mobile captures.

@@ -41,7 +41,8 @@ function SpeakingRound({ pack, level }: { pack: string; level: CEFRLevel }) {
         {recording.phase === "recording" ? <button onClick={recording.stop}>Stop recording</button> :
           <button disabled={locked} onClick={() => void recording.start()}>{recording.phase === "requesting" ? "Waiting for microphone…" : "Record your voice"}</button>}
       </div>
-      <p role="status">{recording.phase === "recording" ? "Recording — stops after 10 seconds." : recording.message || (recording.audio ? "Audio ready for optional pronunciation feedback." : "Audio stays in this tab until you request coach feedback. It is not restored after reload.")}</p>
+      <p className={styles.note}>Browser speech recognition may use an online service. This app sends the saved recording only when you request coach feedback.</p>
+      <p role="status">{recording.phase === "recording" ? "Recording — stops after 10 seconds." : recording.message || (recording.audio ? "Audio ready for optional pronunciation feedback." : "Record a new sample for audio feedback. Recordings are not restored after reload.")}</p>
       <label className={styles.label} htmlFor="speaking-transcript">Your transcript</label>
       <textarea id="speaking-transcript" className={styles.transcript} maxLength={2048} value={actual}
         readOnly={locked} onChange={event => round.updateDraft(event.target.value)} aria-describedby="transcript-help"
