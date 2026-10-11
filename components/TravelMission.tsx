@@ -30,7 +30,9 @@ export default function TravelMission({ scenario }: { scenario: MissionScenario 
           {verdict?.turns[i] && <div className="chat-bubble agent"><span>{verdict.turns[i].accepted ? "✓ Objective addressed" : "Try a clearer reply"}</span><p>{verdict.turns[i].feedback}</p></div>}
         </div>)}</div>
         {!won && <p className={styles.reply}>{verdict?.reply || config.intro}</p>}
-        {won ? <div className="boss-win"><div><strong>Chapter reward saved · {boss?.rewardXp} XP</strong><p>{config.reward}</p><p>{receipt?.legacy ? "This earlier completion has no saved dialogue evidence." : "Your submitted dialogue and rule-based result are saved to your account."}</p></div><Link href={config.campaignRoute} className="button primary">Continue campaign →</Link></div> : boss?.unlocked && <>
+        {won ? <div className="boss-win"><div><strong>Chapter reward saved · {boss?.rewardXp} XP</strong><p>{config.reward}</p>
+          {receipt ? <p>{receipt.legacy ? "This earlier completion has no saved dialogue evidence." : "Your submitted dialogue and rule-based result are saved to your account."}</p> : <p role="status">{busy ? "Loading your saved dialogue…" : "Your chapter is complete, but its saved dialogue could not be loaded."}</p>}
+        </div><Link href={config.campaignRoute} className="button primary">Continue campaign →</Link></div> : boss?.unlocked && <>
           <form className={styles.form} onSubmit={e => { e.preventDefault(); game.send(); }}>
             <label htmlFor="mission-reply">Your reply</label>
             <textarea id="mission-reply" value={draft.text} onChange={e => game.edit(e.target.value)} maxLength={1024} disabled={busy || !!draft.pending || !!verdict?.complete || game.brokenDraft} placeholder="Respond to the current objective in English…" />
@@ -43,6 +45,7 @@ export default function TravelMission({ scenario }: { scenario: MissionScenario 
         </>}
       </>}
       {!boss && game.error && <button className="button" disabled={busy} onClick={() => void game.reload()}>Retry loading mission</button>}
+      {won && !receipt && game.error && <button className="button" disabled={busy} onClick={() => void game.reload()}>Retry loading saved completion</button>}
     </section>}
   </div>;
 }

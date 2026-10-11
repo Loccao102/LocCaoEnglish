@@ -699,3 +699,11 @@ passing after this pacing change (`test-results/.last-run.json`: passed, no
 failed tests, written 2026-10-11 16:33:20 UTC). Typecheck and diff checks passed.
 The final console duration was unavailable after the terminal session expired;
 no duration is asserted. The complete CI suite remains the merge gate.
+
+Review follow-up on 2026-10-12 found a receipt-loading recovery gap: after
+progression reported a cleared chapter, a failed receipt GET left no in-app retry
+and displayed the saved-dialogue message before receipt data was available.
+The completion panel now distinguishes loading, unavailable, legacy and loaded
+dialogue, with a retry for the unavailable receipt. Its regression injects a
+receipt 503 after a real completion and checks restored original messages,
+unchanged XP and no second completion request. Verification is pending below.

@@ -171,6 +171,26 @@ test("mission explains a throttled load and lets the player retry without cleari
   await expect(input(page)).toHaveValue("My reply survives a temporary limit.");
 });
 
+test("mission retries a failed saved receipt without reclaiming the chapter reward", async ({ page, request }) => {
+  const user = await learner(request);
+  const completed = await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: version } });
+  expect(completed.ok(), await completed.text()).toBe(true);
+  let claims = 0;
+  page.on("request", r => { if (r.url().endsWith("/airport-crisis/complete")) claims++; });
+  await page.route("**/bosses/airport-crisis/receipt", route => route.fulfill({ status: 503, json: { error: "Saved dialogue is temporarily unavailable." } }), { times: 1 });
+  await signIn(page, user.token);
+  await expect(page.locator(".feedback-banner[role=alert]")).toHaveText("Saved dialogue is temporarily unavailable.");
+  await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
+  await expect(page.getByText("Your submitted dialogue and rule-based result are saved to your account.")).toHaveCount(0);
+  await expect(page.getByText("Your chapter is complete, but its saved dialogue could not be loaded.")).toBeVisible();
+  await page.getByRole("button", { name: "Retry loading saved completion" }).click();
+  for (const line of lines) await expect(page.getByText(line, { exact: true })).toBeVisible();
+  await expect(page.getByText("Your submitted dialogue and rule-based result are saved to your account.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Retry loading saved completion" })).toHaveCount(0);
+  expect(claims).toBe(0);
+  expect((await (await request.get(`${API}/v1/me`, { headers: user.headers })).json()).user.xp).toBe(210);
+});
+
 // These two cases only read the gate and evaluate one turn; isolated browser
 // contexts can share prerequisite evidence without repeating nine setup calls.
 let mobileUser: Awaited<ReturnType<typeof learner>> | undefined;

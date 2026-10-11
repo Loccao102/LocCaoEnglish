@@ -57,6 +57,10 @@ prompt/verdict contract rather than silently changing this rubric.
   kept until an explicit restart. Storage failure is disclosed in the UI; in-app
   state reload retains the same owner's in-memory draft/pending claim. A full
   browser refresh or page close cannot recover memory when storage is blocked.
+- A cleared chapter and its dialogue receipt load independently. Failed receipt
+  reads show a retry action and unavailable state; the UI does not claim dialogue
+  evidence has loaded until it receives the receipt. Retrying the read never
+  issues another completion claim.
 
 Campaign XP still contributes to the existing total and rankings. Broader trust
 policy and migration of legacy prerequisite evidence remain CORE-005. Existing
