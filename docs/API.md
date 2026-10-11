@@ -49,7 +49,41 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`, `shadowing`.
+
+Shadowing uses `shadowing.v1`, catalog `2026-10-11.1` with the existing 30 phrases
+across core and nine campaigns. These mixed practice phrases retain `B1` as routing
+metadata; it is not calibrated item difficulty. The public prompt intentionally
+shows the reference phrase and pack label. This is guided practice, not recall.
+Submit actual recognized, edited or typed transcript as `answer`; do not send the
+reference on behalf of the learner. Rules retain the v1 token alignment described
+for Dictation below, without its audio-playback gate. `result.transcriptMatch`
+has the same alignment shape; `evidence` is `server-guided-transcript-match`.
+The server verifies the text comparison, not that a person spoke those words.
+
+Owner, snapshot, 24-hour expiry, exact trimmed retry, daily claim and first-check
+practice XP/confidence/review follow the shared contract. Rechecking a completed
+attempt cannot change its transcript or grant another reward. No acoustic score
+enters the grade or ledger. Both `shadowing` and `pronunciation-assessment` now
+reject generic `/v1/attempts` accuracy with 409, including case/whitespace variants.
+Old history is preserved, not upgraded to verified acoustic evidence.
+
+The UI offers optional, independent text-coach and acoustic requests using the
+existing AI proxy endpoints. Text coaching renders suggestions and provider,
+never a pronunciation proxy or IELTS band. An acoustic score is shown only for
+an explicitly acoustic response with a finite 0–100 overall. Failed/unconfigured
+providers never create a substitute score; retry retains the other successful
+feedback. Coach results are transient, not server-owned learning evidence.
+The app's WAV recording is in-memory only, sent on explicit coach request and lost
+on reload/owner change/navigation. Separately, browser speech recognition started
+by the Record action may stream audio to the browser vendor's online service;
+the pre-record UI explains this and does not promise offline/on-device recognition.
+Text drafts and pending submissions use the
+shared owner-scoped browser reference; committed text is stored by the server.
+Capture stops on hide, unmount, account change or ten seconds, including late
+permission grants. See [ADR 004](decisions/004-speaking-evidence.md) for limits.
+No SQL migration; API before web. Preserve the v1 decoder/grader and legacy
+rejection on rollback; refresh old clients instead of restoring client rewards.
 
 Dictation uses `dictation.v1`, content `dictation-core.2026-10-09.v1`: three
 sentences each at A2/B1/B2 in `cefr-core`, including the five original sentences.
@@ -190,13 +224,14 @@ Start/GET return `attemptId`, `activity`, `pack`, `itemKey`, `cefrLevel`,
 `contentVersion`, `rulesVersion`, `status`, `prompt` (word/relation or question,
 plus options or sentence chunks), `mode: guest|account`, `expiresAt` and optional `result`. The public
 prompt/order and private answer are snapshotted together; replay does not re-read
-the current catalog. No answer key/feedback is sent before completion.
+the current catalog. No answer key/feedback is sent before completion in the
+objective activities; Shadowing intentionally shows its guided reference phrase.
 
 Result contains `correct`, `actualAnswer`, `correctAnswer`, `feedback`, `xpDelta`,
 `newConfidence`, `level`, `reviewAdded`, `progressionApplied`, `evidence:
-server-objective` (or the guided listening/dictation provenance above),
+server-objective` (or the guided listening/dictation/transcript provenance above),
 attempt/status and versions. Choice activities accept only offered answers;
-Sentence Builder accepts a complete chunk permutation and Dictation accepts bounded
+Sentence Builder accepts a complete chunk permutation; Dictation and Shadowing accept bounded
 typed text under its normalization/retry rules above. Choice comparison ignores
 surrounding whitespace and case. Wrong answers are retained as
 actual responses, while review teaches the correct answer. Guests and daily repeats

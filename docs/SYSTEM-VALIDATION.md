@@ -536,3 +536,52 @@ review threads were present. The acceptance follow-up changes docs only.
 No deployment. This closes only the CORE-003 migration/grade/recovery scope.
 Broader reward trust, speaking/mission evidence, cross-domain
 recovery, measured difficulty and expanded content remain their roadmap items.
+
+## CORE-004 Shadow Me transcript evidence — 2026-10-11
+
+Branch `codex/core004-shadowing-evidence`, based on main `f97cbcb`; pending CI/merge.
+Shared `/speaking` and `/ielts/speaking` now save actual transcripts through server
+attempts. `shadowing.v1` aligns words against the deliberately visible phrase and
+returns `server-guided-transcript-match`, not acoustic evidence. One catalog keeps
+the 30 existing phrases and ten labels; campaign progression remains accessible
+through guided transcript practice. Generic shadowing/pronunciation client-score
+submissions are rejected. No SQL migration; deploy API before frontend.
+
+Local evidence:
+
+- `go test ./...` and `go vet ./...` passed. New memory/store tests cover repeated
+  word omission, actual answer/source, fractional match, owner/version/expiry,
+  concurrent immutable retry, daily cap and saved results against a retired bank.
+  The same test uses a second PostgreSQL connection on CI; local did not run PG/race.
+- `npm run build` passed all 58 routes; `npx tsc --noEmit` and diff checks passed.
+- Playwright `speaking.spec.ts`, `core.spec.ts`, `learning-recovery-ui.spec.ts`:
+  **19 passed (29.3s)** on `14b9162`. Real APIs cover pending/committed
+  response loss, reload, owner isolation, fake accuracy/legacy rejection and XP once.
+- Simulated microphone/recognition and provider responses cover denied/delayed
+  permission, partial provider failures, unconfigured/invalid acoustic results,
+  a valid zero acoustic score, no coach rewards, stale results after owner change,
+  hidden-tab and client-navigation cleanup, and no audio in browser storage.
+- The initial navigation test timed out intermittently while entering the 3D
+  village. Diagnostics also observed the expected two stopped streams/two closed
+  microphone contexts on that route. The final focused cleanup test navigates to
+  Review and counts only microphone contexts; identical release assertions passed
+  three repeat runs (5.6s) and the full targeted run. This does not establish 3D
+  route performance; existing 3D E2E remain in the full CI suite.
+- Viewed final full-page captures at 390×551 and 390×844: readable phrase/input,
+  19px transcript text, controls at least 48px, no horizontal overflow. Three
+  distinct work-deadline phrases and the existing campaign-label regression passed.
+
+The API preview uses temporary memory storage. Microphone/provider fixtures do not
+prove physical microphone quality or production acoustic accuracy; neither was
+claimed. Coach responses/audio are transient and are not persisted as verified
+learning evidence. Existing AI endpoints' legacy numeric proxies are ignored by
+this UI. No production deployment. CORE-004 remains in progress for persistent
+acoustic receipts, mission dialogue evaluation and IELTS provenance/history;
+CORE-005 still owns comprehensive reward/rank integrity and legacy classification.
+
+Pre-merge review corrected the recording notice: the app's WAV is submitted only
+for explicit coaching, but browser speech recognition may use an online service.
+The UI now states that distinction before recording, with an assertion for the
+notice. No speech API behavior or reward rule changed in this copy correction.
+The revised UI rebuilt successfully; all nine Speaking browser/API cases were
+rerun successfully, including the notice assertion and both mobile captures.

@@ -31,7 +31,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-001 | P0 | Attempt do server cấp và chấm; Word Link làm luồng đầu tiên | — | done |
 | CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | done |
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | done |
-| CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | planned |
+| CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | planned |
 | CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | planned |
@@ -295,13 +295,28 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 
-Điểm vào đã rà ngày 2026-10-11; chưa bắt đầu triển khai: `/speaking` và
+Lát cắt Shadow Me: Codex, `codex/core004-shadowing-evidence`, 2026-10-11,
+`in_review`. Chuyển 30 câu mẫu hiện có thành catalog server; dùng shared attempts
+để lưu/chấm actual transcript theo `shadowing.v1`, giữ draft/retry/owner và daily
+claim. Reference hiện trước khi nói nên đây là guided transcript practice, không
+phải chứng minh phát âm hoặc recall độc lập. Coach/acoustic feedback tách riêng,
+không cấp XP; API legacy từ chối shadowing/pronunciation client accuracy.
+Không đổi SQL; snapshot và result bổ sung transcript alignment. Backend trước
+frontend, giữ grader/snapshot và legacy rejection khi rollback. Nghiệm thu gồm
+đúng/sai/thừa/thiếu/từ lặp, concurrent retry, owner, reload, microphone lỗi/cleanup,
+provider lỗi/không cấu hình, phản hồi cũ và mobile. Mission/IELTS còn ngoài lát cắt.
+Local Go tests/vet, build 58 routes và typecheck đạt. 19 browser/API scenarios
+đạt (29.3s); xem bằng chứng và giới hạn tại [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md).
+Chờ PostgreSQL/race và ma trận CI đầy đủ trước nghiệm thu/merge.
+
+Điểm vào đã rà ngày 2026-10-11: `/speaking` và
 `/ielts/speaking` cùng dùng [SpeakingPractice](../components/SpeakingPractice.tsx).
-Component còn gửi câu mẫu trong `answer` và có thể ghi lại mỗi lần Analyze;
-lát cắt đầu cần lưu actual transcript, provenance và attempt/retry ổn định.
+Lỗi trước lát cắt này: gửi câu mẫu trong `answer` và ghi lại mỗi lần Analyze.
+Contract thay thế ở [ADR 004](decisions/004-speaking-evidence.md).
 Các route `/missions/*` dùng [TravelMission](../components/TravelMission.tsx),
 còn báo accuracy `.85`; xử lý cùng contract đánh giá hội thoại, không chép cách
-cấp thưởng này vào luồng mới. CORE-004 vẫn `planned` cho tới khi nhận lát cắt cụ thể.
+cấp thưởng này vào luồng mới. Toàn CORE-004 vẫn `in_progress`; mission và IELTS
+chưa được nghiệm thu bởi lát cắt Shadow Me.
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

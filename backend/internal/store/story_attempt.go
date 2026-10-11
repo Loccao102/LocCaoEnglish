@@ -112,7 +112,7 @@ func storyChoiceOf(rec LearningAttemptRecord, answer string) (learning.StoryChoi
 	return node.Choice(answer)
 }
 func learningCorrect(rec LearningAttemptRecord, answer string) bool {
-	if rec.Activity == "dictation" {
+	if rec.Activity == "dictation" || rec.Activity == "shadowing" {
 		return learning.GradeDictation(rec.CorrectAnswer, answer).Accuracy == 1
 	}
 	if rec.Activity == "story-choice" {

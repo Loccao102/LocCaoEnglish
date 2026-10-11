@@ -49,6 +49,7 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
+	TranscriptMatch    *DictationGrade    `json:"transcriptMatch,omitempty"`
 	Dictation          *DictationGrade    `json:"dictation,omitempty"`
 	Listening          *ListeningEvidence `json:"listening,omitempty"`
 	Story              *StoryOutcome      `json:"story,omitempty"`

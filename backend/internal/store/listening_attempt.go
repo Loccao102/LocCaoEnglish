@@ -17,6 +17,9 @@ type ListeningSnapshot struct {
 }
 
 func learningEvidence(rec LearningAttemptRecord) string {
+	if rec.Activity == "shadowing" {
+		return "server-guided-transcript-match"
+	}
 	if rec.Activity == "dictation" {
 		return "server-objective-guided-dictation"
 	}
