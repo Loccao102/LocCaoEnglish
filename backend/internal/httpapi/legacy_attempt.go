@@ -17,6 +17,10 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Migrated activities must not award progress through the older accuracy API.
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "npc-conversation") {
+		problem(w, http.StatusConflict, "mission dialogue no longer awards per-turn learning scores; use mission evaluation and completion")
+		return
+	}
 	switch strings.ToLower(strings.TrimSpace(in.Activity)) {
 	case "shadowing", "pronunciation-assessment":
 		problem(w, http.StatusConflict, "use a shadowing attempt for transcript practice; coach and acoustic feedback do not award progress")

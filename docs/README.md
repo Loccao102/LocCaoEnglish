@@ -25,6 +25,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Nhân vật và assets | [CHIBI-CAST](CHIBI-CAST.md), [SUNLIT-VILLAGE](SUNLIT-VILLAGE.md) |
 | Quyết định kiến trúc | [ADR 001: nguồn tiến độ riêng](decisions/001-unified-player-journey.md), [ADR 002: core trước nội dung](decisions/002-core-first-development.md) |
 | Speaking và nguồn gốc kết quả | [ADR 004: transcript và phản hồi phát âm](decisions/004-speaking-evidence.md) |
+| Nhiệm vụ hội thoại và first-clear | [ADR 005: rubric theo thứ tự và bằng chứng đã lưu](decisions/005-mission-evidence.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

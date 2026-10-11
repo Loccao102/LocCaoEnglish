@@ -595,3 +595,48 @@ PostgreSQL/race and vet, AI service, compose, integration, and E2E. Job
 The PR head matched this revision at merge; no review submissions or unresolved
 review threads were present. This acceptance follow-up changes docs only.
 No production deployment; only the guided Shadow Me slice is complete.
+
+## CORE-004 guided mission evidence — 2026-10-11
+
+Branch `codex/core004-mission-evidence`, based on main `e5d8c29`; pending CI/merge.
+All nine `/missions/*` routes use the ordered `conversation.v2` rubric. No fixed
+per-turn learning accuracy remains in the active mission UI or legacy NPC API.
+Original messages, coverage verdict and reported-dialogue provenance are saved
+atomically with first-clear campaign XP in `player_bosses.evidence`. This is a
+guided pattern-based practice result, not semantic/fluency/acoustic assessment.
+
+Local verification of this runtime:
+
+- `go test ./...` and `go vet ./...` passed. Engine tests cover valid conversations
+  across all nine missions, reversed order, repeated stuffing, recovery after
+  irrelevant text, explicit contradictions and payload bounds. Store tests cover
+  locked/incomplete/version errors, eight simultaneous claims, one reward,
+  immutable actual messages, changed-payload conflict, other-owner reads and
+  legacy clears. Dedicated PostgreSQL, second-connection concurrency and migration
+  017 replay twice are wired into CI; local store verification used memory.
+- A test initially failed because its error variable retained the preceding
+  expected foreign-owner error in the memory-only legacy setup. Reset the fixture
+  error before that setup; assertions and runtime behavior were unchanged.
+- Final `npm run build` passed all 58 routes, including type checking.
+- `missions.spec.ts`, `core.spec.ts`, `speaking.spec.ts`: **24 passed (34.2s)**.
+  Eight new mission cases use actual auth, learning, evaluation, claim and receipt
+  APIs. Prerequisite answers come from test catalogs; reported audio events are
+  fixtures, not evidence of a human listening. No mission grading/claim is mocked.
+- Browser faults cover lost evaluation, lost committed and uncommitted claim,
+  immutable retry/reload, legacy/forged score rejection, account switch and delayed
+  old response, corrupt draft preservation until explicit restart, and unavailable
+  storage with a warning and continued in-memory play.
+- Viewed final 390×551 and 390×844 captures after enlarging the inherited small
+  chat text: 18px chat, 19px input, buttons and checkpoint links at least 48px;
+  mobile tests verify no horizontal overflow. Full-page captures include the
+  existing fixed navigation overlay; they do not establish every scroll position.
+- Removed the unused `AirportMission` and score-only helper only after confirming
+  all nine routes import `TravelMission`. No tests were removed or weakened.
+
+Known limits: rubric paraphrases and semantic understanding still need deeper
+evaluation; general language quality is not established by these tests. Existing
+campaign prerequisite legacy trust, memory activity/time parity and XP/rank
+classification remain CORE-005/006. Unfinished dialogue is device-local, while
+completion receipts persist in PostgreSQL; the local API preview uses temporary
+memory. Roll out migration/API before frontend, preserve receipts and the v2
+grader on rollback. No production deployment; CORE-004 remains in progress.

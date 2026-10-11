@@ -1,0 +1,16 @@
+.shell { min-width: 0; }
+.shell p { overflow-wrap: anywhere; }
+.explanation { font-size: 1rem; line-height: 1.6; color: #4b626c; padding: 0 1.25rem; }
+.log { max-height: 28rem; overflow-y: auto; }
+.shell :global(.chat-bubble p) { font-size: 18px; line-height: 1.6; }
+.shell :global(.chat-bubble span), .shell :global(.objective-box small) { font-size: 12px; }
+.shell :global(.objective-box strong), .shell :global(.mission-stage strong) { font-size: 16px; line-height: 1.5; }
+.shell :global(.mission-stage small) { font-size: 12px; }
+.shell :global(.mission-stage-actions a) { font-size: 14px; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+.reply { padding: 1rem 1.25rem; margin: 1rem; border-radius: 18px; background: #eef7e7; font-size: 1.15rem; line-height: 1.6; }
+.form { display: grid; gap: .75rem; padding: 1rem; }
+.form label { font-weight: 700; }
+.form textarea { box-sizing: border-box; width: 100%; min-height: 120px; padding: 1rem; font: inherit; font-size: 19px; line-height: 1.5; border: 2px solid #a2bab5; border-radius: 16px; resize: vertical; color: #163a40; background: #fff; }
+.shell button, .actions a { min-height: 48px; white-space: normal; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; padding: 1rem; }
+@media (max-width: 600px) { .shell :global(.npc-panel-head) { flex-wrap: wrap; gap: 1rem; } .shell :global(.mission-header) { gap: 1rem; } .shell :global(.boss-win) { flex-wrap: wrap; } }
