@@ -91,6 +91,8 @@ python -m unittest discover -s tests -v
 CI chạy ma trận đầy đủ trong [workflow](.github/workflows/ci.yml). Không chỉnh
 workflow chỉ để né lỗi. Khi một kiểm tra bị môi trường chặn, giữ nguyên lỗi/bằng
 chứng, báo rõ phần chưa xác minh; không thử vượt chính sách môi trường.
+E2E trên CI dùng `failOnFlakyTests`: một test chỉ qua nhờ retry vẫn làm job lỗi
+và giữ failure artifacts. Không coi job xanh cũ có flaky là nghiệm thu sạch.
 
 ## 5. PR và bàn giao
 

@@ -396,3 +396,7 @@ API-before-frontend rollout and data-preserving rollback are specified in
 remains separate work. Only successful completion receipts are stored on server;
 unfinished dialogue and draft/pending operations stay in account-scoped browser
 storage, with no tokens in the saved draft. No dialogue is added to logs.
+
+Allowed browser origins receive CORS headers on rate-limit errors too, including
+an exposed `Retry-After` header. The existing request limits remain unchanged;
+429 must be readable as a service response rather than an opaque fetch failure.

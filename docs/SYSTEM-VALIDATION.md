@@ -650,3 +650,31 @@ retry while both storage reads and writes fail. After this correction, build
 passed (58 routes) and all eight mission browser/API cases passed (13.7s).
 The earlier 24-case result belongs to runtime `02ec29a`; final CI must use the
 new PR head containing this correction.
+
+CI 130 on `4e6f116` completed six jobs but its E2E log reported **118 passed and
+one flaky** (17.6m): mission 390×844 timed out waiting for the reply input on its
+first attempt. This is not clean acceptance. The old failure-only upload step
+produced no artifact because Playwright returned success after retry, so the
+exact cause of that CI timeout cannot be asserted from the log.
+
+A local combined learning/recovery/listening/mission run produced 36 passes and
+two Listening failures (1.5m), with an opaque `Failed to fetch` in saved page
+context. Review found a concrete transport defect: rate limiting wrapped CORS,
+so 429 responses omitted allowed-origin headers. A new HTTP regression failed
+against the old middleware, then passed after moving CORS outside the limiter
+for both normal and platform routes. The limits themselves are unchanged;
+`Retry-After` is exposed to allowed origins. This defect is confirmed; attributing
+the earlier CI timeout specifically to it remains an inference.
+
+Mission fixtures now initialize their token on the first mission document rather
+than bootstrapping an unrelated account page, and the two read-only mobile cases
+share prerequisite setup across isolated browser contexts. They still use actual
+grading/rewards and the same assertions. A new browser case verifies a visible
+429 and draft-preserving load retry; its initial selector was scoped to the
+mission error after detecting ambiguity with Next's route announcer. Request
+throttling diagnostics print paths only. CI now enables `failOnFlakyTests`, so
+retry-only passes fail the job and preserve failure artifacts. Final acceptance
+requires the new head and a clean full CI run, including Listening regressions.
+After these changes, local `go test ./...`, `go vet ./...`, and `npx tsc --noEmit`
+passed; all nine mission browser cases passed (11.6s). Frontend runtime remains
+the already-built `4e6f116` UI; the latest runtime change is API middleware only.

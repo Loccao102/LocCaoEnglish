@@ -9,6 +9,11 @@ const root = `${API}/v1/player/bosses/airport-crisis`;
 const lines = ["I missed my flight this afternoon.", "Could you rebook me on the next flight?", "Yes please, book it. Which gate should I use?"];
 const version = "conversation.v2";
 const input = (page: Page) => page.getByRole("textbox", { name: "Your reply" });
+test.beforeEach(async ({ page }) => {
+  page.on("response", response => {
+    if (response.status() === 429) console.warn(`Mission request throttled: ${new URL(response.url()).pathname}`);
+  });
+});
 async function learner(request: APIRequestContext, unlock = true) {
   const created = await request.post(`${API}/v1/auth/register`, { data: { email: `mission-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Mission Learner" } });
   expect(created.ok(), await created.text()).toBe(true); const user = await created.json();
@@ -30,7 +35,11 @@ async function learner(request: APIRequestContext, unlock = true) {
   return { ...user, headers };
 }
 async function signIn(page: Page, token: string) {
-  await page.goto("/account"); await page.evaluate(token => { localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change")); }, token);
+  // Install the test account before the first mission document. Visiting the
+  // account page just to set a token caused an unnecessary second app bootstrap.
+  await page.addInitScript(({ token, key }) => {
+    if (!sessionStorage.getItem(key)) { localStorage.setItem("loccao_token", token); sessionStorage.setItem(key, "ready"); }
+  }, { token, key: `mission-test-init-${randomUUID()}` });
   await page.goto("/missions/airport");
 }
 async function send(page: Page, text: string) {
@@ -114,7 +123,7 @@ test("mission isolates account drafts and preserves corrupt storage until explic
   await expect(input(page)).toHaveValue("Only the first learner wrote this.");
   const key = await page.evaluate(() => Object.keys(localStorage).find(k => k.startsWith("loccao.mission.v2.") && JSON.parse(localStorage.getItem(k)!).text === "Only the first learner wrote this.")!);
   await page.evaluate(key => localStorage.setItem(key, "broken-json"), key); await page.reload();
-  await expect(page.getByRole("alert")).toBeVisible(); await expect(input(page)).toBeDisabled();
+  await expect(page.locator(".feedback-banner[role=alert]")).toBeVisible(); await expect(input(page)).toBeDisabled();
   expect(await page.evaluate(key => localStorage.getItem(key), key)).toBe("broken-json");
   await page.getByRole("button", { name: "Restart dialogue" }).click();
   await expect(input(page)).toBeEnabled(); await expect(input(page)).toHaveValue("");
@@ -142,8 +151,19 @@ test("mission remains playable with an explicit warning when draft storage is un
   await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
 });
 
+test("mission explains a throttled load and lets the player retry without clearing the draft", async ({ page, request }) => {
+  const user = await learner(request); await signIn(page, user.token); await input(page).fill("My reply survives a temporary limit.");
+  await page.route("**/v1/player/progression", route => route.fulfill({ status: 429, headers: { "Retry-After": "1" }, json: { error: "rate limit exceeded" } }), { times: 1 });
+  await page.reload(); await expect(page.locator(".feedback-banner[role=alert]")).toHaveText("rate limit exceeded");
+  await page.getByRole("button", { name: "Retry loading mission" }).click();
+  await expect(input(page)).toHaveValue("My reply survives a temporary limit.");
+});
+
+// These two cases only read the gate and evaluate one turn; isolated browser
+// contexts can share prerequisite evidence without repeating nine setup calls.
+let mobileUser: Awaited<ReturnType<typeof learner>> | undefined;
 for (const height of [551, 844]) test(`mission is readable and usable on 390x${height}`, async ({ page, request }) => {
-  await page.setViewportSize({ width: 390, height }); const user = await learner(request); await signIn(page, user.token);
+  await page.setViewportSize({ width: 390, height }); mobileUser ??= await learner(request); await signIn(page, mobileUser.token);
   await send(page, lines[0]); await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
   const box = await input(page).boundingBox(); expect(box!.width).toBeGreaterThan(250);
   expect(await input(page).evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(18);
