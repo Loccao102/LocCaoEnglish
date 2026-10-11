@@ -678,3 +678,24 @@ requires the new head and a clean full CI run, including Listening regressions.
 After these changes, local `go test ./...`, `go vet ./...`, and `npx tsc --noEmit`
 passed; all nine mission browser cases passed (11.6s). Frontend runtime remains
 the already-built `4e6f116` UI; the latest runtime change is API middleware only.
+
+CI 131 on `96fc1a1` was rejected: **117 passed, two failed and one flaky**
+(17.9m). Artifact `11708357465` now preserves the failures. The first mobile
+mission snapshot shows `rate limit exceeded`, its original reply and the retry
+button; Reading's snapshot shows the same error on attempt creation. The logs
+also record a real 429 on mission evaluation and registration. These failures
+confirm saturation of the shared source-IP rate budget by sequential fixture
+traffic, rather than unreadable mobile text or a different grading verdict.
+
+The mission suite now waits a full 60-second limiter window at its boundaries,
+separating its prerequisite-account traffic from neighboring suites. This is
+test pacing: production limits, HTTP behavior and all assertions are unchanged;
+no Redis/database reset or automatic assertion retry is introduced. The explicit
+429 recovery case remains. This adds about two minutes to E2E; this suite is not
+a throughput/load test. Clean acceptance still requires the revised CI run.
+
+The combined local Listening/Mission/Reading run completed with all 20 cases
+passing after this pacing change (`test-results/.last-run.json`: passed, no
+failed tests, written 2026-10-11 16:33:20 UTC). Typecheck and diff checks passed.
+The final console duration was unavailable after the terminal session expired;
+no duration is asserted. The complete CI suite remains the merge gate.

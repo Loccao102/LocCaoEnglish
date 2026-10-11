@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import { test, expect, type Page, type APIRequestContext } from "@playwright/test";
 import words from "../../backend/internal/learning/catalog.json";
 import dictation from "../../backend/internal/learning/dictation_catalog.json";
@@ -9,6 +10,17 @@ const root = `${API}/v1/player/bosses/airport-crisis`;
 const lines = ["I missed my flight this afternoon.", "Could you rebook me on the next flight?", "Yes please, book it. Which gate should I use?"];
 const version = "conversation.v2";
 const input = (page: Page) => page.getByRole("textbox", { name: "Your reply" });
+// All browser/API fixtures share one source IP. This suite creates prerequisite
+// evidence for several independent accounts, so it needs its own rate window.
+// Let the real 60s buckets expire before/after it; do not reset Redis, raise the
+// limits or silently retry failed assertions. The explicit 429 case stays below.
+async function separateRateWindow() {
+  test.setTimeout(90_000);
+  await delay(60_100);
+}
+test.beforeAll(separateRateWindow);
+test.afterAll(separateRateWindow);
+
 test.beforeEach(async ({ page }) => {
   page.on("response", response => {
     if (response.status() === 429) console.warn(`Mission request throttled: ${new URL(response.url()).pathname}`);
