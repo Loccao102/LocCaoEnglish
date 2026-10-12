@@ -24,10 +24,19 @@ that all learning activities received a full manual playthrough in this pass.
 | Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
 | Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
-| IELTS Lab | Multi-section practice hub, not one minigame; writing/speaking include coach estimates | Preserve estimate labels and separate objective scores from heuristic/acoustic evidence |
+| IELTS Lab | Reading/Listening submit client-computed tallies without original selections/version; Writing/Speaking do not currently save bands through their active UI | Migrate Reading to server-owned evidence-only receipts first, preserve legacy history and correct dashboard provenance/overall labels; see CORE-004 |
 | Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
+
+IELTS route audit, 2026-10-12: `IeltsObjectiveMock` sends `correct`/`total` to
+`/v1/ielts/objective-score`; each save creates a new history row, without request
+identity. `/v1/ielts/band` accepts a client band/source, but `recordBand()` has no
+active caller. Anonymous-demo handlers share the demo history. Listening marks
+a part played before audio starts, so failure prevents replay. The common
+dashboard also returns hardcoded IELTS 6.0/target 7.0. These are confirmed code
+findings, not fixes delivered in the mission PR. The next bounded implementation
+and acceptance criteria are in [CORE-004](ROADMAP.md#core-004--speaking-mission-và-ielts-evidence).
 
 Update 2026-10-11: the nine CORE-003 routes and compatibility exports now share
 the verified attempt lifecycle. A cross-activity audit found that Word Link and

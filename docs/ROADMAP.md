@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-11, main `d8ccd86` (PR #14). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-12, main `2abbc36` (PR #15). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -15,7 +15,8 @@ trước khi các contract core liên quan đã vững.
   Sentence Builder, bài luyện Word Graph, Reading Race, Story Choice, Listen & Pick,
   Dictation Rush) dùng chung server attempts và lifecycle khôi phục; CORE-003 đã
   nghiệm thu. Shadow Me đã lưu guided transcript qua shared attempts, tách coach
-  khỏi XP. Mission/acoustic receipts/IELTS tiếp tục theo CORE-004.
+  khỏi XP. Chín mission đã lưu hội thoại và kết quả rubric theo thứ tự cùng thưởng
+  first-clear. Đánh giá ngữ nghĩa, acoustic receipts và IELTS tiếp tục theo CORE-004.
 - Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
   build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
   Đây không phải xác nhận CI/production cho mọi revision sau này.
@@ -297,7 +298,7 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 ## CORE-004 — Speaking, mission và IELTS evidence
 
 Lát cắt mission: Codex, `codex/core004-mission-evidence`, 2026-10-11,
-`in_review`. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
+`done` trong phạm vi guided rubric, nghiệm thu 2026-10-12. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
 từ khóa toàn transcript bằng rubric theo thứ tự, có ngữ cảnh, bỏ qua spam/lặp
 và các mẫu phủ định trái mục tiêu. Lưu first-clear receipt gồm actual messages, verdict,
 rules version và provenance cùng transaction thưởng; retry cùng nội dung không
@@ -307,7 +308,14 @@ tự khai thành acoustic/mastery evidence. Nghiệm thu: đủ chín mission, i
 thứ tự, phủ định, retry/concurrency, owner, receipt legacy, browser và mobile.
 Xem [ADR 005](decisions/005-mission-evidence.md). Đây vẫn là guided rubric dùng
 pattern; semantic understanding/paraphrase coverage chưa được nghiệm thu. Không
-coi hội thoại tự khai là trusted mastery. Chờ CI đầy đủ trước merge/nghiệm thu.
+coi hội thoại tự khai là trusted mastery. Đã merge
+[PR #15](https://github.com/Loccao102/LocCaoEnglish/pull/15), main `2abbc36`.
+Head `047e7a5` đạt đủ 6 jobs tại
+[CI 133](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38184889862),
+gồm PostgreSQL/race và **121 E2E (19.2m)**, không failed/flaky. Đã sửa CORS cho
+429, giữ draft trong RAM khi storage bị chặn, và retry khi tải receipt thất bại.
+Các lỗi CI trước và cách tách rate window cho fixture được giữ trong
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chưa deploy production.
 
 Lát cắt Shadow Me: Codex, `codex/core004-shadowing-evidence`, 2026-10-11,
 `done` trong phạm vi guided transcript và coach tách riêng. Chuyển 30 câu mẫu hiện có thành catalog server; dùng shared attempts
@@ -337,6 +345,31 @@ Lỗi fixed accuracy `.85` được thay bằng rubric và completion receipt tr
 cắt mission; component `AirportMission` không còn được import đã được bỏ cùng
 helper score-only. Toàn CORE-004 vẫn `in_progress`; persistent acoustic receipts,
 đánh giá ngữ nghĩa hội thoại sâu hơn và IELTS provenance/history còn tiếp tục.
+
+### Lát cắt tiếp theo — IELTS Academic Reading (`planned`, 2026-10-12)
+
+Rà route đang dùng cho thấy `IeltsObjectiveMock` gửi số câu đúng do client tính;
+history chưa có đáp án gốc, phiên bản hoặc khóa chống ghi lặp. Làm Reading trước
+để tách việc chấm/lưu khỏi lifecycle âm thanh của Listening. Phạm vi dự kiến:
+
+- Server cấp bộ câu hỏi có phiên bản, không gửi đáp án chuẩn trước chấm; nhận
+  lựa chọn theo ID, lưu cả câu bỏ trống và kết quả chấm bất biến.
+- Dùng lifecycle owner/draft/pending/retry chung nhưng có chính sách chỉ lưu
+  bằng chứng do server quyết định. Không tự cấp XP, confidence hoặc review khi
+  tái sử dụng store learning attempts; xác minh không có các tác động đó.
+- Lưu receipt và history nguyên tử theo attempt ID; retry cùng dữ liệu trả kết
+  quả cũ, payload khác bị từ chối; kiểm tra PostgreSQL/concurrency và memory.
+- Ghi nguồn/phương pháp/phiên bản; phân biệt kết quả server chấm với legacy
+  client report. Giữ lịch sử cũ, không backfill bằng chứng chưa tồn tại; bỏ nhận
+  tally Reading cũ sau khi luồng thay thế sẵn sàng.
+- Sửa nhãn dashboard: Writing/Speaking hiện chưa có luồng UI lưu band tương ứng,
+  không hứa đã đủ bốn kỹ năng; bỏ band cá nhân 6.0 cố định ở dashboard chung.
+  Chốt policy guest và API band tự khai trước khi dùng history làm tiến độ.
+
+Nghiệm thu thêm: đúng/sai/bỏ trống/ID lỗi, owner/version, pending qua reload,
+phản hồi cũ, storage lỗi, migration chạy lại, hai kích thước mobile và CI.
+Listening playback evidence, persistent acoustic/Writing receipts và overall
+bốn kỹ năng tiếp tục sau lát cắt này. Đây là kế hoạch, chưa triển khai.
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

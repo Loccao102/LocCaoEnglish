@@ -598,7 +598,8 @@ No production deployment; only the guided Shadow Me slice is complete.
 
 ## CORE-004 guided mission evidence — 2026-10-11
 
-Branch `codex/core004-mission-evidence`, based on main `e5d8c29`; pending CI/merge.
+Branch `codex/core004-mission-evidence`, based on main `e5d8c29`; merged via
+[PR #15](https://github.com/Loccao102/LocCaoEnglish/pull/15) as `2abbc36`.
 All nine `/missions/*` routes use the ordered `conversation.v2` rubric. No fixed
 per-turn learning accuracy remains in the active mission UI or legacy NPC API.
 Original messages, coverage verdict and reported-dialogue provenance are saved
@@ -707,3 +708,21 @@ The completion panel now distinguishes loading, unavailable, legacy and loaded
 dialogue, with a retry for the unavailable receipt. Its regression injects a
 receipt 503 after a real completion and checks restored original messages,
 unchanged XP and no second completion request. Verification is pending below.
+
+Final acceptance on 2026-10-12 (Asia/Bangkok): build/typecheck passed all 58
+routes after the receipt fix. The new focused browser case passed once (2.1m,
+including the two rate-window waits), without retry. Independent code review
+found no further blocker in the receipt transaction, ownership, migration or
+CORS changes; documented rubric and gate/rank limitations remain.
+
+[CI 133](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38184889862)
+passed all six jobs on head `047e7a5`: frontend/build/game/assets, backend
+PostgreSQL/race/vet, AI service, compose, integration and E2E. Job
+`114605150718` reports **121 passed (19.2m)**, with no failed/flaky cases under
+`failOnFlakyTests`. The PR head matched at merge; no GitHub review submissions
+or unresolved review threads were present. PR #15 merged to main `2abbc36`.
+
+The acceptance follow-up changes docs only, records the IELTS audit and marks
+only the guided mission slice done. Local documentation checks found 87 valid
+file links after that follow-up; `git diff --check` passed. No production deployment. Full CORE-004,
+semantic/acoustic assessment and broader reward/rank integrity remain open.
