@@ -25,7 +25,7 @@ that all learning activities received a full manual playthrough in this pass.
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
 | Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
 | IELTS Lab | Multi-section practice hub, not one minigame; writing/speaking include coach estimates | Preserve estimate labels and separate objective scores from heuristic/acoustic evidence |
-| Airport Boss | Active route uses `TravelMission` and server objective evaluation; conversation attempts nevertheless report fixed 0.85 accuracy | Remove fixed learning accuracy; replace substring-only objective coverage with stronger, ordered evidence |
+| Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
 
@@ -62,10 +62,8 @@ Keep readable labels and pause support while adding pressure.
 
 ## Dead-code caveat
 
-`components/AirportMission.tsx` contains an older three-turn automatic claim, but
-`app/missions/airport/page.tsx` renders `TravelMission`, and the current backend
-requires evaluated objectives for a claim. The old component is not evidence
-that the current route auto-wins after three arbitrary messages. Likewise,
+`components/AirportMission.tsx` was an unused older three-turn automatic claim.
+After verifying all nine `/missions/*` routes import `TravelMission`, it and its
+unused score-only client helper were removed in the CORE-004 mission slice. Likewise,
 `MiniGames.ListeningPick` now re-exports the active `ListeningPractice`; the obsolete
-client grader and duplicate listening bank were removed in CORE-003. The older
-AirportMission component remains separate debt for the mission migration.
+client grader and duplicate listening bank were removed in CORE-003.

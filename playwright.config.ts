@@ -5,6 +5,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
+  failOnFlakyTests: !!process.env.CI,
   reporter: process.env.CI ? "line" : "html",
   use: {
     baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",

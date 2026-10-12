@@ -296,6 +296,19 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 
+Lát cắt mission: Codex, `codex/core004-mission-evidence`, 2026-10-11,
+`in_review`. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
+từ khóa toàn transcript bằng rubric theo thứ tự, có ngữ cảnh, bỏ qua spam/lặp
+và các mẫu phủ định trái mục tiêu. Lưu first-clear receipt gồm actual messages, verdict,
+rules version và provenance cùng transaction thưởng; retry cùng nội dung không
+thưởng lặp, nội dung khác không ghi đè. UI giữ draft/pending theo tài khoản,
+khôi phục sau mất phản hồi và hiển thị giới hạn heuristic. Không biến hội thoại
+tự khai thành acoustic/mastery evidence. Nghiệm thu: đủ chín mission, input lỗi,
+thứ tự, phủ định, retry/concurrency, owner, receipt legacy, browser và mobile.
+Xem [ADR 005](decisions/005-mission-evidence.md). Đây vẫn là guided rubric dùng
+pattern; semantic understanding/paraphrase coverage chưa được nghiệm thu. Không
+coi hội thoại tự khai là trusted mastery. Chờ CI đầy đủ trước merge/nghiệm thu.
+
 Lát cắt Shadow Me: Codex, `codex/core004-shadowing-evidence`, 2026-10-11,
 `done` trong phạm vi guided transcript và coach tách riêng. Chuyển 30 câu mẫu hiện có thành catalog server; dùng shared attempts
 để lưu/chấm actual transcript theo `shadowing.v1`, giữ draft/retry/owner và daily
@@ -319,10 +332,11 @@ vật lý hoặc provider acoustic production. Toàn CORE-004 vẫn `in_progress
 `/ielts/speaking` cùng dùng [SpeakingPractice](../components/SpeakingPractice.tsx).
 Lỗi trước lát cắt này: gửi câu mẫu trong `answer` và ghi lại mỗi lần Analyze.
 Contract thay thế ở [ADR 004](decisions/004-speaking-evidence.md).
-Các route `/missions/*` dùng [TravelMission](../components/TravelMission.tsx),
-còn báo accuracy `.85`; xử lý cùng contract đánh giá hội thoại, không chép cách
-cấp thưởng này vào luồng mới. Toàn CORE-004 vẫn `in_progress`; mission và IELTS
-chưa được nghiệm thu bởi lát cắt Shadow Me.
+Các route `/missions/*` dùng [TravelMission](../components/TravelMission.tsx).
+Lỗi fixed accuracy `.85` được thay bằng rubric và completion receipt trong lát
+cắt mission; component `AirportMission` không còn được import đã được bỏ cùng
+helper score-only. Toàn CORE-004 vẫn `in_progress`; persistent acoustic receipts,
+đánh giá ngữ nghĩa hội thoại sâu hơn và IELTS provenance/history còn tiếp tục.
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

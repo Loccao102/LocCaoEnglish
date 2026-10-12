@@ -365,3 +365,38 @@ legacy history is unchanged. No timer, hints or competitive certification added.
 ## Missions
 
 - `GET /v1/missions/airport`
+
+### Guided campaign dialogue (`conversation.v2`)
+
+All three endpoints require an authenticated account; guest demo requests return
+401. Nine `/missions/*` routes use this contract. The reply/coverage comes from
+an ordered server rubric; it is not a fluency or acoustic score.
+
+- `POST /v1/player/bosses/{id}/evaluate`: `{messages: string[], rulesVersion:
+  "conversation.v2"}`. An unlocked chapter is required. Returns `bossId`, stage,
+  objective-coverage score, complete, completed/missing objectives, per-turn
+  `{index, accepted, objective, feedback}`, next partner `reply`, rulesVersion and
+  evidence `server-rule-based-reported-dialogue`. Evaluation does not save rewards.
+- `POST /v1/player/bosses/{id}/complete`: same payload; returns `{progression,
+  receipt}`. Receipt contains `bossId`, original `messages`, immutable `evaluation`
+  and `legacy`. Completion recomputes the rubric server-side, then atomically
+  stores receipt and existing first-clear campaign XP. Identical retry returns
+  stored evidence; changed messages/version return 409. `score` is rejected (400).
+- `GET /v1/player/bosses/{id}/receipt`: the current account's receipt, or 404.
+  Earlier clears return `legacy:true`, empty messages and no evaluation; they
+  receive no retroactive transcript or additional reward.
+
+At most 24 turns and 1024 UTF-8 bytes per nonblank turn. Empty arrays are valid
+only for requesting the initial prompt, not for earning a new completion. A turn
+must address the current objective; repeated/irrelevant turns do not advance it.
+No per-turn learning XP/confidence is recorded. `/v1/attempts` rejects normalized
+`npc-conversation*` activities (409). Rubric limits, migration 017, startup schema,
+API-before-frontend rollout and data-preserving rollback are specified in
+[ADR 005](decisions/005-mission-evidence.md). Legacy prerequisite/ranking trust
+remains separate work. Only successful completion receipts are stored on server;
+unfinished dialogue and draft/pending operations stay in account-scoped browser
+storage, with no tokens in the saved draft. No dialogue is added to logs.
+
+Allowed browser origins receive CORS headers on rate-limit errors too, including
+an exposed `Retry-After` header. The existing request limits remain unchanged;
+429 must be readable as a service response rather than an opaque fetch failure.

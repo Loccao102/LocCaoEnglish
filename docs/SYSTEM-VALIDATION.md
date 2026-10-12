@@ -595,3 +595,115 @@ PostgreSQL/race and vet, AI service, compose, integration, and E2E. Job
 The PR head matched this revision at merge; no review submissions or unresolved
 review threads were present. This acceptance follow-up changes docs only.
 No production deployment; only the guided Shadow Me slice is complete.
+
+## CORE-004 guided mission evidence — 2026-10-11
+
+Branch `codex/core004-mission-evidence`, based on main `e5d8c29`; pending CI/merge.
+All nine `/missions/*` routes use the ordered `conversation.v2` rubric. No fixed
+per-turn learning accuracy remains in the active mission UI or legacy NPC API.
+Original messages, coverage verdict and reported-dialogue provenance are saved
+atomically with first-clear campaign XP in `player_bosses.evidence`. This is a
+guided pattern-based practice result, not semantic/fluency/acoustic assessment.
+
+Local verification of this runtime:
+
+- `go test ./...` and `go vet ./...` passed. Engine tests cover valid conversations
+  across all nine missions, reversed order, repeated stuffing, recovery after
+  irrelevant text, explicit contradictions and payload bounds. Store tests cover
+  locked/incomplete/version errors, eight simultaneous claims, one reward,
+  immutable actual messages, changed-payload conflict, other-owner reads and
+  legacy clears. Dedicated PostgreSQL, second-connection concurrency and migration
+  017 replay twice are wired into CI; local store verification used memory.
+- A test initially failed because its error variable retained the preceding
+  expected foreign-owner error in the memory-only legacy setup. Reset the fixture
+  error before that setup; assertions and runtime behavior were unchanged.
+- Final `npm run build` passed all 58 routes, including type checking.
+- `missions.spec.ts`, `core.spec.ts`, `speaking.spec.ts`: **24 passed (34.2s)**.
+  Eight new mission cases use actual auth, learning, evaluation, claim and receipt
+  APIs. Prerequisite answers come from test catalogs; reported audio events are
+  fixtures, not evidence of a human listening. No mission grading/claim is mocked.
+- Browser faults cover lost evaluation, lost committed and uncommitted claim,
+  immutable retry/reload, legacy/forged score rejection, account switch and delayed
+  old response, corrupt draft preservation until explicit restart, and unavailable
+  storage with a warning and continued in-memory play.
+- Viewed final 390×551 and 390×844 captures after enlarging the inherited small
+  chat text: 18px chat, 19px input, buttons and checkpoint links at least 48px;
+  mobile tests verify no horizontal overflow. Full-page captures include the
+  existing fixed navigation overlay; they do not establish every scroll position.
+- Removed the unused `AirportMission` and score-only helper only after confirming
+  all nine routes import `TravelMission`. No tests were removed or weakened.
+
+Known limits: rubric paraphrases and semantic understanding still need deeper
+evaluation; general language quality is not established by these tests. Existing
+campaign prerequisite legacy trust, memory activity/time parity and XP/rank
+classification remain CORE-005/006. Unfinished dialogue is device-local, while
+completion receipts persist in PostgreSQL; the local API preview uses temporary
+memory. Roll out migration/API before frontend, preserve receipts and the v2
+grader on rollback. No production deployment; CORE-004 remains in progress.
+
+Pre-merge review found that the in-app "Reload saved state" action could discard
+the in-memory dialogue when browser storage was blocked. The hook now keeps an
+owner-keyed in-memory copy for that action, including an unresolved claim. The
+storage warning still applies to full page refresh/closing the page. An expanded
+browser case verifies continued turns, lost claim, in-app reload and identical
+retry while both storage reads and writes fail. After this correction, build
+passed (58 routes) and all eight mission browser/API cases passed (13.7s).
+The earlier 24-case result belongs to runtime `02ec29a`; final CI must use the
+new PR head containing this correction.
+
+CI 130 on `4e6f116` completed six jobs but its E2E log reported **118 passed and
+one flaky** (17.6m): mission 390×844 timed out waiting for the reply input on its
+first attempt. This is not clean acceptance. The old failure-only upload step
+produced no artifact because Playwright returned success after retry, so the
+exact cause of that CI timeout cannot be asserted from the log.
+
+A local combined learning/recovery/listening/mission run produced 36 passes and
+two Listening failures (1.5m), with an opaque `Failed to fetch` in saved page
+context. Review found a concrete transport defect: rate limiting wrapped CORS,
+so 429 responses omitted allowed-origin headers. A new HTTP regression failed
+against the old middleware, then passed after moving CORS outside the limiter
+for both normal and platform routes. The limits themselves are unchanged;
+`Retry-After` is exposed to allowed origins. This defect is confirmed; attributing
+the earlier CI timeout specifically to it remains an inference.
+
+Mission fixtures now initialize their token on the first mission document rather
+than bootstrapping an unrelated account page, and the two read-only mobile cases
+share prerequisite setup across isolated browser contexts. They still use actual
+grading/rewards and the same assertions. A new browser case verifies a visible
+429 and draft-preserving load retry; its initial selector was scoped to the
+mission error after detecting ambiguity with Next's route announcer. Request
+throttling diagnostics print paths only. CI now enables `failOnFlakyTests`, so
+retry-only passes fail the job and preserve failure artifacts. Final acceptance
+requires the new head and a clean full CI run, including Listening regressions.
+After these changes, local `go test ./...`, `go vet ./...`, and `npx tsc --noEmit`
+passed; all nine mission browser cases passed (11.6s). Frontend runtime remains
+the already-built `4e6f116` UI; the latest runtime change is API middleware only.
+
+CI 131 on `96fc1a1` was rejected: **117 passed, two failed and one flaky**
+(17.9m). Artifact `11708357465` now preserves the failures. The first mobile
+mission snapshot shows `rate limit exceeded`, its original reply and the retry
+button; Reading's snapshot shows the same error on attempt creation. The logs
+also record a real 429 on mission evaluation and registration. These failures
+confirm saturation of the shared source-IP rate budget by sequential fixture
+traffic, rather than unreadable mobile text or a different grading verdict.
+
+The mission suite now waits a full 60-second limiter window at its boundaries,
+separating its prerequisite-account traffic from neighboring suites. This is
+test pacing: production limits, HTTP behavior and all assertions are unchanged;
+no Redis/database reset or automatic assertion retry is introduced. The explicit
+429 recovery case remains. This adds about two minutes to E2E; this suite is not
+a throughput/load test. Clean acceptance still requires the revised CI run.
+
+The combined local Listening/Mission/Reading run completed with all 20 cases
+passing after this pacing change (`test-results/.last-run.json`: passed, no
+failed tests, written 2026-10-11 16:33:20 UTC). Typecheck and diff checks passed.
+The final console duration was unavailable after the terminal session expired;
+no duration is asserted. The complete CI suite remains the merge gate.
+
+Review follow-up on 2026-10-12 found a receipt-loading recovery gap: after
+progression reported a cleared chapter, a failed receipt GET left no in-app retry
+and displayed the saved-dialogue message before receipt data was available.
+The completion panel now distinguishes loading, unavailable, legacy and loaded
+dialogue, with a retry for the unavailable receipt. Its regression injects a
+receipt 503 after a real completion and checks restored original messages,
+unchanged XP and no second completion request. Verification is pending below.
