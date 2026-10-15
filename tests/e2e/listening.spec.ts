@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import { test, expect, type Page } from "@playwright/test";
 import type { LearningAttempt } from "../../lib/learning-attempt";
 import bank from "../../backend/internal/learning/listening_catalog.json";
@@ -7,6 +8,13 @@ const issued=(page:Page)=>page.waitForResponse(r=>r.url().endsWith("/v1/learning
 const card=(page:Page)=>page.getByRole("region",{name:"Listening practice"});
 const item=(a:LearningAttempt)=>bank.items.find(i=>i.id===a.itemKey)!;
 const API=process.env.E2E_API_URL||"http://localhost:8080";
+
+// Sequential suites share the source-IP rate budget. CI 137 exhausted it before
+// this suite's account/audio checks. Separate real windows without bypassing the
+// limiter, retrying failed assertions or changing the production request limit.
+async function separateRateWindow() { test.setTimeout(90_000); await delay(60_100); }
+test.beforeAll(separateRateWindow);
+test.afterAll(separateRateWindow);
 
 // Headless CI has no installed speech voice. Only media events are simulated;
 // attempts, snapshots, audio requests/reports, grades and rewards use the real API.

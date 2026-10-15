@@ -783,3 +783,26 @@ local runs do not establish durable PostgreSQL behavior. The CI PostgreSQL/race
 job, full browser suite and remaining required jobs must pass on the PR head
 before merge. No production deployment. Listening answer receipts, acoustic/
 Writing persistence and calibrated overall assessment remain outside this slice.
+
+CI 137 (`38744774983`, head `6f30ac3`) passed frontend, backend PostgreSQL/race/
+vet, AI service, compose and integration. E2E was rejected: **129 passed, one
+failed (16.0m)**. All nine IELTS cases passed; the existing Listen & Pick account
+case failed while waiting for the answer buttons to unlock after audio playback.
+Artifact `11980256759` shows `rate limit exceeded` and `Retry audio request` in
+the original failure screenshot. The retry trace confirms `/v1/me` and `/v1/fair`
+returned **429, Retry-After: 60**, before any attempt could be created. This
+confirms shared source-IP budget saturation after the contract/recovery suites.
+
+On 2026-10-16, the Listening browser suite adopts the existing mission/IELTS
+boundary pacing: wait one complete 60-second limiter window before and after
+the suite. Production limits, assertions and strict flaky-test rejection stay
+unchanged. No reload workaround, extra assertion retry, database or bucket reset
+is added. Focused combined verification and clean CI on the revised head are
+still required below before merge.
+
+The combined local run of `learning-contracts.spec.ts`, `learning-recovery.spec.ts`
+and `listening.spec.ts` passed **27/27 (2.4m)** without retries against the same
+production frontend/memory API. This reproduces the neighboring suite order and
+retains account isolation, lost-response, playback completion and mobile checks.
+The only code delta after `6f30ac3` is browser-suite pacing; app runtime is
+unchanged. Documentation checks still find 117 valid links; diff check passes.
