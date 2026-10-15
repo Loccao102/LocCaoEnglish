@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick and Dictation Rush reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick, Dictation Rush, Shadow Me and IELTS Reading reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,7 +49,70 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`, `shadowing`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`, `shadowing`, `ielts-reading`.
+
+### IELTS Academic Reading
+
+`ielts-reading` requires a signed-in account; it does not use the shared demo
+learner or guest practice. Start with pack `ielts-academic-reading`, `cefrLevel:
+"B2"`, rules `ielts-reading.v1`. B2 is routing metadata, not a calibrated level.
+The current content version is `2026-10-12.1`: three original passages, 40
+questions preserved from the former frontend catalog.
+
+`prompt.reading` contains `{title, sections: [{id, title, passage, questions:
+[{id, prompt, options: [{id, text}]}]}]}`. Option IDs are opaque and shuffled;
+the snapshot preserves them. The grading key is not returned on active attempts.
+
+Submit `answer` as a JSON string containing question/option tuples in paper
+order, e.g. `[["R1","issued-option-id"],["R3","issued-option-id"]]`.
+Omissions are unanswered; `[]` is valid and scores zero. Unknown IDs, duplicate
+questions, out-of-order tuples, options from another question and malformed
+arrays return 400. The shared 2048-byte maximum applies. Submit the issued
+content/rules versions, never a score or provider. Owner mismatch is 404,
+invalid versions are 400, changed completed submissions conflict with 409,
+and active expiry is 410.
+
+Completed `result.ielts` contains `{section, testType, rawScore, maxScore, band,
+percentage, method, methodVersion, provider, disclaimer, answers}`. Each answer
+is `{questionId, optionId, correctOptionId, correct}`; an empty `optionId` denotes
+unanswered. `actualAnswer` preserves the submitted serialized choices. Evidence
+is `server-objective-practice`, provider `loccao-objective`, method version
+`ielts-anchors-interpolation.v1`. The band is an internal practice estimate from
+an uncalibrated question set, not an official score or a four-skill overall.
+
+Completion and the IELTS history receipt commit together, keyed by the learning
+attempt ID. Same-payload retries return the saved result; changed payloads do
+not overwrite it. This is an evidence-only path: no XP, confidence/level,
+learning daily claim, review item or legacy learning-attempt write. Generic
+`/v1/attempts` rejects `ielts-reading*` accuracy submissions with 409.
+
+### IELTS history and legacy endpoints
+
+- `GET /v1/ielts/history` requires sign-in and reads only that account. Rows add
+  `evidence`, `legacy` and optional `attemptId`, content/rules/method versions
+  and provider. Previous rows keep their scores/source text and report
+  `legacy:true`, `evidence:"legacy-unverified"`; no answers are invented.
+- `POST /v1/ielts/objective-score` requires sign-in. Reading tally writes return
+  409. Listening temporarily keeps the tally contract but records
+  `client-reported` evidence and `client-reported-practice-estimate` source;
+  these values are not server-graded selections. Its UI waits for actual audio
+  completion, permits retry after playback failure and stops on hide/unmount.
+  Full passages use a bounded five-minute playback budget; short learning clips
+  keep their existing 90-second default. Playback is not a server evidence receipt.
+- `POST /v1/ielts/band` rejects new arbitrary band/source writes with 409 after
+  authentication. Existing Writing/Speaking estimates are preserved in history.
+- `POST /v1/ielts/overall` remains a calculation helper; it does not persist or
+  verify its client-supplied inputs. The active dashboard does not treat it as
+  an evidenced four-skill result.
+- `GET /v1/dashboard` returns nullable `ieltsBand`/`targetBand`. Overall remains
+  null until supported evidence exists; a chosen target comes from the saved
+  onboarded profile. The old fixed 6.0/7.0 values are removed.
+
+Deploy additive migration 018/startup schema and API before frontend. Preserve
+old rows, new receipts, snapshots and v1 grading on rollback. See
+[ADR 006](decisions/006-ielts-reading-evidence.md) for recovery and rollout limits.
+
+### Guided transcript practice
 
 Shadowing uses `shadowing.v1`, catalog `2026-10-11.1` with the existing 30 phrases
 across core and nine campaigns. These mixed practice phrases retain `B1` as routing

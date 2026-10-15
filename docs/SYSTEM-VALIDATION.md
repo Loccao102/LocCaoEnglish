@@ -726,3 +726,83 @@ The acceptance follow-up changes docs only, records the IELTS audit and marks
 only the guided mission slice done. Local documentation checks found 87 valid
 file links after that follow-up; `git diff --check` passed. No production deployment. Full CORE-004,
 semantic/acoustic assessment and broader reward/rank integrity remain open.
+
+## CORE-004 — IELTS Academic Reading evidence (2026-10-14)
+
+Branch `codex/core004-ielts-reading`, based on main `973b6fc`. Reading now
+issues the original three passages/40 questions from a server catalog and grades
+actual opaque selections through shared attempts. Atomic result/history receipts
+are evidence-only: no XP, confidence, level, daily reward, review or legacy
+learning-attempt write. Migration 018 is additive. History is account-only,
+preserves unverified old rows and distinguishes Listening's client reports.
+The dashboard no longer invents an overall band or a default chosen target.
+Contract and rollout details are in [ADR 006](decisions/006-ielts-reading-evidence.md).
+
+Local verification:
+
+- `go test ./...` and `go vet ./...`: passed in memory mode. Focused cases cover
+  all 40 questions, strict selection parsing, no pre-grade key, owner/version/
+  expiry, immutable retry, concurrency, snapshot/result aliases and zero reward
+  side effects. PostgreSQL variants also cover atomic rollback and migration replay.
+- `npm run build`: passed, 58 routes, including TypeScript. Existing workspace-root
+  warnings remain; no dependency or build configuration was changed.
+- The initial eight Reading browser/API cases passed; the terminal session expired
+  so no duration is asserted. Four mobile captures were saved and visually reviewed:
+  390×551/844 question controls and feedback use readable text and touch targets.
+  Added camp nullable-band/history sign-out assertions and a Listening regression
+  still require the final run below.
+
+Review on 2026-10-15 found the legacy audio helper resolved when playback started,
+so the rewritten Listening screen could incorrectly say the recording finished.
+It now reuses the completion-aware player, aborts on hide/unmount, and unlocks
+retry on playback failure. A further review found that player's 90-second budget
+was too short for a full IELTS passage. This caller now allows up to five minutes;
+the shared default stays unchanged. The browser regression advances 91 seconds
+before ending a held Part 4 recording. Provider/voice events are simulated;
+this does not validate real voice quality or produce server listening evidence.
+
+The first expanded nine-case run passed all eight Reading cases but failed a
+new Listening assertion that searched the complete HTML for the transcript.
+Listening still intentionally ships its client catalog in Next's serialized
+props. The assertion now checks the rendered practice region, matching its
+documented presentation-only script hiding; Reading's private-key/API checks
+remain unchanged. Final verification is recorded below after rerun.
+
+Final local run on 2026-10-15: `npx playwright test
+tests/e2e/ielts-reading.spec.ts --reporter=line` passed **9/9 (2.2m)** with
+no retries, against the production build at port 3102 and memory API at 8080.
+This includes camp's empty overall state, history sign-out, all eight Reading
+scenarios, and Listening failure/hide/retry/actual completion beyond 90 seconds
+plus a failed, uncommitted tally retry. Both Reading and Listening mobile
+captures were visually inspected at 390×551 and 390×844. Final build/typecheck
+passed 58 routes. Documentation checks found 117 valid file links and
+`git diff --check` passed. CI acceptance remains pending below.
+
+The local Docker daemon is unavailable and `TEST_DATABASE_URL` is absent, so
+local runs do not establish durable PostgreSQL behavior. The CI PostgreSQL/race
+job, full browser suite and remaining required jobs must pass on the PR head
+before merge. No production deployment. Listening answer receipts, acoustic/
+Writing persistence and calibrated overall assessment remain outside this slice.
+
+CI 137 (`38744774983`, head `6f30ac3`) passed frontend, backend PostgreSQL/race/
+vet, AI service, compose and integration. E2E was rejected: **129 passed, one
+failed (16.0m)**. All nine IELTS cases passed; the existing Listen & Pick account
+case failed while waiting for the answer buttons to unlock after audio playback.
+Artifact `11980256759` shows `rate limit exceeded` and `Retry audio request` in
+the original failure screenshot. The retry trace confirms `/v1/me` and `/v1/fair`
+returned **429, Retry-After: 60**, before any attempt could be created. This
+confirms shared source-IP budget saturation after the contract/recovery suites.
+
+On 2026-10-16, the Listening browser suite adopts the existing mission/IELTS
+boundary pacing: wait one complete 60-second limiter window before and after
+the suite. Production limits, assertions and strict flaky-test rejection stay
+unchanged. No reload workaround, extra assertion retry, database or bucket reset
+is added. Focused combined verification and clean CI on the revised head are
+still required below before merge.
+
+The combined local run of `learning-contracts.spec.ts`, `learning-recovery.spec.ts`
+and `listening.spec.ts` passed **27/27 (2.4m)** without retries against the same
+production frontend/memory API. This reproduces the neighboring suite order and
+retains account isolation, lost-response, playback completion and mobile checks.
+The only code delta after `6f30ac3` is browser-suite pacing; app runtime is
+unchanged. Documentation checks still find 117 valid links; diff check passes.

@@ -2,89 +2,100 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { calculateOverall, getIELTSHistory, IELTSAttempt } from "@/lib/ielts";
+import { getIELTSHistory, type IELTSAttempt } from "@/lib/ielts";
+import { getAuthToken } from "@/lib/session";
+import useSignedInToken from "./learning/useSignedInToken";
+import styles from "./IeltsDashboard.module.css";
 
-const floors = [
-  { key: "listening", floor: "FLOOR 1", label: "Listening", href: "/ielts/listening", copy: "40 questions · 4 audio parts · one-play mock", icon: "◉" },
-  { key: "reading", floor: "FLOOR 2", label: "Academic Reading", href: "/ielts/reading", copy: "40 questions · 3 original academic-style passages", icon: "▤" },
-  { key: "writing", floor: "FLOOR 3", label: "Writing", href: "/ielts/writing", copy: "Task 2 · four-criterion AI/local coach", icon: "✎" },
-  { key: "speaking", floor: "FLOOR 4", label: "Speaking", href: "/ielts/speaking", copy: "Mic recording · language coach · optional acoustic assessment", icon: "◉" },
+const skills = [
+  { key: "listening", label: "Listening", href: "/ielts/listening", copy: "40 questions · 4 audio parts", kind: "Client-reported practice estimate" },
+  { key: "reading", label: "Academic Reading", href: "/ielts/reading", copy: "40 questions · 3 original passages", kind: "Saved choices checked by the server" },
+  { key: "writing", label: "Writing", href: "/ielts/writing", copy: "Task 2 · feedback on your writing", kind: "Coaching only · no saved band" },
+  { key: "speaking", label: "Speaking", href: "/ielts/speaking", copy: "Mic recording · language feedback", kind: "Coaching only · no saved band" },
 ];
 
-export default function IeltsDashboard() {
-  const [history, setHistory] = useState<IELTSAttempt[]>([]);
-  const [overall, setOverall] = useState<number | null>(null);
+function evidenceLabel(item: IELTSAttempt) {
+  if (item.legacy) return "Legacy estimate · original answers unavailable";
+  if (item.evidence === "server-objective-practice" && item.section === "reading") return "Server-checked Reading choices";
+  return "Client-reported estimate · original answers unverified";
+}
 
+export default function IeltsDashboard() {
+  const token = useSignedInToken();
+  return <DashboardHistory key={token ?? "loading"} token={token} />;
+}
+
+function DashboardHistory({ token }: { token: string | null }) {
+  const [history, setHistory] = useState<IELTSAttempt[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    getIELTSHistory().then((result) => setHistory(result.items)).catch(() => {});
-  }, []);
+    if (!token) return;
+    const controller = new AbortController();
+    let active = true;
+    setStatus("loading"); setError("");
+    getIELTSHistory(token, controller.signal).then(response => {
+      if (!active || token !== getAuthToken()) return;
+      setHistory(response.items); setStatus("ready");
+    }).catch(reason => {
+      if (!active || token !== getAuthToken()) return;
+      setError(reason instanceof Error ? reason.message : "Practice history could not load."); setStatus("error");
+    });
+    return () => { active = false; controller.abort(); };
+  }, [token, retry]);
 
   const latest = useMemo(() => {
-    const result: Record<string, IELTSAttempt> = {};
-    history.forEach((attempt) => { if (!result[attempt.section]) result[attempt.section] = attempt; });
-    return result;
+    const entries: Record<string, IELTSAttempt> = {};
+    history.forEach(item => {
+      if ((item.section === "listening" || item.section === "reading") && !entries[item.section]) entries[item.section] = item;
+    });
+    return entries;
   }, [history]);
 
-  const cleared = floors.filter((floor) => latest[floor.key]).length;
+  return <div className={styles.dashboard}>
+    <section className={styles.intro}>
+      <span className="eyebrow">IELTS PRACTICE</span>
+      <h1>Build skills. Understand your results.</h1>
+      <p>Reading saves your answers and checks them against an answer key. Listening currently saves a score reported by your browser. Writing and Speaking provide coaching without adding a band to this history.</p>
+      <p>No overall band is calculated from these different kinds of practice.</p>
+    </section>
 
-  async function calculate() {
-    if (floors.every((floor) => latest[floor.key])) {
-      const result = await calculateOverall(
-        latest.listening.band,
-        latest.reading.band,
-        latest.writing.band,
-        latest.speaking.band,
-      );
-      setOverall(result.overall);
-    }
-  }
+    <section className={styles.skills} aria-label="IELTS skills">
+      {skills.map(skill => {
+        const recent = token && status === "ready" ? latest[skill.key] : undefined;
+        return <Link href={skill.href} key={skill.key}>
+          <h2>{skill.label}</h2>
+          <p>{skill.copy}</p>
+          <span>{skill.kind}</span>
+          {recent && <p className={styles.estimate}><b>{recent.band.toFixed(1)}</b> latest estimate<br /><small>{evidenceLabel(recent)}</small></p>}
+          <strong>Open practice →</strong>
+        </Link>;
+      })}
+    </section>
 
-  return (
-    <div className="ielts-dashboard">
-      <section className="ielts-overview">
-        <div>
-          <span className="eyebrow">IELTS TOWER · CHALLENGE MODE</span>
-          <h1>Clear four floors. Build one overall band.</h1>
-          <p>Listening and Reading keep the real raw score. Writing and Speaking use criterion-based practice estimates. Clear every floor to calculate your latest overall run.</p>
-          <div className="plan-summary"><span>{cleared}/4 floors cleared</span><span>practice history saved</span><span>target: consistency, not one lucky run</span></div>
-        </div>
-        <div className="overall-orb">
-          <strong>{overall?.toFixed(1) ?? "—"}</strong>
-          <span>tower rating</span>
-          <button disabled={!floors.every((floor) => latest[floor.key])} onClick={() => void calculate()}>
-            {cleared === 4 ? "Calculate run" : `Clear ${4 - cleared} more`}
-          </button>
-        </div>
-      </section>
-
-      <section className="ielts-skill-grid">
-        {floors.map((floor) => (
-          <Link href={floor.href} key={floor.key}>
-            <span>{floor.floor} · {floor.icon} {floor.label}</span>
-            <strong>{latest[floor.key]?.band?.toFixed(1) ?? "—"}</strong>
-            <p>{floor.copy}</p>
-            <b>{latest[floor.key] ? "Run again →" : "Enter floor →"}</b>
-          </Link>
-        ))}
-      </section>
-
-      <section className="panel ielts-history">
-        <div className="section-heading">
-          <div><span className="eyebrow">RUN HISTORY</span><h2>Your recent tower attempts</h2></div>
-        </div>
-        {history.length === 0 ? (
-          <p className="muted">No floors cleared yet. Start with Listening or Reading to record your first run.</p>
-        ) : history.slice(0, 12).map((item) => (
-          <div key={item.id}>
-            <span>{item.section}</span>
-            <small>{item.rawScore != null ? `${item.rawScore}/${item.maxScore}` : item.source}</small>
-            <b>{item.band.toFixed(1)}</b>
-            <time>{new Date(item.createdAt).toLocaleDateString()}</time>
+    <section className={styles.history} aria-label="IELTS practice history">
+      <span className="eyebrow">YOUR PRACTICE HISTORY</span>
+      <h2>Recent results and their source</h2>
+      {token === null || token && status === "loading" ? <p role="status">Loading practice history…</p>
+        : !token ? <p>Sign in to see your saved practice. <Link href="/account">Sign in</Link></p>
+        : status === "error" ? <div role="alert"><p>{error}</p><button className="button primary" onClick={() => setRetry(value => value + 1)}>Retry history</button></div>
+        : !history.length ? <p>No saved IELTS practice yet. Complete a Reading practice to keep your answers and result here.</p>
+        : <ol>{history.slice(0, 12).map(item => <li key={item.id}>
+          <div className={styles.historyTop}>
+            <h3>{item.section === "reading" ? "Academic Reading" : item.section.charAt(0).toUpperCase() + item.section.slice(1)}</h3>
+            <strong>{item.band.toFixed(1)} <small>estimated band</small></strong>
           </div>
-        ))}
-      </section>
-
-      <p className="ielts-disclaimer">Practice estimates only. IELTS states that exact raw-score thresholds for Listening and Reading can vary slightly between test versions.</p>
-    </div>
-  );
+          <p>{item.rawScore != null ? `${item.rawScore}/${item.maxScore} correct · ` : ""}{evidenceLabel(item)}</p>
+          <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString()}</time>
+          {item.evidence === "server-objective-practice" && <details>
+            <summary>Result details</summary>
+            <p>Scoring provider: {item.provider}. Method: {item.methodVersion}.</p>
+            <p>Content: {item.contentVersion}. Rules: {item.rulesVersion}.</p>
+            <p>These choices were checked against the practice answer key. This is not an official IELTS score.</p>
+          </details>}
+        </li>)}</ol>}
+    </section>
+    <p className={styles.disclaimer}>All bands shown here are practice estimates. These original practice passages and question sets have not been calibrated as official IELTS tests.</p>
+  </div>;
 }

@@ -1,0 +1,59 @@
+.reader { max-width: 1180px; margin: auto; min-width: 0; color: #234735; font-size: 18px; line-height: 1.7; overflow-wrap: anywhere; }
+.reader h1 { font-size: clamp(28px, 3.5vw, 42px); line-height: 1.2; margin: 12px 0 18px; }
+.reader h2 { font-size: 24px; line-height: 1.4; margin: 0 0 18px; }
+.reader button, .reader a, .reader summary { font: inherit; }
+.reader button, .reader a.button { min-height: 48px; }
+.reader button { white-space: normal; }
+.reader button:disabled { cursor: default; opacity: .65; }
+.reader a { color: #146149; display: inline-flex; align-items: center; min-height: 48px; }
+.reader button:focus-visible, .reader a:focus-visible, .reader summary:focus-visible { outline: 3px solid #a76525; outline-offset: 3px; }
+.intro { background: #fffaf0; border: 1px solid #d2dfd3; border-radius: 22px; padding: 28px; margin-bottom: 24px; }
+.intro p { margin: 12px 0; }
+.note { color: #536451; font-size: 16px; }
+.progress { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin: 24px 0 18px; }
+.progress progress { width: 100%; height: 12px; accent-color: #237f61; }
+.parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+.parts button { display: flex; flex-direction: column; align-items: flex-start; border: 1px solid #bdd4c7; border-radius: 14px; padding: 14px 18px; background: white; color: #234735; cursor: pointer; }
+.parts button[aria-current="step"] { border: 2px solid #237f61; background: #eaf7ec; }
+.parts span { font-size: 15px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: start; }
+.passage { padding: 28px; background: #fffdf6; border: 1px solid #d2dfd3; border-radius: 22px; min-width: 0; position: sticky; top: 24px; max-height: calc(100dvh - 48px); overflow-y: auto; }
+.passage p { font-size: 18px; line-height: 1.9; margin: 0 0 24px; }
+.passage p:last-child { margin-bottom: 0; }
+.questions { min-width: 0; display: grid; gap: 24px; }
+.question { margin: 0; min-width: 0; border: 1px solid #d2dfd3; border-radius: 20px; padding: 20px; background: white; }
+.question legend { font-size: 20px; line-height: 1.5; font-weight: 700; padding: 0 8px; max-width: 100%; }
+.options { display: grid; gap: 12px; }
+.options label { display: flex; align-items: flex-start; gap: 12px; font-size: 18px; line-height: 1.6; padding: 15px; min-height: 56px; border: 1px solid #c4d7c8; border-radius: 12px; background: #fafdfa; cursor: pointer; }
+.options label[data-selected="true"] { border-color: #247654; background: #e8f5e8; }
+.options label:has(input:focus-visible) { outline: 3px solid #a76525; outline-offset: 3px; }
+.options label:has(input:disabled) { cursor: default; }
+.options label[data-verdict="correct"] { border-color: #328354; background: #e8f5e8; }
+.options label[data-verdict="incorrect"] { border-color: #bd784a; background: #fff1e6; }
+.options input { flex-shrink: 0; width: 20px; height: 20px; margin: 4px 0 0; accent-color: #237f61; }
+.clear { color: #36543f; background: transparent; border: 0; text-decoration: underline; margin-top: 12px; padding: 10px 0; cursor: pointer; }
+.review { margin-top: 16px; padding: 16px; border-radius: 12px; background: #fff5e7; }
+.review[data-correct="true"] { background: #edf7ea; }
+.review p { margin: 8px 0 0; }
+.result { padding: 28px; border-radius: 22px; border: 1px solid #adcfae; background: #eff9eb; }
+.result p { margin: 16px 0; }
+.result details { font-size: 16px; }
+.result summary { cursor: pointer; min-height: 48px; display: list-item; padding: 10px 0; }
+.score { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.score strong { font-size: 52px; line-height: 1.2; }
+.footer { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.footer button { padding: 12px 20px; font-size: 17px; }
+.warning { border: 1px solid #c29b6a; padding: 20px; background: #fff4df; border-radius: 16px; margin-top: 20px; }
+.warning p { margin: 0; }
+@media (max-width: 850px) { .layout { grid-template-columns: minmax(0, 1fr); } .passage { position: static; max-height: none; } }
+@media (max-width: 540px) {
+  .intro, .passage, .result { padding: 20px; }
+  .parts { gap: 8px; }
+  .parts button { padding: 12px 8px; }
+  .parts span { font-size: 14px; }
+  .question { padding: 16px; }
+  .question legend { font-size: 18px; }
+  .options label { padding: 13px; }
+  .footer { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .footer button { width: 100%; }
+}

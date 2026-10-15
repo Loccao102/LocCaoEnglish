@@ -1,7 +1,7 @@
 import type { ListeningAudio } from "./learning-attempt";
 
 // Resolve on completion, not when play()/speak() merely queues the audio.
-export function playListeningClip(clip: ListeningAudio, signal: AbortSignal): Promise<void> {
+export function playListeningClip(clip: ListeningAudio, signal: AbortSignal, maxDurationMs = 90000): Promise<void> {
  return new Promise((resolve,reject) => {
   let settled=false, started=false, media:HTMLAudioElement|undefined, utterance:SpeechSynthesisUtterance|undefined;
   const finish=(error?:Error) => {
@@ -11,7 +11,8 @@ export function playListeningClip(clip: ListeningAudio, signal: AbortSignal): Pr
    if(error)reject(error);else resolve();
   };
   const cancel=()=>finish(new Error("Audio stopped before finishing. Play it again when ready."));
-  const timeout=setTimeout(()=>finish(new Error("Audio did not finish. Check your sound settings and try again.")),90000);
+  const budget=Number.isFinite(maxDurationMs)?Math.max(90000,Math.min(300000,maxDurationMs)):90000;
+  const timeout=setTimeout(()=>finish(new Error("Audio did not finish. Check your sound settings and try again.")),budget);
   signal.addEventListener("abort",cancel,{once:true}); if(signal.aborted){cancel();return;}
   try {
    if(clip.provider==="azure-speech-neural-tts" && clip.audioBase64 && clip.mimeType==="audio/mpeg") {

@@ -346,11 +346,13 @@ cắt mission; component `AirportMission` không còn được import đã đư�
 helper score-only. Toàn CORE-004 vẫn `in_progress`; persistent acoustic receipts,
 đánh giá ngữ nghĩa hội thoại sâu hơn và IELTS provenance/history còn tiếp tục.
 
-### Lát cắt tiếp theo — IELTS Academic Reading (`planned`, 2026-10-12)
+### Lát cắt đang làm — IELTS Academic Reading (`in_review`, bắt đầu 2026-10-12)
+
+Owner/task: Codex, branch `codex/core004-ielts-reading`, nền main `973b6fc`.
 
 Rà route đang dùng cho thấy `IeltsObjectiveMock` gửi số câu đúng do client tính;
 history chưa có đáp án gốc, phiên bản hoặc khóa chống ghi lặp. Làm Reading trước
-để tách việc chấm/lưu khỏi lifecycle âm thanh của Listening. Phạm vi dự kiến:
+để tách việc chấm/lưu khỏi lifecycle âm thanh của Listening. Đã triển khai:
 
 - Server cấp bộ câu hỏi có phiên bản, không gửi đáp án chuẩn trước chấm; nhận
   lựa chọn theo ID, lưu cả câu bỏ trống và kết quả chấm bất biến.
@@ -364,12 +366,14 @@ history chưa có đáp án gốc, phiên bản hoặc khóa chống ghi lặp. 
   tally Reading cũ sau khi luồng thay thế sẵn sàng.
 - Sửa nhãn dashboard: Writing/Speaking hiện chưa có luồng UI lưu band tương ứng,
   không hứa đã đủ bốn kỹ năng; bỏ band cá nhân 6.0 cố định ở dashboard chung.
-  Chốt policy guest và API band tự khai trước khi dùng history làm tiến độ.
+  IELTS yêu cầu đăng nhập; API band tự khai trả 409, không gộp lịch sử guest.
 
 Nghiệm thu thêm: đúng/sai/bỏ trống/ID lỗi, owner/version, pending qua reload,
 phản hồi cũ, storage lỗi, migration chạy lại, hai kích thước mobile và CI.
 Listening playback evidence, persistent acoustic/Writing receipts và overall
-bốn kỹ năng tiếp tục sau lát cắt này. Đây là kế hoạch, chưa triển khai.
+bốn kỹ năng tiếp tục sau lát cắt này. Build 58 routes, Go tests/vet và 9 browser/API
+cases local đạt (2.2m, 2026-10-15); CI đang xác minh. Xem [ADR 006](decisions/006-ielts-reading-evidence.md)
+và [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chỉ nghiệm thu sau khi có bằng chứng CI.
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

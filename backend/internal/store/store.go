@@ -211,7 +211,16 @@ func (s *Store) Dashboard(ctx context.Context, userID string) (model.Dashboard, 
 			due++
 		}
 	}
-	return model.Dashboard{User: u, Skills: skills, DueReviews: due, IELTSBand: 6.0, TargetBand: 7.0}, nil
+	profile, err := s.GetPlayerProfile(ctx, userID)
+	if err != nil {
+		return model.Dashboard{}, err
+	}
+	var target *float64
+	if profile.Onboarded {
+		target = &profile.TargetBand
+	}
+	// One reading practice estimate cannot establish an overall IELTS band.
+	return model.Dashboard{User: u, Skills: skills, DueReviews: due, IELTSBand: nil, TargetBand: target}, nil
 }
 
 func (s *Store) Skills(ctx context.Context, userID string) ([]model.Skill, error) {

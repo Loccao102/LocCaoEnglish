@@ -1,0 +1,468 @@
+{
+  "contentVersion": "2026-10-12.1",
+  "id": "ielts-academic-reading-01",
+  "title": "Academic Reading practice",
+  "sections": [
+    {
+      "id": "passage-1",
+      "title": "Passage 1 · Cooling cities without more air conditioning",
+      "passage": "Cities are often warmer than the rural areas around them, a phenomenon known as the urban heat island effect. Roads, roofs and other dark surfaces absorb solar energy during the day and release it gradually after sunset. At the same time, dense buildings can reduce air movement, while traffic, industry and air-conditioning systems add waste heat. The result is not simply an uncomfortable afternoon. Higher night-time temperatures can prevent the human body from recovering after a hot day, increasing health risks during heatwaves.\n\nOne response is to increase tree cover. Trees intercept sunlight and cool the air through evapotranspiration, the movement of water from soil through plants into the atmosphere. Yet planting programmes are not automatically successful. Young trees need several years before their crowns provide substantial shade, and species that thrive in one climate may struggle in another. Roots can also conflict with underground utilities or narrow pavements. For these reasons, some cities map heat exposure, pedestrian activity and available soil before deciding where trees will provide the greatest benefit.\n\nCool roofs provide another strategy. A conventional dark roof may absorb a large proportion of incoming sunlight, whereas a reflective roof sends more radiation back into the atmosphere. The effect is strongest on the building itself: indoor temperatures and demand for mechanical cooling can fall. When reflective materials are installed across a large district, they may also reduce local air temperature slightly. However, the outcome depends on building type, climate and roof condition; a coating that performs well in a dry sunny region may deliver less value somewhere cloudy and cold.\n\nA third approach is to redesign public space so that people can reach shade and water even before large infrastructure projects are completed. Temporary shade structures, drinking fountains and adjusted opening hours for public buildings can be deployed relatively quickly. Researchers increasingly argue that heat plans should combine these short-term protections with slower physical changes such as trees, roofs and redesigned streets. No single intervention removes urban heat. The strongest programmes treat heat as a system involving buildings, transport, public health and unequal exposure across neighbourhoods.",
+      "questions": [
+        {
+          "id": "R1",
+          "prompt": "What is the urban heat island effect?",
+          "answer": "Cities being warmer than surrounding rural areas",
+          "options": [
+            "Cities receiving more rainfall",
+            "Cities being warmer than surrounding rural areas",
+            "Rural areas having more traffic",
+            "Buildings blocking radio signals"
+          ]
+        },
+        {
+          "id": "R2",
+          "prompt": "Why can hot nights be especially harmful?",
+          "answer": "They limit recovery after daytime heat",
+          "options": [
+            "They increase tree growth",
+            "They limit recovery after daytime heat",
+            "They cool buildings too quickly",
+            "They reduce traffic"
+          ]
+        },
+        {
+          "id": "R3",
+          "prompt": "Which process allows trees to cool air?",
+          "answer": "Evapotranspiration",
+          "options": [
+            "Condensation",
+            "Evapotranspiration",
+            "Combustion",
+            "Insulation"
+          ]
+        },
+        {
+          "id": "R4",
+          "prompt": "Why may young trees provide limited immediate benefit?",
+          "answer": "Their crowns take years to grow",
+          "options": [
+            "Their roots are always too deep",
+            "Their crowns take years to grow",
+            "They reflect too much sunlight",
+            "They cannot survive in cities"
+          ]
+        },
+        {
+          "id": "R5",
+          "prompt": "What do some cities map before planting trees?",
+          "answer": "Heat exposure, pedestrian activity and soil",
+          "options": [
+            "Only property prices",
+            "Heat exposure, pedestrian activity and soil",
+            "Bus routes only",
+            "Annual rainfall only"
+          ]
+        },
+        {
+          "id": "R6",
+          "prompt": "What is the main property of a cool roof?",
+          "answer": "It reflects more incoming radiation",
+          "options": [
+            "It stores more water",
+            "It reflects more incoming radiation",
+            "It produces electricity",
+            "It increases indoor humidity"
+          ]
+        },
+        {
+          "id": "R7",
+          "prompt": "Where is the strongest effect of a reflective roof?",
+          "answer": "On the building itself",
+          "options": [
+            "Across the whole country",
+            "On the building itself",
+            "In underground railways",
+            "On nearby rivers"
+          ]
+        },
+        {
+          "id": "R8",
+          "prompt": "Why does cool-roof performance vary?",
+          "answer": "Climate and building conditions differ",
+          "options": [
+            "All roofs use identical materials",
+            "Climate and building conditions differ",
+            "Only roof colour matters",
+            "Reflective coatings work only at night"
+          ]
+        },
+        {
+          "id": "R9",
+          "prompt": "Which intervention can be deployed relatively quickly?",
+          "answer": "Temporary shade structures",
+          "options": [
+            "Mature street trees",
+            "New underground rail lines",
+            "Temporary shade structures",
+            "Complete street reconstruction"
+          ]
+        },
+        {
+          "id": "R10",
+          "prompt": "What do researchers recommend?",
+          "answer": "Combining short-term protection with long-term physical changes",
+          "options": [
+            "Using only air conditioning",
+            "Planting one tree species everywhere",
+            "Combining short-term protection with long-term physical changes",
+            "Avoiding public buildings during heat"
+          ]
+        },
+        {
+          "id": "R11",
+          "prompt": "The passage says a single intervention can remove urban heat completely.",
+          "answer": "False",
+          "options": [
+            "True",
+            "False",
+            "Not Given",
+            "Only in dry climates"
+          ]
+        },
+        {
+          "id": "R12",
+          "prompt": "Tree roots may conflict with what?",
+          "answer": "Underground utilities and narrow pavements",
+          "options": [
+            "Cloud cover",
+            "Underground utilities and narrow pavements",
+            "Reflective coatings",
+            "Drinking fountains"
+          ]
+        },
+        {
+          "id": "R13",
+          "prompt": "What broader issue is included in strong heat programmes?",
+          "answer": "Unequal exposure between neighbourhoods",
+          "options": [
+            "Only architectural style",
+            "Unequal exposure between neighbourhoods",
+            "Tourism growth",
+            "Internet access"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passage-2",
+      "title": "Passage 2 · The return of repair",
+      "passage": "For much of the twentieth century, household products became cheaper to replace and increasingly difficult to repair. Manufacturers often used sealed cases, proprietary fasteners and components that were glued rather than screwed together. At the same time, global supply chains lowered the retail price of many appliances. For a consumer facing a broken toaster or phone, purchasing a replacement could appear more rational than paying for diagnosis, labour and spare parts.\n\nThat calculation is now being challenged. Repair cafés, community workshops and online repair communities have expanded in many countries. Their supporters describe repair not only as a way to reduce waste but also as a means of preserving practical knowledge. A volunteer who helps someone replace a laptop battery may also teach safe tool use, fault diagnosis and the confidence to attempt future maintenance. This educational role helps explain why community repair events continue even when the financial saving on a single item is small.\n\nPolicy is changing too. Some jurisdictions have introduced or proposed ‘right to repair’ rules requiring manufacturers to provide spare parts, manuals or diagnostic information for a defined period. The details vary widely. A rule covering washing machines may not apply to smartphones, and access to a part does not guarantee that it will be affordable. Manufacturers also raise legitimate concerns about safety, cybersecurity and intellectual property, particularly when repairs involve batteries, medical devices or network-connected products.\n\nResearchers therefore caution against treating repairability as a simple yes-or-no feature. A product can be physically opened yet remain impractical to fix because replacement parts are expensive or software refuses to recognise them. Conversely, a sealed component may be replaced safely as a complete module. Several proposed repairability labels attempt to capture multiple factors: availability of documentation, price of parts, ease of disassembly and expected software support.\n\nThe environmental case is similarly nuanced. Extending product life usually avoids the material and energy required to manufacture a replacement. But keeping an extremely inefficient old appliance in service may consume more energy than replacing it with a much more efficient model. The most useful question is therefore not ‘repair or replace?’ in isolation. It is how product design, energy use, part availability and expected remaining life interact in a particular case.",
+      "questions": [
+        {
+          "id": "R14",
+          "prompt": "Why did replacement often appear rational to consumers?",
+          "answer": "New products became cheap while repair involved labour and parts",
+          "options": [
+            "Repair shops disappeared completely",
+            "New products became cheap while repair involved labour and parts",
+            "Governments banned repair",
+            "Appliances never failed"
+          ]
+        },
+        {
+          "id": "R15",
+          "prompt": "Which design choice can make products harder to repair?",
+          "answer": "Glued components",
+          "options": [
+            "Standard screws",
+            "Glued components",
+            "Replaceable batteries",
+            "Printed manuals"
+          ]
+        },
+        {
+          "id": "R16",
+          "prompt": "What additional benefit do repair cafés provide?",
+          "answer": "They preserve and teach practical knowledge",
+          "options": [
+            "They manufacture new appliances",
+            "They preserve and teach practical knowledge",
+            "They guarantee free spare parts",
+            "They eliminate all electronic waste"
+          ]
+        },
+        {
+          "id": "R17",
+          "prompt": "Why may community repair continue when savings are small?",
+          "answer": "It has an educational role",
+          "options": [
+            "Volunteers receive high salaries",
+            "It has an educational role",
+            "All repairs are legally required",
+            "Replacement products are unavailable"
+          ]
+        },
+        {
+          "id": "R18",
+          "prompt": "What can right-to-repair rules require?",
+          "answer": "Parts, manuals or diagnostic information",
+          "options": [
+            "Free products for every consumer",
+            "Parts, manuals or diagnostic information",
+            "A lifetime warranty",
+            "Identical laws for every product"
+          ]
+        },
+        {
+          "id": "R19",
+          "prompt": "The passage says right-to-repair rules are identical in all jurisdictions.",
+          "answer": "False",
+          "options": [
+            "True",
+            "False",
+            "Not Given",
+            "Only for phones"
+          ]
+        },
+        {
+          "id": "R20",
+          "prompt": "Which manufacturer concern is acknowledged as legitimate?",
+          "answer": "Safety and cybersecurity",
+          "options": [
+            "Loss of colour choice",
+            "Safety and cybersecurity",
+            "Lower advertising budgets",
+            "Too many repair cafés"
+          ]
+        },
+        {
+          "id": "R21",
+          "prompt": "Why is physical access alone insufficient for repairability?",
+          "answer": "Parts may be costly or software may reject them",
+          "options": [
+            "Every opened product becomes unsafe",
+            "Parts may be costly or software may reject them",
+            "Consumers dislike manuals",
+            "Tools are illegal"
+          ]
+        },
+        {
+          "id": "R22",
+          "prompt": "What do repairability labels try to combine?",
+          "answer": "Several practical factors",
+          "options": [
+            "Only product price",
+            "Only ease of opening",
+            "Several practical factors",
+            "Only energy consumption"
+          ]
+        },
+        {
+          "id": "R23",
+          "prompt": "What environmental benefit usually comes from extending product life?",
+          "answer": "Avoiding resources needed for a replacement",
+          "options": [
+            "Increasing packaging waste",
+            "Avoiding resources needed for a replacement",
+            "Making old products use no energy",
+            "Eliminating transport"
+          ]
+        },
+        {
+          "id": "R24",
+          "prompt": "When might replacement have an environmental advantage?",
+          "answer": "When an old appliance is extremely inefficient",
+          "options": [
+            "Whenever a product is more than one year old",
+            "When an old appliance is extremely inefficient",
+            "Whenever repair is possible",
+            "Only when parts are cheap"
+          ]
+        },
+        {
+          "id": "R25",
+          "prompt": "What is the author’s main argument?",
+          "answer": "Repair decisions depend on interacting design, cost and energy factors",
+          "options": [
+            "Repair is always better",
+            "Replacement is always better",
+            "Repair decisions depend on interacting design, cost and energy factors",
+            "Governments should ban sealed products"
+          ]
+        },
+        {
+          "id": "R26",
+          "prompt": "Which item is mentioned as especially sensitive because of repair risks?",
+          "answer": "Medical devices",
+          "options": [
+            "Books",
+            "Wooden chairs",
+            "Medical devices",
+            "Ceramic cups"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passage-3",
+      "title": "Passage 3 · When scientific teams become larger",
+      "passage": "Scientific papers increasingly list more authors than they did several decades ago. In some fields, a study may require expertise in statistics, laboratory methods, field sampling, software engineering and specialist equipment. Large collaborations can make projects possible that no individual laboratory could complete alone. Astronomy offers a striking example: major observatories generate data used by teams spread across many institutions and countries. Similar patterns occur in genomics, climate science and large clinical studies.\n\nTeam growth, however, changes how credit is allocated. Traditional author lists suggest a simple sequence, with the first author often associated with much of the practical work and the final author with senior supervision. That convention becomes less informative when dozens or hundreds of researchers contribute distinct forms of expertise. Some journals now ask authors to describe contributions using standard categories such as data curation, software, methodology, visualisation and project administration. Supporters argue that these statements make otherwise invisible work easier to recognise.\n\nLarge teams may also influence the kind of research that gets produced. Studies comparing publication patterns have reported that small teams are more likely to introduce ideas that disrupt established lines of work, while large teams more often develop and extend existing directions. One explanation is organisational: coordinating many people encourages clear milestones and lowers tolerance for projects whose outcome is highly uncertain. Another explanation concerns resources. Large teams frequently work on expensive programmes that already have defined objectives. These findings do not mean that large teams are uncreative or that small teams are always radical; they describe statistical tendencies across many projects.\n\nCommunication presents another challenge. Adding experts does not automatically combine their knowledge. Specialists may use the same word differently, assume unfamiliar background knowledge, or optimise for different goals. Successful collaborations therefore invest in shared documentation, regular cross-disciplinary meetings and people who can translate between domains. Software tools can help, but organisational practices remain important.\n\nThere is also a career dimension. Early-career researchers can gain access to equipment, data and mentors through large projects, yet their individual contribution may be difficult for hiring committees to identify. Contribution statements, open code repositories and clearly owned sub-projects can provide stronger evidence of what a researcher actually did. For institutions, the challenge is to reward both the visible intellectual leadership of a paper and the less visible technical work that makes complex research reliable.\n\nThe debate is sometimes framed as a choice between the agility of small teams and the power of large ones. In practice, scientific ecosystems need both. Small groups may explore uncertain ideas cheaply; successful directions can later attract larger collaborations capable of testing them at scale. Rather than asking for an ideal team size, research organisations may gain more by matching team structure to the stage and demands of a problem.",
+      "questions": [
+        {
+          "id": "R27",
+          "prompt": "Why have author lists grown in many fields?",
+          "answer": "Projects require multiple kinds of expertise",
+          "options": [
+            "Journals require extra names",
+            "Projects require multiple kinds of expertise",
+            "Scientists publish less often",
+            "Equipment has become simpler"
+          ]
+        },
+        {
+          "id": "R28",
+          "prompt": "Which field is used as an example of distributed large collaboration?",
+          "answer": "Astronomy",
+          "options": [
+            "History",
+            "Astronomy",
+            "Literary criticism",
+            "Philosophy"
+          ]
+        },
+        {
+          "id": "R29",
+          "prompt": "What is a weakness of traditional author order in very large teams?",
+          "answer": "It does not clearly describe distinct contributions",
+          "options": [
+            "It prevents papers from being published",
+            "It does not clearly describe distinct contributions",
+            "It always places supervisors first",
+            "It removes institutional names"
+          ]
+        },
+        {
+          "id": "R30",
+          "prompt": "What do contribution statements list?",
+          "answer": "Roles such as software, methodology and data curation",
+          "options": [
+            "Only academic titles",
+            "Roles such as software, methodology and data curation",
+            "Only the number of hours worked",
+            "Salary information"
+          ]
+        },
+        {
+          "id": "R31",
+          "prompt": "According to studies described, small teams are statistically more likely to do what?",
+          "answer": "Introduce disruptive ideas",
+          "options": [
+            "Use expensive equipment",
+            "Introduce disruptive ideas",
+            "Repeat existing work exactly",
+            "Have hundreds of authors"
+          ]
+        },
+        {
+          "id": "R32",
+          "prompt": "Why may large teams prefer more predictable projects?",
+          "answer": "Coordination encourages milestones and reduces tolerance for uncertainty",
+          "options": [
+            "They have no creative researchers",
+            "Coordination encourages milestones and reduces tolerance for uncertainty",
+            "Journals ban uncertain work",
+            "Their equipment cannot test new ideas"
+          ]
+        },
+        {
+          "id": "R33",
+          "prompt": "The passage claims every small team produces radical research.",
+          "answer": "False",
+          "options": [
+            "True",
+            "False",
+            "Not Given",
+            "Only in astronomy"
+          ]
+        },
+        {
+          "id": "R34",
+          "prompt": "What communication problem can specialists have?",
+          "answer": "The same terms may mean different things across fields",
+          "options": [
+            "They cannot use software",
+            "The same terms may mean different things across fields",
+            "They always work in different languages",
+            "They refuse to document work"
+          ]
+        },
+        {
+          "id": "R35",
+          "prompt": "What practice can improve cross-disciplinary collaboration?",
+          "answer": "Shared documentation and regular meetings",
+          "options": [
+            "Avoiding meetings entirely",
+            "Shared documentation and regular meetings",
+            "Removing specialist vocabulary from science",
+            "Using only email"
+          ]
+        },
+        {
+          "id": "R36",
+          "prompt": "What can early-career researchers gain from large projects?",
+          "answer": "Access to data, equipment and mentors",
+          "options": [
+            "Guaranteed permanent jobs",
+            "Access to data, equipment and mentors",
+            "Automatic first authorship",
+            "Freedom from supervision"
+          ]
+        },
+        {
+          "id": "R37",
+          "prompt": "What difficulty may early-career researchers face?",
+          "answer": "Their individual contribution can be hard to identify",
+          "options": [
+            "They cannot access data",
+            "Their individual contribution can be hard to identify",
+            "They must pay for equipment personally",
+            "They are excluded from code repositories"
+          ]
+        },
+        {
+          "id": "R38",
+          "prompt": "Which evidence can make an individual contribution clearer?",
+          "answer": "Contribution statements and owned sub-projects",
+          "options": [
+            "A longer paper title",
+            "Contribution statements and owned sub-projects",
+            "Fewer collaborators",
+            "Removing code from public view"
+          ]
+        },
+        {
+          "id": "R39",
+          "prompt": "How does the author view small and large teams?",
+          "answer": "Scientific systems benefit from both",
+          "options": [
+            "Only small teams are useful",
+            "Only large teams are reliable",
+            "Scientific systems benefit from both",
+            "Team size has no relationship to research"
+          ]
+        },
+        {
+          "id": "R40",
+          "prompt": "What does the final paragraph recommend?",
+          "answer": "Match team structure to the stage and demands of the problem",
+          "options": [
+            "Set one ideal team size for every field",
+            "Match team structure to the stage and demands of the problem",
+            "Limit all papers to five authors",
+            "Move successful large projects back to one researcher"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -30,6 +30,10 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 	}
 	in.RequestID = strings.TrimSpace(in.RequestID)
 	in.Activity = strings.TrimSpace(in.Activity)
+	if in.Activity == "ielts-reading" && userID == "" {
+		problem(w, http.StatusUnauthorized, "sign in to save IELTS practice")
+		return
+	}
 	if !learningRequestID.MatchString(in.RequestID) {
 		problem(w, 400, "requestId must be a UUIDv4")
 		return
@@ -67,9 +71,24 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 	}
 	var publicPrompt model.LearningAttemptPrompt
 	var listeningSnapshot *store.ListeningSnapshot
+	var ieltsSnapshot *learning.IELTSReadingSnapshot
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "ielts-reading":
+		if pack != learning.IELTSReadingPack || level != "B2" || len(in.ExcludeItemKeys) != 0 {
+			problem(w, 400, "IELTS Academic Reading uses its fixed practice pack and B2 metadata")
+			return
+		}
+		reading, snapshot, id, version, err := learning.NewIELTSReading()
+		if err != nil {
+			problem(w, 500, "could not open this reading; retry the same request")
+			return
+		}
+		skill, itemKey, contentVersion, rulesVersion = "Reading", id, version, learning.IELTSReadingRulesVersion
+		promptText, feedback = reading.Title, "Your reading selections have been saved. This estimate does not award learning XP or measure an overall IELTS band."
+		publicPrompt = model.LearningAttemptPrompt{Title: reading.Title, Options: []string{}, Reading: &reading}
+		ieltsSnapshot = &snapshot
 	case "shadowing":
 		item, label, err := learning.PickShadowing(level, pack, in.RequestID, in.ExcludeItemKeys)
 		if err != nil {
@@ -209,7 +228,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 	rec, created, err := s.store.StartLearningAttempt(
 		r.Context(), userID, in.RequestID, in.Activity, skill, itemKey, level,
 		contentVersion, rulesVersion, promptText, correctAnswer, feedback,
-		store.LearningSnapshot{Input: in, Prompt: publicPrompt, Listening: listeningSnapshot},
+		store.LearningSnapshot{Input: in, Prompt: publicPrompt, Listening: listeningSnapshot, IELTS: ieltsSnapshot},
 	)
 	if err != nil {
 		learningError(w, err)
@@ -243,6 +262,7 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 		base.Mode = "guest"
 	}
 	return base, base.Pack == requestedPack && (len(base.Prompt.Options) > 0 ||
+		base.Activity == "ielts-reading" && base.RulesVersion == learning.IELTSReadingRulesVersion && base.Prompt.Reading != nil && rec.Snapshot.IELTS != nil ||
 		base.Activity == "shadowing" && base.RulesVersion == learning.ShadowingRulesVersion && base.Prompt.Question != "" ||
 		base.Activity == "dictation" && base.RulesVersion == learning.DictationRulesVersion && rec.Snapshot.Listening != nil ||
 		base.Activity == "sentence-builder" && base.RulesVersion == learning.SentenceRulesVersion && len(base.Prompt.Chunks) > 1)
