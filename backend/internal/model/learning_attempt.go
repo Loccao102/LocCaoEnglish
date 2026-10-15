@@ -11,13 +11,14 @@ type LearningAttemptStartInput struct {
 }
 
 type LearningAttemptPrompt struct {
-	Title    string          `json:"title,omitempty"`
-	Passage  string          `json:"passage,omitempty"`
-	Word     string          `json:"word,omitempty"`
-	Relation string          `json:"relation,omitempty"`
-	Question string          `json:"question,omitempty"`
-	Options  []string        `json:"options"`
-	Chunks   []SentenceChunk `json:"chunks,omitempty"`
+	Reading  *IELTSReadingPrompt `json:"reading,omitempty"`
+	Title    string              `json:"title,omitempty"`
+	Passage  string              `json:"passage,omitempty"`
+	Word     string              `json:"word,omitempty"`
+	Relation string              `json:"relation,omitempty"`
+	Question string              `json:"question,omitempty"`
+	Options  []string            `json:"options"`
+	Chunks   []SentenceChunk     `json:"chunks,omitempty"`
 }
 
 type SentenceChunk struct {
@@ -49,24 +50,25 @@ type LearningAttemptSubmitInput struct {
 }
 
 type LearningAttemptResult struct {
-	TranscriptMatch    *DictationGrade    `json:"transcriptMatch,omitempty"`
-	Dictation          *DictationGrade    `json:"dictation,omitempty"`
-	Listening          *ListeningEvidence `json:"listening,omitempty"`
-	Story              *StoryOutcome      `json:"story,omitempty"`
-	AttemptID          string             `json:"attemptId"`
-	Status             string             `json:"status"`
-	Correct            bool               `json:"correct"`
-	CorrectAnswer      string             `json:"correctAnswer"`
-	Feedback           string             `json:"feedback"`
-	XPDelta            int                `json:"xpDelta"`
-	NewConfidence      float64            `json:"newConfidence"`
-	Level              int                `json:"level"`
-	ReviewAdded        bool               `json:"reviewAdded"`
-	ContentVersion     string             `json:"contentVersion"`
-	RulesVersion       string             `json:"rulesVersion"`
-	ActualAnswer       string             `json:"actualAnswer"`
-	ProgressionApplied bool               `json:"progressionApplied"`
-	Evidence           string             `json:"evidence"`
+	IELTS              *IELTSReadingResult `json:"ielts,omitempty"`
+	TranscriptMatch    *DictationGrade     `json:"transcriptMatch,omitempty"`
+	Dictation          *DictationGrade     `json:"dictation,omitempty"`
+	Listening          *ListeningEvidence  `json:"listening,omitempty"`
+	Story              *StoryOutcome       `json:"story,omitempty"`
+	AttemptID          string              `json:"attemptId"`
+	Status             string              `json:"status"`
+	Correct            bool                `json:"correct"`
+	CorrectAnswer      string              `json:"correctAnswer"`
+	Feedback           string              `json:"feedback"`
+	XPDelta            int                 `json:"xpDelta"`
+	NewConfidence      float64             `json:"newConfidence"`
+	Level              int                 `json:"level"`
+	ReviewAdded        bool                `json:"reviewAdded"`
+	ContentVersion     string              `json:"contentVersion"`
+	RulesVersion       string              `json:"rulesVersion"`
+	ActualAnswer       string              `json:"actualAnswer"`
+	ProgressionApplied bool                `json:"progressionApplied"`
+	Evidence           string              `json:"evidence"`
 }
 
 type DictationWord struct {

@@ -11,9 +11,10 @@ export type TTSResult = {
   disclaimer?: string;
 };
 
-export function synthesizeSpeech(text: string, rate = 1, voice = "en-US-JennyNeural") {
+export function synthesizeSpeech(text: string, rate = 1, voice = "en-US-JennyNeural", signal?: AbortSignal) {
   return apiFetch<TTSResult>("/v1/ai/tts", {
     method: "POST",
+    signal,
     body: JSON.stringify({ text, locale: "en-US", voice, rate }),
   });
 }

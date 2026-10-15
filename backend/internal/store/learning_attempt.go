@@ -19,6 +19,7 @@ var ErrAttemptExpired = errors.New("this round expired; start a new round")
 var ErrAttemptInput = errors.New("invalid answer or content/rules version; refresh and try again")
 
 type LearningSnapshot struct {
+	IELTS     *learning.IELTSReadingSnapshot  `json:"ielts,omitempty"`
 	Listening *ListeningSnapshot              `json:"listening,omitempty"`
 	Story     *StorySnapshot                  `json:"story,omitempty"`
 	Input     model.LearningAttemptStartInput `json:"input"`
@@ -91,6 +92,9 @@ ALTER TABLE attempts ADD COLUMN IF NOT EXISTS rules_version TEXT NOT NULL DEFAUL
 `
 
 func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, activity, skill, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback string, snapshots ...LearningSnapshot) (LearningAttemptRecord, bool, error) {
+	if activity == "ielts-reading" && userID == "" {
+		return LearningAttemptRecord{}, false, ErrAttemptOwner
+	}
 	var snapshot LearningSnapshot
 	if len(snapshots) > 0 {
 		snapshot = snapshots[0]
@@ -100,9 +104,11 @@ func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, act
 		return LearningAttemptRecord{}, false, err
 	}
 	// Break caller-owned slice aliases in memory mode as well as PostgreSQL.
-	if err = json.Unmarshal(raw, &snapshot); err != nil {
+	var storedSnapshot LearningSnapshot
+	if err = json.Unmarshal(raw, &storedSnapshot); err != nil {
 		return LearningAttemptRecord{}, false, err
 	}
+	snapshot = storedSnapshot
 	expires := time.Now().UTC().Add(24 * time.Hour)
 	if snapshot.Story != nil {
 		expires = snapshot.Story.Deadline
@@ -146,6 +152,7 @@ func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, act
 }
 
 func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, answer string, versions ...model.LearningAttemptSubmitInput) (model.LearningAttemptResult, error) {
+	rawAnswer := answer
 	answer = strings.TrimSpace(answer)
 	if s.db != nil {
 		tx, err := s.db.BeginTx(ctx, nil)
@@ -167,6 +174,9 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		if rec.UserID != userID {
 			return model.LearningAttemptResult{}, ErrAttemptOwner
 		}
+		if rec.Activity == "ielts-reading" {
+			answer = rawAnswer
+		}
 		if err = validateLearningSubmission(rec, answer, versions); err != nil {
 			return model.LearningAttemptResult{}, err
 		}
@@ -177,6 +187,9 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			return learningAttemptResult(rec), nil
 		}
 
+		if rec.Activity == "ielts-reading" {
+			return s.submitIELTSReadingTx(ctx, tx, rec, answer)
+		}
 		actual := learningAnswerText(rec, answer)
 		correct := learningCorrect(rec, answer)
 		applied := false
@@ -258,6 +271,9 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	if rec.UserID != userID {
 		return model.LearningAttemptResult{}, ErrAttemptOwner
 	}
+	if rec.Activity == "ielts-reading" {
+		answer = rawAnswer
+	}
 	if err := validateLearningSubmission(rec, answer, versions); err != nil {
 		return model.LearningAttemptResult{}, err
 	}
@@ -266,6 +282,9 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			return model.LearningAttemptResult{}, ErrAttemptConflict
 		}
 		return learningAttemptResult(rec), nil
+	}
+	if rec.Activity == "ielts-reading" {
+		return s.submitIELTSReadingMemory(rec, answer)
 	}
 	if s.learningRewards == nil {
 		s.learningRewards = map[string]bool{}
@@ -348,6 +367,7 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 	}
 	evidence := learningEvidence(rec)
 	return model.LearningAttemptResult{
+		IELTS:           ieltsReadingResult(rec),
 		TranscriptMatch: transcriptMatchResult(rec),
 		Dictation:       dictationResult(rec),
 		Listening:       ListeningEvidenceOf(rec, true),
@@ -364,7 +384,7 @@ func sameAnswer(left, right string) bool {
 }
 
 func sameSubmittedAnswer(rec LearningAttemptRecord, answer string) bool {
-	if rec.Activity == "sentence-builder" || rec.Activity == "dictation" || rec.Activity == "shadowing" {
+	if rec.Activity == "sentence-builder" || rec.Activity == "dictation" || rec.Activity == "shadowing" || rec.Activity == "ielts-reading" {
 		return rec.SubmittedAnswer == answer
 	}
 	return sameAnswer(rec.SubmittedAnswer, answer)
@@ -376,6 +396,15 @@ func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snap
 	return rec.Activity == activity && rec.CEFRLevel == level && string(left) == string(right)
 }
 func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
+	// Reading has nested prompt/key/result slices; a full JSON copy prevents callers
+	// from mutating issued content or a completed verdict in memory mode.
+	if rec.Activity == "ielts-reading" {
+		raw, _ := json.Marshal(rec.Snapshot)
+		var snapshot LearningSnapshot
+		_ = json.Unmarshal(raw, &snapshot)
+		rec.Snapshot = snapshot
+		return rec
+	}
 	rec.Snapshot.Listening = cloneListening(rec.Snapshot.Listening)
 	rec.Snapshot.Story = cloneStory(rec.Snapshot.Story)
 	rec.Snapshot.Prompt.Chunks = append([]model.SentenceChunk(nil), rec.Snapshot.Prompt.Chunks...)
@@ -384,6 +413,14 @@ func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
 	return rec
 }
 func validateLearningSubmission(rec LearningAttemptRecord, answer string, versions []model.LearningAttemptSubmitInput) error {
+	if rec.Activity == "ielts-reading" {
+		if rec.UserID == "" || rec.RulesVersion != learning.IELTSReadingRulesVersion || len(versions) != 1 || rec.Snapshot.IELTS == nil {
+			return ErrAttemptInput
+		}
+		if _, err := learning.GradeIELTSReading(rec.Snapshot.Prompt.Reading, rec.Snapshot.IELTS, answer); err != nil {
+			return ErrAttemptInput
+		}
+	}
 	if rec.Activity == "shadowing" && (rec.RulesVersion != learning.ShadowingRulesVersion || len(answer) > 2048 || len(learning.DictationTokens(answer)) == 0) {
 		return ErrAttemptInput
 	}
@@ -398,6 +435,9 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	}
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
+	}
+	if rec.Activity == "ielts-reading" {
+		return nil
 	}
 	if rec.Activity == "shadowing" {
 		return nil

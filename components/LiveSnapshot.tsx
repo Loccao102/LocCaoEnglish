@@ -1,25 +1,49 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Dashboard, getDashboard } from "@/lib/api";
+import { AUTH_EVENT, getAuthToken } from "@/lib/session";
 
 export default function LiveSnapshot() {
   const [data, setData] = useState<Dashboard | null>(null);
-  const [live, setLive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
-    getDashboard().then((value) => { setData(value); setLive(true); }).catch(() => setLive(false));
-  }, []);
+    let generation = 0;
+    const refresh = () => {
+      const current = ++generation, token = getAuthToken();
+      setData(null); setLoading(true);
+      getDashboard().then(value => {
+        if (current === generation && token === getAuthToken()) setData(value);
+      }).catch(() => {}).finally(() => {
+        if (current === generation && token === getAuthToken()) setLoading(false);
+      });
+    };
+    const storage = (event: StorageEvent) => {
+      if (event.key === "loccao_token" || event.key === null) refresh();
+    };
+    refresh();
+    window.addEventListener(AUTH_EVENT, refresh);
+    window.addEventListener("storage", storage);
+    return () => {
+      generation++;
+      window.removeEventListener(AUTH_EVENT, refresh);
+      window.removeEventListener("storage", storage);
+    };
+  }, [reload]);
 
   if (!data) {
     return (
       <section className="live-snapshot offline">
         <div>
           <span className="eyebrow">PLAYER PROFILE</span>
-          <h2>{live ? "Loading your save…" : "Offline training mode"}</h2>
-          <p>Start the Go API to load persisted XP, streaks, weak skills and review quests.</p>
+          <h2>{loading ? "Loading your progress…" : "Your progress is unavailable"}</h2>
+          <p>{loading ? "Your saved practice will appear here." : "Check your connection and try loading it again."}</p>
+          {!loading && <button className="button" onClick={() => setReload(value => value + 1)}>Retry loading progress</button>}
         </div>
-        <span className="mode-badge warning">LOCAL</span>
+        <span className="mode-badge warning">{loading ? "LOADING" : "UNAVAILABLE"}</span>
       </section>
     );
   }
@@ -48,9 +72,11 @@ export default function LiveSnapshot() {
       </div>
 
       <div className="snapshot-band">
-        <small>IELTS TOWER</small>
-        <strong>{data.ieltsBand.toFixed(1)}</strong>
-        <span>target {data.targetBand.toFixed(1)}</span>
+        <small>IELTS PRACTICE</small>
+        <strong>{data.ieltsBand?.toFixed(1) ?? "—"}</strong>
+        <span>{data.ieltsBand == null ? "No overall estimate yet" : "Overall practice estimate"}</span>
+        {data.targetBand != null && <span>target {data.targetBand.toFixed(1)}</span>}
+        <Link href="/ielts">View practice history →</Link>
       </div>
     </section>
   );

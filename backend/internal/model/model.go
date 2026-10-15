@@ -47,28 +47,28 @@ type ReviewItem struct {
 }
 
 type Dashboard struct {
-	User       User    `json:"user"`
-	Skills     []Skill `json:"skills"`
-	DueReviews int     `json:"dueReviews"`
-	IELTSBand  float64 `json:"ieltsBand"`
-	TargetBand float64 `json:"targetBand"`
+	User       User     `json:"user"`
+	Skills     []Skill  `json:"skills"`
+	DueReviews int      `json:"dueReviews"`
+	IELTSBand  *float64 `json:"ieltsBand"`
+	TargetBand *float64 `json:"targetBand"`
 }
 
 type PlanItem struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Skill       string `json:"skill"`
-	Activity    string `json:"activity"`
-	Reason      string `json:"reason"`
-	Minutes     int    `json:"minutes"`
-	XP          int    `json:"xp"`
-	Route       string `json:"route"`
-	Priority    int    `json:"priority"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Skill    string `json:"skill"`
+	Activity string `json:"activity"`
+	Reason   string `json:"reason"`
+	Minutes  int    `json:"minutes"`
+	XP       int    `json:"xp"`
+	Route    string `json:"route"`
+	Priority int    `json:"priority"`
 }
 
 type DailyPlan struct {
-	Focus      string     `json:"focus"`
-	TotalMins  int        `json:"totalMins"`
-	PotentialXP int       `json:"potentialXp"`
-	Items      []PlanItem `json:"items"`
+	Focus       string     `json:"focus"`
+	TotalMins   int        `json:"totalMins"`
+	PotentialXP int        `json:"potentialXp"`
+	Items       []PlanItem `json:"items"`
 }
