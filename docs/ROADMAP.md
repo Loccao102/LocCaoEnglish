@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-12, main `2abbc36` (PR #15). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-16, main `6e1a7e5` (PR #17). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -16,10 +16,12 @@ trước khi các contract core liên quan đã vững.
   Dictation Rush) dùng chung server attempts và lifecycle khôi phục; CORE-003 đã
   nghiệm thu. Shadow Me đã lưu guided transcript qua shared attempts, tách coach
   khỏi XP. Chín mission đã lưu hội thoại và kết quả rubric theo thứ tự cùng thưởng
-  first-clear. Đánh giá ngữ nghĩa, acoustic receipts và IELTS tiếp tục theo CORE-004.
-- Bằng chứng của đợt core trước: 50 logic cases, 17 browser scenarios và kiểm tra
-  build/Go local; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết giới hạn.
-  Đây không phải xác nhận CI/production cho mọi revision sau này.
+  first-clear. IELTS Reading đã lưu lựa chọn gốc, chấm server và history nguyên tử,
+  không cấp learning XP. Listening, đánh giá ngữ nghĩa và acoustic/Writing receipts
+  tiếp tục theo CORE-004.
+- Nền PR #17 đã qua 50 logic cases, 130 browser/API cases và đủ sáu CI jobs,
+  gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
+  revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
 ## Thứ tự mặc định
 
@@ -346,7 +348,7 @@ cắt mission; component `AirportMission` không còn được import đã đư�
 helper score-only. Toàn CORE-004 vẫn `in_progress`; persistent acoustic receipts,
 đánh giá ngữ nghĩa hội thoại sâu hơn và IELTS provenance/history còn tiếp tục.
 
-### Lát cắt đang làm — IELTS Academic Reading (`in_review`, bắt đầu 2026-10-12)
+### Lát cắt đã nghiệm thu — IELTS Academic Reading (`done`, 2026-10-16)
 
 Owner/task: Codex, branch `codex/core004-ielts-reading`, nền main `973b6fc`.
 
@@ -368,12 +370,47 @@ history chưa có đáp án gốc, phiên bản hoặc khóa chống ghi lặp. 
   không hứa đã đủ bốn kỹ năng; bỏ band cá nhân 6.0 cố định ở dashboard chung.
   IELTS yêu cầu đăng nhập; API band tự khai trả 409, không gộp lịch sử guest.
 
-Nghiệm thu thêm: đúng/sai/bỏ trống/ID lỗi, owner/version, pending qua reload,
-phản hồi cũ, storage lỗi, migration chạy lại, hai kích thước mobile và CI.
-Listening playback evidence, persistent acoustic/Writing receipts và overall
-bốn kỹ năng tiếp tục sau lát cắt này. Build 58 routes, Go tests/vet và 9 browser/API
-cases local đạt (2.2m, 2026-10-15); CI đang xác minh. Xem [ADR 006](decisions/006-ielts-reading-evidence.md)
-và [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chỉ nghiệm thu sau khi có bằng chứng CI.
+Đã nghiệm thu đúng/sai/bỏ trống/ID lỗi, owner/version, pending qua reload,
+phản hồi cũ, storage lỗi, migration chạy lại, concurrency và hai kích thước mobile.
+Build 58 routes, Go tests/vet và 9 browser/API cases local đạt (2.2m); lượt kết hợp
+contract/recovery/Listening đạt 27/27 (2.4m). CI 137 bị từ chối do Listening chạm
+giới hạn IP chung; sửa nhịp chạy suite, không giảm assertion hoặc tăng rate limit.
+
+[CI 138](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38789544231) trên
+head `60ae09f` đạt đủ sáu jobs, gồm PostgreSQL/race/vet và **130 E2E passed (23.6m)**,
+không failed/flaky/retry. [PR #17](https://github.com/Loccao102/LocCaoEnglish/pull/17)
+đã merge thành main `6e1a7e5`. Xem [ADR 006](decisions/006-ielts-reading-evidence.md)
+và [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Không deploy production. Toàn CORE-004
+vẫn `in_progress`; Listening playback evidence, acoustic/Writing receipts và
+overall bốn kỹ năng chưa được nghiệm thu trong lát cắt Reading.
+
+### Lát cắt tiếp theo — IELTS Listening (`planned`)
+
+Ưu tiên sau Reading: thay tally do client tính tại `/ielts/listening` bằng lựa
+chọn gốc do server chấm, dùng shared attempts/recovery. Không thêm bộ đề/game
+mới trong lúc còn thiếu lưu bài và chống ghi lặp.
+
+Phạm vi và điều kiện nghiệm thu:
+
+- Server snapshot bốn phần/40 câu, giữ transcript và answer key ngoài public
+  prompt; opaque option IDs, phiên bản nội dung/luật và feedback sau submit.
+- Mở rộng audio journal hiện có theo từng phần; ghi provider, hoàn thành/thất bại,
+  replay/slow khi hỗ trợ. Báo cáo playback từ browser không phải chứng minh người
+  học đã nghe, không được nâng thành bằng chứng acoustic hoặc unaided mastery.
+- Lưu actual selections, câu bỏ trống, verdict và history nguyên tử theo attempt;
+  không cấp XP/confidence/review. Retry cùng payload không thêm lịch sử; payload
+  khác bị từ chối, owner và version được kiểm tra.
+- Draft và pending tồn tại qua reload; response cũ/đổi tài khoản, mất phản hồi sau
+  commit, audio lỗi/ẩn tab và storage lỗi có đường phục hồi rõ ràng.
+- Chặn tally Listening cũ sau khi adapter mới sẵn sàng; giữ các hàng client-reported/
+  legacy cũ, không backfill đáp án. API/schema trước frontend; rollback giữ receipts.
+- Kiểm tra PostgreSQL/concurrency/migration, completion của đoạn audio dài và
+  mobile 390×551/844; CI sạch trên head cuối. Listening band vẫn là ước lượng
+  luyện tập, không tự tạo overall bốn kỹ năng.
+
+Đây là công việc `planned`, chưa phải chức năng đã triển khai hay nghiệm thu.
+
+### Tiêu chí hoàn tất toàn CORE-004
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,
 acoustic assessment hoặc heuristic estimate; provider/version và assistance theo

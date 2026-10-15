@@ -806,3 +806,24 @@ production frontend/memory API. This reproduces the neighboring suite order and
 retains account isolation, lost-response, playback completion and mobile checks.
 The only code delta after `6f30ac3` is browser-suite pacing; app runtime is
 unchanged. Documentation checks still find 117 valid links; diff check passes.
+
+Final acceptance on 2026-10-16 (Asia/Bangkok):
+[CI 138](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38789544231)
+passed all six jobs on head `60ae09f`: frontend, backend, AI service, compose,
+integration and E2E. The frontend job passed 50 game logic cases, asset checks
+(45 GLBs/24 companions and 41 unique assets) and the 58-route production build/
+TypeScript. Backend ran `go test -race ./...` and `go vet ./...` with the dedicated
+PostgreSQL `loccao_system_test` database. E2E job `116610689994` reports
+**130 passed (23.6m)**, with no failed/flaky cases or retries under the strict
+`failOnFlakyTests` gate. This includes the previously failing Listening account case.
+
+PR head/base matched the tested revisions before merge; there were no submitted
+GitHub reviews or unresolved review threads. [PR #17](https://github.com/Loccao102/LocCaoEnglish/pull/17)
+merged to main `6e1a7e5`. The follow-up changes documentation only: marks this
+Reading slice done, preserves the earlier failure evidence and defines the next
+Listening slice as planned. Full CORE-004 remains in progress. Listening answer
+receipts, persistent acoustic/Writing feedback and calibrated overall evidence
+remain outside this acceptance. No production deployment.
+
+Documentation-only follow-up validation: 117 internal file links resolve and
+`git diff --check` passes. No app rebuild is needed for these three documentation files.

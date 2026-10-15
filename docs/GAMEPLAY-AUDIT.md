@@ -24,12 +24,12 @@ that all learning activities received a full manual playthrough in this pass.
 | Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
 | Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
-| IELTS Lab | Reading now uses server-issued questions, actual selections and atomic evidence-only receipts; Listening still reports a client tally, and Writing/Speaking coaching does not save bands | Verify Reading recovery/migration in CORE-004; preserve legacy provenance and keep Listening lifecycle, acoustic/Writing receipts and calibrated overall evidence as follow-up work |
+| IELTS Lab | Reading now uses server-issued questions, actual selections and atomic evidence-only receipts; Listening still reports a client tally, and Writing/Speaking coaching does not save bands | Reading recovery/migration accepted in CORE-004; preserve legacy provenance and keep Listening lifecycle, acoustic/Writing receipts and calibrated overall evidence as follow-up work |
 | Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
 
-IELTS update, 2026-10-14: `/ielts/reading` uses `VerifiedIeltsReading` and the
+IELTS update, 2026-10-16 (PR #17): `/ielts/reading` uses `VerifiedIeltsReading` and the
 shared learning lifecycle. The server snapshots the original 40 questions,
 grades opaque option IDs and saves one immutable result/history transaction,
 without XP, confidence or review rewards. Reading tally and arbitrary band writes
