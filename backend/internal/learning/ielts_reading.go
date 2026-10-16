@@ -27,8 +27,8 @@ type IELTSReadingCatalog struct {
 	ID             string
 	Title          string
 	Sections       []struct {
-		ID, Title, Passage string
-		Questions          []struct {
+		ID, Title, Passage, Transcript string
+		Questions                      []struct {
 			ID, Prompt, Answer string
 			Options            []string
 		}
@@ -52,9 +52,13 @@ type IELTSReadingSnapshot struct {
 }
 
 func NewIELTSReading() (model.IELTSReadingPrompt, IELTSReadingSnapshot, string, string, error) {
-	prompt := model.IELTSReadingPrompt{Title: ieltsReadingCatalog.Title, Sections: []model.IELTSReadingSection{}}
+	return newIELTSObjective(ieltsReadingCatalog)
+}
+
+func newIELTSObjective(catalog IELTSReadingCatalog) (model.IELTSReadingPrompt, IELTSReadingSnapshot, string, string, error) {
+	prompt := model.IELTSReadingPrompt{Title: catalog.Title, Sections: []model.IELTSReadingSection{}}
 	private := IELTSReadingSnapshot{CorrectOptions: map[string]string{}, MethodVersion: IELTSReadingMethodVersion}
-	for _, section := range ieltsReadingCatalog.Sections {
+	for _, section := range catalog.Sections {
 		public := model.IELTSReadingSection{ID: section.ID, Title: section.Title, Passage: section.Passage, Questions: []model.IELTSReadingQuestion{}}
 		for _, question := range section.Questions {
 			q := model.IELTSReadingQuestion{ID: question.ID, Prompt: question.Prompt, Options: []model.IELTSReadingOption{}}
@@ -74,12 +78,16 @@ func NewIELTSReading() (model.IELTSReadingPrompt, IELTSReadingSnapshot, string, 
 		}
 		prompt.Sections = append(prompt.Sections, public)
 	}
-	return prompt, private, ieltsReadingCatalog.ID, ieltsReadingCatalog.ContentVersion, nil
+	return prompt, private, catalog.ID, catalog.ContentVersion, nil
 }
 
 // Resolve only a strict array of two-string tuples, in issued question order.
 // Unanswered questions are omitted; [] is a valid submission worth zero marks.
 func GradeIELTSReading(prompt *model.IELTSReadingPrompt, snapshot *IELTSReadingSnapshot, answer string) (*model.IELTSReadingResult, error) {
+	return gradeIELTSObjective(prompt, snapshot, answer, "reading")
+}
+
+func gradeIELTSObjective(prompt *model.IELTSReadingPrompt, snapshot *IELTSReadingSnapshot, answer, section string) (*model.IELTSReadingResult, error) {
 	invalid := errors.New("invalid IELTS reading selections or snapshot")
 	if prompt == nil || snapshot == nil || snapshot.MethodVersion != IELTSReadingMethodVersion || len(answer) > 2048 || !strings.HasPrefix(strings.TrimSpace(answer), "[") {
 		return nil, invalid
@@ -143,7 +151,7 @@ func GradeIELTSReading(prompt *model.IELTSReadingPrompt, snapshot *IELTSReadingS
 		}
 		answers = append(answers, model.IELTSReadingAnswer{QuestionID: q.ID, OptionID: selected[q.ID], CorrectOptionID: key, Correct: correct})
 	}
-	score, err := ieltscore.Objective("reading", "academic", raw, 40)
+	score, err := ieltscore.Objective(section, "academic", raw, 40)
 	if err != nil {
 		return nil, err
 	}

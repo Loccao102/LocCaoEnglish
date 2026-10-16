@@ -3,7 +3,6 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import catalog from "../../backend/internal/learning/ielts_reading_catalog.json";
 import type { IELTSReadingPrompt, LearningAttempt } from "../../lib/learning-attempt";
-import { listeningSections } from "../../data/ieltsMocks";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080";
 const activity = "ielts-reading", pack = "ielts-academic-reading";
@@ -85,8 +84,7 @@ test("IELTS Reading API owns the answer key, validates selections and records on
   expect(saved[0]).toMatchObject({ attemptId: a.attemptId, source: "server-objective-practice", evidence: "server-objective-practice", legacy: false, provider: "loccao-objective", methodVersion: "ielts-anchors-interpolation.v1", contentVersion: a.contentVersion, rulesVersion: a.rulesVersion });
   expect(await history(request, other.headers)).toEqual([]);
   const listening = await request.post(`${API}/v1/ielts/objective-score`, { headers: owner.headers, data: { section: "listening", testType: "academic", correct: 20, total: 40 } });
-  expect(listening.ok(), await listening.text()).toBe(true);
-  expect((await listening.json()).attempt).toMatchObject({ source: "client-reported-practice-estimate", evidence: "client-reported", legacy: false });
+  expect(listening.status()).toBe(409);
   expect((await (await request.get(`${API}/v1/me`, { headers: owner.headers })).json()).user.xp).toBe(0);
   const reviews = await request.get(`${API}/v1/review`, { headers: owner.headers });
   expect(reviews.ok()).toBe(true);
@@ -101,9 +99,8 @@ test("IELTS Reading API owns the answer key, validates selections and records on
   await expect(page.locator(".snapshot-band").getByText("6.0", { exact: true })).toHaveCount(0);
   await page.goto("/ielts");
   const historyCard = page.getByRole("region", { name: "IELTS practice history" });
-  await expect(historyCard.getByRole("listitem")).toHaveCount(2);
+  await expect(historyCard.getByRole("listitem")).toHaveCount(1);
   await expect(historyCard.getByText(/40\/40 correct · Server-checked Reading choices/)).toBeVisible();
-  await expect(historyCard.getByText(/20\/40 correct · Client-reported estimate/)).toBeVisible();
   await page.evaluate(() => { localStorage.removeItem("loccao_token"); window.dispatchEvent(new Event("loccao-auth-change")); });
   await expect(historyCard.getByText(/Sign in to see your saved practice/)).toBeVisible();
   await expect(historyCard.getByRole("listitem")).toHaveCount(0);
@@ -254,86 +251,4 @@ for (const height of [551, 844]) test(`IELTS Reading supports forty questions, k
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await card(page).getByRole("heading", { name: "Reading practice saved" }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: `.cache/ielts-reading-feedback-${height}.png` });
-});
-
-test("IELTS Listening retries playback and a failed tally save while keeping its client-reported source explicit", async ({ page, request }) => {
-  // Only provider transport and browser media events are simulated. The tally
-  // save/history use the real API; this legacy path does not have attempt IDs
-  // and cannot promise deduplication if the server committed a lost response.
-  await page.clock.install();
-  await page.addInitScript(() => {
-    const state = { mode: "fail", calls: 0, cancelled: 0, current: null as SpeechSynthesisUtterance | null };
-    Object.assign(window, { ieltsSpeech: state });
-    Object.defineProperty(window, "speechSynthesis", { configurable: true, value: {
-      speak(utterance: SpeechSynthesisUtterance) {
-        state.calls++; state.current = utterance;
-        utterance.onstart?.({} as SpeechSynthesisEvent);
-        if (state.mode === "fail") setTimeout(() => utterance.onerror?.({} as SpeechSynthesisErrorEvent), 20);
-      },
-      cancel() { state.cancelled++; },
-    } });
-  });
-  await page.route("**/v1/ai/tts", route => route.abort("failed"));
-  await page.goto("/ielts/listening");
-  await expect(page.getByRole("heading", { name: "Sign in to save your Listening estimate" })).toBeVisible();
-  const user = await learner(request);
-  await page.evaluate(token => { localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change")); }, user.token);
-  const listening = page.getByRole("region", { name: "IELTS Listening practice" });
-  await expect(listening.getByText(/Client-reported practice estimate: your browser checks these answers/)).toBeVisible();
-  // Listening still ships its client-side catalog (including Next's serialized
-  // props). Only its visible script is hidden; unlike Reading, it does not
-  // claim a server-private answer key or verified listening evidence.
-  await expect(listening.getByText(listeningSections[0].context, { exact: true })).toHaveCount(0);
-  await listening.getByRole("button", { name: "Play recording", exact: true }).click();
-  await expect(listening.getByText("The recording did not finish. Try playing it again.", { exact: true })).toBeVisible();
-  await expect(listening.getByRole("button", { name: "Play recording", exact: true })).toBeEnabled();
-  await page.evaluate(() => { (window as any).ieltsSpeech.mode = "hold"; });
-  await listening.getByRole("button", { name: "Play recording", exact: true }).click();
-  await expect.poll(() => page.evaluate(() => (window as any).ieltsSpeech.calls)).toBe(2);
-  await page.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, value: true }); document.dispatchEvent(new Event("visibilitychange")); });
-  await expect(listening.getByRole("button", { name: "Play recording", exact: true })).toBeEnabled();
-  expect(await page.evaluate(() => (window as any).ieltsSpeech.cancelled)).toBe(2);
-  await expect(listening.getByText("Recording finished. You can answer the questions.", { exact: true })).toHaveCount(0);
-  await page.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, value: false }); document.dispatchEvent(new Event("visibilitychange")); });
-  for (let part = 0; part < 4; part++) {
-    await listening.getByRole("button", { name: "Play recording", exact: true }).click();
-    await expect(listening.getByRole("button", { name: "Playing…", exact: true })).toBeDisabled();
-    await expect.poll(() => page.evaluate(() => (window as any).ieltsSpeech.calls)).toBe(part + 3);
-    await expect(listening.getByText("Playing with your browser's English voice…", { exact: true })).toBeVisible();
-    await expect(listening.getByText("Recording finished. You can answer the questions.", { exact: true })).toHaveCount(0);
-    if (part < 3) await expect(listening.getByRole("button", { name: "Next section →", exact: true })).toBeDisabled();
-    else {
-      // A full IELTS lecture can legitimately exceed a short learning clip's
-      // 90-second watchdog. It still must await the actual completion event.
-      await page.clock.fastForward(91_000);
-      await expect(listening.getByRole("button", { name: "Playing…", exact: true })).toBeDisabled();
-      await expect(listening.getByRole("button", { name: "Save reported estimate", exact: true })).toBeDisabled();
-      await expect(listening.getByText("The recording did not finish. Try playing it again.", { exact: true })).toHaveCount(0);
-    }
-    await page.evaluate(() => { (window as any).ieltsSpeech.current.onend({}); });
-    await expect(listening.getByRole("button", { name: "Recording played", exact: true })).toBeDisabled();
-    await expect(listening.getByText("Recording finished. You can answer the questions.", { exact: true })).toBeVisible();
-    const first = listeningSections[part].questions[0];
-    await listening.getByRole("group", { name: new RegExp(`^${part * 10 + 1}\\. `) }).getByRole("radio", { name: first.answer, exact: true }).check();
-    if (part < 3) await listening.getByRole("button", { name: "Next section →", exact: true }).click();
-  }
-  expect(await page.evaluate(() => (window as any).ieltsSpeech.calls)).toBe(6);
-  let payload: unknown;
-  await page.route("**/v1/ielts/objective-score", async route => { payload = route.request().postDataJSON(); await route.abort("failed"); }, { times: 1 });
-  await listening.getByRole("button", { name: "Save reported estimate", exact: true }).click();
-  await expect(listening.getByRole("alert")).toContainText("Your choices are still here.");
-  await expect(listening.getByRole("radio", { name: listeningSections[3].questions[0].answer, exact: true })).toBeChecked();
-  const retry = page.waitForRequest(request => request.url().endsWith("/v1/ielts/objective-score"));
-  await listening.getByRole("button", { name: "Save reported estimate", exact: true }).click();
-  expect((await retry).postDataJSON()).toEqual(payload);
-  await expect(listening.getByRole("heading", { name: "Listening estimate saved", exact: true })).toBeVisible();
-  await expect(listening.getByText(/4\/40 reported correct/)).toBeVisible();
-  const items = await history(request, user.headers); expect(items).toHaveLength(1);
-  expect(items[0]).toMatchObject({ source: "client-reported-practice-estimate", evidence: "client-reported", legacy: false });
-  for (const height of [551, 844]) {
-    await page.setViewportSize({ width: 390, height });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await listening.getByRole("heading", { name: "Client-reported Listening estimate", exact: true }).scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `.cache/ielts-listening-feedback-${height}.png` });
-  }
 });

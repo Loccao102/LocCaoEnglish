@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"net/http"
-	"strings"
 
 	ieltscore "github.com/Loccao102/LocCaoEnglish/backend/internal/ielts"
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
@@ -15,7 +14,7 @@ func (s *Server) registerIELTSRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /v1/ielts/history", s.ieltsHistory)
 }
 func (s *Server) ieltsObjectiveScore(w http.ResponseWriter, r *http.Request) {
-	u, ok := s.signedInUser(w, r)
+	_, ok := s.signedInUser(w, r)
 	if !ok {
 		return
 	}
@@ -28,22 +27,12 @@ func (s *Server) ieltsObjectiveScore(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	if strings.EqualFold(strings.TrimSpace(in.Section), "reading") {
-		problem(w, 409, "Reading estimates now require a server-owned IELTS Reading attempt with actual selections")
-		return
-	}
-	result, err := ieltscore.Objective(in.Section, in.TestType, in.Correct, in.Total)
+	_, err := ieltscore.Objective(in.Section, in.TestType, in.Correct, in.Total)
 	if err != nil {
 		problem(w, 400, err.Error())
 		return
 	}
-	raw, max := result.RawScore, result.MaxScore
-	attempt, err := s.store.SaveIELTSAttempt(r.Context(), u.ID, model.IELTSAttempt{Section: result.Section, TestType: result.TestType, RawScore: &raw, MaxScore: &max, Band: result.Band, Source: "client-reported-practice-estimate", Evidence: "client-reported"})
-	if err != nil {
-		problem(w, 500, "could not save this reported estimate")
-		return
-	}
-	write(w, 200, map[string]any{"result": result, "attempt": attempt})
+	problem(w, 409, "Reading and Listening estimates require a server-owned IELTS attempt with actual selections")
 }
 func (s *Server) ieltsBand(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.signedInUser(w, r); !ok {
