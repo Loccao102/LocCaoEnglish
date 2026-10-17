@@ -872,3 +872,23 @@ Old tally endpoints now reject writes, while existing client-reported history
 keeps its provenance. No tests are skipped and `failOnFlakyTests` is unchanged.
 Full CI, final review and merge are pending; this slice is not yet accepted.
 No production deployment or four-skill overall claim.
+
+CI follow-up, 2026-10-17: [CI 141](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38832536352)
+on `52c9b30` passed frontend, backend (dedicated PostgreSQL/race/vet), AI service,
+compose and integration. Browser job `116754581460` reported **135 passed and
+1 flaky (20.0m)**, so the strict gate correctly failed. All seven new Listening
+cases passed, including the late audio-preparation response account boundary.
+The unrelated Tea Time short-screen case missed the first Tea ingredient and
+left Start steeping disabled; its retry passed. Failure artifact `12018622133`
+shows the recipe requesting Tea → Honey → Mint but feedback only Honey → Mint.
+
+The Tea test previously sampled a button's bounds and clicked raw coordinates
+while opening the recipe could move the responsive playfield. Replace that
+helper with Playwright's normal locator click, which checks stability and hit
+target, and assert the exact accumulated ingredients after every selection.
+This retains real pointer input, frozen game-clock timing, three-customer scoring,
+pause/reload/oversteep/save and mobile geometry checks. No forced click, engine
+shortcut, retry loop or relaxed assertion. Runtime rules are unchanged.
+Local baseline ran 10 short-screen repetitions successfully (1.2m), confirming
+the failure is intermittent; the revised full Tea file passed 2/2 (9.5s).
+Further repeated validation and a fresh complete CI run are pending acceptance.
