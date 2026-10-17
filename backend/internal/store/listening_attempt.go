@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"maps"
 	"time"
 
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/learning"
@@ -12,12 +13,13 @@ import (
 )
 
 type ListeningSnapshot struct {
-	Transcript string                    `json:"transcript"`
-	Events     []model.ListeningPlayback `json:"events"`
+	Transcripts map[string]string         `json:"transcripts,omitempty"`
+	Transcript  string                    `json:"transcript"`
+	Events      []model.ListeningPlayback `json:"events"`
 }
 
 func learningEvidence(rec LearningAttemptRecord) string {
-	if rec.Activity == "ielts-reading" {
+	if learning.IsIELTSObjective(rec.Activity) {
 		return learning.IELTSReadingEvidence
 	}
 	if rec.Activity == "shadowing" {
@@ -33,6 +35,7 @@ func learningEvidence(rec LearningAttemptRecord) string {
 }
 func supportedAudioAttempt(rec LearningAttemptRecord) bool {
 	return rec.Activity == "listen-pick" && rec.RulesVersion == learning.ListeningRulesVersion ||
+		rec.Activity == "ielts-listening" && rec.RulesVersion == learning.IELTSListeningRulesVersion ||
 		rec.Activity == "dictation" && rec.RulesVersion == learning.DictationRulesVersion
 }
 func cloneListening(value *ListeningSnapshot) *ListeningSnapshot {
@@ -40,6 +43,7 @@ func cloneListening(value *ListeningSnapshot) *ListeningSnapshot {
 		return nil
 	}
 	copy := *value
+	copy.Transcripts = maps.Clone(value.Transcripts)
 	copy.Events = append([]model.ListeningPlayback{}, value.Events...)
 	return &copy
 }
@@ -51,10 +55,28 @@ func ListeningEvidenceOf(rec LearningAttemptRecord, reveal bool) *model.Listenin
 	out := &model.ListeningEvidence{Events: append([]model.ListeningPlayback{}, value.Events...), Source: "client-reported-playback"}
 	if reveal && rec.Status == "completed" {
 		out.Transcript = value.Transcript
+		out.Transcripts = maps.Clone(value.Transcripts)
 	}
 	return out
 }
 func listeningReady(rec LearningAttemptRecord) bool {
+	if rec.Activity == "ielts-listening" {
+		if rec.Snapshot.Listening == nil || len(rec.Snapshot.Listening.Transcripts) != 4 {
+			return false
+		}
+		for part := range rec.Snapshot.Listening.Transcripts {
+			played := false
+			for _, event := range rec.Snapshot.Listening.Events {
+				if event.PartID == part && event.Status == "completed" {
+					played = true
+				}
+			}
+			if !played {
+				return false
+			}
+		}
+		return true
+	}
 	if rec.Snapshot.Listening != nil {
 		for _, event := range rec.Snapshot.Listening.Events {
 			if event.Status == "completed" {
@@ -78,6 +100,13 @@ func (s *Store) RecordListeningPlayback(ctx context.Context, owner, id, contentV
 		if event.RequestID == "" || (event.Rate != 1 && event.Rate != 0.72) {
 			return rec, ErrAttemptInput
 		}
+		if rec.Activity == "ielts-listening" {
+			if event.PartID == "" || rec.Snapshot.Listening.Transcripts[event.PartID] == "" {
+				return rec, ErrAttemptInput
+			}
+		} else if event.PartID != "" {
+			return rec, ErrAttemptInput
+		}
 		if event.Status != "requested" && event.Status != "completed" && event.Status != "failed" {
 			return rec, ErrAttemptInput
 		}
@@ -88,7 +117,7 @@ func (s *Store) RecordListeningPlayback(ctx context.Context, owner, id, contentV
 		found := -1
 		for i, saved := range rec.Snapshot.Listening.Events {
 			if saved.RequestID == event.RequestID {
-				if saved.Rate != event.Rate {
+				if saved.Rate != event.Rate || saved.PartID != event.PartID {
 					return rec, ErrAttemptConflict
 				}
 				if saved == event {
@@ -115,7 +144,11 @@ func (s *Store) RecordListeningPlayback(ctx context.Context, owner, id, contentV
 			if event.Status != "requested" {
 				return rec, ErrAttemptConflict
 			}
-			if len(rec.Snapshot.Listening.Events) >= 32 {
+			limit := 32
+			if rec.Activity == "ielts-listening" {
+				limit = 128
+			}
+			if len(rec.Snapshot.Listening.Events) >= limit {
 				return rec, ErrAttemptInput
 			}
 			rec.Snapshot.Listening.Events = append(rec.Snapshot.Listening.Events, event)

@@ -8,7 +8,7 @@ import useSignedInToken from "./learning/useSignedInToken";
 import styles from "./IeltsDashboard.module.css";
 
 const skills = [
-  { key: "listening", label: "Listening", href: "/ielts/listening", copy: "40 questions · 4 audio parts", kind: "Client-reported practice estimate" },
+  { key: "listening", label: "Listening", href: "/ielts/listening", copy: "40 questions · 4 audio parts", kind: "Saved choices checked by the server" },
   { key: "reading", label: "Academic Reading", href: "/ielts/reading", copy: "40 questions · 3 original passages", kind: "Saved choices checked by the server" },
   { key: "writing", label: "Writing", href: "/ielts/writing", copy: "Task 2 · feedback on your writing", kind: "Coaching only · no saved band" },
   { key: "speaking", label: "Speaking", href: "/ielts/speaking", copy: "Mic recording · language feedback", kind: "Coaching only · no saved band" },
@@ -17,6 +17,7 @@ const skills = [
 function evidenceLabel(item: IELTSAttempt) {
   if (item.legacy) return "Legacy estimate · original answers unavailable";
   if (item.evidence === "server-objective-practice" && item.section === "reading") return "Server-checked Reading choices";
+  if (item.evidence === "server-objective-practice" && item.section === "listening") return "Server-checked Listening choices · reported playback";
   return "Client-reported estimate · original answers unverified";
 }
 
@@ -57,7 +58,7 @@ function DashboardHistory({ token }: { token: string | null }) {
     <section className={styles.intro}>
       <span className="eyebrow">IELTS PRACTICE</span>
       <h1>Build skills. Understand your results.</h1>
-      <p>Reading saves your answers and checks them against an answer key. Listening currently saves a score reported by your browser. Writing and Speaking provide coaching without adding a band to this history.</p>
+      <p>Reading and Listening save your choices and check them against an answer key. Listening also keeps the playback reported by your browser. Writing and Speaking provide coaching without adding a band to this history.</p>
       <p>No overall band is calculated from these different kinds of practice.</p>
     </section>
 

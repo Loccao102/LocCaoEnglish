@@ -23,7 +23,7 @@ Attempt payload:
 
 This is the **current legacy contract**, not the planned trusted grading model.
 Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick, Dictation Rush, Shadow Me and IELTS Reading reject this route with 409, including
+Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick, Dictation Rush, Shadow Me and IELTS Reading/Listening reject this route with 409, including
 case/whitespace variants; use server-owned attempts below.
 Do not extend the legacy trust model to new rewards/ranking.
 
@@ -49,7 +49,7 @@ Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisio
 | `GET /v1/learning/attempts/{id}` | 200 saved prompt/options and optional committed result |
 | `POST /v1/learning/attempts/{id}/submit` | `{answer, contentVersion, rulesVersion}` → 200 immutable verdict |
 
-Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`, `shadowing`, `ielts-reading`.
+Activities: `word-link`, `grammar-repair`, `collocation-factory`, `sentence-builder`, `word-graph`, `reading-race`, `story-choice`, `listen-pick`, `dictation`, `shadowing`, `ielts-reading`, `ielts-listening`.
 
 ### IELTS Academic Reading
 
@@ -86,19 +86,51 @@ not overwrite it. This is an evidence-only path: no XP, confidence/level,
 learning daily claim, review item or legacy learning-attempt write. Generic
 `/v1/attempts` rejects `ielts-reading*` accuracy submissions with 409.
 
+### IELTS Listening
+
+`ielts-listening` also requires sign-in, pack `ielts-listening`, B2 routing
+metadata, rules `ielts-listening.v1` and catalog `2026-10-16.1`. It uses the
+same ordered selection parser, 2048-byte answer budget, ownership/version checks,
+24-hour expiry and atomic evidence-only history writer as Reading. The original
+four-part/40-question catalog lives on the backend. `prompt.listeningPaper`
+has the same section/question/option structure without `passage` or transcripts.
+Submit issued `L1`–`L40` question IDs and option IDs, not a correct-answer count.
+
+The shared `POST /v1/learning/attempts/{id}/audio` request adds `partId` for
+this activity, alongside `requestId`, `rate`, `status`, optional `provider` and
+content/rules versions. A valid saved part ID is required; existing short clips
+reject a nonempty part ID. An audio request ID binds its part and rate permanently.
+The journal accepts at most 128 requests per paper (32 for existing short clips);
+an existing request can still finish or retry when the journal is full.
+
+Each of the four parts needs a `completed` report before submit; `requested` or
+`failed` reports do not satisfy this gate (409). Answers may be selected before
+or during playback. Replay and slow playback are allowed and recorded. The
+audio and submit writers share a lock: a completed result freezes all evidence;
+identical retries remain valid. `result.listening` includes the saved events and
+`transcripts` keyed by part ID. Its source is `client-reported-playback`; the
+server checks selections, not whether a human listened. Browser synthesis
+explicitly receives the saved transcript as assistance. No transcript/key is
+returned in the active public prompt. The paper player has a five-minute budget;
+short-clip callers retain their 90-second default. Stop/hide/unmount cancel media.
+
+Drafts, pending submissions and part-specific pending audio requests recover
+across reload. A completed audio report retries without playing again. Invalid
+audio references require explicit discard; storage failure is disclosed and
+keeps in-memory work usable. Account changes cancel media and ignore late replies.
+See [ADR 007](decisions/007-ielts-listening-evidence.md).
+
 ### IELTS history and legacy endpoints
 
 - `GET /v1/ielts/history` requires sign-in and reads only that account. Rows add
   `evidence`, `legacy` and optional `attemptId`, content/rules/method versions
   and provider. Previous rows keep their scores/source text and report
   `legacy:true`, `evidence:"legacy-unverified"`; no answers are invented.
-- `POST /v1/ielts/objective-score` requires sign-in. Reading tally writes return
-  409. Listening temporarily keeps the tally contract but records
-  `client-reported` evidence and `client-reported-practice-estimate` source;
-  these values are not server-graded selections. Its UI waits for actual audio
-  completion, permits retry after playback failure and stops on hide/unmount.
-  Full passages use a bounded five-minute playback budget; short learning clips
-  keep their existing 90-second default. Playback is not a server evidence receipt.
+- `POST /v1/ielts/objective-score` requires sign-in. Both Reading and Listening
+  tally writes return 409. Previous `client-reported` rows keep their evidence
+  and `client-reported-practice-estimate` source; they are not upgraded to
+  server-graded selections. Generic `/v1/attempts` rejects both
+  `ielts-reading*` and `ielts-listening*` accuracy submissions with 409.
 - `POST /v1/ielts/band` rejects new arbitrary band/source writes with 409 after
   authentication. Existing Writing/Speaking estimates are preserved in history.
 - `POST /v1/ielts/overall` remains a calculation helper; it does not persist or

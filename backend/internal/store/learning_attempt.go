@@ -92,7 +92,7 @@ ALTER TABLE attempts ADD COLUMN IF NOT EXISTS rules_version TEXT NOT NULL DEFAUL
 `
 
 func (s *Store) StartLearningAttempt(ctx context.Context, userID, requestID, activity, skill, itemKey, cefrLevel, contentVersion, rulesVersion, prompt, correctAnswer, feedback string, snapshots ...LearningSnapshot) (LearningAttemptRecord, bool, error) {
-	if activity == "ielts-reading" && userID == "" {
+	if learning.IsIELTSObjective(activity) && userID == "" {
 		return LearningAttemptRecord{}, false, ErrAttemptOwner
 	}
 	var snapshot LearningSnapshot
@@ -174,7 +174,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		if rec.UserID != userID {
 			return model.LearningAttemptResult{}, ErrAttemptOwner
 		}
-		if rec.Activity == "ielts-reading" {
+		if learning.IsIELTSObjective(rec.Activity) {
 			answer = rawAnswer
 		}
 		if err = validateLearningSubmission(rec, answer, versions); err != nil {
@@ -187,8 +187,8 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 			return learningAttemptResult(rec), nil
 		}
 
-		if rec.Activity == "ielts-reading" {
-			return s.submitIELTSReadingTx(ctx, tx, rec, answer)
+		if learning.IsIELTSObjective(rec.Activity) {
+			return s.submitIELTSObjectiveTx(ctx, tx, rec, answer)
 		}
 		actual := learningAnswerText(rec, answer)
 		correct := learningCorrect(rec, answer)
@@ -271,7 +271,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	if rec.UserID != userID {
 		return model.LearningAttemptResult{}, ErrAttemptOwner
 	}
-	if rec.Activity == "ielts-reading" {
+	if learning.IsIELTSObjective(rec.Activity) {
 		answer = rawAnswer
 	}
 	if err := validateLearningSubmission(rec, answer, versions); err != nil {
@@ -283,8 +283,8 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		}
 		return learningAttemptResult(rec), nil
 	}
-	if rec.Activity == "ielts-reading" {
-		return s.submitIELTSReadingMemory(rec, answer)
+	if learning.IsIELTSObjective(rec.Activity) {
+		return s.submitIELTSObjectiveMemory(rec, answer)
 	}
 	if s.learningRewards == nil {
 		s.learningRewards = map[string]bool{}
@@ -367,7 +367,7 @@ func learningAttemptResult(rec LearningAttemptRecord) model.LearningAttemptResul
 	}
 	evidence := learningEvidence(rec)
 	return model.LearningAttemptResult{
-		IELTS:           ieltsReadingResult(rec),
+		IELTS:           ieltsObjectiveResult(rec),
 		TranscriptMatch: transcriptMatchResult(rec),
 		Dictation:       dictationResult(rec),
 		Listening:       ListeningEvidenceOf(rec, true),
@@ -384,7 +384,7 @@ func sameAnswer(left, right string) bool {
 }
 
 func sameSubmittedAnswer(rec LearningAttemptRecord, answer string) bool {
-	if rec.Activity == "sentence-builder" || rec.Activity == "dictation" || rec.Activity == "shadowing" || rec.Activity == "ielts-reading" {
+	if rec.Activity == "sentence-builder" || rec.Activity == "dictation" || rec.Activity == "shadowing" || learning.IsIELTSObjective(rec.Activity) {
 		return rec.SubmittedAnswer == answer
 	}
 	return sameAnswer(rec.SubmittedAnswer, answer)
@@ -398,7 +398,7 @@ func sameLearningRequest(rec LearningAttemptRecord, activity, level string, snap
 func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
 	// Reading has nested prompt/key/result slices; a full JSON copy prevents callers
 	// from mutating issued content or a completed verdict in memory mode.
-	if rec.Activity == "ielts-reading" {
+	if learning.IsIELTSObjective(rec.Activity) {
 		raw, _ := json.Marshal(rec.Snapshot)
 		var snapshot LearningSnapshot
 		_ = json.Unmarshal(raw, &snapshot)
@@ -413,11 +413,11 @@ func cloneLearningRecord(rec LearningAttemptRecord) LearningAttemptRecord {
 	return rec
 }
 func validateLearningSubmission(rec LearningAttemptRecord, answer string, versions []model.LearningAttemptSubmitInput) error {
-	if rec.Activity == "ielts-reading" {
-		if rec.UserID == "" || rec.RulesVersion != learning.IELTSReadingRulesVersion || len(versions) != 1 || rec.Snapshot.IELTS == nil {
+	if learning.IsIELTSObjective(rec.Activity) {
+		if rec.UserID == "" || !validIELTSRules(rec) || len(versions) != 1 || rec.Snapshot.IELTS == nil {
 			return ErrAttemptInput
 		}
-		if _, err := learning.GradeIELTSReading(rec.Snapshot.Prompt.Reading, rec.Snapshot.IELTS, answer); err != nil {
+		if _, err := gradeIELTSAttempt(rec, answer); err != nil {
 			return ErrAttemptInput
 		}
 	}
@@ -436,7 +436,10 @@ func validateLearningSubmission(rec LearningAttemptRecord, answer string, versio
 	if !time.Now().Before(rec.ExpiresAt) {
 		return ErrAttemptExpired
 	}
-	if rec.Activity == "ielts-reading" {
+	if learning.IsIELTSObjective(rec.Activity) {
+		if rec.Activity == "ielts-listening" && !listeningReady(rec) {
+			return ErrAttemptConflict
+		}
 		return nil
 	}
 	if rec.Activity == "shadowing" {

@@ -10,8 +10,29 @@ import (
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 )
 
-func ieltsReadingResult(rec LearningAttemptRecord) *model.IELTSReadingResult {
-	if rec.Activity != "ielts-reading" || rec.Status != "completed" || rec.Snapshot.IELTS == nil || rec.Snapshot.IELTS.Result == nil {
+func validIELTSRules(rec LearningAttemptRecord) bool {
+	return rec.Activity == "ielts-reading" && rec.RulesVersion == learning.IELTSReadingRulesVersion ||
+		rec.Activity == "ielts-listening" && rec.RulesVersion == learning.IELTSListeningRulesVersion
+}
+
+func gradeIELTSAttempt(rec LearningAttemptRecord, answer string) (*model.IELTSReadingResult, error) {
+	if rec.Activity == "ielts-listening" {
+		paper, audio := rec.Snapshot.Prompt.ListeningPaper, rec.Snapshot.Listening
+		if paper == nil || len(paper.Sections) != 4 || audio == nil || len(audio.Transcripts) != 4 {
+			return nil, ErrAttemptInput
+		}
+		for _, part := range paper.Sections {
+			if audio.Transcripts[part.ID] == "" {
+				return nil, ErrAttemptInput
+			}
+		}
+		return learning.GradeIELTSListening(paper, rec.Snapshot.IELTS, answer)
+	}
+	return learning.GradeIELTSReading(rec.Snapshot.Prompt.Reading, rec.Snapshot.IELTS, answer)
+}
+
+func ieltsObjectiveResult(rec LearningAttemptRecord) *model.IELTSReadingResult {
+	if !learning.IsIELTSObjective(rec.Activity) || rec.Status != "completed" || rec.Snapshot.IELTS == nil || rec.Snapshot.IELTS.Result == nil {
 		return nil
 	}
 	result := *rec.Snapshot.IELTS.Result
@@ -19,8 +40,8 @@ func ieltsReadingResult(rec LearningAttemptRecord) *model.IELTSReadingResult {
 	return &result
 }
 
-func completeIELTSReading(rec LearningAttemptRecord, answer string) (LearningAttemptRecord, model.IELTSAttempt, ieltsReceipt, error) {
-	result, err := learning.GradeIELTSReading(rec.Snapshot.Prompt.Reading, rec.Snapshot.IELTS, answer)
+func completeIELTSObjective(rec LearningAttemptRecord, answer string) (LearningAttemptRecord, model.IELTSAttempt, ieltsReceipt, error) {
+	result, err := gradeIELTSAttempt(rec, answer)
 	if err != nil {
 		return rec, model.IELTSAttempt{}, ieltsReceipt{}, ErrAttemptInput
 	}
@@ -30,15 +51,15 @@ func completeIELTSReading(rec LearningAttemptRecord, answer string) (LearningAtt
 	// Evidence-only completion never consumes a daily reward, changes skill
 	// confidence, creates a review, or writes the old mastery attempts table.
 	rec.XPDelta, rec.ResultConfidence, rec.ResultLevel, rec.ReviewAdded, rec.ProgressionApplied = 0, 0, 0, false, false
-	a := model.IELTSAttempt{ID: newID(), AttemptID: rec.ID, Section: "reading", TestType: "academic", RawScore: &result.RawScore, MaxScore: &result.MaxScore, Band: result.Band, Source: learning.IELTSReadingEvidence, CreatedAt: time.Now().UTC(), ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, MethodVersion: result.MethodVersion, Provider: result.Provider, Evidence: learning.IELTSReadingEvidence, Legacy: false}
-	receipt := ieltsReceipt{Evidence: a.Evidence, ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, ActualAnswer: answer, Result: result}
+	a := model.IELTSAttempt{ID: newID(), AttemptID: rec.ID, Section: result.Section, TestType: "academic", RawScore: &result.RawScore, MaxScore: &result.MaxScore, Band: result.Band, Source: learning.IELTSReadingEvidence, CreatedAt: time.Now().UTC(), ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, MethodVersion: result.MethodVersion, Provider: result.Provider, Evidence: learning.IELTSReadingEvidence, Legacy: false}
+	receipt := ieltsReceipt{Evidence: a.Evidence, ContentVersion: rec.ContentVersion, RulesVersion: rec.RulesVersion, ActualAnswer: answer, Result: result, Listening: ListeningEvidenceOf(rec, true)}
 	return rec, a, receipt, nil
 }
 
 // Called under the shared attempt FOR UPDATE lock; the history and verdict
 // commit together. No nested transaction or independent history writer.
-func (s *Store) submitIELTSReadingTx(ctx context.Context, tx *sql.Tx, rec LearningAttemptRecord, answer string) (model.LearningAttemptResult, error) {
-	rec, a, receipt, err := completeIELTSReading(rec, answer)
+func (s *Store) submitIELTSObjectiveTx(ctx context.Context, tx *sql.Tx, rec LearningAttemptRecord, answer string) (model.LearningAttemptResult, error) {
+	rec, a, receipt, err := completeIELTSObjective(rec, answer)
 	if err != nil {
 		return model.LearningAttemptResult{}, err
 	}
@@ -64,11 +85,11 @@ func (s *Store) submitIELTSReadingTx(ctx context.Context, tx *sql.Tx, rec Learni
 
 // s.mu is held by SubmitLearningAttempt, serializing the same receipt invariant
 // as the database row lock. History readers cannot see a half-finished record.
-func (s *Store) submitIELTSReadingMemory(rec LearningAttemptRecord, answer string) (model.LearningAttemptResult, error) {
+func (s *Store) submitIELTSObjectiveMemory(rec LearningAttemptRecord, answer string) (model.LearningAttemptResult, error) {
 	if _, ok := s.mem.users[rec.UserID]; !ok {
 		return model.LearningAttemptResult{}, ErrNotFound
 	}
-	rec, a, _, err := completeIELTSReading(rec, answer)
+	rec, a, _, err := completeIELTSObjective(rec, answer)
 	if err != nil {
 		return model.LearningAttemptResult{}, err
 	}

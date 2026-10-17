@@ -16,7 +16,17 @@ import (
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 )
 
-func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
+func TestIELTSObjectiveEvidenceMemoryAndPostgres(t *testing.T) {
+	for _, activity := range []string{"ielts-reading", "ielts-listening"} {
+		t.Run(activity, func(t *testing.T) { testIELTSEvidence(t, activity) })
+	}
+}
+
+func testIELTSEvidence(t *testing.T, activity string) {
+	kind, firstQuestion := "reading", "R1"
+	if activity == "ielts-listening" {
+		kind, firstQuestion = "listening", "L1"
+	}
 	urls := map[string]string{"memory": ""}
 	if url := os.Getenv("TEST_DATABASE_URL"); url != "" {
 		if !strings.Contains(url, "loccao_system_test") {
@@ -76,18 +86,42 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 			}
 			start := func(req string) LearningAttemptRecord {
 				p, private, id, version, e := learning.NewIELTSReading()
+				pack, rules, skill := learning.IELTSReadingPack, learning.IELTSReadingRulesVersion, "Reading"
+				var audio *ListeningSnapshot
+				if activity == "ielts-listening" {
+					var transcripts map[string]string
+					p, private, transcripts, id, version, e = learning.NewIELTSListening()
+					audio = &ListeningSnapshot{Transcripts: transcripts, Events: []model.ListeningPlayback{}}
+					pack, rules, skill = learning.IELTSListeningPack, learning.IELTSListeningRulesVersion, "Listening"
+				}
 				if e != nil {
 					t.Fatal(e)
 				}
-				snap := LearningSnapshot{Input: model.LearningAttemptStartInput{RequestID: req, Activity: "ielts-reading", Pack: learning.IELTSReadingPack, CEFRLevel: "B2", ExcludeItemKeys: []string{}}, Prompt: model.LearningAttemptPrompt{Reading: &p, Options: []string{}}, IELTS: &private}
-				rec, _, e := s.StartLearningAttempt(ctx, u.ID, req, "ielts-reading", "Reading", id, "B2", version, learning.IELTSReadingRulesVersion, p.Title, "", "Practice", snap)
+				snap := LearningSnapshot{Input: model.LearningAttemptStartInput{RequestID: req, Activity: activity, Pack: pack, CEFRLevel: "B2", ExcludeItemKeys: []string{}}, Prompt: model.LearningAttemptPrompt{Reading: &p, Options: []string{}}, IELTS: &private, Listening: audio}
+				if audio != nil {
+					snap.Prompt.ListeningPaper, snap.Prompt.Reading = &p, nil
+				}
+				rec, _, e := s.StartLearningAttempt(ctx, u.ID, req, activity, skill, id, "B2", version, rules, p.Title, "", "Practice", snap)
 				if e != nil {
 					t.Fatal(e)
 				}
 				// The caller keeps its original snapshot; changing it must not change
 				// the stored prompt or grading key in memory mode.
 				p.Sections[0].Questions[0].Options[0].Text = "changed caller content"
-				private.CorrectOptions["R1"] = "changed caller key"
+				private.CorrectOptions[firstQuestion] = "changed caller key"
+				if audio != nil {
+					for _, part := range p.Sections {
+						event := model.ListeningPlayback{RequestID: "play-" + part.ID, PartID: part.ID, Rate: 1, Status: "requested"}
+						if _, e = s.RecordListeningPlayback(ctx, u.ID, rec.ID, version, rules, event); e != nil {
+							t.Fatal(e)
+						}
+						event.Status, event.Provider = "completed", "browser-speech-synthesis"
+						rec, e = s.RecordListeningPlayback(ctx, u.ID, rec.ID, version, rules, event)
+						if e != nil {
+							t.Fatal(e)
+						}
+					}
+				}
 				return rec
 			}
 			a := start("ielts-evidence-1")
@@ -96,8 +130,13 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 			if !reflect.DeepEqual(original, retryStart) {
 				t.Fatal("new catalog/option IDs replaced creation retry")
 			}
-			a.Snapshot.Prompt.Reading.Sections[0].Questions[0].Options[0].Text = "mutated"
-			a.Snapshot.IELTS.CorrectOptions["R1"] = "mutated"
+			paper := a.Snapshot.Prompt.Reading
+			if activity == "ielts-listening" {
+				paper = a.Snapshot.Prompt.ListeningPaper
+				a.Snapshot.Listening.Transcripts[paper.Sections[0].ID] = "mutated"
+			}
+			paper.Sections[0].Questions[0].Options[0].Text = "mutated"
+			a.Snapshot.IELTS.CorrectOptions[firstQuestion] = "mutated"
 			readStore := s
 			if url != "" {
 				readStore, err = New(url)
@@ -125,8 +164,8 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 			if _, err = s.SubmitLearningAttempt(ctx, u.ID, a.ID, `[["R1","invalid"]]`, versions); !errors.Is(err, ErrAttemptInput) {
 				t.Fatal("bad option", err)
 			}
-			key := a.Snapshot.IELTS.CorrectOptions["R1"]
-			raw, _ := json.Marshal([][]string{{"R1", key}})
+			key := a.Snapshot.IELTS.CorrectOptions[firstQuestion]
+			raw, _ := json.Marshal([][]string{{firstQuestion, key}})
 			answer := " " + string(raw) + " "
 			var wg sync.WaitGroup
 			results := make(chan model.LearningAttemptResult, 8)
@@ -158,17 +197,27 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 				}
 				count++
 			}
-			if count != 8 || first.IELTS == nil || first.IELTS.RawScore != 1 || first.Correct || first.ActualAnswer != answer || first.Evidence != learning.IELTSReadingEvidence || first.XPDelta != 0 || first.ProgressionApplied || first.NewConfidence != 0 || first.Level != 0 || first.ReviewAdded {
+			if count != 8 || first.IELTS == nil || first.IELTS.Section != kind || first.IELTS.RawScore != 1 || first.Correct || first.ActualAnswer != answer || first.Evidence != learning.IELTSReadingEvidence || first.XPDelta != 0 || first.ProgressionApplied || first.NewConfidence != 0 || first.Level != 0 || first.ReviewAdded {
 				t.Fatal("incorrect evidence-only completion", first)
 			}
 			saved, err := s.GetLearningAttempt(ctx, u.ID, a.ID)
 			if err != nil || !reflect.DeepEqual(LearningResult(saved), &first) {
 				t.Fatal("result not persisted", err)
 			}
+			if activity == "ielts-listening" {
+				if first.Listening == nil || len(first.Listening.Transcripts) != 4 || len(first.Listening.Events) != 4 {
+					t.Fatal("missing immutable audio evidence", first.Listening)
+				}
+				first.Listening.Transcripts["listening-part-1"] = "mutated"
+				event := model.ListeningPlayback{RequestID: "after-completion", PartID: "listening-part-1", Rate: 1, Status: "requested"}
+				if _, err = s.RecordListeningPlayback(ctx, u.ID, a.ID, a.ContentVersion, a.RulesVersion, event); !errors.Is(err, ErrAttemptConflict) {
+					t.Fatal("audio mutated after completion", err)
+				}
+			}
 			first.IELTS.Answers[0].Correct = false
 			saved.Snapshot.IELTS.Result.Band = 99
 			retry, err := readStore.SubmitLearningAttempt(ctx, u.ID, a.ID, answer, versions)
-			if err != nil || !retry.IELTS.Answers[0].Correct || retry.IELTS.Band == 99 {
+			if err != nil || !retry.IELTS.Answers[0].Correct || retry.IELTS.Band == 99 || retry.Listening != nil && retry.Listening.Transcripts["listening-part-1"] == "mutated" {
 				t.Fatal("result alias changed receipt", err)
 			}
 			if _, err = s.SubmitLearningAttempt(ctx, u.ID, a.ID, string(raw), versions); !errors.Is(err, ErrAttemptConflict) {
@@ -178,7 +227,7 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 			if err != nil || len(history) != 2 {
 				t.Fatal("duplicate/missing history", history, err)
 			}
-			if history[0].AttemptID != a.ID || history[0].Legacy || history[0].Evidence != learning.IELTSReadingEvidence || history[0].ContentVersion != a.ContentVersion || history[0].RulesVersion != a.RulesVersion || history[0].MethodVersion != learning.IELTSReadingMethodVersion || history[0].Provider != learning.IELTSReadingProvider || history[1].ID != legacy.ID || !history[1].Legacy {
+			if history[0].Section != kind || history[0].AttemptID != a.ID || history[0].Legacy || history[0].Evidence != learning.IELTSReadingEvidence || history[0].ContentVersion != a.ContentVersion || history[0].RulesVersion != a.RulesVersion || history[0].MethodVersion != learning.IELTSReadingMethodVersion || history[0].Provider != learning.IELTSReadingProvider || history[1].ID != legacy.ID || !history[1].Legacy {
 				t.Fatal("history provenance", history)
 			}
 			*history[0].RawScore = 99
@@ -233,7 +282,7 @@ func TestIELTSReadingEvidenceMemoryAndPostgres(t *testing.T) {
 					t.Fatal(err)
 				}
 				var receipt ieltsReceipt
-				if err = json.Unmarshal(receiptJSON, &receipt); err != nil || receipt.ActualAnswer != answer || !reflect.DeepEqual(receipt.Result, retry.IELTS) {
+				if err = json.Unmarshal(receiptJSON, &receipt); err != nil || receipt.ActualAnswer != answer || !reflect.DeepEqual(receipt.Result, retry.IELTS) || !reflect.DeepEqual(receipt.Listening, retry.Listening) {
 					t.Fatal("raw receipt lost", err)
 				}
 				rollback := start("ielts-rollback")

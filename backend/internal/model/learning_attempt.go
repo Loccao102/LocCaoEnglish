@@ -11,14 +11,15 @@ type LearningAttemptStartInput struct {
 }
 
 type LearningAttemptPrompt struct {
-	Reading  *IELTSReadingPrompt `json:"reading,omitempty"`
-	Title    string              `json:"title,omitempty"`
-	Passage  string              `json:"passage,omitempty"`
-	Word     string              `json:"word,omitempty"`
-	Relation string              `json:"relation,omitempty"`
-	Question string              `json:"question,omitempty"`
-	Options  []string            `json:"options"`
-	Chunks   []SentenceChunk     `json:"chunks,omitempty"`
+	ListeningPaper *IELTSReadingPrompt `json:"listeningPaper,omitempty"`
+	Reading        *IELTSReadingPrompt `json:"reading,omitempty"`
+	Title          string              `json:"title,omitempty"`
+	Passage        string              `json:"passage,omitempty"`
+	Word           string              `json:"word,omitempty"`
+	Relation       string              `json:"relation,omitempty"`
+	Question       string              `json:"question,omitempty"`
+	Options        []string            `json:"options"`
+	Chunks         []SentenceChunk     `json:"chunks,omitempty"`
 }
 
 type SentenceChunk struct {
@@ -88,15 +89,17 @@ type DictationGrade struct {
 
 // Playback completion is reported by the browser, never proof that a human heard it.
 type ListeningPlayback struct {
+	PartID    string  `json:"partId,omitempty"`
 	RequestID string  `json:"requestId"`
 	Rate      float64 `json:"rate"`
 	Status    string  `json:"status"`
 	Provider  string  `json:"provider,omitempty"`
 }
 type ListeningEvidence struct {
-	Events     []ListeningPlayback `json:"events"`
-	Source     string              `json:"source"`
-	Transcript string              `json:"transcript,omitempty"`
+	Transcripts map[string]string   `json:"transcripts,omitempty"`
+	Events      []ListeningPlayback `json:"events"`
+	Source      string              `json:"source"`
+	Transcript  string              `json:"transcript,omitempty"`
 }
 
 type StoryDecision struct {

@@ -32,7 +32,7 @@ type IELTSReadingQuestion struct {
 type IELTSReadingSection struct {
 	ID        string                 `json:"id"`
 	Title     string                 `json:"title"`
-	Passage   string                 `json:"passage"`
+	Passage   string                 `json:"passage,omitempty"`
 	Questions []IELTSReadingQuestion `json:"questions"`
 }
 type IELTSReadingPrompt struct {

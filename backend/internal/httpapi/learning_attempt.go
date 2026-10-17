@@ -30,7 +30,7 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 	}
 	in.RequestID = strings.TrimSpace(in.RequestID)
 	in.Activity = strings.TrimSpace(in.Activity)
-	if in.Activity == "ielts-reading" && userID == "" {
+	if learning.IsIELTSObjective(in.Activity) && userID == "" {
 		problem(w, http.StatusUnauthorized, "sign in to save IELTS practice")
 		return
 	}
@@ -75,6 +75,21 @@ func (s *Server) learningAttemptStart(w http.ResponseWriter, r *http.Request) {
 
 	var skill, itemKey, contentVersion, rulesVersion, promptText, correctAnswer, feedback string
 	switch in.Activity {
+	case "ielts-listening":
+		if pack != learning.IELTSListeningPack || level != "B2" || len(in.ExcludeItemKeys) != 0 {
+			problem(w, 400, "IELTS Listening uses its fixed practice pack and B2 metadata")
+			return
+		}
+		paper, snapshot, transcripts, id, version, err := learning.NewIELTSListening()
+		if err != nil {
+			problem(w, 500, "could not open this listening practice; retry the same request")
+			return
+		}
+		skill, itemKey, contentVersion, rulesVersion = "Listening", id, version, learning.IELTSListeningRulesVersion
+		promptText, feedback = paper.Title, "Your listening selections have been saved. Playback is reported by your browser; this practice estimate awards no XP."
+		publicPrompt = model.LearningAttemptPrompt{Title: paper.Title, Options: []string{}, ListeningPaper: &paper}
+		ieltsSnapshot = &snapshot
+		listeningSnapshot = &store.ListeningSnapshot{Transcripts: transcripts, Events: []model.ListeningPlayback{}}
 	case "ielts-reading":
 		if pack != learning.IELTSReadingPack || level != "B2" || len(in.ExcludeItemKeys) != 0 {
 			problem(w, 400, "IELTS Academic Reading uses its fixed practice pack and B2 metadata")
@@ -262,6 +277,7 @@ func learningAttemptResponse(rec store.LearningAttemptRecord, requestedPack stri
 		base.Mode = "guest"
 	}
 	return base, base.Pack == requestedPack && (len(base.Prompt.Options) > 0 ||
+		base.Activity == "ielts-listening" && base.RulesVersion == learning.IELTSListeningRulesVersion && base.Prompt.ListeningPaper != nil && rec.Snapshot.IELTS != nil && rec.Snapshot.Listening != nil ||
 		base.Activity == "ielts-reading" && base.RulesVersion == learning.IELTSReadingRulesVersion && base.Prompt.Reading != nil && rec.Snapshot.IELTS != nil ||
 		base.Activity == "shadowing" && base.RulesVersion == learning.ShadowingRulesVersion && base.Prompt.Question != "" ||
 		base.Activity == "dictation" && base.RulesVersion == learning.DictationRulesVersion && rec.Snapshot.Listening != nil ||
