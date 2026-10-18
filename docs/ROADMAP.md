@@ -384,7 +384,9 @@ và [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Không deploy production. Toàn C
 vẫn `in_progress`; Listening playback evidence, acoustic/Writing receipts và
 overall bốn kỹ năng chưa được nghiệm thu trong lát cắt Reading.
 
-### Lát cắt tiếp theo — IELTS Listening (`planned`)
+### Lát cắt đang xác minh — IELTS Listening (`in_review`, 2026-10-16)
+
+Owner/task: Codex, branch `codex/core004-ielts-listening`, nền main `372bb9a`.
 
 Ưu tiên sau Reading: thay tally do client tính tại `/ielts/listening` bằng lựa
 chọn gốc do server chấm, dùng shared attempts/recovery. Không thêm bộ đề/game
@@ -408,7 +410,10 @@ Phạm vi và điều kiện nghiệm thu:
   mobile 390×551/844; CI sạch trên head cuối. Listening band vẫn là ước lượng
   luyện tập, không tự tạo overall bốn kỹ năng.
 
-Đây là công việc `planned`, chưa phải chức năng đã triển khai hay nghiệm thu.
+Đã triển khai adapter `VerifiedIeltsPaper` dùng chung Reading/Listening, catalog
+Listening phía server, journal theo `partId`, chặn submit thiếu phần nghe và đóng
+tally/legacy XP bypass. Đang xác minh browser, race/PostgreSQL và CI; chưa nghiệm
+thu. Contract ở [ADR 007](decisions/007-ielts-listening-evidence.md).
 
 ### Tiêu chí hoàn tất toàn CORE-004
 

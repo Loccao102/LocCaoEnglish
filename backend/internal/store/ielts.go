@@ -71,6 +71,7 @@ func (s *Store) SaveIELTSAttempt(ctx context.Context, userID string, a model.IEL
 }
 
 type ieltsReceipt struct {
+	Listening      *model.ListeningEvidence  `json:"listening,omitempty"`
 	Evidence       string                    `json:"evidence"`
 	ContentVersion string                    `json:"contentVersion,omitempty"`
 	RulesVersion   string                    `json:"rulesVersion,omitempty"`

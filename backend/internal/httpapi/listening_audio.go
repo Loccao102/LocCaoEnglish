@@ -61,13 +61,17 @@ func (s *Server) listeningAudio(w http.ResponseWriter, r *http.Request) {
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 		defer cancel()
-		err = s.ai.Post(ctx, "/v1/tts/synthesize", map[string]any{"text": rec.Snapshot.Listening.Transcript, "locale": "en-US", "voice": "en-US-JennyNeural", "rate": input.Rate}, &generated)
+		transcript := rec.Snapshot.Listening.Transcript
+		if input.PartID != "" {
+			transcript = rec.Snapshot.Listening.Transcripts[input.PartID]
+		}
+		err = s.ai.Post(ctx, "/v1/tts/synthesize", map[string]any{"text": transcript, "locale": "en-US", "voice": "en-US-JennyNeural", "rate": input.Rate}, &generated)
 		if err == nil && generated.Provider == "azure-speech-neural-tts" && generated.MimeType == "audio/mpeg" && generated.AudioBase64 != "" {
 			output.Audio = map[string]any{"provider": generated.Provider, "audioBase64": generated.AudioBase64, "mimeType": generated.MimeType, "rate": input.Rate}
 		} else {
 			// Browser synthesis requires text. It is deliberate assistance, not secret
 			// assessment content; no answer key or grading feedback is returned here.
-			output.Audio = map[string]any{"provider": "browser-speech-synthesis", "text": rec.Snapshot.Listening.Transcript, "rate": input.Rate}
+			output.Audio = map[string]any{"provider": "browser-speech-synthesis", "text": transcript, "rate": input.Rate}
 		}
 	}
 	write(w, 200, output)

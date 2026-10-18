@@ -1,1 +1,5 @@
-import IeltsObjectiveMock from"@/components/IeltsObjectiveMock";import{listeningSections}from"@/data/ieltsMocks";export default function Page(){return <div className="page-wrap ielts-test-page"><IeltsObjectiveMock kind="listening" sections={listeningSections}/></div>}
+import VerifiedIeltsPaper from "@/components/learning/VerifiedIeltsPaper";
+
+export default function Page() {
+  return <div className="page-wrap ielts-test-page"><VerifiedIeltsPaper kind="listening" /></div>;
+}

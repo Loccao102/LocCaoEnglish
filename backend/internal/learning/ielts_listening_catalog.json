@@ -1,0 +1,475 @@
+{
+  "id": "ielts-listening-paper",
+  "contentVersion": "2026-10-16.1",
+  "title": "Listen, reason, and review",
+  "sections": [
+    {
+      "id": "listening-part-1",
+      "title": "Part 1 · Community course booking",
+      "transcript": "Receptionist: Good morning, Riverside Community Centre. Caller: Hi, I’m calling about the weekend photography course. Receptionist: The beginner course starts on Saturday the 18th at 9:30 in Studio B. It runs for four Saturdays and finishes at noon each day. The standard fee is 80 pounds, but students pay 60 with valid identification. You need to bring your own camera, though tripods can be borrowed. On the first day, please arrive fifteen minutes early because the tutor, Maya Chen, checks everyone’s equipment. There are twelve places in the group. At the moment nine are booked. If you drive, use the east car park; the west entrance is closed for repairs. Caller: Can I pay online? Receptionist: Yes. We accept card payment through the website, but not bank transfer. The confirmation email includes a map and a short equipment checklist.",
+      "questions": [
+        {
+          "id": "L1",
+          "prompt": "On what date does the beginner course start?",
+          "answer": "Saturday the 18th",
+          "options": [
+            "Saturday the 11th",
+            "Saturday the 18th",
+            "Sunday the 18th",
+            "Monday the 20th"
+          ]
+        },
+        {
+          "id": "L2",
+          "prompt": "What time does each class begin?",
+          "answer": "9:30",
+          "options": [
+            "9:00",
+            "9:15",
+            "9:30",
+            "10:00"
+          ]
+        },
+        {
+          "id": "L3",
+          "prompt": "Where is the course held?",
+          "answer": "Studio B",
+          "options": [
+            "Studio A",
+            "Studio B",
+            "Room 12",
+            "The west hall"
+          ]
+        },
+        {
+          "id": "L4",
+          "prompt": "How many Saturdays does the course run?",
+          "answer": "Four",
+          "options": [
+            "Three",
+            "Four",
+            "Five",
+            "Six"
+          ]
+        },
+        {
+          "id": "L5",
+          "prompt": "What is the student fee?",
+          "answer": "£60",
+          "options": [
+            "£40",
+            "£60",
+            "£80",
+            "£90"
+          ]
+        },
+        {
+          "id": "L6",
+          "prompt": "What must learners bring themselves?",
+          "answer": "A camera",
+          "options": [
+            "A tripod",
+            "A camera",
+            "A laptop",
+            "Printed photographs"
+          ]
+        },
+        {
+          "id": "L7",
+          "prompt": "Who checks equipment on the first day?",
+          "answer": "Maya Chen",
+          "options": [
+            "The receptionist",
+            "Maya Chen",
+            "A technician",
+            "The centre manager"
+          ]
+        },
+        {
+          "id": "L8",
+          "prompt": "How many course places are still available?",
+          "answer": "Three",
+          "options": [
+            "Two",
+            "Three",
+            "Nine",
+            "Twelve"
+          ]
+        },
+        {
+          "id": "L9",
+          "prompt": "Which car park should drivers use?",
+          "answer": "The east car park",
+          "options": [
+            "The north car park",
+            "The east car park",
+            "The west car park",
+            "Street parking"
+          ]
+        },
+        {
+          "id": "L10",
+          "prompt": "Which payment method is NOT accepted?",
+          "answer": "Bank transfer",
+          "options": [
+            "Online card",
+            "Bank transfer",
+            "Credit card",
+            "Debit card"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listening-part-2",
+      "title": "Part 2 · Museum visitor briefing",
+      "transcript": "Welcome to the North Harbour Museum. The ground floor contains our permanent maritime gallery, while the temporary exhibition, Cities Under Water, is on the second floor. The main lift is beside the information desk. Today, however, it is being serviced between one and three o’clock, so visitors who need step-free access should use the smaller lift near the café. The guided harbour tour leaves the front entrance at 2:15 and lasts about fifty minutes. Tickets cost six pounds in addition to museum admission. Families may prefer the free children’s workshop at 3:30 in the education room; booking is essential because it is limited to sixteen children. Photography is allowed in most galleries, but flash and tripods are prohibited. The museum café closes at 4:45, thirty minutes before the galleries. If you have large bags, free lockers are available next to the toilets on the lower ground floor. Finally, the fire alarm is tested every Wednesday at eleven. If you hear a short ten-second alarm at that time, no evacuation is required.",
+      "questions": [
+        {
+          "id": "L11",
+          "prompt": "Where is the temporary exhibition?",
+          "answer": "Second floor",
+          "options": [
+            "Ground floor",
+            "First floor",
+            "Second floor",
+            "Lower ground floor"
+          ]
+        },
+        {
+          "id": "L12",
+          "prompt": "When is the main lift being serviced?",
+          "answer": "1:00–3:00",
+          "options": [
+            "10:00–12:00",
+            "1:00–3:00",
+            "2:00–4:00",
+            "All day"
+          ]
+        },
+        {
+          "id": "L13",
+          "prompt": "Where is the alternative lift?",
+          "answer": "Near the café",
+          "options": [
+            "Near the shop",
+            "Near the café",
+            "At the front entrance",
+            "Inside the maritime gallery"
+          ]
+        },
+        {
+          "id": "L14",
+          "prompt": "When does the guided harbour tour leave?",
+          "answer": "2:15",
+          "options": [
+            "1:45",
+            "2:00",
+            "2:15",
+            "2:50"
+          ]
+        },
+        {
+          "id": "L15",
+          "prompt": "How long is the harbour tour?",
+          "answer": "About 50 minutes",
+          "options": [
+            "About 30 minutes",
+            "About 40 minutes",
+            "About 50 minutes",
+            "About 90 minutes"
+          ]
+        },
+        {
+          "id": "L16",
+          "prompt": "What extra fee is charged for the tour?",
+          "answer": "£6",
+          "options": [
+            "£4",
+            "£6",
+            "£10",
+            "No extra fee"
+          ]
+        },
+        {
+          "id": "L17",
+          "prompt": "What is required for the children’s workshop?",
+          "answer": "Advance booking",
+          "options": [
+            "A museum membership",
+            "Advance booking",
+            "A separate entrance ticket",
+            "A parent in the room"
+          ]
+        },
+        {
+          "id": "L18",
+          "prompt": "What photography equipment is prohibited?",
+          "answer": "Flash and tripods",
+          "options": [
+            "Cameras",
+            "Phones",
+            "Flash and tripods",
+            "Zoom lenses"
+          ]
+        },
+        {
+          "id": "L19",
+          "prompt": "When does the café close?",
+          "answer": "4:45",
+          "options": [
+            "4:15",
+            "4:30",
+            "4:45",
+            "5:15"
+          ]
+        },
+        {
+          "id": "L20",
+          "prompt": "Where are the free lockers?",
+          "answer": "Lower ground floor",
+          "options": [
+            "Ground floor",
+            "First floor",
+            "Second floor",
+            "Lower ground floor"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listening-part-3",
+      "title": "Part 3 · Students planning a research project",
+      "transcript": "Nora: We need to narrow our project on urban heat. I originally wanted to compare five neighbourhoods, but Dr Patel said that would give us too little data from each site. Leo: So three? Nora: He recommended two contrasting areas: the dense commercial centre and the riverside residential district. Leo: That makes the travel easier. Are we still measuring air temperature, surface temperature and humidity? Nora: We’ll drop humidity because the sensors available from the department are unreliable. We’ll measure air temperature with digital loggers every ten minutes, then use the infrared camera for pavement and wall surfaces. Leo: What about interviews? Nora: Only a short resident questionnaire, maybe six questions. Dr Patel said not to ask people whether climate change is ‘real’; that would distract from local experience. We should ask about shade, sleep and use of public spaces during hot weather. Leo: Sampling times? Nora: Two weekdays and one Saturday. Morning readings at eight, afternoon at three, and evening at nine. Leo: The library database has satellite images from 2018 onward. Nora: Great. Let’s use 2020 and 2025 so we can compare land-cover change. Leo: And our first draft? Nora: Literature review by Friday the 7th; methods section a week later.",
+      "questions": [
+        {
+          "id": "L21",
+          "prompt": "How many areas will the students compare?",
+          "answer": "Two",
+          "options": [
+            "Two",
+            "Three",
+            "Four",
+            "Five"
+          ]
+        },
+        {
+          "id": "L22",
+          "prompt": "Which two areas were selected?",
+          "answer": "Commercial centre and riverside residential district",
+          "options": [
+            "Two residential suburbs",
+            "Commercial centre and industrial zone",
+            "Commercial centre and riverside residential district",
+            "Riverside and university campus"
+          ]
+        },
+        {
+          "id": "L23",
+          "prompt": "Which measurement will they drop?",
+          "answer": "Humidity",
+          "options": [
+            "Air temperature",
+            "Surface temperature",
+            "Humidity",
+            "Land cover"
+          ]
+        },
+        {
+          "id": "L24",
+          "prompt": "How often will digital loggers record?",
+          "answer": "Every 10 minutes",
+          "options": [
+            "Every 5 minutes",
+            "Every 10 minutes",
+            "Every 30 minutes",
+            "Once an hour"
+          ]
+        },
+        {
+          "id": "L25",
+          "prompt": "What will the infrared camera measure?",
+          "answer": "Pavement and wall surface temperature",
+          "options": [
+            "Air temperature",
+            "Humidity",
+            "Pavement and wall surface temperature",
+            "Traffic volume"
+          ]
+        },
+        {
+          "id": "L26",
+          "prompt": "How long will the resident questionnaire be?",
+          "answer": "About six questions",
+          "options": [
+            "Three questions",
+            "About six questions",
+            "Ten questions",
+            "Twenty questions"
+          ]
+        },
+        {
+          "id": "L27",
+          "prompt": "Which topic should the questionnaire avoid?",
+          "answer": "Whether climate change is real",
+          "options": [
+            "Sleep during heat",
+            "Access to shade",
+            "Use of public space",
+            "Whether climate change is real"
+          ]
+        },
+        {
+          "id": "L28",
+          "prompt": "On how many days will field sampling occur?",
+          "answer": "Three",
+          "options": [
+            "Two",
+            "Three",
+            "Four",
+            "Seven"
+          ]
+        },
+        {
+          "id": "L29",
+          "prompt": "Which satellite-image years will be compared?",
+          "answer": "2020 and 2025",
+          "options": [
+            "2018 and 2020",
+            "2018 and 2025",
+            "2020 and 2025",
+            "2024 and 2025"
+          ]
+        },
+        {
+          "id": "L30",
+          "prompt": "What is due on Friday the 7th?",
+          "answer": "The literature review",
+          "options": [
+            "The methods section",
+            "The questionnaire",
+            "The literature review",
+            "The final report"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listening-part-4",
+      "title": "Part 4 · Lecture on sleep and memory",
+      "transcript": "Today we will examine why sleep matters for memory rather than simply for rest. During waking hours, the brain encodes new information, but those memories remain relatively fragile. Sleep supports consolidation: a set of processes through which newly formed memories become more stable and better integrated with existing knowledge. Researchers often distinguish declarative memories, such as facts and events, from procedural memories, such as motor skills. Slow-wave sleep appears particularly important for strengthening many declarative memories. Rapid eye movement, or REM sleep, has been linked to emotional memory and some forms of skill learning, although the evidence is more complex than popular summaries suggest. Timing also matters. A short nap after learning can improve later recall, but a nap cannot fully compensate for repeated nights of inadequate sleep. One common experimental method asks participants to learn paired words in the evening. One group sleeps normally; another remains awake for a controlled period. Their recall is then tested under matched conditions. Modern studies also use electroencephalography to relate patterns of brain activity, including sleep spindles, to memory performance. Importantly, sleep does not preserve every detail. Consolidation can make memories more general, helping people extract patterns. That can support learning, but it may also contribute to memory distortions. For students, the practical conclusion is not that studying immediately before sleep is magical. The stronger evidence supports regular sufficient sleep combined with spaced learning.",
+      "questions": [
+        {
+          "id": "L31",
+          "prompt": "What happens to newly encoded memories while awake?",
+          "answer": "They remain relatively fragile",
+          "options": [
+            "They become permanent immediately",
+            "They are deleted during sleep",
+            "They remain relatively fragile",
+            "They change into motor skills"
+          ]
+        },
+        {
+          "id": "L32",
+          "prompt": "What term describes stabilising new memories?",
+          "answer": "Consolidation",
+          "options": [
+            "Encoding",
+            "Consolidation",
+            "Interference",
+            "Retrieval"
+          ]
+        },
+        {
+          "id": "L33",
+          "prompt": "Declarative memories mainly include what?",
+          "answer": "Facts and events",
+          "options": [
+            "Motor movements only",
+            "Emotions only",
+            "Facts and events",
+            "Sleep patterns"
+          ]
+        },
+        {
+          "id": "L34",
+          "prompt": "Which sleep stage is highlighted for many declarative memories?",
+          "answer": "Slow-wave sleep",
+          "options": [
+            "Light sleep",
+            "Slow-wave sleep",
+            "REM only",
+            "Waking rest"
+          ]
+        },
+        {
+          "id": "L35",
+          "prompt": "REM sleep has been linked to what?",
+          "answer": "Emotional memory and some skill learning",
+          "options": [
+            "Only factual memory",
+            "Emotional memory and some skill learning",
+            "Forgetting vocabulary",
+            "No memory processes"
+          ]
+        },
+        {
+          "id": "L36",
+          "prompt": "What can a short nap after learning do?",
+          "answer": "Improve later recall",
+          "options": [
+            "Replace all night sleep",
+            "Improve later recall",
+            "Eliminate the need for review",
+            "Prevent every memory distortion"
+          ]
+        },
+        {
+          "id": "L37",
+          "prompt": "What does the paired-word experiment compare?",
+          "answer": "Sleep and controlled wakefulness",
+          "options": [
+            "Two types of food",
+            "Different classroom sizes",
+            "Sleep and controlled wakefulness",
+            "Reading and listening"
+          ]
+        },
+        {
+          "id": "L38",
+          "prompt": "What technology records brain activity in many sleep studies?",
+          "answer": "Electroencephalography",
+          "options": [
+            "Ultrasound",
+            "Electroencephalography",
+            "X-ray",
+            "Thermal imaging"
+          ]
+        },
+        {
+          "id": "L39",
+          "prompt": "What can consolidation do besides preserve detail?",
+          "answer": "Help extract general patterns",
+          "options": [
+            "Make all memories perfectly exact",
+            "Help extract general patterns",
+            "Remove emotional content",
+            "Stop skill learning"
+          ]
+        },
+        {
+          "id": "L40",
+          "prompt": "What study habit does the lecture support most strongly?",
+          "answer": "Regular sleep plus spaced learning",
+          "options": [
+            "Studying only just before sleep",
+            "All-night revision",
+            "Regular sleep plus spaced learning",
+            "Replacing sleep with naps"
+          ]
+        }
+      ]
+    }
+  ]
+}

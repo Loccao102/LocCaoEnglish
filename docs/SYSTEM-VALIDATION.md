@@ -827,3 +827,68 @@ remain outside this acceptance. No production deployment.
 
 Documentation-only follow-up validation: 117 internal file links resolve and
 `git diff --check` passes. No app rebuild is needed for these three documentation files.
+
+## CORE-004 — IELTS Listening selections and part playback (2026-10-16)
+
+Branch `codex/core004-ielts-listening`, base main `372bb9a`. This replaces the
+remaining client-tally paper with signed server-issued Listening attempts and
+reuses Reading's ordered selections, grader, exact retries and atomic receipts.
+The original catalog now lives on the backend. Active prompts omit transcripts
+and keys; browser speech fallback explicitly receives text as assistance.
+Four part-specific completed playback reports are required to save. The result
+freezes the events, original selections, wrong/blank verdicts and transcripts,
+without XP, confidence, review or daily-claim writes. See ADR 007 and API.md.
+
+Local verification before PR, on the implementation working tree:
+
+- `npx tsc --noEmit`, production `npm run build`: passed, 58 routes.
+- `go test ./...`, `go vet ./...`: passed in memory mode. Expanded HTTP fixtures
+  use separate source IPs to avoid consuming neighboring fixtures' default
+  httptest limiter budget; production limits are unchanged.
+- Store coverage now runs both Reading/Listening invariants, plus Listening
+  requested/failed/completed gating, request part/rate identity, concurrent final
+  playback/submit, frozen receipts, 128-event boundary and old client-reported
+  history preservation. PostgreSQL/race execution remains a CI requirement:
+  local Docker daemon is unavailable; no user database was reset or used.
+- `npm run test:game`: 50 passed. Asset checks: 41 unique assets, 45 GLBs and
+  24 animated companions. Assets and game rules are unchanged.
+- First Listening browser run: 6 passed (2.2m), real local API/memory store and
+  production build. Only browser media events are simulated. Covers all 40
+  selections, audio failure/hide/long completion, exact audio/answer recovery,
+  storage failures, account switch and mobile keyboard controls. The additional
+  late audio-preparation response case and shared Reading/Dictation/Listen & Pick
+  regression are pending final verification, together with full CI.
+- Viewed `.cache/ielts-listening-551.png` and
+  `.cache/ielts-listening-feedback-844.png`: readable 18px choices, large controls,
+  result provenance and no horizontal overflow at 390px. Both viewport heights
+  are covered by browser assertions; artifacts stay ignored locally.
+- No Listening catalog identifiers were found in the built static client chunks.
+  Documentation check: 121 internal links resolve. No new database migration:
+  migration 018 and the additive JSON snapshot/receipt remain authoritative.
+
+The old Listening tally/audio browser case is replaced by the new paper cases,
+retaining its failure, hide, long-playback, choice retention and mobile checks.
+Old tally endpoints now reject writes, while existing client-reported history
+keeps its provenance. No tests are skipped and `failOnFlakyTests` is unchanged.
+Full CI, final review and merge are pending; this slice is not yet accepted.
+No production deployment or four-skill overall claim.
+
+CI follow-up, 2026-10-17: [CI 141](https://github.com/Loccao102/LocCaoEnglish/actions/runs/38832536352)
+on `52c9b30` passed frontend, backend (dedicated PostgreSQL/race/vet), AI service,
+compose and integration. Browser job `116754581460` reported **135 passed and
+1 flaky (20.0m)**, so the strict gate correctly failed. All seven new Listening
+cases passed, including the late audio-preparation response account boundary.
+The unrelated Tea Time short-screen case missed the first Tea ingredient and
+left Start steeping disabled; its retry passed. Failure artifact `12018622133`
+shows the recipe requesting Tea → Honey → Mint but feedback only Honey → Mint.
+
+The Tea test previously sampled a button's bounds and clicked raw coordinates
+while opening the recipe could move the responsive playfield. Replace that
+helper with Playwright's normal locator click, which checks stability and hit
+target, and assert the exact accumulated ingredients after every selection.
+This retains real pointer input, frozen game-clock timing, three-customer scoring,
+pause/reload/oversteep/save and mobile geometry checks. No forced click, engine
+shortcut, retry loop or relaxed assertion. Runtime rules are unchanged.
+Local baseline ran 10 short-screen repetitions successfully (1.2m), confirming
+the failure is intermittent; the revised full Tea file passed 2/2 (9.5s).
+Further repeated validation and a fresh complete CI run are pending acceptance.

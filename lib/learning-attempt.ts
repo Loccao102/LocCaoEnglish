@@ -1,18 +1,18 @@
 import {apiFetch} from "./api";
 
 export type CEFRLevel="A1"|"A2"|"B1"|"B2"|"C1"|"C2";
-export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory"|"sentence-builder"|"word-graph"|"reading-race"|"story-choice"|"listen-pick"|"dictation"|"shadowing"|"ielts-reading";
-export type IELTSReadingPrompt={title:string;sections:{id:string;title:string;passage:string;questions:{id:string;prompt:string;options:{id:string;text:string}[]}[]}[]};
-export type IELTSReadingResult={section:"reading";testType:"academic";rawScore:number;maxScore:number;band:number;percentage:number;method:string;methodVersion:string;provider:string;disclaimer:string;answers:{questionId:string;optionId:string;correctOptionId:string;correct:boolean}[]};
-export type ListeningPlayback={requestId:string;rate:1|0.72;status:"requested"|"completed"|"failed";provider?:"browser-speech-synthesis"|"azure-speech-neural-tts"};
-export type ListeningEvidence={events:ListeningPlayback[];source:"client-reported-playback";transcript?:string};
+export type VerifiedLearningActivity="word-link"|"grammar-repair"|"collocation-factory"|"sentence-builder"|"word-graph"|"reading-race"|"story-choice"|"listen-pick"|"dictation"|"shadowing"|"ielts-reading"|"ielts-listening";
+export type IELTSReadingPrompt={title:string;sections:{id:string;title:string;passage?:string;questions:{id:string;prompt:string;options:{id:string;text:string}[]}[]}[]};
+export type IELTSReadingResult={section:"reading"|"listening";testType:"academic";rawScore:number;maxScore:number;band:number;percentage:number;method:string;methodVersion:string;provider:string;disclaimer:string;answers:{questionId:string;optionId:string;correctOptionId:string;correct:boolean}[]};
+export type ListeningPlayback={requestId:string;partId?:string;rate:1|0.72;status:"requested"|"completed"|"failed";provider?:"browser-speech-synthesis"|"azure-speech-neural-tts"};
+export type ListeningEvidence={events:ListeningPlayback[];source:"client-reported-playback";transcript?:string;transcripts?:Record<string,string>};
 export type ListeningAudio={provider:"browser-speech-synthesis"|"azure-speech-neural-tts";rate:number;text?:string;audioBase64?:string;mimeType?:string};
 export type LearningAttempt={
  listening?:ListeningEvidence;
   story?:{runId:string;step:number;history:{scene:string;answer:string;consequence:string;xp:number}[]};
   attemptId:string;activity:VerifiedLearningActivity;pack:string;itemKey:string;cefrLevel:CEFRLevel;
   contentVersion:string;rulesVersion:string;status:string;
-  prompt:{word?:string;relation?:string;question?:string;title?:string;passage?:string;options:string[];chunks?:{id:string;text:string}[];reading?:IELTSReadingPrompt};
+  prompt:{word?:string;relation?:string;question?:string;title?:string;passage?:string;options:string[];chunks?:{id:string;text:string}[];reading?:IELTSReadingPrompt;listeningPaper?:IELTSReadingPrompt};
   mode:"guest"|"account";expiresAt:string;result?:LearningAttemptResult;
 };
 export type LearningAttemptResult={

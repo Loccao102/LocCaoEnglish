@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"reflect"
 	"strings"
@@ -17,7 +18,16 @@ import (
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/store"
 )
 
-func TestIELTSReadingHTTPContract(t *testing.T) {
+func TestIELTSObjectiveHTTPContract(t *testing.T) {
+	for _, activity := range []string{"ielts-reading", "ielts-listening"} {
+		t.Run(activity, func(t *testing.T) { testIELTSHTTP(t, activity) })
+	}
+}
+func testIELTSHTTP(t *testing.T, activity string) {
+	pack := learning.IELTSReadingPack
+	if activity == "ielts-listening" {
+		pack = learning.IELTSListeningPack
+	}
 	ctx := context.Background()
 	st, err := store.New("")
 	if err != nil {
@@ -41,6 +51,12 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 	call := func(method, path string, body any, bearer string) *httptest.ResponseRecorder {
 		raw, _ := json.Marshal(body)
 		r := httptest.NewRequest(method, path, strings.NewReader(string(raw)))
+		// Each fixture represents its own client; avoid consuming neighboring
+		// HTTP suites' shared default httptest source-IP budget.
+		r.RemoteAddr = "192.0.2.18:1234"
+		if activity == "ielts-listening" {
+			r.RemoteAddr = "192.0.2.19:1234"
+		}
 		if bearer != "" {
 			r.Header.Set("Authorization", "Bearer "+bearer)
 		}
@@ -48,7 +64,7 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 		handler.ServeHTTP(w, r)
 		return w
 	}
-	input := model.LearningAttemptStartInput{RequestID: "92345678-1234-4123-8123-123456789012", Activity: "ielts-reading", Pack: learning.IELTSReadingPack, CEFRLevel: "B2"}
+	input := model.LearningAttemptStartInput{RequestID: "92345678-1234-4123-8123-123456789012", Activity: activity, Pack: pack, CEFRLevel: "B2"}
 	base := "/v1/learning/attempts"
 	for _, path := range []string{"/v1/ielts/history", "/v1/ielts/band", "/v1/ielts/objective-score"} {
 		method := "POST"
@@ -82,7 +98,11 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 	if err = json.Unmarshal(created.Body.Bytes(), &a); err != nil {
 		t.Fatal(err)
 	}
-	if a.Mode != "account" || a.Prompt.Reading == nil || len(a.Prompt.Reading.Sections) != 3 || a.Result != nil {
+	paper, parts := a.Prompt.Reading, 3
+	if activity == "ielts-listening" {
+		paper, parts = a.Prompt.ListeningPaper, 4
+	}
+	if a.Mode != "account" || paper == nil || len(paper.Sections) != parts || a.Result != nil {
 		t.Fatal("invalid issued reading")
 	}
 	if r := call("POST", base, input, token); r.Code != 200 || r.Body.String() != created.Body.String() {
@@ -101,7 +121,7 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 		t.Fatal(err)
 	}
 	selections := [][]string{}
-	for _, section := range a.Prompt.Reading.Sections {
+	for _, section := range paper.Sections {
 		for _, q := range section.Questions {
 			selections = append(selections, []string{q.ID, rec.Snapshot.IELTS.CorrectOptions[q.ID]})
 		}
@@ -122,7 +142,7 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 	if r := call("POST", submit, payload, otherToken); r.Code != 404 {
 		t.Fatal("foreign submit", r.Code)
 	}
-	for _, activity := range []string{"ielts-reading", " IELTS-READING-calibration "} {
+	for _, activity := range []string{"ielts-reading", " IELTS-READING-calibration ", "ielts-listening", " IELTS-LISTENING-calibration "} {
 		if r := call("POST", "/v1/attempts", model.AttemptInput{Skill: "Reading", Activity: activity, ItemKey: "test", Accuracy: 1}, token); r.Code != 409 {
 			t.Fatal("legacy XP bypass", r.Code)
 		}
@@ -132,6 +152,59 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 	}
 	if r := call("POST", "/v1/ielts/band", map[string]any{"section": "speaking", "band": 9, "source": "server-objective"}, token); r.Code != 409 {
 		t.Fatal("client band accepted", r.Code)
+	}
+	if activity == "ielts-listening" {
+		if r := call("POST", submit, payload, token); r.Code != 409 {
+			t.Fatal("unheard paper submitted", r.Code)
+		}
+		audioPath := base + "/" + a.AttemptID + "/audio"
+		for i, part := range paper.Sections {
+			event := map[string]any{"requestId": fmt.Sprintf("a2345678-1234-4123-8123-%012d", i+1), "partId": part.ID, "rate": 1, "status": "requested", "contentVersion": a.ContentVersion, "rulesVersion": a.RulesVersion}
+			if i == 0 {
+				event["partId"] = "foreign-part"
+				if r := call("POST", audioPath, event, token); r.Code != 400 {
+					t.Fatal("unknown part accepted", r.Code)
+				}
+				event["partId"] = part.ID
+				if r := call("POST", audioPath, event, otherToken); r.Code != 404 {
+					t.Fatal("foreign audio", r.Code)
+				}
+				event["contentVersion"] = "old"
+				if r := call("POST", audioPath, event, token); r.Code != 400 {
+					t.Fatal("audio version", r.Code)
+				}
+				event["contentVersion"] = a.ContentVersion
+			}
+			prepared := call("POST", audioPath, event, token)
+			if prepared.Code != 200 {
+				t.Fatal("prepare", prepared.Code, prepared.Body.String())
+			}
+			var playback struct {
+				Attempt model.LearningAttemptStart
+				Audio   struct{ Provider, Text string }
+			}
+			if err = json.Unmarshal(prepared.Body.Bytes(), &playback); err != nil || playback.Audio.Provider != "browser-speech-synthesis" || playback.Audio.Text != rec.Snapshot.Listening.Transcripts[part.ID] || playback.Attempt.Listening.Transcripts != nil {
+				t.Fatal("wrong part/fallback/public transcript", err)
+			}
+			event["partId"] = paper.Sections[(i+1)%4].ID
+			if r := call("POST", audioPath, event, token); r.Code != 409 {
+				t.Fatal("audio ID reassigned to another part", r.Code)
+			}
+			event["partId"] = part.ID
+			event["status"], event["provider"] = "completed", "browser-speech-synthesis"
+			done := call("POST", audioPath, event, token)
+			if done.Code != 200 {
+				t.Fatal("completion", done.Code)
+			}
+			if r := call("POST", audioPath, event, token); r.Code != 200 || r.Body.String() != done.Body.String() {
+				t.Fatal("audio retry changed evidence", r.Code)
+			}
+			if i < 3 {
+				if r := call("POST", submit, payload, token); r.Code != 409 {
+					t.Fatal("partial listening accepted", r.Code)
+				}
+			}
+		}
 	}
 	response := call("POST", submit, payload, token)
 	if response.Code != 200 {
@@ -157,11 +230,11 @@ func TestIELTSReadingHTTPContract(t *testing.T) {
 	if err = json.Unmarshal(r.Body.Bytes(), &resumed); err != nil || !reflect.DeepEqual(resumed.Result, &result) {
 		t.Fatal("GET lost verdict", err)
 	}
-	if r := call("POST", "/v1/ielts/objective-score", map[string]any{"section": "listening", "testType": "academic", "correct": 20, "total": 40}, token); r.Code != 200 {
-		t.Fatal("reported listening rejected", r.Code, r.Body.String())
+	if r := call("POST", "/v1/ielts/objective-score", map[string]any{"section": "listening", "testType": "academic", "correct": 20, "total": 40}, token); r.Code != 409 {
+		t.Fatal("reported listening tally accepted", r.Code, r.Body.String())
 	}
 	history, err := st.IELTSHistory(ctx, u.ID, 30)
-	if err != nil || len(history) != 2 || history[0].Evidence != "client-reported" || history[0].Legacy || history[1].AttemptID != a.AttemptID || history[1].Evidence != learning.IELTSReadingEvidence {
+	if err != nil || len(history) != 1 || history[0].AttemptID != a.AttemptID || history[0].Evidence != learning.IELTSReadingEvidence {
 		t.Fatal("history provenance", history, err)
 	}
 	if r := call("GET", "/v1/ielts/history", nil, otherToken); r.Code != 200 || !strings.Contains(r.Body.String(), `"items":[]`) {
