@@ -24,19 +24,35 @@ that all learning activities received a full manual playthrough in this pass.
 | Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
 | Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
-| IELTS Lab | Reading uses server-issued questions, actual selections and atomic evidence-only receipts; Listening now implements the same contract plus per-part audio reports, with acceptance pending; Writing/Speaking coaching does not save bands | Reading accepted in CORE-004; finish Listening verification, then acoustic/Writing receipts and calibrated overall evidence |
+| IELTS Lab | Reading/Listening use server-issued questions, actual selections and atomic evidence-only receipts; Listening records per-part playback; Writing/Speaking coaching does not save bands | Reading/Listening accepted in CORE-004; next Writing receipts, then persistent acoustic feedback and calibrated overall evidence |
 | Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
 
-IELTS update, 2026-10-16 (PR #17): `/ielts/reading` uses `VerifiedIeltsReading` and the
+IELTS update, 2026-10-18 ([PR #18](https://github.com/Loccao102/LocCaoEnglish/pull/18),
+main `b7b0333`): Reading and Listening now use `VerifiedIeltsPaper` and the shared
+objective grader. Listening snapshots the original four parts/40 questions on
+the server, hides keys/transcripts from active prompts, records per-part playback
+and requires four completed reports before saving. Browser speech fallback
+receives source text explicitly as assistance; reported playback is not proof of
+human listening. Actual selections and wrong/blank verdicts survive exact retry,
+reload and account boundaries. Atomic receipts preserve legacy history and
+award no learning XP/confidence/review. Tally/legacy IELTS accuracy writes reject.
+All six CI jobs and 136 browser/API cases passed on head `411163b`; see
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) and [ADR 007](decisions/007-ielts-listening-evidence.md).
+Writing remains state-only with word-count heuristic bands and no saved essay
+receipt; the next slice in [ROADMAP](ROADMAP.md) addresses this before more content.
+Acoustic receipts and calibrated four-skill overall remain pending. No production deployment.
+
+Historical IELTS update, 2026-10-16 (PR #17): `/ielts/reading` uses `VerifiedIeltsReading` and the
 shared learning lifecycle. The server snapshots the original 40 questions,
 grades opaque option IDs and saves one immutable result/history transaction,
 without XP, confidence or review rewards. Reading tally and arbitrary band writes
 are rejected. History requires an account and distinguishes server-checked,
 client-reported and legacy estimates; the common dashboard no longer invents an
-overall 6.0 or a chosen target. Listening audio errors now allow retry, but its
-tally remains client-reported and lacks an idempotent answer receipt. See
+overall 6.0 or a chosen target. At that revision, Listening audio errors allowed
+retry but its tally remained client-reported without an idempotent answer receipt;
+the 2026-10-18 acceptance above supersedes that limitation. See
 [ADR 006](decisions/006-ielts-reading-evidence.md) and the acceptance status in
 [CORE-004](ROADMAP.md#core-004--speaking-mission-và-ielts-evidence).
 

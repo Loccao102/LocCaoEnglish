@@ -892,3 +892,35 @@ shortcut, retry loop or relaxed assertion. Runtime rules are unchanged.
 Local baseline ran 10 short-screen repetitions successfully (1.2m), confirming
 the failure is intermittent; the revised full Tea file passed 2/2 (9.5s).
 Further repeated validation and a fresh complete CI run are pending acceptance.
+
+Final acceptance on 2026-10-18 (Asia/Bangkok):
+[CI 142](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39027387520)
+passed all six jobs on final PR head `411163bad7b565ba678fe7e912153f02759a63f6`:
+backend, frontend, AI service, compose, integration and E2E. Backend job
+`117380950951` ran `go test -race ./...` and `go vet ./...` against dedicated
+PostgreSQL `loccao_system_test`. Frontend passed 50 game logic cases, 41 unique
+assets, 45 GLBs/24 companions and the 58-route production build/TypeScript.
+E2E job `117381111046` reports **136 passed (22.2m)** without failed/flaky cases
+or retries under the unchanged strict gate. Failure artifact upload was skipped.
+This includes all seven new Listening cases and the previously flaky Tea case.
+
+Local final-head verification also passed Reading/Listening/Listen & Pick/Dictation
+**27/27 (6.7m)** and the revised Tea suite **20/20 repetitions (1.9m)**, both with
+no retries. New mobile captures `.cache/ielts-listening-844.png` and
+`.cache/ielts-listening-feedback-551.png` were visually reviewed alongside the
+earlier complementary viewports: readable choices/results, large controls, no
+horizontal overflow. Media events remain simulated; these tests do not establish
+real voice quality or unaided listening. Local API uses memory; durable/race
+evidence comes from CI's dedicated PostgreSQL database, never user data.
+
+Before merge, the PR still matched tested head `411163b` and base `372bb9a`;
+submitted reviews and inline review threads were empty. The expected-head guarded
+squash merge of [PR #18](https://github.com/Loccao102/LocCaoEnglish/pull/18)
+created main `b7b0333e79c0bb7d6f7c984506f5fe1096e87493`. This acceptance follow-up
+changes documentation only: marks Listening done, preserves CI 141 failure
+evidence and specifies the next Writing receipt slice as planned. Full CORE-004
+remains in progress; acoustic/Writing receipts, deeper semantic dialogue grading
+and calibrated overall evidence are not claimed complete. No production deployment.
+
+Documentation-only follow-up validation: all 125 internal file links resolve and
+`git diff --check` passes. No app rebuild is needed for these three documentation files.

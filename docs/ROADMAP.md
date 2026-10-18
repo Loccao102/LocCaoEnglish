@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-16, main `6e1a7e5` (PR #17). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-18, main `b7b0333` (PR #18). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -16,10 +16,10 @@ trước khi các contract core liên quan đã vững.
   Dictation Rush) dùng chung server attempts và lifecycle khôi phục; CORE-003 đã
   nghiệm thu. Shadow Me đã lưu guided transcript qua shared attempts, tách coach
   khỏi XP. Chín mission đã lưu hội thoại và kết quả rubric theo thứ tự cùng thưởng
-  first-clear. IELTS Reading đã lưu lựa chọn gốc, chấm server và history nguyên tử,
-  không cấp learning XP. Listening, đánh giá ngữ nghĩa và acoustic/Writing receipts
-  tiếp tục theo CORE-004.
-- Nền PR #17 đã qua 50 logic cases, 130 browser/API cases và đủ sáu CI jobs,
+  first-clear. IELTS Reading/Listening đã lưu lựa chọn gốc, chấm server và history
+  nguyên tử; Listening có journal playback theo từng phần, không cấp learning XP.
+  Đánh giá ngữ nghĩa và acoustic/Writing receipts tiếp tục theo CORE-004.
+- Nền PR #18 đã qua 50 logic cases, 136 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -384,7 +384,7 @@ và [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Không deploy production. Toàn C
 vẫn `in_progress`; Listening playback evidence, acoustic/Writing receipts và
 overall bốn kỹ năng chưa được nghiệm thu trong lát cắt Reading.
 
-### Lát cắt đang xác minh — IELTS Listening (`in_review`, 2026-10-16)
+### Lát cắt đã nghiệm thu — IELTS Listening (`done`, 2026-10-18)
 
 Owner/task: Codex, branch `codex/core004-ielts-listening`, nền main `372bb9a`.
 
@@ -412,8 +412,41 @@ Phạm vi và điều kiện nghiệm thu:
 
 Đã triển khai adapter `VerifiedIeltsPaper` dùng chung Reading/Listening, catalog
 Listening phía server, journal theo `partId`, chặn submit thiếu phần nghe và đóng
-tally/legacy XP bypass. Đang xác minh browser, race/PostgreSQL và CI; chưa nghiệm
-thu. Contract ở [ADR 007](decisions/007-ielts-listening-evidence.md).
+tally/legacy XP bypass. [CI 142](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39027387520)
+trên head `411163b` đạt đủ sáu jobs, gồm PostgreSQL/race/vet và **136 E2E passed
+(22.2m)**, không failed/flaky/retry. [PR #18](https://github.com/Loccao102/LocCaoEnglish/pull/18)
+đã merge thành main `b7b0333`. Local regression Reading/Listening/Dictation/
+Listen & Pick đạt 27/27 (6.7m); Tea Time đạt 20/20 lần lặp sau sửa click test
+theo phần tử ổn định, giữ nguyên luật game và các assertion. Bằng chứng và lỗi
+CI trước đó được lưu ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md); contract ở
+[ADR 007](decisions/007-ielts-listening-evidence.md). Chưa deploy production;
+toàn CORE-004 vẫn `in_progress`.
+
+### Lát cắt tiếp theo — IELTS Writing feedback receipt (`planned`)
+
+Rà route ngày 2026-10-17: `app/ielts/writing/page.tsx` dùng `WritingLab`;
+bài viết chỉ ở React state, gọi `/v1/ai/writing-score` qua proxy. Cả browser và
+AI service còn tạo band từ số từ/connectors; chưa có receipt gắn với bài viết
+và phiên bản đề. Đổi nội dung trong khi chờ phản hồi cũng cần chặn kết quả cũ.
+
+Ưu tiên sau Listening, trước mở rộng đề/game:
+
+- Đề Task 2 và phiên bản rubric do server cấp; bản nháp theo owner, giới hạn độ
+  dài riêng cho essay (không ép vào answer budget 2048 byte của câu hỏi khách quan).
+- Lưu nguyên văn bài nộp, prompt/rules/provider/model version và phản hồi tương ứng;
+  retry sau commit trả receipt cũ, không gọi provider đồng thời hoặc ghi history
+  trùng; sửa bài tạo revision mới. ADR phải xử lý crash sau provider response
+  nhưng trước commit, không hứa exactly-once provider khi dịch vụ không hỗ trợ.
+- Không dùng thống kê số từ để tạo band thay thế khi provider lỗi. Phân biệt gợi ý
+  biên tập, phản hồi heuristic và estimate từ provider; response sai schema hoặc
+  không có bằng chứng giữ trạng thái lỗi có thể retry, không tạo kết quả giả.
+- Mất phản hồi sau commit, reload, đổi tài khoản và sửa draft trong lúc chờ không
+  trộn bài/kết quả. Chưa cấp learning XP/confidence, chưa ghép overall bốn kỹ năng.
+- ADR cho lifecycle evaluation, transaction/idempotency và rollout trước code;
+  kiểm tra provider lỗi/timeout/malformed/zero, race, PostgreSQL và mobile.
+
+Acoustic receipts và calibrated overall vẫn là phần tiếp theo của CORE-004;
+không coi Writing đã triển khai từ kế hoạch này.
 
 ### Tiêu chí hoàn tất toàn CORE-004
 
