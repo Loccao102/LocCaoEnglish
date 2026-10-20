@@ -49,6 +49,7 @@ type Store struct {
 	demoID           string
 	learningAttempts map[string]LearningAttemptRecord
 	learningRewards  map[string]bool
+	writingAttempts  map[string]writingRecord
 }
 
 func New(databaseURL string) (*Store, error) {

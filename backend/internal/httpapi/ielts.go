@@ -8,6 +8,7 @@ import (
 )
 
 func (s *Server) registerIELTSRoutes(mux *http.ServeMux) {
+	s.registerWritingRoutes(mux)
 	mux.HandleFunc("POST /v1/ielts/objective-score", s.ieltsObjectiveScore)
 	mux.HandleFunc("POST /v1/ielts/band", s.ieltsBand)
 	mux.HandleFunc("POST /v1/ielts/overall", s.ieltsOverall)

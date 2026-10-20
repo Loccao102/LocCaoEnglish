@@ -126,6 +126,8 @@ External LLM configuration is optional. Local deterministic fallback engines kee
 
 ## Production boundary
 
+Writing Lab saves account drafts and immutable essay revisions with feedback linked to exact quotations. Writing feedback requires a configured LLM (`LLM_CHAT_URL`, `LLM_MODEL`, optional `LLM_API_KEY`); without it, essays remain saved and evaluation can be retried, with no heuristic band fallback. Save draft syncs to the account; unsaved edits have browser recovery when storage is available. See [Writing contract](docs/decisions/008-writing-receipts.md).
+
 IELTS Writing/Speaking results are practice estimates, not official examiner scores. Acoustic pronunciation scoring is available when the configured speech provider is present; otherwise the product explicitly falls back to non-acoustic signals. Production deployment also supports the standalone Next.js image, Caddy reverse proxy, PostgreSQL, Redis and isolated API/AI services.
 
 

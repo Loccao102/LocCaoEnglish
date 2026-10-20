@@ -924,3 +924,66 @@ and calibrated overall evidence are not claimed complete. No production deployme
 
 Documentation-only follow-up validation: all 125 internal file links resolve and
 `git diff --check` passes. No app rebuild is needed for these three documentation files.
+
+## CORE-004 — Writing drafts and feedback receipts (2026-10-21)
+
+Branch `codex/core004-writing-receipts`, base main `18509ac`. The active
+`/ielts/writing` route still imports WritingLab; it now uses `useWritingSession`
+and dedicated versioned essay attempts instead of browser-only state and raw AI
+proxy scores. See [ADR 008](decisions/008-writing-receipts.md) and [API](API.md).
+
+Account drafts sync through explicit Save draft. An owner-scoped browser copy
+retains unsent edits and exact pending requests. Submission freezes the essay;
+editing creates a child revision. Row-locked evaluation generations/90-second
+leases prevent concurrent claims, fence dead workers and preserve exact retries.
+Provider calls occur outside the transaction, with no automatic provider retry.
+Completed feedback and the essay commit in one row; IELTS history derives its
+provider-estimate entry from that receipt. It grants no learning rewards.
+
+Both AI and Go require four finite half-step criteria (including valid zero),
+overall consistent with the criteria, exact essay quotations, bounded advice and
+service-owned method/provider/model versions. Browser/service word-count band
+fallbacks were removed. Missing/failed/malformed provider feedback retains a saved
+failed submission, with no score added to history. No live model calibration is
+claimed. All provider success/timeout/malformed cases use deterministic fixtures.
+
+Local working-tree checks:
+
+- `go test ./...`, `go vet ./...`: passed in memory mode. Store tests cover owner,
+  exact create/save/submit retry, draft conflicts, long essays, concurrent claims,
+  expired leases/stale generations, failure/retry, original revisions, immutable
+  receipt aliases, valid zero history and zero XP/confidence/review effects.
+  PostgreSQL variants use two independent connections and migration 019 replay;
+  those require CI because the local Docker daemon is unavailable. No user DB used.
+- AI compile and `python -m unittest discover -s tests -v`: **18 passed**.
+  Six Writing tests replace the old heuristic-shape test with actual contract,
+  unavailable-provider, timeout, oversized/malformed response, invented quotation,
+  provider metadata and finite/zero-band validation. HTTP provider calls are mocked.
+- `npm run build`: passed, 58 routes with TypeScript. Game checks: **50 passed**;
+  assets: 41 unique assets/23 hashes, 45 GLBs and 24 animated companions.
+- `node scripts/verify-writing-api.mjs`: passed against the real local API/memory
+  store, including signed-only access, legacy rejection, exact retry, saved failed
+  essay and empty result history. Integration CI now runs this replacement for
+  the obsolete anonymous heuristic-band smoke check; no checks are skipped.
+- The first ten Writing browser cases passed **10/10 (2.3m)**. The final combined
+  Reading/Listening/Writing run additionally covers generation identity, lost
+  start response, deep links and unsaved text when another tab submits; pending.
+
+The browser tests exercise real account/API storage and failed-provider recovery;
+mobile feedback rendering uses an explicitly labeled response fixture. Full Go
+HTTP tests separately exercise successful provider feedback through the real
+handler/store. This does not establish live provider quality. Migration 019 and
+API must deploy before frontend; rollback retains schema, handlers and receipts.
+Final review, clean six-job CI and merge are pending. No production deployment.
+
+Additional local protocol verification: a separate memory API at 8082 called the
+real Python AI service at 8092, which used a local synthetic LLM HTTP fixture.
+Real browser input saved/submitted the essay, received validated 6.0 feedback,
+loaded one provider-estimate history entry, reloaded the receipt and created a
+child revision. Resending generation zero returned the identical saved result;
+the upstream fixture recorded exactly one call. This verifies the complete
+browser → Go → Python → provider protocol → receipt path without contacting or
+billing a live model. Temporary fixture services were stopped afterward.
+Rendered `.cache/writing-stack-feedback-551.png` and `-844.png` were viewed:
+18px essay/feedback text, large actions, readable quotations and no horizontal
+overflow at 390px. Final browser regression remains separately required.

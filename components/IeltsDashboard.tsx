@@ -10,7 +10,7 @@ import styles from "./IeltsDashboard.module.css";
 const skills = [
   { key: "listening", label: "Listening", href: "/ielts/listening", copy: "40 questions · 4 audio parts", kind: "Saved choices checked by the server" },
   { key: "reading", label: "Academic Reading", href: "/ielts/reading", copy: "40 questions · 3 original passages", kind: "Saved choices checked by the server" },
-  { key: "writing", label: "Writing", href: "/ielts/writing", copy: "Task 2 · feedback on your writing", kind: "Coaching only · no saved band" },
+  { key: "writing", label: "Writing", href: "/ielts/writing", copy: "Task 2 · saved drafts and revisions", kind: "Saved provider feedback · practice estimate" },
   { key: "speaking", label: "Speaking", href: "/ielts/speaking", copy: "Mic recording · language feedback", kind: "Coaching only · no saved band" },
 ];
 
@@ -18,6 +18,7 @@ function evidenceLabel(item: IELTSAttempt) {
   if (item.legacy) return "Legacy estimate · original answers unavailable";
   if (item.evidence === "server-objective-practice" && item.section === "reading") return "Server-checked Reading choices";
   if (item.evidence === "server-objective-practice" && item.section === "listening") return "Server-checked Listening choices · reported playback";
+  if (item.evidence === "provider-estimate" && item.section === "writing") return "Provider estimate · original essay saved";
   return "Client-reported estimate · original answers unverified";
 }
 
@@ -49,7 +50,7 @@ function DashboardHistory({ token }: { token: string | null }) {
   const latest = useMemo(() => {
     const entries: Record<string, IELTSAttempt> = {};
     history.forEach(item => {
-      if ((item.section === "listening" || item.section === "reading") && !entries[item.section]) entries[item.section] = item;
+      if ((item.section === "listening" || item.section === "reading" || item.section === "writing" && item.evidence === "provider-estimate") && !entries[item.section]) entries[item.section] = item;
     });
     return entries;
   }, [history]);
@@ -58,7 +59,7 @@ function DashboardHistory({ token }: { token: string | null }) {
     <section className={styles.intro}>
       <span className="eyebrow">IELTS PRACTICE</span>
       <h1>Build skills. Understand your results.</h1>
-      <p>Reading and Listening save your choices and check them against an answer key. Listening also keeps the playback reported by your browser. Writing and Speaking provide coaching without adding a band to this history.</p>
+      <p>Reading and Listening save your choices and check them against an answer key. Listening also keeps the playback reported by your browser. Writing saves your essay and provider feedback. Speaking coaching does not add a band to this history.</p>
       <p>No overall band is calculated from these different kinds of practice.</p>
     </section>
 
@@ -88,6 +89,7 @@ function DashboardHistory({ token }: { token: string | null }) {
             <strong>{item.band.toFixed(1)} <small>estimated band</small></strong>
           </div>
           <p>{item.rawScore != null ? `${item.rawScore}/${item.maxScore} correct · ` : ""}{evidenceLabel(item)}</p>
+          {item.section === "writing" && item.evidence === "provider-estimate" && <Link href={`/ielts/writing?attempt=${encodeURIComponent(item.attemptId!)}`}>Open saved essay and feedback</Link>}
           <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString()}</time>
           {item.evidence === "server-objective-practice" && <details>
             <summary>Result details</summary>

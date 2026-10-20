@@ -32,7 +32,7 @@ func (s *Store) EnsureIELTS(ctx context.Context) error {
 		_ = s.ieltsMemory()
 		return nil
 	}
-	_, err := s.db.ExecContext(ctx, ieltsSchemaSQL)
+	_, err := s.db.ExecContext(ctx, ieltsSchemaSQL+writingSchemaSQL)
 	return err
 }
 
@@ -80,6 +80,10 @@ type ieltsReceipt struct {
 }
 
 func (s *Store) IELTSHistory(ctx context.Context, userID string, limit int) ([]model.IELTSAttempt, error) {
+	writingItems, err := s.writingHistory(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
 	if limit <= 0 || limit > 100 {
 		limit = 30
 	}
@@ -121,7 +125,10 @@ func (s *Store) IELTSHistory(ctx context.Context, userID string, limit int) ([]m
 			}
 			out = append(out, a)
 		}
-		return out, rows.Err()
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
+		return sortIELTSHistory(append(out, writingItems...), limit), nil
 	}
 	state := s.ieltsMemory()
 	state.mu.RLock()
@@ -130,6 +137,10 @@ func (s *Store) IELTSHistory(ctx context.Context, userID string, limit int) ([]m
 		items = append(items, cloneIELTSAttempt(a))
 	}
 	state.mu.RUnlock()
+	return sortIELTSHistory(append(items, writingItems...), limit), nil
+}
+
+func sortIELTSHistory(items []model.IELTSAttempt, limit int) []model.IELTSAttempt {
 	sort.Slice(items, func(i, j int) bool {
 		if items[i].CreatedAt.Equal(items[j].CreatedAt) {
 			return items[i].ID > items[j].ID
@@ -139,7 +150,7 @@ func (s *Store) IELTSHistory(ctx context.Context, userID string, limit int) ([]m
 	if len(items) > limit {
 		items = items[:limit]
 	}
-	return items, nil
+	return items
 }
 
 func cloneIELTSAttempt(a model.IELTSAttempt) model.IELTSAttempt {

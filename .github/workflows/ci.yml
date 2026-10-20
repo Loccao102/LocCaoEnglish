@@ -111,11 +111,8 @@ jobs:
         run: curl -fsS http://localhost:8080/v1/lessons | grep -q 'airport-check-in-sprint'
       - name: Social leaderboard
         run: curl -fsS http://localhost:8080/v1/social/leaderboard | grep -q 'items'
-      - name: Writing AI route
-        run: |
-          curl -fsS -X POST http://localhost:8080/v1/ai/writing-score \
-            -H 'Content-Type: application/json' \
-            -d '{"essay":"Public transport can reduce congestion and pollution. Governments should improve reliable networks because better access can change how people travel every day.","task":"Discuss transport investment.","level":"IELTS"}' | grep -q 'overall'
+      - name: Writing saved revision and unavailable-provider recovery
+        run: node scripts/verify-writing-api.mjs
       - name: Neural TTS fallback route
         run: |
           curl -fsS -X POST http://localhost:8080/v1/ai/tts \

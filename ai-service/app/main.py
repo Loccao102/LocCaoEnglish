@@ -9,17 +9,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 from app.roleplay import roleplay_reply
+from app.writing import WritingRequest, writing_score
 
 app = FastAPI(title="LocCaoEnglish AI Service", version="0.4.0")
 
 LLM_CHAT_URL = os.getenv("LLM_CHAT_URL", "").strip()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
-
-class WritingRequest(BaseModel):
-    essay: str = Field(min_length=20, max_length=12000)
-    task: str = ""
-    level: str = "IELTS"
 
 class SpeakingRequest(BaseModel):
     transcript: str = Field(min_length=1, max_length=4000)
@@ -47,28 +43,6 @@ def half(value: float) -> float:
 
 def tokenize(value: str) -> list[str]:
     return re.findall(r"[A-Za-z']+", value.lower())
-
-def local_writing_score(req: WritingRequest) -> dict[str, Any]:
-    words = tokenize(req.essay); count = len(words)
-    paragraphs = [p for p in re.split(r"\n\s*\n", req.essay) if p.strip()]
-    sentences = [s.strip() for s in re.split(r"[.!?]+", req.essay) if s.strip()]
-    unique_ratio = len(set(words)) / max(1, count); avg_sentence = count / max(1, len(sentences)); lower = req.essay.lower()
-    connectors = ["however", "therefore", "moreover", "furthermore", "although", "whereas", "consequently", "nevertheless", "in contrast", "for example"]
-    connector_hits = sum(1 for x in connectors if x in lower); complex_hits = sum(lower.count(x) for x in ["although", "while", "whereas", "which", "that", "because", "despite", "unless"])
-    task = half(clamp(4 + min(2.0, count / 140) + (0.5 if len(paragraphs) >= 4 else 0) + (0.5 if count >= 250 else 0)))
-    coherence = half(clamp(4 + min(1.5, connector_hits * 0.22) + (1 if len(paragraphs) >= 4 else 0.4) + (0.5 if 10 <= avg_sentence <= 28 else 0)))
-    lexical = half(clamp(4 + (1.6 if unique_ratio >= .52 else 1.1 if unique_ratio >= .42 else .6) + (0.8 if count >= 220 else .3)))
-    grammar = half(clamp(4 + min(1.5, complex_hits * .18) + (0.8 if len(sentences) >= 8 else .3) + (0.4 if 10 <= avg_sentence <= 30 else 0)))
-    overall = half((task + coherence + lexical + grammar) / 4)
-    strengths=[]; improvements=[]
-    if count >= 250: strengths.append("You developed the response to an IELTS Task 2 length.")
-    else: improvements.append("Develop the argument further; aim for at least 250 words in full Task 2 practice.")
-    if connector_hits >= 4: strengths.append("Logical linking language is visible across the response.")
-    else: improvements.append("Make paragraph relationships explicit with selective linking language rather than adding connectors mechanically.")
-    if unique_ratio >= .45: strengths.append("Vocabulary range is reasonably varied for the sample length.")
-    else: improvements.append("Reduce repeated high-frequency words by using precise topic vocabulary and natural collocations.")
-    if complex_hits < 3: improvements.append("Add controlled complex sentences using subordination, relative clauses, or concession.")
-    return {"provider":"local-heuristic","overall":overall,"criteria":{"taskResponse":task,"coherenceCohesion":coherence,"lexicalResource":lexical,"grammarRangeAccuracy":grammar},"metrics":{"wordCount":count,"paragraphs":len(paragraphs),"uniqueRatio":round(unique_ratio,3)},"strengths":strengths or ["The response contains enough language for targeted feedback."],"improvements":improvements or ["Now focus on precision: make each sentence directly support the central position."],"rewriteExample":"A stronger revision should state one precise claim, explain why it matters, and support it with a concrete example before linking back to the essay position.","disclaimer":"Practice estimate only; this is not an official IELTS score."}
 
 def local_speaking_feedback(req: SpeakingRequest) -> dict[str, Any]:
     spoken=tokenize(req.transcript);target=tokenize(req.target);overlap=0.0
@@ -99,11 +73,7 @@ async def llm_json(system: str, user: dict[str, Any]) -> dict[str, Any] | None:
 @app.get("/health")
 async def health() -> dict[str, Any]: return {"status":"ok","llmConfigured":bool(LLM_CHAT_URL and LLM_MODEL)}
 
-@app.post("/v1/writing/score")
-async def writing_score(req: WritingRequest) -> dict[str, Any]:
-    system="You are a cautious IELTS Writing coach. Return JSON only with overall, criteria (taskResponse, coherenceCohesion, lexicalResource, grammarRangeAccuracy), strengths, improvements, rewriteExample, disclaimer. Scores are practice estimates in 0.5 bands and must not be presented as official examiner scores.";remote=await llm_json(system,req.model_dump())
-    if remote: remote["provider"]="configured-llm";remote.setdefault("disclaimer","Practice estimate only; not an official IELTS score.");return remote
-    return local_writing_score(req)
+app.post("/v1/writing/score")(writing_score)
 
 @app.post("/v1/speaking/feedback")
 async def speaking_feedback(req: SpeakingRequest) -> dict[str, Any]:
