@@ -532,7 +532,8 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 ### Đang xác minh — Đóng điểm tự báo và bảng XP có receipt (`in_review`)
 
 Owner/task: Codex, branch `codex/core005-reward-boundary`, 2026-10-21,
-tiếp nối head acoustic `b38ecf9` (PR #20). [ADR 010](decisions/010-checked-practice-ranking.md)
+tiếp nối main `4cd2104`, acoustic đã nghiệm thu qua PR #20.
+[ADR 010](decisions/010-checked-practice-ranking.md)
 chốt việc nghỉ endpoint accuracy cũ, bỏ gửi điểm từ lesson/placement, tính bảng
 XP từ shared receipts/daily claim và chặn duel score tự báo. Không reset XP/save,
 không tự nâng legacy confidence/prerequisite thành bằng chứng mới. Nghiệm thu

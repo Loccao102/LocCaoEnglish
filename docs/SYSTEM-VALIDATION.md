@@ -78,7 +78,8 @@ This slice is in review; full CI/merge evidence will follow on the final head.
   API: retired score writes, six concurrent identical real learning submissions,
   one checked-board contribution and signed self-reported bookmark with no XP.
   CI runs the same contract against the PostgreSQL container stack.
-- Follow-up on `4ce44c9`: an actual production-browser recording action traversed
+- Local follow-up before rebase (`4ce44c9`; runtime unchanged at `ed36bf9`): an
+  actual production-browser recording action traversed
   Go on 8082 and real Python on 8092 to a synthetic Azure `httpx` transport. The
   completed receipt retained zero scores/word/phoneme evidence and matching hashes;
   account history/reload and exact initial retry produced **one provider call**,
