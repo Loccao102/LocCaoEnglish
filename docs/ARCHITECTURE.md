@@ -3,8 +3,11 @@
 Contribution policy: [PROJECT-RULES](PROJECT-RULES.md). Implementation priorities:
 [ROADMAP](ROADMAP.md). Word Link and Grammar Repair share server-owned attempts
 and a recoverable frontend lifecycle ([ADR 003](decisions/003-learning-recovery.md)).
-The generic attempt API still accepts client-reported accuracy for other activities;
-their migration and competitive integrity remain CORE-003/005 work.
+The generic accuracy endpoint is retired for every activity. Checked community
+XP derives from supported completed learning receipts and their daily claim;
+legacy personal totals and confidence are preserved without being reclassified.
+See [ADR 010](decisions/010-checked-practice-ranking.md) and CORE-005 for remaining
+legacy-evidence and competitive-session work.
 
 ## Principles
 

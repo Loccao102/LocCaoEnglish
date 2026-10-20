@@ -70,6 +70,10 @@ This slice is in review; full CI/merge evidence will follow on the final head.
   reload/retries and exactly one checked-board contribution; generic renamed score
   attempts; practice invitation; local placement with no shared-demo mutation;
   lesson open responses/locked checks, failed bookmark and explicit retry.
+- `node scripts/verify-reward-boundary.mjs` passes against the final local memory
+  API: retired score writes, six concurrent identical real learning submissions,
+  one checked-board contribution and signed self-reported bookmark with no XP.
+  CI runs the same contract against the PostgreSQL container stack.
 - Lesson and community renders at **390×551/844** were inspected. A first render
   exposed old 9–10px social labels; new labels/rows are 16–20px and score/name
   layout wraps without horizontal overflow. Lesson input has an accessible name,
