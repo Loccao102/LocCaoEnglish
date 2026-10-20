@@ -50,7 +50,7 @@ test("listening and social production surfaces load", async ({ page }) => {
   await expect(page.getByRole("button", { name: /play audio/i })).toBeVisible();
   await page.goto("/social");
   await expect(page.getByRole("heading", { name: "Practise together, track checked progress." })).toBeVisible();
-  await expect(page.getByText(/PRACTICE INVITATIONS/i).first()).toBeVisible();
+  await expect(page.locator(".social-main .eyebrow")).toContainText("PRACTICE INVITATIONS");
   await expect(page.getByText("CHECKED PRACTICE XP", {exact: true})).toBeVisible();
 });
 
