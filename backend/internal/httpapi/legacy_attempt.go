@@ -17,7 +17,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Migrated activities must not award progress through the older accuracy API.
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-reading") || strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-listening") {
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-reading") || strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-listening") || strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-writing") {
 		problem(w, http.StatusConflict, "IELTS practice uses server-owned attempts and does not award learning progress")
 		return
 	}

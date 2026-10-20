@@ -1,0 +1,29 @@
+.workspace { display:grid; gap:24px; max-width:1100px; margin:auto; color:#263d46; }
+.workspace button { min-height:48px; padding:12px 18px; border-radius:14px; border:1px solid #adc5ca; background:#fff; color:#244650; font:inherit; font-weight:700; cursor:pointer; }
+.workspace button:disabled { opacity:.55; cursor:default; }
+.workspace button:focus-visible,.workspace textarea:focus-visible { outline:3px solid #187e83; outline-offset:3px; }
+.notice,.task,.editor,.feedback,.history { padding:24px; border-radius:24px; background:#fff; border:1px solid #d9e4e4; }
+.notice { background:#fff6dd; }
+.task { background:#eaf6f2; }
+.task p { font-size:21px; line-height:1.65; }
+.workspace h2 { margin:10px 0; font-size:27px; }
+.workspace h3 { font-size:20px; margin:12px 0; }
+.workspace p,.workspace li { line-height:1.65; }
+.workspace small { font-size:15px; }
+.editor label { display:block; font-size:20px; font-weight:800; margin-bottom:14px; }
+.editor textarea { width:100%; min-height:390px; padding:20px; resize:vertical; border:1px solid #a8c2c3; border-radius:16px; color:#203c43; background:#fcfefd; font-family:inherit; font-size:18px; line-height:1.75; box-sizing:border-box; }
+.editor textarea[readonly] { background:#f2f6f6; }
+.meta,.actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:14px; }
+.meta { justify-content:space-between; }
+.saveStatus { color:#52676e; font-size:15px; }
+.actions small,.actions p { flex-basis:100%; }
+.criteria { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.criteria article { border:1px solid #d7e4e4; padding:18px; border-radius:18px; }
+.criteria strong { float:right; color:#14766a; }
+.criteria blockquote { margin:14px 0; padding:12px 16px; border-left:3px solid #7cb8aa; background:#f0f7f4; white-space:pre-wrap; overflow-wrap:anywhere; }
+.feedback { overflow-wrap:anywhere; }
+.feedback summary { cursor:pointer; min-height:44px; padding-top:10px; font-weight:700; }
+.history ul { padding:0; list-style:none; display:grid; gap:14px; }
+.history li { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.history time { font-size:14px; color:#52676e; }
+@media(max-width:600px) { .workspace { gap:16px; } .notice,.task,.editor,.feedback,.history { padding:18px; border-radius:18px; } .criteria { grid-template-columns:1fr; } .task p { font-size:19px; } .editor textarea { padding:14px; min-height:330px; } .actions button { flex:1 1 100%; } .meta { font-size:14px; } }

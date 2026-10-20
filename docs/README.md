@@ -28,6 +28,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Nhiệm vụ hội thoại và first-clear | [ADR 005: rubric theo thứ tự và bằng chứng đã lưu](decisions/005-mission-evidence.md) |
 | IELTS Reading và lịch sử kết quả | [ADR 006: lựa chọn gốc, chấm và lưu không cấp XP](decisions/006-ielts-reading-evidence.md) |
 | IELTS Listening và phát âm thanh từng phần | [ADR 007: lựa chọn gốc, audio journal và phục hồi](decisions/007-ielts-listening-evidence.md) |
+| Writing và phản hồi theo phiên bản bài | [ADR 008: bản nháp, lần nộp và kết quả chấm](decisions/008-writing-receipts.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

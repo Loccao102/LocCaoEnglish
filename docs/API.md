@@ -126,11 +126,15 @@ See [ADR 007](decisions/007-ielts-listening-evidence.md).
   `evidence`, `legacy` and optional `attemptId`, content/rules/method versions
   and provider. Previous rows keep their scores/source text and report
   `legacy:true`, `evidence:"legacy-unverified"`; no answers are invented.
+  Completed Writing receipts appear as `section:"writing"`,
+  `evidence:"provider-estimate"`, `source:"provider-practice-estimate"` and link
+  `attemptId` to their saved essay. These are derived from the completed Writing
+  snapshot, never an independent client band write. Failed evaluations add no band.
 - `POST /v1/ielts/objective-score` requires sign-in. Both Reading and Listening
   tally writes return 409. Previous `client-reported` rows keep their evidence
   and `client-reported-practice-estimate` source; they are not upgraded to
   server-graded selections. Generic `/v1/attempts` rejects both
-  `ielts-reading*` and `ielts-listening*` accuracy submissions with 409.
+  `ielts-reading*`, `ielts-listening*` and `ielts-writing*` accuracy submissions with 409.
 - `POST /v1/ielts/band` rejects new arbitrary band/source writes with 409 after
   authentication. Existing Writing/Speaking estimates are preserved in history.
 - `POST /v1/ielts/overall` remains a calculation helper; it does not persist or
@@ -143,6 +147,63 @@ See [ADR 007](decisions/007-ielts-listening-evidence.md).
 Deploy additive migration 018/startup schema and API before frontend. Preserve
 old rows, new receipts, snapshots and v1 grading on rollback. See
 [ADR 006](decisions/006-ielts-reading-evidence.md) for recovery and rollout limits.
+
+### Writing drafts and saved feedback
+
+All routes require a signed account; unknown/other-owner IDs return 404. Contract
+`ielts-writing.v1`, original Task 2 prompt/catalog `2026-10-18.1`. Essay limits are
+12000 Unicode characters, no NUL; JSON save/submit bodies are limited to 100000
+bytes. At least 40 whitespace-separated words are required for feedback; 250 is
+the practice target. Only the server supplies task/content/rubric versions.
+
+- `POST /v1/ielts/writing/attempts`: `{requestId,parentId?}`. Request IDs contain
+  16–64 alphanumeric/hyphen characters. Same owner/request ID and parent returns
+  the same attempt (201); a changed parent returns 409. A completed/failed parent
+  creates an editable child revision preserving its prompt and original essay.
+- `GET /v1/ielts/writing/attempts`: latest 50 account drafts/submissions ordered
+  by update time. `GET /v1/ielts/writing/attempts/{id}` retrieves an older revision
+  directly, including exact essay and its saved feedback if complete.
+- `PUT /v1/ielts/writing/attempts/{id}/draft`:
+  `{version,essay,rulesVersion}`. Saves only editable drafts and increments version.
+  Same payload at the immediately preceding version returns the saved draft;
+  other stale writes return 409. Saving after submission returns 409.
+- `POST /v1/ielts/writing/attempts/{id}/submit`:
+  `{version,essay,rulesVersion,generation}`. Essay/version must match the saved
+  draft. Generation starts at zero; the claim freezes the essay and increments
+  generation under a row lock. Same/older generation reads its resulting state;
+  deliberate retry after failure or expired lease names the observed current
+  generation. Completed retries return the immutable result without provider I/O.
+  Changed essay/version or future/negative generation returns 409.
+
+Attempts expose `status` (`draft`, `evaluating`, `failed`, `completed`), `version`,
+`generation`, optional `leaseUntil`, parent/revision, timestamps and optional
+`feedback`/`failure`. Pending returns 202; completed or saved failure returns 200.
+Failure means the essay is stored but no valid assessment was obtained; it does
+not manufacture a score. Provider I/O runs outside transactions with a 25-second
+HTTP timeout and a 90-second claim lease. A disconnected client can recover via
+GET. Dead-worker recovery requires explicit retry; stale generations cannot commit.
+Ambiguous provider success before a failed commit may repeat billing on explicit
+recovery; exactly-once receipt persistence does not promise exactly-once provider I/O.
+
+Feedback includes service-owned `provider:"configured-llm"`, `model`,
+`evaluatorVersion:"writing-feedback.v1"`, rules version, finite half-step `overall`
+and all four criteria: `taskResponse`, `coherenceCohesion`, `lexicalResource`,
+`grammarRangeAccuracy`. Each has `band`, an exact essay quotation in `evidence`
+and a bounded explanatory `comment`. Overall must match rounded criterion mean;
+zero is valid. Strengths/improvements and a practice disclaimer accompany it.
+AI and Go both validate the response; no provider configuration, timeout, invalid
+schema or invented quotation leaves a retryable failure. Word counts are editor
+information, never substitute bands. No XP, confidence, review or daily claim.
+
+Browser recovery is owner-scoped. It preserves unsent edits and exact pending
+operations; save/submit locks editing. Conflicts retain local text until explicit
+account-copy selection. Account changes ignore late responses; corrupt storage
+requires explicit discard, and unavailable storage has a visible warning.
+Drafts sync to the account through Save draft; unsaved edits remain browser-only.
+
+Deploy additive migration 019/startup schema and API before frontend. Both must
+retain Writing handlers/snapshots and legacy rejection on rollback; preserve
+existing Reading/Listening and old estimates. See [ADR 008](decisions/008-writing-receipts.md).
 
 ### Guided transcript practice
 
@@ -452,7 +513,10 @@ legacy history is unchanged. No timer, hints or competitive certification added.
 
 ## AI proxy
 
-- `POST /v1/ai/writing-score`
+- `POST /v1/ai/writing-score` requires sign-in and returns 409; use the saved
+  Writing submission flow above. The internal AI `/v1/writing/score` endpoint
+  accepts server-supplied `{essay,task,rulesVersion}`, returns validated feedback
+  or 503, and has no heuristic band fallback.
 - `POST /v1/ai/speaking-feedback`
 - `POST /v1/ai/exercises`
 - `POST /v1/conversation/reply`

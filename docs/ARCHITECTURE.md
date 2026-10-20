@@ -9,7 +9,7 @@ their migration and competitive integrity remain CORE-003/005 work.
 ## Principles
 
 1. **Game content and learner state are separate.** A mini-game emits attempts; the adaptive engine decides what those attempts mean for the learner.
-2. **AI is an enhancement, not a single point of failure.** Writing, speaking, generation and NPC endpoints all have deterministic fallback behavior.
+2. **AI failure preserves the learner's work.** Writing saves the original essay and exposes a retryable evaluation failure when valid provider feedback is unavailable; word counts never substitute a band. Speaking, generation and NPC endpoints retain explicitly labeled non-acoustic/template fallbacks where supported.
 3. **IELTS scoring is framed as practice estimation.** The product never labels model/heuristic output as an official IELTS result.
 4. **Wrong answers become future curriculum.** Review scheduling is part of the core domain instead of an optional flashcard feature.
 

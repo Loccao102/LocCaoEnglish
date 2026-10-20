@@ -422,7 +422,10 @@ CI trước đó được lưu ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md); co
 [ADR 007](decisions/007-ielts-listening-evidence.md). Chưa deploy production;
 toàn CORE-004 vẫn `in_progress`.
 
-### Lát cắt tiếp theo — IELTS Writing feedback receipt (`planned`)
+### Lát cắt đang xác minh — IELTS Writing feedback receipt (`in_review`)
+
+Owner/task: Codex, branch `codex/core004-writing-receipts`, 2026-10-18,
+nền main `18509ac`. Contract: [ADR 008](decisions/008-writing-receipts.md).
 
 Rà route ngày 2026-10-17: `app/ielts/writing/page.tsx` dùng `WritingLab`;
 bài viết chỉ ở React state, gọi `/v1/ai/writing-score` qua proxy. Cả browser và
@@ -446,7 +449,20 @@ và phiên bản đề. Đổi nội dung trong khi chờ phản hồi cũng c�
   kiểm tra provider lỗi/timeout/malformed/zero, race, PostgreSQL và mobile.
 
 Acoustic receipts và calibrated overall vẫn là phần tiếp theo của CORE-004;
-không coi Writing đã triển khai từ kế hoạch này.
+nghiệm thu Writing được ghi riêng theo bằng chứng triển khai bên dưới.
+
+Tiếp nối triển khai 2026-10-21: đã có server draft/version, immutable submission,
+generation/lease chống gọi chấm trùng, revision history và adapter owner-scoped.
+Chấm yêu cầu dẫn chứng từ bài viết, provider/model/rubric rõ và zero hợp lệ;
+đã bỏ band fallback theo số từ ở browser/AI. API legacy trả 409; không cấp XP.
+Local Go tests/vet, 18 AI tests và build 58 routes đã đạt. Lượt browser đầu đạt
+10/10 (2.3m); bản bổ sung generation, lost-start và tab khác nộp bài đang xác minh.
+PostgreSQL/race, CI cuối và nghiệm thu chưa hoàn tất; chưa deploy production.
+
+Luồng chấm thành công đã chạy qua browser → Go → Python → provider HTTP fixture,
+lưu receipt/history, reload và tạo revision; retry giữ kết quả với đúng một lần
+gọi fixture. Chưa đánh giá model thật. Kiểm tra cuối bổ sung lỗi validation 400
+để người học sửa draft thay vì mắc kẹt trong pending request.
 
 ### Tiêu chí hoàn tất toàn CORE-004
 
