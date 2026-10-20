@@ -41,7 +41,7 @@ func TestCheckedPracticeRankingMemoryAndPostgres(t *testing.T) {
 			}
 			// Simulate existing client-graded history without reopening its public route.
 			for i := 0; i < 3; i++ {
-				if _, e = s.RecordAttempt(ctx, old.ID, model.AttemptInput{Skill: "Vocabulary", Activity: "old-client", ItemKey: fmt.Sprint(i), Accuracy: 1}); e != nil {
+				if _, e = s.recordLegacyFixture(ctx, old.ID, model.AttemptInput{Skill: "Vocabulary", Activity: "old-client", ItemKey: fmt.Sprint(i), Accuracy: 1}); e != nil {
 					t.Fatal(e)
 				}
 			}

@@ -65,6 +65,10 @@ This slice is in review; full CI/merge evidence will follow on the final head.
   unsupported-rule receipts, and reopen PostgreSQL for durability when CI supplies
   the dedicated test URL. All arbitrary activity names/duel scores reject without
   changing XP/confidence/reviews; bookmark auth/range/provenance are checked.
+  The legacy store award method is no longer compiled into production; fixtures
+  reconstruct older rows in `_test.go` only. The old adaptive-review test now
+  submits actual wrong/correct server attempts and checks the saved reference,
+  zero wrong-answer XP, exactly 20 correct-answer XP and repetition scheduling.
 - Production build/typecheck pass, 58 routes. Actual browser/API core + reward
   tests pass **15/15 (11.6s)**: real Word Link input, lost committed response,
   reload/retries and exactly one checked-board contribution; generic renamed score

@@ -16,6 +16,8 @@ scores even though Word Link no longer submits them. Neither is verified competi
 - Retire all public `/v1/attempts` writes with 409. Activity-name blacklists cannot
   make a client-supplied accuracy trustworthy. Keep old history/personal XP and
   skill state intact; never retroactively label that data verified or reset it.
+  Remove the unused client-accuracy award method from the production store too.
+  Legacy row reconstruction lives only in test fixtures, not the API binary.
 - Lesson and placement local practice stop submitting accuracy/target answers as
   learning evidence. Local checks are explicitly advisory. Open-ended lesson
   responses have no automatic correctness verdict. Completion bookmarks remain
