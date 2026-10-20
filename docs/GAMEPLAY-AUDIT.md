@@ -23,19 +23,25 @@ that all learning activities received a full manual playthrough in this pass.
 | Story Choice | Server-owned five-scene decision graph with four endings, multiple effective opening choices and recovery branches; immutable decisions and one child per parent | Snapshot graph/history, owner/retry/expiry, readable controls and legacy rejection replace client scoring; more scenarios and B1 calibration need playtests |
 | Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
-| Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
-| IELTS Lab | Reading/Listening save original choices and results; Writing saves account drafts, frozen submissions, validated provider feedback and revision history; Speaking coaching remains transient | Reading/Listening/Writing receipt slices accepted in CORE-004; next persistent acoustic feedback and calibrated overall evidence |
+| Shadow Me | Guided transcript attempts store actual text/alignment/daily claim; signed acoustic feedback now retains sample-bound receipts without raw audio or rewards | Transcript matching is not pronunciation mastery; live provider calibration and wider evidence policy remain CORE-004/005 |
+| IELTS Lab | Reading/Listening save original choices/results; Writing saves drafts/submissions/provider evidence; signed Speaking saves acoustic feedback independently | Receipt slices accepted; semantic mission depth, provider calibration and four-skill overall evidence remain |
 | Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
 
-Acoustic implementation, 2026-10-21 (CORE-004, acceptance pending): signed
+Acoustic acceptance, 2026-10-21 (CORE-004, [PR #20](https://github.com/Loccao102/LocCaoEnglish/pull/20),
+main `99c8535`): signed
 `SpeakingPractice` uses a dedicated receipt adapter bound to the owned phrase,
 reported transcript and validated WAV hash. Provider feedback/history survive
 reload without retaining or automatically resending audio. Explicit retries
 need the original sample; failure never creates an acoustic score or reward.
 Guest previews and transcript XP remain separate. See [ADR 009](decisions/009-acoustic-receipts.md)
 and [validation](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
+Final head `b38ecf9` passed all six jobs at
+[CI 149](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39495797778),
+including dedicated PostgreSQL/race/vet, real Go/Python failure/recovery and
+**153/153 E2E (29.5m)** without retries/flaky tests. No production deployment or
+live acoustic calibration claimed.
 
 Writing acceptance, 2026-10-21 (CORE-004,
 [PR #19](https://github.com/Loccao102/LocCaoEnglish/pull/19), main `40794e6`):

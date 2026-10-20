@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-21, main `40794e6` (PR #19). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-21, main `99c8535` (PR #20). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -19,8 +19,9 @@ trước khi các contract core liên quan đã vững.
   first-clear. IELTS Reading/Listening đã lưu lựa chọn gốc, chấm server và history
   nguyên tử; Listening có journal playback theo từng phần, không cấp learning XP.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
-  giữ lịch sử sửa bài. Đánh giá ngữ nghĩa sâu và acoustic receipts tiếp tục theo CORE-004.
-- Nền PR #19 đã qua 50 logic cases, 149 browser/API cases và đủ sáu CI jobs,
+  giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
+  audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
+- Nền PR #20 đã qua 50 logic cases, 153 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -475,7 +476,7 @@ ADR 008; chấm thực tế cần cấu hình provider, không tự tạo band k
 Chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chưa deploy production;
 toàn CORE-004 vẫn `in_progress`.
 
-### Lát cắt đang xác minh — Speaking acoustic feedback receipt (`in_review`)
+### Lát cắt đã nghiệm thu — Speaking acoustic feedback receipt (`done` trong phạm vi)
 
 Owner/task: Codex, branch `codex/core004-acoustic-receipts`, 2026-10-21,
 nền main `8ce2260`. Contract: [ADR 009](decisions/009-acoustic-receipts.md).
@@ -497,11 +498,15 @@ không khôi phục sau reload; guided transcript result không phải bằng ch
 - Kiểm tra PostgreSQL/concurrency, mất phản hồi/reload, đổi tài khoản, permission,
   audio không hợp lệ và mobile. Chốt rollout/rollback trước thay luồng đang dùng.
 
-Code hiện có adapter tài khoản, migration 020 và lịch sử phản hồi theo mẫu, không
-lưu raw audio. Writing/acoustic dùng chung policy lease/generation; lỗi provider
-được lưu riêng, không cấp XP hoặc band. Local Go/vet, 22 AI tests, 50 logic và
-asset verification đã đạt; browser Speaking/Writing và CI toàn hệ thống đang
-xác minh. Chỉ nghiệm thu sau khi có bằng chứng trên head cuối cùng; xem
+Đã merge [PR #20](https://github.com/Loccao102/LocCaoEnglish/pull/20), main
+`99c8535`. Head `b38ecf9` đạt đủ sáu jobs tại
+[CI 149](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39495797778),
+gồm PostgreSQL/race/vet, container Go→Python, 22 AI, 50 logic, assets và **153/153
+E2E (29.5m)**, không flaky/retry. Local Speaking cuối đạt 13/13; lượt Speaking +
+Writing trước đó đạt 25/25. Adapter tài khoản/migration 020 lưu lịch sử theo mẫu,
+không lưu raw audio; Writing/acoustic dùng chung lease/generation. Lỗi provider
+không tạo điểm giả, XP hoặc band. Chưa deploy hay hiệu chuẩn provider thật; toàn
+CORE-004 vẫn `in_progress`. Chi tiết tại
 [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
 
 ### Tiêu chí hoàn tất toàn CORE-004

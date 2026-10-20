@@ -5,7 +5,8 @@ Implementation was completed before running the suites below. Failures found dur
 ## Acoustic receipts — 2026-10-21
 
 CORE-004 branch `codex/core004-acoustic-receipts`, based on main `8ce2260`.
-Implementation is in review, not yet accepted or deployed. See [ADR 009](decisions/009-acoustic-receipts.md)
+Accepted via [PR #20](https://github.com/Loccao102/LocCaoEnglish/pull/20), main
+`99c8535`; no production deployment. See [ADR 009](decisions/009-acoustic-receipts.md)
 for retention, immutable inputs, generation leases and rollout/rollback.
 
 Local verification on Windows:
@@ -41,7 +42,14 @@ on Windows. Its legacy row is now explicitly dated one hour earlier in both stor
 modes, preserving all provenance/order assertions instead of relying on distinct
 consecutive clock reads. No player data or rate limits were changed.
 
-Full six-job CI and merge evidence will be recorded after the final head passes.
+Final runtime head `b38ecf90c629e214c1a79330ca0f0b328a80d067` passed all six jobs
+at [CI 149](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39495797778):
+backend **118880398365** includes dedicated PostgreSQL/race/vet; AI has 22 passing
+tests; frontend verifies 50 logic cases/assets/58 routes; container integration
+**118880927123** passes real Go/Python acoustic failure/recovery. E2E job
+**118880927292** passes **153/153 (29.5m)** with strict flaky failure enabled and
+no retries/flaky tests. Reviews/threads were empty at the expected-head squash
+merge. Local final Speaking regression also passed **13/13 (14.8s)**.
 Local memory data is temporary. Docker/PostgreSQL/race were not run locally.
 No production deployment, live audio quality, IELTS overall calibration or wider
 reward/rank policy is claimed by this slice.
