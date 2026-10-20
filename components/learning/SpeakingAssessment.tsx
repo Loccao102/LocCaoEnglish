@@ -18,6 +18,7 @@ function AccountAssessment({attempt, transcript, audio, sampleId, recording, tok
   const [busy, setBusy] = useState(true), [error, setError] = useState(""), [warning, setWarning] = useState("");
   const [recovery, setRecovery] = useState<Recovery | null>(null), [owner, setOwner] = useState("");
   const active = useRef(false), lock = useRef(false), storageKey = useRef("");
+  const lifecycle = useRef(0);
   // The only retained upload is in memory. Recovery storage contains identity only.
   const pending = useRef<{input: AcousticInput; sampleId: string} | null>(null);
   const current = () => active.current && getAuthToken() === token;
@@ -27,9 +28,11 @@ function AccountAssessment({attempt, transcript, audio, sampleId, recording, tok
   }
   useEffect(() => {
     active.current = true;
+    const generation = ++lifecycle.current;
+    const alive = () => current() && lifecycle.current === generation;
     void (async () => {
       try {
-        const me = await getMe(); if (!current()) return;
+        const me = await getMe(); if (!alive()) return;
         setOwner(me.user.id); storageKey.current = `loccao-acoustic.v1:${me.user.id}:${attempt.attemptId}`;
         let saved: Recovery | null = null;
         try {
@@ -40,16 +43,16 @@ function AccountAssessment({attempt, transcript, audio, sampleId, recording, tok
             saved = value; setRecovery(value);
           }
         } catch {setWarning("The local request reference cannot be read. Your account history remains available.");}
-        const history = await listAcoustic(token); if (!current()) return;
+        const history = await listAcoustic(token); if (!alive()) return;
         setItems(history.items);
         if (saved) {
-          try {apply(await findAcoustic(saved.requestId, token));}
-          catch (e) {if (current()) setError(e instanceof APIError && e.status === 404 ? "The previous upload was not found. Record a new take to request feedback." : "Could not confirm the previous request. Refresh saved status before submitting another recording.");}
+          try {const item = await findAcoustic(saved.requestId, token); if (alive()) apply(item);}
+          catch (e) {if (alive()) setError(e instanceof APIError && e.status === 404 ? "The previous upload was not found. Record a new take to request feedback." : "Could not confirm the previous request. Refresh saved status before submitting another recording.");}
         }
-      } catch {if (current()) setError("Could not load pronunciation history. Reload this page to reconnect.");}
-      finally {if (current()) setBusy(false);}
+      } catch {if (alive()) setError("Could not load pronunciation history. Reload this page to reconnect.");}
+      finally {if (alive()) setBusy(false);}
     })();
-    return () => {active.current = false; pending.current = null;};
+    return () => {active.current = false; lifecycle.current++; pending.current = null;};
   }, [token, attempt.attemptId]);
   const sameTake = !!pending.current && pending.current.sampleId === sampleId && pending.current.input.transcript === transcript && pending.current.input.audioBase64 === audio;
   const waiting = receipt?.status === "evaluating";

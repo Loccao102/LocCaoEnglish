@@ -24,7 +24,7 @@ AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "").strip()
 class PronunciationRequest(BaseModel):
     audioBase64: str = Field(min_length=1, max_length=533336)
     referenceText: str = Field(min_length=1, max_length=1000)
-    transcript: str = Field(default="", max_length=2000)
+    transcript: str = Field(default="", max_length=2048)
     locale: str = "en-US"
 
 

@@ -56,7 +56,7 @@ class AcousticProviderTests(unittest.IsolatedAsyncioTestCase):
     async def call(self, handler):
         client = httpx.AsyncClient
         with patch("app.pronunciation.AZURE_SPEECH_KEY", "fixture"), patch("app.pronunciation.AZURE_SPEECH_REGION", "fixture"), patch("app.pronunciation.httpx.AsyncClient", side_effect=lambda **kw: client(transport=httpx.MockTransport(handler), **kw)):
-            return await assess_pronunciation(PronunciationRequest(audioBase64=wav_b64(), referenceText="Hello", transcript="hello"))
+            return await assess_pronunciation(PronunciationRequest(audioBase64=wav_b64(), referenceText="Hello", transcript="x" * 2048))
 
     async def test_exact_audio_reference_and_real_zero_are_retained(self):
         calls = 0
