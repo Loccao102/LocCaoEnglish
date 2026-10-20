@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-18, main `b7b0333` (PR #18). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-21, main `40794e6` (PR #19). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -18,8 +18,9 @@ trước khi các contract core liên quan đã vững.
   khỏi XP. Chín mission đã lưu hội thoại và kết quả rubric theo thứ tự cùng thưởng
   first-clear. IELTS Reading/Listening đã lưu lựa chọn gốc, chấm server và history
   nguyên tử; Listening có journal playback theo từng phần, không cấp learning XP.
-  Đánh giá ngữ nghĩa và acoustic/Writing receipts tiếp tục theo CORE-004.
-- Nền PR #18 đã qua 50 logic cases, 136 browser/API cases và đủ sáu CI jobs,
+  Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
+  giữ lịch sử sửa bài. Đánh giá ngữ nghĩa sâu và acoustic receipts tiếp tục theo CORE-004.
+- Nền PR #19 đã qua 50 logic cases, 149 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -422,7 +423,7 @@ CI trước đó được lưu ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md); co
 [ADR 007](decisions/007-ielts-listening-evidence.md). Chưa deploy production;
 toàn CORE-004 vẫn `in_progress`.
 
-### Lát cắt đang xác minh — IELTS Writing feedback receipt (`in_review`)
+### Lát cắt đã nghiệm thu — IELTS Writing feedback receipt (`done`, 2026-10-21)
 
 Owner/task: Codex, branch `codex/core004-writing-receipts`, 2026-10-18,
 nền main `18509ac`. Contract: [ADR 008](decisions/008-writing-receipts.md).
@@ -456,13 +457,44 @@ generation/lease chống gọi chấm trùng, revision history và adapter owner
 Chấm yêu cầu dẫn chứng từ bài viết, provider/model/rubric rõ và zero hợp lệ;
 đã bỏ band fallback theo số từ ở browser/AI. API legacy trả 409; không cấp XP.
 Local Go tests/vet, 18 AI tests và build 58 routes đã đạt. Lượt browser đầu đạt
-10/10 (2.3m); bản bổ sung generation, lost-start và tab khác nộp bài đang xác minh.
-PostgreSQL/race, CI cuối và nghiệm thu chưa hoàn tất; chưa deploy production.
+10/10 (2.3m); lượt kết hợp Reading/Listening/Writing đạt 27/27 (6.7m). Bản cuối
+`ceb477f` đạt 13/13 Writing (2.3m), gồm generation, lost-start, validation 400 và
+giữ bản sửa khi tab khác nộp bài; đã xem ảnh draft/feedback ở 390×551/844.
 
 Luồng chấm thành công đã chạy qua browser → Go → Python → provider HTTP fixture,
 lưu receipt/history, reload và tạo revision; retry giữ kết quả với đúng một lần
 gọi fixture. Chưa đánh giá model thật. Kiểm tra cuối bổ sung lỗi validation 400
 để người học sửa draft thay vì mắc kẹt trong pending request.
+
+[CI 145](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39488459649)
+đạt đủ sáu jobs trên head `ceb477f`, gồm PostgreSQL/race/vet, integration và
+**149 E2E passed (22.9m)**, không failed/flaky/retry.
+[PR #19](https://github.com/Loccao102/LocCaoEnglish/pull/19) đã merge thành main
+`40794e6`; tree khớp bản đã kiểm tra. Lưu/chấm Writing được nghiệm thu trong phạm vi
+ADR 008; chấm thực tế cần cấu hình provider, không tự tạo band khi provider lỗi.
+Chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chưa deploy production;
+toàn CORE-004 vẫn `in_progress`.
+
+### Lát cắt tiếp theo — Speaking acoustic feedback receipt (`planned`)
+
+Rà route 2026-10-21: `/speaking` và `/ielts/speaking` dùng `SpeakingPractice`;
+`useSpeakingFeedback` còn giữ coach/acoustic feedback trong React state. Audio
+không khôi phục sau reload; guided transcript result không phải bằng chứng phát âm.
+
+- ADR chốt receipt gắn đúng owner, reference/attempt và sample identity; lưu rõ
+  provider/model/method version và loại bằng chứng. Không suy band IELTS từ điểm
+  transcript match hoặc thang acoustic 0–100.
+- Chỉ gửi mẫu khi người học yêu cầu đánh giá. Chốt retention trước schema; mặc
+  định không lưu raw audio dài hạn, không thêm thu âm nền hoặc telemetry âm thanh.
+- Áp dụng lifecycle evaluation/generation phù hợp để giữ exact retry, owner,
+  failure và stale-worker boundaries. Zero hợp lệ; thiếu cấu hình, provider lỗi
+  hoặc schema sai không tạo acoustic score giả. Không hứa exactly-once provider.
+- Giữ guided transcript practice và XP hiện có độc lập với acoustic feedback;
+  receipt mới không cấp thưởng. Chưa ghép overall bốn kỹ năng.
+- Kiểm tra PostgreSQL/concurrency, mất phản hồi/reload, đổi tài khoản, permission,
+  audio không hợp lệ và mobile. Chốt rollout/rollback trước thay luồng đang dùng.
+
+Đây là phạm vi tiếp theo; chưa triển khai acoustic persistence trong lát cắt Writing.
 
 ### Tiêu chí hoàn tất toàn CORE-004
 

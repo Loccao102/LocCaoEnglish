@@ -987,3 +987,40 @@ billing a live model. Temporary fixture services were stopped afterward.
 Rendered `.cache/writing-stack-feedback-551.png` and `-844.png` were viewed:
 18px essay/feedback text, large actions, readable quotations and no horizontal
 overflow at 390px. Final browser regression remains separately required.
+
+Final acceptance on 2026-10-21 (Asia/Bangkok):
+[CI 145](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39488459649)
+passed all six jobs on final PR head `ceb477fdbee1506ed7aa264c0ae1dd07be91df6e`:
+backend, frontend, AI service, compose, integration and E2E. Backend job
+`118854939165` ran `go test -race ./...` and `go vet ./...` with dedicated
+PostgreSQL `loccao_system_test`; Writing migration replay, two-connection
+concurrent create/claim, stale generations and immutable history checks passed.
+Integration passed the new account/draft/failed-provider recovery script through
+the Docker API/AI/PostgreSQL stack. Frontend passed 50 game cases, both asset
+verifiers and the 58-route build/TypeScript; AI passed all 18 tests.
+E2E job `118855428439` reports **149 passed (22.9m)**, no failed/flaky cases or
+test retries under the strict gate. No tests or assertions were relaxed.
+
+Final-head local build/typecheck passed 58 routes; Writing passed **13/13 (2.3m)**
+with no retries (`.cache/writing-head-e2e.log`). This includes correction after a
+definite validation rejection, loss before/after save and submit, lost create,
+account changes, another tab submitting, corrupt/blocked storage and mobile.
+The earlier combined Reading/Listening/Writing run passed **27/27 (6.7m)** before
+the final validation-rejection refinement; full CI verifies all three on the
+final head. The final four draft/feedback captures at 390×551 and 390×844 were
+viewed: 18px text, large controls, clear source/quotes and no horizontal overflow.
+
+PR head and main base `18509ac` were unchanged before merge; submitted reviews
+and inline review threads were empty. Expected-head guarded squash merge of
+[PR #19](https://github.com/Loccao102/LocCaoEnglish/pull/19) created main
+`40794e623aaa2c0cf994dc56ae83f5ee0e85dabd`. Local main's tree exactly matched
+tested head `ceb477f` before the acceptance documentation follow-up.
+This follow-up changes docs only: marks the Writing slice done and defines the
+next Speaking acoustic receipt scope as planned. Full CORE-004 remains in
+progress; live model calibration, persistent acoustic evidence, deeper semantic
+mission grading and calibrated four-skill overall are not claimed complete.
+No production deployment. Provider configuration remains required for real
+Writing feedback; saved essays survive unavailable/invalid provider results.
+
+Documentation-only acceptance validation: all 143 internal file links resolve
+and `git diff --check` passes. No app rebuild is required for these three docs.

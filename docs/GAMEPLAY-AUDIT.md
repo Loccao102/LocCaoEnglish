@@ -24,12 +24,13 @@ that all learning activities received a full manual playthrough in this pass.
 | Listen & Pick | `/listening` uses server-owned choices/grades, recorded normal/slow playback and explicit browser fallback; 18 clips across six packs | More levels and measured difficulty remain; reported playback is not proof of unaided listening |
 | Dictation Rush | `/dictation` uses server token alignment, immutable actual response, audio journal and owner-scoped drafts; 9 sentences at A2/B1/B2 | Guided practice; editorial difficulty still needs player calibration; broader bank and correction practice remain future work |
 | Shadow Me | Guided transcript attempts now store actual text, server alignment and daily claim; coach/acoustic feedback is separate and cannot award XP | Transcript match is not pronunciation mastery; persistent acoustic receipts, provider validation and wider evidence policy remain CORE-004/005 |
-| IELTS Lab | Reading/Listening save original choices and results; Writing now implements account drafts, frozen submissions, validated provider feedback and revision history, pending acceptance; Speaking coaching remains transient | Finish Writing verification in CORE-004, then persistent acoustic feedback and calibrated overall evidence |
+| IELTS Lab | Reading/Listening save original choices and results; Writing saves account drafts, frozen submissions, validated provider feedback and revision history; Speaking coaching remains transient | Reading/Listening/Writing receipt slices accepted in CORE-004; next persistent acoustic feedback and calibrated overall evidence |
 | Campaign missions | All nine routes use ordered contextual rubrics, original dialogue receipts and atomic first-clear rewards; no fixed per-turn learning accuracy | Pattern-based reported dialogue is not semantic/fluency assessment; paraphrase coverage, prerequisite trust and fresh-evidence memory parity remain CORE-004/005/006 |
 
 ## Cross-system priorities
 
-Writing implementation update, 2026-10-21 (CORE-004, acceptance pending):
+Writing acceptance, 2026-10-21 (CORE-004,
+[PR #19](https://github.com/Loccao102/LocCaoEnglish/pull/19), main `40794e6`):
 `WritingLab` uses `useWritingSession` and the dedicated server Writing contract.
 Drafts sync on Save draft, browser recovery retains unsent edits, and submitted
 essays stay immutable. Child revisions preserve their source and history. Provider
@@ -39,6 +40,10 @@ provider failure retains the essay without inventing a band. Completed Writing
 receipts appear as provider estimates in IELTS history without learning rewards.
 See [ADR 008](decisions/008-writing-receipts.md), [API](API.md) and
 [ROADMAP](ROADMAP.md). No live provider calibration or production deployment claimed.
+Final head `ceb477f` passed all six jobs at
+[CI 145](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39488459649),
+including dedicated PostgreSQL/race/vet and 149/149 E2E without flaky retries.
+Local final Writing coverage passed 13/13; Speaking acoustic persistence is next.
 
 IELTS update, 2026-10-18 ([PR #18](https://github.com/Loccao102/LocCaoEnglish/pull/18),
 main `b7b0333`): Reading and Listening now use `VerifiedIeltsPaper` and the shared
