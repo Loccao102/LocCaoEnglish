@@ -513,6 +513,41 @@ legacy history is unchanged. No timer, hints or competitive certification added.
 
 ## AI proxy
 
+### Saved pronunciation assessments
+
+Signed accounts use `speaking-acoustic.v1`; guest previews remain temporary.
+
+- `POST /v1/speaking/assessments`: `{requestId,attemptId,transcript,
+  contentVersion,transcriptRulesVersion,rulesVersion,audioBase64}`. The account's
+  shadowing snapshot supplies the reference. Accept PCM mono 16-bit 16kHz WAV,
+  1 sample–12 seconds, at most 400000 decoded bytes; JSON limit 600000 bytes.
+- `GET /v1/speaking/assessments`: latest 30, optionally `?attemptId=...`.
+- `GET /v1/speaking/assessments/{id}` and
+  `GET /v1/speaking/assessments/by-request/{requestId}` restore saved state.
+- `POST /v1/speaking/assessments/{id}/retry`: `{generation,audioBase64?}`.
+  Old generations, completed and live pending requests only read state. Acquiring
+  a failed/ready/expired generation requires the original matching WAV. A hash
+  alone cannot trigger scoring. Initial exact duplicates never re-evaluate.
+
+Receipts contain reference, reported transcript, sample hash/format/duration,
+content/rules versions, status/generation and validated provider feedback. State
+is `ready`, `evaluating`, `failed` or `completed`; active evaluation returns 202,
+finished outcomes 200. Wrong owner is 404, invalid input 400, conflicting payload,
+generation or missing original recording 409. Unknown status/storage failure is
+503 and must retain the local request identity. No raw audio is stored or logged.
+Browser recovery stores owner/attempt/request identity only. Releasing a local
+reference does not delete account history; after reload another evaluation needs
+a new recording. Explicit same-recording retry may repeat external billing if
+an earlier provider response could not be committed.
+
+The provider result must bind audio/reference hashes and expose finite 0–100
+scores, mandatory accuracy/fluency/completeness, optional prosody and bounded
+word/phoneme details. Zero is valid. Provider/configuration/schema failure saves
+failure with no acoustic score. Model revision is recorded as unspecified, not
+invented. Acoustic receipts award no XP, confidence, review, rank or IELTS band.
+Migration 020/startup schema is additive; deploy AI/API before web and keep saved
+receipt handlers on rollback. See [ADR 009](decisions/009-acoustic-receipts.md).
+
 - `POST /v1/ai/writing-score` requires sign-in and returns 409; use the saved
   Writing submission flow above. The internal AI `/v1/writing/score` endpoint
   accepts server-supplied `{essay,task,rulesVersion}`, returns validated feedback

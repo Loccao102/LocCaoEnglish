@@ -40,6 +40,112 @@ async function microphone(page: Page) {
   });
 }
 
+async function acousticAccount(page: Page, request: import("@playwright/test").APIRequestContext) {
+  const res = await request.post(`${API}/v1/auth/register`, {data: {email: `acoustic-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Acoustic learner"}});
+  expect(res.ok()).toBe(true); const account = await res.json();
+  await page.goto("/account");
+  await page.evaluate(token => {localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change"));}, account.token);
+  return account;
+}
+
+test("Saved acoustic failure survives response loss and reload without storing or resending audio", async ({page, request}) => {
+  await microphone(page); const account = await acousticAccount(page, request);
+  const opened = issued(page); await page.goto("/speaking"); const attempt: LearningAttempt = await (await opened).json();
+  const panel = page.getByRole("complementary", {name: "Saved pronunciation assessments"});
+  await expect(panel.getByText("No saved assessments yet.")).toBeVisible();
+  await card(page).getByRole("button", {name: "Record your voice"}).click();
+  await expect(field(page)).toHaveValue("I said something different.");
+  await card(page).getByRole("button", {name: "Stop recording"}).click();
+  let input: any, saved: any;
+  await page.route("**/v1/speaking/assessments", async route => {
+    if (route.request().method() !== "POST") {await route.continue(); return;}
+    input = route.request().postDataJSON();
+    const response = await route.fetch(); expect(response.ok()).toBe(true); saved = await response.json();
+    await route.abort("failed");
+  }, {times: 1});
+  await panel.getByRole("button", {name: "Assess this recording", exact: true}).click();
+  await expect(panel.getByRole("alert")).toContainText("reply was interrupted");
+  expect(saved.status).toBe("failed"); expect(saved.feedback).toBeUndefined();
+  expect(saved.reference).toBe(attempt.prompt.question); expect(saved.transcript).toBe("I said something different.");
+  expect(input.audioBase64).toBeTruthy();
+  const retry = page.waitForRequest(r => r.url().endsWith("/v1/speaking/assessments") && r.method() === "POST");
+  await panel.getByRole("button", {name: "Assess this recording", exact: true}).click();
+  expect((await retry).postDataJSON()).toEqual(input);
+  await expect(panel.getByRole("status")).toContainText("Saved request: failed");
+  await expect(panel.getByRole("button", {name: "Retry this recording"})).toBeEnabled();
+  const headers = {Authorization: `Bearer ${account.token}`};
+  const history = await (await request.get(`${API}/v1/speaking/assessments`, {headers})).json();
+  expect(history.items).toHaveLength(1); expect(history.items[0].generation).toBe(1);
+  const stored = await page.evaluate(() => JSON.stringify(localStorage));
+  expect(stored).not.toContain('"audioBase64"'); expect(stored).not.toContain(input.audioBase64);
+  let uploads = 0; page.on("request", r => {if (r.method() === "POST" && r.url().includes("/speaking/assessments")) uploads++;});
+  await page.reload();
+  await expect(panel.getByRole("status")).toContainText("original audio is not available");
+  await expect(panel.getByRole("button", {name: "Assess this recording", exact: true})).toBeDisabled();
+  await panel.getByRole("button", {name: "Refresh saved status"}).click();
+  await expect(panel.getByRole("status")).toContainText("Saved request: failed"); expect(uploads).toBe(0);
+  expect((await (await request.get(`${API}/v1/me`, {headers})).json()).user.xp).toBe(0);
+  expect((await request.post(`${API}/v1/speaking/assessments/${saved.id}/retry`, {headers, data: {generation: 1}})).status()).toBe(409);
+  expect((await request.get(`${API}/v1/speaking/assessments/${saved.id}`)).status()).toBe(401);
+  await page.evaluate(() => {localStorage.removeItem("loccao_token"); window.dispatchEvent(new Event("loccao-auth-change"));});
+  await expect(panel).toHaveCount(0); await expect(field(page)).toHaveValue("");
+});
+
+test("A late acoustic reply stays with its original account", async ({page, request}) => {
+  await microphone(page); const first = await acousticAccount(page, request);
+  const otherResponse = await request.post(`${API}/v1/auth/register`, {data: {email: `acoustic-other-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Other speaker"}});
+  expect(otherResponse.ok()).toBe(true); const other = await otherResponse.json();
+  await page.goto("/speaking"); const panel = page.getByRole("complementary", {name: "Saved pronunciation assessments"});
+  await expect(panel.getByText("No saved assessments yet.")).toBeVisible();
+  await card(page).getByRole("button", {name: "Record your voice"}).click(); await expect(field(page)).toHaveValue("I said something different.");
+  await card(page).getByRole("button", {name: "Stop recording"}).click();
+  let release!: () => void, committed!: () => void;
+  const held = new Promise<void>(resolve => {release = resolve;});
+  const saved = new Promise<void>(resolve => {committed = resolve;});
+  await page.route("**/v1/speaking/assessments", async route => {
+    if (route.request().method() !== "POST") {await route.continue(); return;}
+    const response = await route.fetch(); expect(response.ok()).toBe(true); committed(); await held;
+    await route.fulfill({response});
+  });
+  await panel.getByRole("button", {name: "Assess this recording", exact: true}).click(); await saved;
+  await page.evaluate(token => {localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change"));}, other.token);
+  await expect(field(page)).toHaveValue(""); await expect(panel.getByText("No saved assessments yet.")).toBeVisible();
+  release();
+  await panel.getByRole("button", {name: "Refresh saved status"}).click();
+  await expect(panel.getByText("No saved assessments yet.")).toBeVisible(); await expect(panel.getByText(/Saved request: failed/)).toHaveCount(0);
+  await page.evaluate(token => {localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change"));}, first.token);
+  await expect(panel.getByRole("status")).toContainText("Saved request: failed");
+  await expect(panel.getByRole("button", {name: "Assess this recording", exact: true})).toBeDisabled();
+});
+
+for (const height of [551, 844]) test(`Saved acoustic zero and word evidence remain readable at 390x${height}`, async ({page, request}) => {
+  await page.setViewportSize({width: 390, height}); await microphone(page); await acousticAccount(page, request);
+  // UI-only provider fixture. HTTP/store/provider success is verified separately in Go/Python.
+  let receipt: any = null, posts = 0;
+  await page.route("**/v1/speaking/assessments**", async route => {
+    if (route.request().method() === "GET") {await route.fulfill({json: route.request().url().includes("by-request") ? receipt : {items: receipt ? [receipt] : []}}); return;}
+    posts++; const input = route.request().postDataJSON();
+    receipt = {...input, audioBase64: undefined, id: "ui-acoustic-fixture", reference: "Hello, could I have some tea please?", status: "completed", generation: 1, createdAt: "2026-10-21T00:00:00Z", updatedAt: "2026-10-21T00:00:00Z", sample: {sha256: "a".repeat(64), bytes: 556, sampleRate: 16000, durationSec: .016}, feedback: {provider: "azure-speech-pronunciation-assessment", model: "provider-managed-unspecified", methodVersion: "guided-pronunciation.v1", acousticAssessment: true, overall: 0, scores: {accuracy: 0, fluency: 0, completeness: 0, prosody: null}, words: [{word: "Hello", accuracy: 0, errorType: "Mispronunciation", phonemes: [{phoneme: "h", accuracy: 0}]}], coaching: ["Repeat the opening sound slowly."], disclaimer: "Practice feedback, not an official IELTS score."}};
+    await route.fulfill({json: receipt});
+  });
+  await page.goto("/speaking"); const panel = page.getByRole("complementary", {name: "Saved pronunciation assessments"});
+  await expect(panel.getByText("No saved assessments yet.")).toBeVisible();
+  await card(page).getByRole("button", {name: "Record your voice"}).click(); await expect(field(page)).toHaveValue("I said something different.");
+  await card(page).getByRole("button", {name: "Stop recording"}).click();
+  await panel.getByRole("button", {name: "Assess this recording", exact: true}).click();
+  await panel.getByText("0 / 100 · Hello, could I have some tea please?", {exact: true}).click();
+  await expect(panel.getByText("accuracy: 0 / 100", {exact: true})).toBeVisible();
+  await expect(panel.getByText("prosody: Unavailable", {exact: true})).toBeVisible();
+  await panel.getByText("Word and sound feedback", {exact: true}).click();
+  await expect(panel.getByText("h: 0", {exact: true})).toBeVisible();
+  await panel.getByText("h: 0", {exact: true}).scrollIntoViewIfNeeded();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({path: `test-results/acoustic-${height}.png`, fullPage: true});
+  await page.reload(); await expect(panel.getByText(/0 \/ 100 · Hello/)).toBeVisible(); expect(posts).toBe(1);
+  await page.evaluate(() => {localStorage.removeItem("loccao_token"); window.dispatchEvent(new Event("loccao-auth-change"));});
+  await expect(panel).toHaveCount(0);
+});
+
 test("Speaking preserves actual draft and pending answer, then explains alignment", async ({ page, request }) => {
   const opened = issued(page); await page.goto("/speaking?pack=travel-airport");
   const a: LearningAttempt = await (await opened).json();

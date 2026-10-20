@@ -33,7 +33,7 @@ export default function useSpeakingFeedback(attemptId: string, text: string, tar
     const init = { method: "POST", signal: abort.signal, headers: { Authorization: token ? `Bearer ${token}` : "" } };
     const outcomes = await Promise.allSettled([
       text.trim() && !coach ? apiFetch<SpeakingFeedback>("/v1/ai/speaking-feedback", { ...init, body: JSON.stringify({ transcript: text, target, topic: "guided practice" }) }) : Promise.resolve(coach),
-      audio && !acoustic ? apiFetch<PronunciationScore>("/v1/ai/pronunciation-score", { ...init, body: JSON.stringify({ audioBase64: audio, referenceText: target, transcript: text, locale: "en-US" }) }) : Promise.resolve(acoustic),
+      !token && audio && !acoustic ? apiFetch<PronunciationScore>("/v1/ai/pronunciation-score", { ...init, body: JSON.stringify({ audioBase64: audio, referenceText: target, transcript: text, locale: "en-US" }) }) : Promise.resolve(acoustic),
     ]);
     if (!current()) return;
     const failures: string[] = [];

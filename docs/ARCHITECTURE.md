@@ -59,6 +59,11 @@ Answers under 85% accuracy enter the review queue. Review grading uses a small S
 - Speaking can record PCM audio locally. Requesting acoustic assessment sends the
   recorded audio to the scoring endpoint; transcript-only fallback is a different
   evidence mode and must not be presented as acoustic pronunciation scoring.
+  Account assessments use the saved receipt adapter in [ADR 009](decisions/009-acoustic-receipts.md).
+  Reference and versions come from the owned shadowing snapshot. Only metadata
+  and validated feedback are persisted; raw recordings stay in memory. Writing
+  and acoustic adapters share generation-fenced lease policy, with provider I/O
+  outside short transactions. Acoustic feedback changes no learning rewards.
 
 ## Player journey
 

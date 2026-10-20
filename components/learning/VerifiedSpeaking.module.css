@@ -11,5 +11,7 @@
 .card button:disabled { opacity: .55; cursor: default; }
 .card :is(button, textarea):focus-visible { outline: 3px solid #dc9c32; outline-offset: 3px; }
 .note { color: #53655a; }
+.receipt { margin-top: 18px; border-top: 1px solid #a6b6c5; padding-top: 14px; overflow-wrap: anywhere; }
+.receipt summary { font-size: 18px; line-height: 1.6; cursor: pointer; min-height: 48px; }
 .feedback { margin-top: 20px; padding: 20px; background: #eef3f9; border-radius: 18px; }
 @media (max-width: 480px) { .actions { flex-direction: column; align-items: stretch; } .phrase, .feedback { padding: 16px; } }

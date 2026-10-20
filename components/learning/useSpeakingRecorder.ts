@@ -16,6 +16,7 @@ type Handle = { context: AudioContext; stream: MediaStream; source: MediaStreamA
 export default function useSpeakingRecorder(attemptId: string, onTranscript: (text: string) => void) {
   const [phase, setPhase] = useState<"idle" | "requesting" | "recording">("idle");
   const [audio, setAudio] = useState("");
+  const [sampleId, setSampleId] = useState("");
   const [message, setMessage] = useState("");
   const recorder = useRef<Handle | null>(null), recognition = useRef<Recognition | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,7 +42,7 @@ export default function useSpeakingRecorder(attemptId: string, onTranscript: (te
   }
   function cancel() {
     generation.current++; locked.current = false; release();
-    setPhase("idle"); setAudio(""); setMessage("");
+    setPhase("idle"); setAudio(""); setSampleId(""); setMessage("");
     window.speechSynthesis?.cancel();
   }
   useEffect(() => {
@@ -63,13 +64,14 @@ export default function useSpeakingRecorder(attemptId: string, onTranscript: (te
     if (!handle) return;
     if (!handle.chunks.length) { setMessage("No audio was captured. Try recording again."); return; }
     setAudio(wavBase64(handle.chunks, handle.sampleRate));
+    setSampleId(crypto.randomUUID());
   }
   async function start() {
     if (locked.current || !attemptId) return;
     locked.current = true;
     const seq = ++generation.current, token = getAuthToken();
     const current = () => seq === generation.current && token === getAuthToken();
-    setPhase("requesting"); setMessage(""); setAudio("");
+    setPhase("requesting"); setMessage(""); setAudio(""); setSampleId("");
     window.speechSynthesis?.cancel();
     let stream: MediaStream | undefined, context: AudioContext | undefined;
     try {
@@ -104,5 +106,5 @@ export default function useSpeakingRecorder(attemptId: string, onTranscript: (te
       setMessage(error instanceof Error ? error.message : "Could not start recording. Check microphone permission and try again.");
     }
   }
-  return { phase, audio, message, start, stop, cancel };
+  return { phase, audio, sampleId, message, start, stop, cancel };
 }

@@ -29,6 +29,14 @@ that all learning activities received a full manual playthrough in this pass.
 
 ## Cross-system priorities
 
+Acoustic implementation, 2026-10-21 (CORE-004, acceptance pending): signed
+`SpeakingPractice` uses a dedicated receipt adapter bound to the owned phrase,
+reported transcript and validated WAV hash. Provider feedback/history survive
+reload without retaining or automatically resending audio. Explicit retries
+need the original sample; failure never creates an acoustic score or reward.
+Guest previews and transcript XP remain separate. See [ADR 009](decisions/009-acoustic-receipts.md)
+and [validation](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
+
 Writing acceptance, 2026-10-21 (CORE-004,
 [PR #19](https://github.com/Loccao102/LocCaoEnglish/pull/19), main `40794e6`):
 `WritingLab` uses `useWritingSession` and the dedicated server Writing contract.

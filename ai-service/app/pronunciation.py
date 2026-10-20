@@ -1,6 +1,8 @@
 import array
+import asyncio
 import base64
 import io
+import hashlib
 import json
 import math
 import os
@@ -20,7 +22,7 @@ AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "").strip()
 
 
 class PronunciationRequest(BaseModel):
-    audioBase64: str = Field(min_length=100, max_length=12_000_000)
+    audioBase64: str = Field(min_length=1, max_length=533336)
     referenceText: str = Field(min_length=1, max_length=1000)
     transcript: str = Field(default="", max_length=2000)
     locale: str = "en-US"
@@ -33,20 +35,22 @@ def pronunciation_provider() -> str:
 def _decode_audio(value: str) -> bytes:
     payload = value.split(",", 1)[1] if value.startswith("data:") and "," in value else value
     audio = base64.b64decode(payload, validate=True)
-    if len(audio) > 8 * 1024 * 1024:
+    if len(audio) > 400000:
         raise ValueError("audio is too large")
     return audio
 
 
 def _wav_metrics(audio: bytes) -> dict[str, Any]:
+    if len(audio) > 400000:
+        raise ValueError("recording exceeds the short-practice limit")
     with wave.open(io.BytesIO(audio), "rb") as wav:
         channels = wav.getnchannels()
         width = wav.getsampwidth()
         rate = wav.getframerate()
         frames = wav.getnframes()
         raw = wav.readframes(frames)
-    if channels != 1 or width != 2:
-        raise ValueError("expected mono 16-bit PCM WAV")
+    if channels != 1 or width != 2 or rate != 16000 or frames < 1 or frames > 16000 * 12 or len(raw) != frames * 2:
+        raise ValueError("expected a complete mono 16-bit 16kHz PCM WAV of at most 12 seconds")
     samples = array.array("h")
     samples.frombytes(raw)
     if sys.byteorder == "big":
@@ -145,37 +149,33 @@ async def assess_pronunciation(req: PronunciationRequest) -> dict[str, Any]:
     }
     params = {"language": req.locale, "format": "detailed"}
     try:
-        async with httpx.AsyncClient(timeout=35) as client:
-            response = await client.post(url, params=params, headers=headers, content=audio)
-            response.raise_for_status()
-            data = response.json()
-        best = (data.get("NBest") or [{}])[0]
-        pa = best.get("PronunciationAssessment") or {}
-        words = []
-        for item in best.get("Words") or []:
-            word_pa = item.get("PronunciationAssessment") or {}
-            phonemes = []
-            for phoneme in item.get("Phonemes") or []:
-                phoneme_pa = phoneme.get("PronunciationAssessment") or {}
-                phonemes.append({"phoneme": phoneme.get("Phoneme"), "accuracy": phoneme_pa.get("AccuracyScore")})
-            words.append({
-                "word": item.get("Word"),
-                "accuracy": word_pa.get("AccuracyScore"),
-                "errorType": word_pa.get("ErrorType", "None"),
-                "phonemes": phonemes,
-            })
+        async with asyncio.timeout(20), httpx.AsyncClient(timeout=20) as client:
+            async with client.stream("POST", url, params=params, headers=headers, content=audio) as response:
+                response.raise_for_status()
+                body = bytearray()
+                async for chunk in response.aiter_bytes():
+                    body.extend(chunk)
+                    if len(body) > 131072:
+                        raise ValueError("provider response too large")
+        data = json.loads(body)
+        if data.get("RecognitionStatus") != "Success":
+            raise ValueError("recognition did not succeed")
+        best = data["NBest"][0]
+        pa = best["PronunciationAssessment"]
+        overall = _score(pa.get("PronScore"))
+        scores = {"accuracy": _score(pa.get("AccuracyScore")), "fluency": _score(pa.get("FluencyScore")),
+                  "completeness": _score(pa.get("CompletenessScore")), "prosody": _score(pa.get("ProsodyScore"), optional=True)}
+        words = _words(best.get("Words", []))
         return {
             "provider": "azure-speech-pronunciation-assessment",
+            "model": "provider-managed-unspecified",
+            "methodVersion": "guided-pronunciation.v1",
+            "locale": req.locale,
+            "audioSHA256": hashlib.sha256(audio).hexdigest(),
+            "referenceSHA256": hashlib.sha256(req.referenceText.encode("utf-8")).hexdigest(),
             "acousticAssessment": True,
-            "overall": pa.get("PronScore"),
-            "scores": {
-                "accuracy": pa.get("AccuracyScore"),
-                "fluency": pa.get("FluencyScore"),
-                "completeness": pa.get("CompletenessScore"),
-                "prosody": pa.get("ProsodyScore"),
-                "textMatch": _text_match(req.referenceText, req.transcript),
-                "signalQuality": metrics["signalQuality"],
-            },
+            "overall": overall,
+            "scores": scores,
             "words": words[:60],
             "audio": metrics,
             "recognitionText": best.get("Display") or data.get("DisplayText"),
@@ -186,8 +186,41 @@ async def assess_pronunciation(req: PronunciationRequest) -> dict[str, Any]:
             ],
             "disclaimer": "Acoustic scores are produced by Azure Speech Pronunciation Assessment and are learning feedback, not an official IELTS score.",
         }
-    except Exception as exc:
+    except (httpx.HTTPError, TimeoutError, ValueError, KeyError, IndexError, TypeError, AttributeError):
         return _fallback(req, audio, "acoustic provider unavailable")
+
+
+def _score(value, optional=False):
+    if value is None and optional:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 100:
+        raise ValueError("invalid acoustic score")
+    return value
+
+
+def _words(items):
+    if not isinstance(items, list):
+        raise ValueError("invalid word evidence")
+    words = []
+    for item in items[:60]:
+        word = item.get("Word")
+        if not isinstance(word, str) or not word.strip() or len(word) > 100:
+            raise ValueError("invalid word")
+        pa = item.get("PronunciationAssessment") or {}
+        phonemes = item.get("Phonemes") or []
+        if not isinstance(phonemes, list) or len(phonemes) > 50:
+            raise ValueError("invalid phonemes")
+        details = []
+        for phoneme in phonemes:
+            text = phoneme.get("Phoneme")
+            if not isinstance(text, str) or not text.strip() or len(text) > 25:
+                raise ValueError("invalid phoneme")
+            details.append({"phoneme": text, "accuracy": _score((phoneme.get("PronunciationAssessment") or {}).get("AccuracyScore"), optional=True)})
+        error = pa.get("ErrorType", "None")
+        if not isinstance(error, str) or len(error) > 100:
+            raise ValueError("invalid error type")
+        words.append({"word": word, "accuracy": _score(pa.get("AccuracyScore"), optional=True), "errorType": error, "phonemes": details})
+    return words
 
 
 @router.post("/pronunciation/score")

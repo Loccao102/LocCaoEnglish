@@ -6,6 +6,7 @@ import useVerifiedLearningRound from "./learning/useVerifiedLearningRound";
 import useSpeakingRecorder from "./learning/useSpeakingRecorder";
 import useSpeakingFeedback from "./learning/useSpeakingFeedback";
 import LearningRoundNotice from "./learning/LearningRoundNotice";
+import SpeakingAssessment from "./learning/SpeakingAssessment";
 import styles from "./learning/VerifiedSpeaking.module.css";
 
 export default function SpeakingPractice({ pack = "default" }: { pack?: string }) {
@@ -67,6 +68,7 @@ function SpeakingRound({ pack, level }: { pack: string; level: CEFRLevel }) {
         <p>Source: {feedback.acoustic.provider}. This feedback is not saved as learning progress.</p>
         {typeof feedback.acoustic.disclaimer === "string" && <p>{feedback.acoustic.disclaimer}</p>}
       </aside>}
+      <SpeakingAssessment attempt={attempt} transcript={actual} audio={recording.audio} sampleId={recording.sampleId} recording={recordingBusy} />
       {result && phase === "feedback" && <div className={styles.feedback} aria-label="Transcript result">
         <h3>{result.correct ? "Your transcript matches" : "Compare your words"}</h3>
         <p>{Math.floor((result.transcriptMatch?.accuracy || 0) * 100 + 1e-8)}% transcript match</p>
