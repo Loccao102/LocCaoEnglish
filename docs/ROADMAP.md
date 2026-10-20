@@ -475,7 +475,10 @@ ADR 008; chấm thực tế cần cấu hình provider, không tự tạo band k
 Chi tiết ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md). Chưa deploy production;
 toàn CORE-004 vẫn `in_progress`.
 
-### Lát cắt tiếp theo — Speaking acoustic feedback receipt (`planned`)
+### Lát cắt đang xác minh — Speaking acoustic feedback receipt (`in_review`)
+
+Owner/task: Codex, branch `codex/core004-acoustic-receipts`, 2026-10-21,
+nền main `8ce2260`. Contract: [ADR 009](decisions/009-acoustic-receipts.md).
 
 Rà route 2026-10-21: `/speaking` và `/ielts/speaking` dùng `SpeakingPractice`;
 `useSpeakingFeedback` còn giữ coach/acoustic feedback trong React state. Audio
@@ -494,7 +497,12 @@ không khôi phục sau reload; guided transcript result không phải bằng ch
 - Kiểm tra PostgreSQL/concurrency, mất phản hồi/reload, đổi tài khoản, permission,
   audio không hợp lệ và mobile. Chốt rollout/rollback trước thay luồng đang dùng.
 
-Đây là phạm vi tiếp theo; chưa triển khai acoustic persistence trong lát cắt Writing.
+Code hiện có adapter tài khoản, migration 020 và lịch sử phản hồi theo mẫu, không
+lưu raw audio. Writing/acoustic dùng chung policy lease/generation; lỗi provider
+được lưu riêng, không cấp XP hoặc band. Local Go/vet, 22 AI tests, 50 logic và
+asset verification đã đạt; browser Speaking/Writing và CI toàn hệ thống đang
+xác minh. Chỉ nghiệm thu sau khi có bằng chứng trên head cuối cùng; xem
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
 
 ### Tiêu chí hoàn tất toàn CORE-004
 

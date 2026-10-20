@@ -41,7 +41,7 @@ func (c *Client) Post(ctx context.Context, path string, input any, out any) erro
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("%w: status %d", ErrUnavailable, resp.StatusCode)
 	}
-	if path == "/v1/writing/score" {
+	if path == "/v1/writing/score" || path == "/v1/pronunciation/score" {
 		body, err := io.ReadAll(io.LimitReader(resp.Body, (128<<10)+1))
 		if err != nil {
 			return err

@@ -50,6 +50,7 @@ type Store struct {
 	learningAttempts map[string]LearningAttemptRecord
 	learningRewards  map[string]bool
 	writingAttempts  map[string]writingRecord
+	acousticReceipts map[string]acousticRecord
 }
 
 func New(databaseURL string) (*Store, error) {

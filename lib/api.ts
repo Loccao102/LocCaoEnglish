@@ -6,7 +6,7 @@ export async function apiFetch<T>(path:string,init:RequestInit={}):Promise<T>{
   const headers=new Headers(init.headers);headers.set("Content-Type","application/json");
   if(!headers.has("Authorization")){const token=getAuthToken();if(token)headers.set("Authorization",`Bearer ${token}`);}
   const controller=new AbortController(),abort=()=>controller.abort();
-  const timeout=setTimeout(abort,path.includes("/ai/")||path.includes("/conversation/")||path.includes("/ielts/writing/")?65000:12000);
+  const timeout=setTimeout(abort,path.includes("/ai/")||path.includes("/conversation/")||path.includes("/ielts/writing/")||path.includes("/speaking/assessments")?65000:12000);
   if(init.signal?.aborted)controller.abort();else init.signal?.addEventListener("abort",abort,{once:true});
   try{
     const response=await fetch(`${API_URL}${path}`,{...init,headers,cache:"no-store",signal:controller.signal});

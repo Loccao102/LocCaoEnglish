@@ -84,6 +84,23 @@ func testIELTSEvidence(t *testing.T, activity string) {
 			if err != nil || !legacy.Legacy || legacy.Evidence != "legacy-unverified" {
 				t.Fatal("legacy source promoted to verified", legacy, err)
 			}
+			// This fixture represents older history. Do not rely on consecutive wall
+			// clock reads being distinct on systems with a coarse clock resolution.
+			legacy.CreatedAt = time.Now().UTC().Add(-time.Hour)
+			if s.db != nil {
+				if _, err = s.db.ExecContext(ctx, "UPDATE ielts_attempts SET created_at=$2 WHERE id=$1", legacy.ID, legacy.CreatedAt); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				state := s.ieltsMemory()
+				state.mu.Lock()
+				for i := range state.attempts[u.ID] {
+					if state.attempts[u.ID][i].ID == legacy.ID {
+						state.attempts[u.ID][i].CreatedAt = legacy.CreatedAt
+					}
+				}
+				state.mu.Unlock()
+			}
 			start := func(req string) LearningAttemptRecord {
 				p, private, id, version, e := learning.NewIELTSReading()
 				pack, rules, skill := learning.IELTSReadingPack, learning.IELTSReadingRulesVersion, "Reading"

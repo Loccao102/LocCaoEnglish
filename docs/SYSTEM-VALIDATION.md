@@ -2,6 +2,50 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Acoustic receipts — 2026-10-21
+
+CORE-004 branch `codex/core004-acoustic-receipts`, based on main `8ce2260`.
+Implementation is in review, not yet accepted or deployed. See [ADR 009](decisions/009-acoustic-receipts.md)
+for retention, immutable inputs, generation leases and rollout/rollback.
+
+Local verification on Windows:
+
+- `go test ./...` and `go vet ./...`: pass, memory store. New cases cover strict
+  WAV validation, provider identity/input binding/zero, concurrent generation
+  claims, stale finish, exact duplicate creation, owner/version/hash conflicts,
+  missing original audio and no learning rewards. PostgreSQL/race still needs CI.
+- AI compile + `unittest discover -s tests -v`: **22 passed**. The Azure transport
+  is synthetic: actual PCM/reference transmission, metadata hashes, zero and
+  word/phoneme details, malformed/missing/nonfinite scores, oversized response
+  and provider timeout. No live provider calibration or physical-microphone proof.
+- Production build/typecheck: pass, **58 routes**. `test:game`: **50 passed**;
+  illustration verifier **41 assets/23 hashes** and 3D verifier **45 GLBs/24 companions** pass.
+- Speaking + Writing browser/API suite: **25 passed (2.5m)**; the added delayed
+  acoustic/account-switch case separately passed **1/1**. These include real
+  account API lost-response/reload/exact retry, audio-free recovery storage,
+  failed provider state, no XP and existing guest microphone/cleanup flows.
+  Two successful acoustic history renders use explicit UI fixtures; real
+  success validation/storage is covered by Go HTTP/store and Python transport tests.
+- 390×551 and 390×844 rendered histories were inspected: readable scores and
+  controls, expandable word/phoneme feedback, no horizontal overflow. Screenshots
+  are generated under ignored `test-results/` by the two viewport cases.
+- `node scripts/verify-acoustic-api.mjs`: pass against the local Go API with an
+  intentionally unreachable AI address. CI additionally runs it through real
+  Go/Python containers with an unconfigured acoustic provider and dedicated data.
+
+Initial browser failures were a local launch configuration error (API CORS had
+only port 3000 while web used 3102). Restarting the test-only API with the explicit
+3102 origins resolved the failures; no application assertion was weakened.
+One pre-existing Reading history fixture also exposed equal wall-clock timestamps
+on Windows. Its legacy row is now explicitly dated one hour earlier in both store
+modes, preserving all provenance/order assertions instead of relying on distinct
+consecutive clock reads. No player data or rate limits were changed.
+
+Full six-job CI and merge evidence will be recorded after the final head passes.
+Local memory data is temporary. Docker/PostgreSQL/race were not run locally.
+No production deployment, live audio quality, IELTS overall calibration or wider
+reward/rank policy is claimed by this slice.
+
 ## Delivered system
 
 - `/journey` connects seven story chapters, fourteen quests, eight fair games, all twenty-four companions, learning recommendations and companion selection.

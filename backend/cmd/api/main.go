@@ -32,6 +32,9 @@ func main() {
 	if err := st.EnsureIELTS(context.Background()); err != nil {
 		log.Fatalf("initialize IELTS store: %v", err)
 	}
+	if err := st.EnsureAcoustic(context.Background()); err != nil {
+		log.Fatalf("initialize acoustic store: %v", err)
+	}
 	if err := st.EnsurePlayerProfiles(context.Background()); err != nil {
 		log.Fatalf("initialize player profiles: %v", err)
 	}

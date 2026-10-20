@@ -113,6 +113,8 @@ jobs:
         run: curl -fsS http://localhost:8080/v1/social/leaderboard | grep -q 'items'
       - name: Writing saved revision and unavailable-provider recovery
         run: node scripts/verify-writing-api.mjs
+      - name: Saved acoustic feedback and unavailable-provider recovery
+        run: node scripts/verify-acoustic-api.mjs
       - name: Neural TTS fallback route
         run: |
           curl -fsS -X POST http://localhost:8080/v1/ai/tts \

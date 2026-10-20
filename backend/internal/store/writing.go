@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Loccao102/LocCaoEnglish/backend/internal/evaluation"
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/writing"
 )
@@ -243,35 +244,23 @@ func (s *Store) ClaimWriting(ctx context.Context, owner, id string, in writing.S
 		if in.Version != a.Version || in.Essay != a.Essay {
 			return writing.ErrConflict
 		}
-		if in.Generation < 0 || in.Generation > a.Generation {
+		state, acquired, err := evaluation.Claim(evaluation.State{Status: a.Status, Generation: a.Generation, LeaseUntil: a.LeaseUntil}, in.Generation, time.Now().UTC())
+		if err != nil {
 			return writing.ErrConflict
 		}
-		// An unconfirmed old request only reads its resulting state. A deliberate
-		// retry after failure/expired lease must name the latest generation.
-		if in.Generation < a.Generation {
-			return nil
+		if acquired {
+			a.Status, a.Generation, a.LeaseUntil = state.Status, state.Generation, state.LeaseUntil
+			a.Failure = ""
+			a.UpdatedAt = time.Now().UTC()
+			claimed = true
 		}
-		now := time.Now().UTC()
-		if a.Status == "completed" || a.Status == "evaluating" && a.LeaseUntil != nil && now.Before(*a.LeaseUntil) {
-			return nil
-		}
-		if a.Status != "draft" && a.Status != "failed" && a.Status != "evaluating" {
-			return writing.ErrConflict
-		}
-		lease := now.Add(90 * time.Second)
-		a.Status = "evaluating"
-		a.Failure = ""
-		a.Generation++
-		a.LeaseUntil = &lease
-		a.UpdatedAt = now
-		claimed = true
 		return nil
 	})
 	return a, claimed, err
 }
 func (s *Store) FinishWriting(ctx context.Context, owner, id string, generation int, feedback *writing.Feedback) (writing.Attempt, error) {
 	return s.changeWriting(ctx, owner, id, func(a *writing.Attempt) error {
-		if a.Status != "evaluating" || a.Generation != generation {
+		if !evaluation.CanFinish(evaluation.State{Status: a.Status, Generation: a.Generation, LeaseUntil: a.LeaseUntil}, generation) {
 			return writing.ErrConflict
 		}
 		if feedback != nil {
