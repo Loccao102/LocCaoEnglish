@@ -54,6 +54,36 @@ Local memory data is temporary. Docker/PostgreSQL/race were not run locally.
 No production deployment, live audio quality, IELTS overall calibration or wider
 reward/rank policy is claimed by this slice.
 
+## Checked practice rewards — 2026-10-21
+
+CORE-005 branch `codex/core005-reward-boundary`, [ADR 010](decisions/010-checked-practice-ranking.md).
+This slice is in review; full CI/merge evidence will follow on the final head.
+
+- Go tests/vet pass locally (memory). New memory/PostgreSQL-parity cases retain
+  legacy personal XP while excluding it from rank, derive 20 checked XP once
+  through ten concurrent same-attempt completions, exclude wrong/replayed and
+  unsupported-rule receipts, and reopen PostgreSQL for durability when CI supplies
+  the dedicated test URL. All arbitrary activity names/duel scores reject without
+  changing XP/confidence/reviews; bookmark auth/range/provenance are checked.
+- Production build/typecheck pass, 58 routes. Actual browser/API core + reward
+  tests pass **15/15 (11.6s)**: real Word Link input, lost committed response,
+  reload/retries and exactly one checked-board contribution; generic renamed score
+  attempts; practice invitation; local placement with no shared-demo mutation;
+  lesson open responses/locked checks, failed bookmark and explicit retry.
+- Lesson and community renders at **390×551/844** were inspected. A first render
+  exposed old 9–10px social labels; new labels/rows are 16–20px and score/name
+  layout wraps without horizontal overflow. Lesson input has an accessible name,
+  checked responses lock and controls remain at least 48px.
+- The first full lesson run exposed an existing null-options crash on entering
+  a free-response item; fixed optional options handling. One new alert assertion
+  initially also matched Next's route announcer; it is now scoped to the lesson
+  and still requires the actual bookmark failure text. No checks were removed.
+
+No SQL migration/reset/backfill, production deployment or competitive skill
+certification. Existing lifetime XP, mixed legacy confidence and campaign unlocks
+are preserved, not retroactively verified. Real competitive sessions and legacy
+mastery/prerequisite policy remain outside this slice.
+
 ## Delivered system
 
 - `/journey` connects seven story chapters, fourteen quests, eight fair games, all twenty-four companions, learning recommendations and companion selection.

@@ -67,6 +67,12 @@ Answers under 85% accuracy enter the review queue. Review grading uses a small S
 
 ## Player journey
 
+The community board derives checked practice XP from immutable shared attempts
+and their daily claim ledger, not the mixed lifetime user counter. Generic client
+accuracy and arbitrary duel-score writes are retired. Lessons/placement remain
+explicit local practice/preferences; bookmarks are self-reported. Legacy totals
+and confidence remain intact and are not reclassified. See [ADR 010](decisions/010-checked-practice-ranking.md).
+
 See [ADR 001](decisions/001-unified-player-journey.md) for the shared catalog, guest/account boundary, offline completion queue, transactional ledger and derived companion friendship milestones.
 
 See [ADR 002](decisions/002-core-first-development.md) for core-first development

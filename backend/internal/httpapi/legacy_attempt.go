@@ -1,46 +1,12 @@
 package httpapi
 
-import (
-	"net/http"
-	"strings"
+import "net/http"
 
-	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
-)
-
+// No activity alias can turn client-reported accuracy into learning evidence.
+// Keep the route so older clients get an explicit migration response.
 func (s *Server) attempt(w http.ResponseWriter, r *http.Request) {
-	id, ok := s.userID(w, r)
-	if !ok {
+	if _, ok := s.userID(w, r); !ok {
 		return
 	}
-	var in model.AttemptInput
-	if !decode(w, r, &in) {
-		return
-	}
-	// Migrated activities must not award progress through the older accuracy API.
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-reading") || strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-listening") || strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "ielts-writing") {
-		problem(w, http.StatusConflict, "IELTS practice uses server-owned attempts and does not award learning progress")
-		return
-	}
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(in.Activity)), "npc-conversation") {
-		problem(w, http.StatusConflict, "mission dialogue no longer awards per-turn learning scores; use mission evaluation and completion")
-		return
-	}
-	switch strings.ToLower(strings.TrimSpace(in.Activity)) {
-	case "shadowing", "pronunciation-assessment":
-		problem(w, http.StatusConflict, "use a shadowing attempt for transcript practice; coach and acoustic feedback do not award progress")
-		return
-	case "word-link", "grammar-repair", "collocation-factory", "sentence-builder", "word-graph", "reading-race", "story-choice", "listen-pick", "dictation":
-		problem(w, http.StatusConflict, "use server-owned learning attempts for this activity")
-		return
-	}
-	if strings.TrimSpace(in.Skill) == "" || strings.TrimSpace(in.ItemKey) == "" {
-		problem(w, http.StatusBadRequest, "skill and itemKey are required")
-		return
-	}
-	res, err := s.store.RecordAttempt(r.Context(), id, in)
-	if err != nil {
-		problem(w, 500, err.Error())
-		return
-	}
-	write(w, http.StatusCreated, res)
+	problem(w, http.StatusConflict, "client-reported accuracy is retired; use server-owned learning attempts. Local lesson and placement checks do not award learning progress")
 }

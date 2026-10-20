@@ -29,6 +29,17 @@ that all learning activities received a full manual playthrough in this pass.
 
 ## Cross-system priorities
 
+Reward-boundary implementation, 2026-10-21 (CORE-005, acceptance pending): the
+generic accuracy API is retired for all activity names; lesson/placement checks
+no longer submit invented target responses/accuracy as learning evidence. Open
+lesson responses are ungraded and checked items cannot be counted repeatedly.
+The social board derives checked XP from eligible immutable receipts/daily claims,
+excludes legacy/story/estimate totals and labels its guided-practice limits.
+Arbitrary duel score writes are retired; old results remain unverified archive
+and invitations open ordinary practice. Personal legacy progress is retained;
+mixed skill confidence and campaign prerequisite policy remain separate work.
+See [ADR 010](decisions/010-checked-practice-ranking.md).
+
 Acoustic acceptance, 2026-10-21 (CORE-004, [PR #20](https://github.com/Loccao102/LocCaoEnglish/pull/20),
 main `99c8535`): signed
 `SpeakingPractice` uses a dedicated receipt adapter bound to the owned phrase,

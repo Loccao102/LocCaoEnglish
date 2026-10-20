@@ -38,8 +38,11 @@ của chủ dự án thì ghi lý do ở task/PR; không tự đặt thêm vòng
 | Coach/IELTS estimates | Ghi rõ phương pháp, provider và giới hạn; không trình bày như điểm thi chính thức |
 | Speaking | Transcript match, heuristic và acoustic assessment là các loại bằng chứng khác nhau |
 
-`/v1/attempts` hiện còn nhận accuracy từ client: đây là nợ CORE-001. Không tuyên bố
-nó đã an toàn cho mastery/rank, không thêm tính năng thưởng dựa trên điểm tự báo.
+`/v1/attempts` đã nghỉ ghi cho mọi activity; không mở lại hoặc đổi tên activity để
+nhận accuracy từ client. Lịch sử/XP/confidence legacy được giữ, không tự nâng thành
+bằng chứng đã xác thực. Bảng checked-practice chỉ dùng receipt đủ điều kiện theo
+[ADR 010](decisions/010-checked-practice-ranking.md); đây vẫn là luyện tập có hỗ trợ,
+không phải chứng chỉ năng lực hay competitive anti-cheat.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 
