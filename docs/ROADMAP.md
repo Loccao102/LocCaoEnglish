@@ -616,6 +616,15 @@ Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình 
 
 ## GOV-002 — Rào chắn merge thực tế
 
+Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
+`protected:false`, required status checks ở chế độ off; danh sách repository
+rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/LocCaoEnglish/branches/main),
+[rulesets](https://api.github.com/repos/Loccao102/LocCaoEnglish/rulesets).
+Đây là bằng chứng chưa có enforcement tại thời điểm đọc, không phải đã cấu hình.
+Các merge trong đợt này vẫn chờ đủ sáu jobs và dùng expected head SHA thủ công.
+Connector hiện có chỉ cung cấp đọc branch protection/rulesets; cần quyền/công cụ
+quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Mục vẫn planned.
+
 **Cần làm:** kiểm tra branch rules/permissions và CI jobs thật trên GitHub; cấu hình
 required checks và review phù hợp với quyền/chế độ cộng tác của repository. Không
 tự điền CODEOWNERS cho người chưa được phân công. Ghi những điều được kiểm tra tự

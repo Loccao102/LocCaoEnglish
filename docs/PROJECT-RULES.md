@@ -137,9 +137,9 @@ bắt buộc đang lỗi hoặc phần nghiệm thu còn chưa đáp ứng.
 
 AGENTS giúp agent đọc luật; CONTRIBUTING và PR template đưa luật vào review.
 CI hiện có kiểm tra frontend, backend, AI, compose, integration và E2E. Tài liệu
-không thể tự cưỡng chế mọi người tuân thủ: cấu hình branch protection/required
-reviews của GitHub chưa được xác minh hoặc thay đổi trong đợt này (GOV-002).
-Không được tuyên bố merge đã bị GitHub chặn nếu chưa xác minh cấu hình đó.
+không thể tự cưỡng chế mọi người tuân thủ: lần đọc GitHub 2026-10-21 xác nhận
+main chưa protected và repository chưa có ruleset (GOV-002); chưa thay cấu hình.
+Phải chờ đủ check theo quy trình, không coi đó là GitHub đã cưỡng chế chặn merge.
 
 Ngoại lệ phải nêu phạm vi, lý do, rủi ro và việc còn lại trong PR. Yêu cầu rõ ràng
 của chủ dự án quyết định phạm vi/ưu tiên; quy tắc repo không thay thế hướng dẫn cấp

@@ -2,9 +2,10 @@ package store
 
 import (
 	"context"
+	"sort"
+
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 	"github.com/lib/pq"
-	"sort"
 )
 
 const CheckedPracticeMethod = "server-checked-practice.v1"
