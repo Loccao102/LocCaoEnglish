@@ -115,6 +115,8 @@ jobs:
         run: node scripts/verify-writing-api.mjs
       - name: Saved acoustic feedback and unavailable-provider recovery
         run: node scripts/verify-acoustic-api.mjs
+      - name: Checked practice receipts and retired client scores
+        run: node scripts/verify-reward-boundary.mjs
       - name: Neural TTS fallback route
         run: |
           curl -fsS -X POST http://localhost:8080/v1/ai/tts \
