@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-22, main `6e130fc` (PR #21). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-22, main `a0ae3be` (PR #22). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -21,7 +21,7 @@ trước khi các contract core liên quan đã vững.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
   giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
   audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
-- Nền PR #21 đã qua 50 logic cases, 161 browser/API cases và đủ sáu CI jobs,
+- Nền PR #22 đã qua 50 logic cases, 170 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -565,7 +565,7 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Đang xác minh — Daily plan cố định và bằng chứng theo ngày (`in_review`)
+### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core006-daily-recovery`, 2026-10-21, tiếp nối
 reward-boundary PR #21 đã nghiệm thu, main `6e130fc`. [ADR 011](decisions/011-daily-practice-recovery.md)
@@ -579,8 +579,15 @@ Migration 021/startup schema bổ sung plan/receipt; giữ claim/XP/streak cũ, 
 legacy thay vì backfill. Memory và SQL dùng actual completion time giống nhau;
 retry kết quả cũ không đổi ngày, valid wrong/fresh replay được tính công luyện.
 UI giữ owner/date/rules khi mất response, GET phục hồi và explicit retry; account
-đổi/hết hạn, storage lỗi/corrupt có đường xử lý. Đang xác minh Go/HTTP, browser
-thật và hai kích thước mobile; CI PostgreSQL/race/container trên head cuối cần đạt.
+đổi/hết hạn, storage lỗi/corrupt có đường xử lý. Go/HTTP, browser thật và hai kích
+thước mobile đã đạt. Head `b4410d3` đạt đủ sáu jobs tại
+[CI 155](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39797758885), lượt
+cuối gồm PostgreSQL/race/vet, container integration và **170/170 E2E (29.9m)**.
+[PR #22](https://github.com/Loccao102/LocCaoEnglish/pull/22) đã merge thành main
+`a0ae3be` sau kiểm tra reviews/threads và expected head. Lỗi fixture assets cũ và
+sự cố cập nhật kết quả GitHub được ghi tại
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#stable-daily-practice-recovery--2026-10-22).
+Chưa deploy production; toàn CORE-006 và CORE-005 vẫn `in_progress`.
 
 **Cần làm:** mở rộng quy tắc khôi phục sang shared learning attempts; rà các ranh
 giới guest/account/offline/tài khoản hết hạn. Đánh giá nhu cầu records Cloud Hop

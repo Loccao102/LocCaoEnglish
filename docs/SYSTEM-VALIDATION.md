@@ -6,8 +6,9 @@ Implementation was completed before running the suites below. Failures found dur
 
 CORE-006/005 branch `codex/core006-daily-recovery`, based on accepted PR #21,
 main `6e130fc`. Contract: [ADR 011](decisions/011-daily-practice-recovery.md).
-Acceptance of this slice still requires final-head six-job CI; broader recovery,
-legacy mastery policy and difficulty calibration are not completed by this work.
+Accepted via [PR #22](https://github.com/Loccao102/LocCaoEnglish/pull/22), main
+`a0ae3be`, on 2026-10-22. Broader recovery, legacy mastery policy and difficulty
+calibration remain open.
 
 - Local `go test ./...` and `go vet ./...` pass (memory). New domain/store/HTTP
   cases cover UTC+7 boundaries, completion versus creation time, valid wrong/fresh
@@ -15,7 +16,7 @@ legacy mastery policy and difficulty calibration are not completed by this work.
   exclusion, frozen plans, owner/version guards, strict dated request bodies,
   12 concurrent claims with one fixed reward, clone isolation and separate memory
   stores. PostgreSQL cases additionally reopen the store, replay migration 021
-  and exercise two store instances; those require the dedicated CI database.
+  and exercise two store instances; these passed against the dedicated CI database.
 - Production build/typecheck passes, **58 routes**. Actual Daily + Speaking
   browser/API regression passes **22/22 (2.4m)**. Includes real guided speaking
   input plus real server-graded Reading/Sentence completion, a changed profile,
@@ -41,12 +42,28 @@ legacy mastery policy and difficulty calibration are not completed by this work.
   reward control, then an owned incomplete plan with visible closed-chest art,
   disabled reward button and zero reward writes. Full asset suite passes locally
   **8/8 (8.4s)** on desktop/mobile. No runtime eligibility or test assertion was
-  weakened; the final head must pass all six CI jobs before merge.
+  weakened. The corrected final head was verified below before merge.
+
+Final head `b4410d336f705e62b8decabd991c547ddf973574` passed all six jobs at
+[CI 155](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39797758885), final
+attempt: backend **119922931947** (dedicated PostgreSQL/race/vet), frontend
+**119922845624** (50 logic cases, assets, 58 routes), AI **119922845392**, compose
+**119922842405**, real container integration **119922958115**, and E2E
+**119922958465**, **170/170 passed (29.9m)**. Strict flaky failure remained enabled;
+no failing/flaky cases were accepted. Reviews/threads were empty and the squash
+merge pinned the expected head.
+
+The first CI 155 attempt already passed **170/170 (31.0m)**, but its compose check
+kept reporting in progress after all steps completed. GitHub confirmed an
+[Actions Results incident](https://www.githubstatus.com/incidents/q29p76qtnkyk).
+The affected job/dependencies were rerun on the unchanged head; final acceptance
+uses the fresh six successful conclusions above. No check was bypassed.
 
 Migration 021 is additive, preserves older claims/XP/streak and marks absent
 receipts as legacy. No player data reset, production deployment, live-provider
 calibration or human playtest. Local PostgreSQL/Docker/race are unavailable;
-CI remains necessary before merge. In-memory local progress remains temporary.
+Their coverage was supplied by CI 155 before merge. In-memory local progress
+remains temporary.
 
 ## Acoustic receipts — 2026-10-21
 

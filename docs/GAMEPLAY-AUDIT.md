@@ -29,7 +29,7 @@ that all learning activities received a full manual playthrough in this pass.
 
 ## Cross-system priorities
 
-Daily practice implementation, 2026-10-22 (CORE-006/005, acceptance pending): the
+Daily practice implementation, accepted through PR #22 on 2026-10-22 (CORE-006/005): the
 account checklist is frozen for its UTC+7 day and only dated completed shared
 attempts count effort. Confidence/legacy inference and the process-global memory
 claim map are removed. Dated immutable receipts bind one personal 50 XP reward
