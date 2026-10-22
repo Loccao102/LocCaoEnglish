@@ -63,12 +63,25 @@ test("collection filters all asset categories and downloads real files", async (
 });
 
 test("Camp applies buildings and chest artwork without bypassing the reward gate", async ({ page }) => {
+  let rewardWrites=0;
+  page.on("request",request=>{if(request.url().endsWith("/v1/player/daily/claim")&&request.method()==="POST")rewardWrites++;});
   await page.route("**/v1/**", route => route.fulfill({ status: 503, json: { error: "Offline" } }));
   await page.route("**/v1/player/progression", route => route.fulfill({ json: progression }));
-  await page.route("**/v1/player/daily", route => route.fulfill({ json: { date: "2026-09-12", quests: [], completed: 0, total: 3, chestXp: 50, claimable: false, claimed: false } }));
+  await page.route("**/v1/me",route=>route.fulfill({json:{user:{id:"asset-check-learner",email:"asset@example.test",displayName:"Asset explorer",xp:0,streak:1},role:"learner"}}));
+  await page.route("**/v1/player/daily", route => route.fulfill({ json: { date: "2026-10-22", rulesVersion:"daily-plan.v1",method:"completed-practice.v1",quests: [
+    {id:"daily-word-link",title:"Find a word connection",skill:"Vocabulary",activity:"word-link",route:"/games/word-link",xp:20,complete:false},
+    {id:"daily-grammar",title:"Repair a sentence",skill:"Grammar",activity:"grammar-repair",route:"/games/grammar-repair",xp:20,complete:false},
+    {id:"daily-reading",title:"Read and choose the evidence",skill:"Reading",activity:"reading-race",route:"/reading",xp:20,complete:false},
+  ], completed: 0, total: 3, chestXp: 50, claimable: false, claimed: false } }));
   await page.goto("/camp");
   await expect(page.getByRole("region", { name: "Welcome to Sunlit Village" })).toBeVisible();
-  await expect(page.getByRole("img", { name: "Reward chest · locked" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Clear all quests to unlock chest" })).toBeDisabled();
+  const daily=page.getByRole("article",{name:"Daily practice"});
+  await expect(daily.getByRole("link",{name:"Sign in for daily practice"})).toBeVisible();
+  await expect(daily.getByRole("button",{name:/Open daily chest/})).toHaveCount(0);
+  await page.evaluate(()=>{localStorage.setItem("loccao_token","asset-fixture-token");window.dispatchEvent(new Event("loccao-auth-change"));});
+  await expect(daily.getByRole("heading",{name:"0/3 activities finished"})).toBeVisible();
+  await expect(daily.getByRole("img", { name: "Daily chest · locked" })).toBeVisible();
+  await expect(daily.getByRole("button", { name: "Open daily chest · +50 XP" })).toBeDisabled();
+  expect(rewardWrites).toBe(0);
   await expect(page.locator(".sunlit-world-select [data-asset='travel-station']")).toBeVisible();
 });

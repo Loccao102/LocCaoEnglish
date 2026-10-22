@@ -31,7 +31,17 @@ legacy mastery policy and difficulty calibration are not completed by this work.
   could not wrap (390px viewport, document width 462px). Enabled wrapping at the
   existing mobile breakpoint; assertions were retained. Render inspection also
   exposed faded/struck completed labels; these now remain dark, readable text.
-  Final viewport verification/screens are recorded after the cosmetic follow-up.
+  Final viewport rerun passes **2/2 (2.0m)** and rendered checklist/chest screens
+  were inspected at both sizes. Core/reward regression also passes **15/15 (11.4s)**.
+- Initial [CI 154](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39790716777)
+  on `a51996f` passed five jobs including PostgreSQL/race/vet and real daily
+  container integration. E2E had **169 passed, 1 failed (31.6m)**: the old asset
+  fixture assumed an anonymous reward chest and an obsolete button label. It is
+  rejected as acceptance. The updated fixture first verifies guest sign-in/no
+  reward control, then an owned incomplete plan with visible closed-chest art,
+  disabled reward button and zero reward writes. Full asset suite passes locally
+  **8/8 (8.4s)** on desktop/mobile. No runtime eligibility or test assertion was
+  weakened; the final head must pass all six CI jobs before merge.
 
 Migration 021 is additive, preserves older claims/XP/streak and marks absent
 receipts as legacy. No player data reset, production deployment, live-provider
