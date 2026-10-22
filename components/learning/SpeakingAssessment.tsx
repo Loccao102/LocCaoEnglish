@@ -32,7 +32,7 @@ function AccountAssessment({attempt, transcript, audio, sampleId, recording, tok
     const alive = () => current() && lifecycle.current === generation;
     void (async () => {
       try {
-        const me = await getMe(); if (!alive()) return;
+        const me = await getMe(token); if (!alive()) return;
         setOwner(me.user.id); storageKey.current = `loccao-acoustic.v1:${me.user.id}:${attempt.attemptId}`;
         let saved: Recovery | null = null;
         try {

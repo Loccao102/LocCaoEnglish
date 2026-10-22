@@ -2,6 +2,52 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Stable daily practice recovery — 2026-10-22
+
+CORE-006/005 branch `codex/core006-daily-recovery`, based on accepted PR #21,
+main `6e130fc`. Contract: [ADR 011](decisions/011-daily-practice-recovery.md).
+Acceptance of this slice still requires final-head six-job CI; broader recovery,
+legacy mastery policy and difficulty calibration are not completed by this work.
+
+- Local `go test ./...` and `go vet ./...` pass (memory). New domain/store/HTTP
+  cases cover UTC+7 boundaries, completion versus creation time, valid wrong/fresh
+  replay effort, old exact retries retaining their date, legacy/confidence
+  exclusion, frozen plans, owner/version guards, strict dated request bodies,
+  12 concurrent claims with one fixed reward, clone isolation and separate memory
+  stores. PostgreSQL cases additionally reopen the store, replay migration 021
+  and exercise two store instances; those require the dedicated CI database.
+- Production build/typecheck passes, **58 routes**. Actual Daily + Speaking
+  browser/API regression passes **22/22 (2.4m)**. Includes real guided speaking
+  input plus real server-graded Reading/Sentence completion, a changed profile,
+  lost response before/after commit, reload without automatic POST, identical dated
+  retry, late response across accounts, expiry during bootstrap/receipt read,
+  corrupt reference kept until explicit release, blocked storage and 50 XP once.
+  Speaking's owner bootstrap now sends the captured token explicitly.
+- `node scripts/verify-daily-practice.mjs` passes against local memory API:
+  signed plan, wrong-answer effort, frozen goals, forged/versioned claim rejection,
+  eight concurrent claims, receipt evidence IDs, GET restore, exactly 50 personal
+  XP and exclusion from checked rank. CI also runs this against the PostgreSQL stack.
+- The first two mobile cases failed because the existing journal top-action row
+  could not wrap (390px viewport, document width 462px). Enabled wrapping at the
+  existing mobile breakpoint; assertions were retained. Render inspection also
+  exposed faded/struck completed labels; these now remain dark, readable text.
+  Final viewport rerun passes **2/2 (2.0m)** and rendered checklist/chest screens
+  were inspected at both sizes. Core/reward regression also passes **15/15 (11.4s)**.
+- Initial [CI 154](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39790716777)
+  on `a51996f` passed five jobs including PostgreSQL/race/vet and real daily
+  container integration. E2E had **169 passed, 1 failed (31.6m)**: the old asset
+  fixture assumed an anonymous reward chest and an obsolete button label. It is
+  rejected as acceptance. The updated fixture first verifies guest sign-in/no
+  reward control, then an owned incomplete plan with visible closed-chest art,
+  disabled reward button and zero reward writes. Full asset suite passes locally
+  **8/8 (8.4s)** on desktop/mobile. No runtime eligibility or test assertion was
+  weakened; the final head must pass all six CI jobs before merge.
+
+Migration 021 is additive, preserves older claims/XP/streak and marks absent
+receipts as legacy. No player data reset, production deployment, live-provider
+calibration or human playtest. Local PostgreSQL/Docker/race are unavailable;
+CI remains necessary before merge. In-memory local progress remains temporary.
+
 ## Acoustic receipts — 2026-10-21
 
 CORE-004 branch `codex/core004-acoustic-receipts`, based on main `8ce2260`.
@@ -57,7 +103,13 @@ reward/rank policy is claimed by this slice.
 ## Checked practice rewards — 2026-10-21
 
 CORE-005 branch `codex/core005-reward-boundary`, [ADR 010](decisions/010-checked-practice-ranking.md).
-This slice is in review; full CI/merge evidence will follow on the final head.
+Accepted via [PR #21](https://github.com/Loccao102/LocCaoEnglish/pull/21), main
+`6e130fc`, on 2026-10-22. Final runtime head `9b9b5286ab459d94123fcd974c5a821005bfca52`
+passed all six jobs at [CI 152](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39500642512).
+Backend **118896949520** includes dedicated PostgreSQL/race/vet, integration
+**118897327893** verifies real checked receipts and retired writes, and E2E
+**118897327780** passed **161/161 (28.9m)** without retries/flaky acceptance.
+Reviews/threads were empty and the squash merge pinned that exact head.
 
 - Go tests/vet pass locally (memory). New memory/PostgreSQL-parity cases retain
   legacy personal XP while excluding it from rank, derive 20 checked XP once

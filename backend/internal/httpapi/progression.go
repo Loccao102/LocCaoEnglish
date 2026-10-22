@@ -16,6 +16,7 @@ func (s *Server) registerProgressionRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /v1/player/bosses/{id}/receipt", s.missionReceipt)
 	mux.HandleFunc("PUT /v1/player/loadout", s.equipCosmetic)
 	mux.HandleFunc("GET /v1/player/daily", s.dailyRun)
+	mux.HandleFunc("GET /v1/player/daily/claims/{day}", s.dailyReceipt)
 	mux.HandleFunc("POST /v1/player/daily/claim", s.claimDailyRun)
 }
 

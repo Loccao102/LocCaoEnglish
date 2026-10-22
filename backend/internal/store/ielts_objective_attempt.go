@@ -71,7 +71,7 @@ func (s *Store) submitIELTSObjectiveTx(ctx context.Context, tx *sql.Tx, rec Lear
 	if err != nil {
 		return model.LearningAttemptResult{}, err
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE learning_attempts SET status='completed',submitted_answer=$2,correct=$3,snapshot=$4,completed_at=NOW() WHERE id=$1`, rec.ID, answer, rec.Correct, string(rawSnapshot)); err != nil {
+	if err = tx.QueryRowContext(ctx, `UPDATE learning_attempts SET status='completed',submitted_answer=$2,correct=$3,snapshot=$4,completed_at=clock_timestamp() WHERE id=$1 RETURNING completed_at`, rec.ID, answer, rec.Correct, string(rawSnapshot)).Scan(&rec.CompletedAt); err != nil {
 		return model.LearningAttemptResult{}, err
 	}
 	if _, err = tx.ExecContext(ctx, `INSERT INTO ielts_attempts(id,user_id,section,test_type,raw_score,max_score,band,source,created_at,attempt_id,receipt) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, a.ID, rec.UserID, a.Section, a.TestType, a.RawScore, a.MaxScore, a.Band, a.Source, a.CreatedAt, rec.ID, string(rawReceipt)); err != nil {
@@ -97,6 +97,7 @@ func (s *Store) submitIELTSObjectiveMemory(rec LearningAttemptRecord, answer str
 	state.mu.Lock()
 	defer state.mu.Unlock()
 	state.attempts[rec.UserID] = append(state.attempts[rec.UserID], cloneIELTSAttempt(a))
+	rec.CompletedAt = time.Now().UTC()
 	s.learningAttempts[rec.ID] = rec
 	return learningAttemptResult(rec), nil
 }

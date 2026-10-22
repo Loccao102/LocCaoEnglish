@@ -33,6 +33,7 @@ của chủ dự án thì ghi lý do ở task/PR; không tự đặt thêm vòng
 | --- | --- |
 | Fair keepsakes | Client báo kết quả cá nhân; không cấp learning XP, coin hoặc rank |
 | Story rewards | Chấm quest và cấp first-clear reward theo contract story; retry không cấp lặp |
+| Daily personal chest | Plan cố định theo owner/ngày UTC+7; dùng completed attempts đúng ngày, thưởng nguyên tử một lần; không dùng confidence/legacy để suy luyện hôm nay, không cấp checked rank |
 | Learning mastery / XP | Chỉ mở rộng qua kết quả attempt được server xác thực/chấm; không thêm điểm cố định cho mọi câu trả lời |
 | Competitive results | Không tin score do browser tự quyết; cần phiên/kết quả được server kiểm chứng |
 | Coach/IELTS estimates | Ghi rõ phương pháp, provider và giới hạn; không trình bày như điểm thi chính thức |

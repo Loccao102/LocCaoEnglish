@@ -50,6 +50,7 @@ type LearningAttemptRecord struct {
 	Snapshot           LearningSnapshot
 	ExpiresAt          time.Time
 	ProgressionApplied bool
+	CompletedAt        time.Time
 }
 
 const learningAttemptSchemaSQL = `
@@ -162,7 +163,7 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 		defer tx.Rollback()
 
 		rec, err := learningAttemptFromRow(tx.QueryRowContext(ctx, `
-			SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied
+			SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied,completed_at
 			FROM learning_attempts WHERE id=$1 FOR UPDATE
 		`, attemptID))
 		if errors.Is(err, sql.ErrNoRows) {
@@ -246,11 +247,11 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 				return model.LearningAttemptResult{}, err
 			}
 		}
-		if _, err = tx.ExecContext(ctx, `
+		if err = tx.QueryRowContext(ctx, `
 			UPDATE learning_attempts
-			SET status='completed',submitted_answer=$2,correct=$3,xp_delta=$4,result_confidence=$5,result_level=$6,review_added=$7,completed_at=NOW(),progression_applied=$8
-			WHERE id=$1
-		`, rec.ID, answer, correct, xp, next, level, reviewAdded, applied); err != nil {
+			SET status='completed',submitted_answer=$2,correct=$3,xp_delta=$4,result_confidence=$5,result_level=$6,review_added=$7,completed_at=clock_timestamp(),progression_applied=$8
+			WHERE id=$1 RETURNING completed_at
+		`, rec.ID, answer, correct, xp, next, level, reviewAdded, applied).Scan(&rec.CompletedAt); err != nil {
 			return model.LearningAttemptResult{}, err
 		}
 		if err = tx.Commit(); err != nil {
@@ -337,13 +338,14 @@ func (s *Store) SubmitLearningAttempt(ctx context.Context, userID, attemptID, an
 	rec.Status, rec.SubmittedAnswer, rec.Correct, rec.XPDelta = "completed", answer, correct, xp
 	rec.ResultConfidence, rec.ResultLevel, rec.ReviewAdded = next, level, reviewAdded
 	rec.ProgressionApplied = applied
+	rec.CompletedAt = time.Now().UTC()
 	s.learningAttempts[attemptID] = rec
 	return learningAttemptResult(rec), nil
 }
 
 func (s *Store) learningAttemptByRequest(ctx context.Context, userID, requestID string) (LearningAttemptRecord, error) {
 	return learningAttemptFromRow(s.db.QueryRowContext(ctx, `
-		SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied
+		SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied,completed_at
 		FROM learning_attempts WHERE COALESCE(user_id,'')=$1 AND request_id=$2
 	`, userID, requestID))
 }
@@ -353,7 +355,11 @@ type learningRow interface{ Scan(dest ...any) error }
 func learningAttemptFromRow(row learningRow) (LearningAttemptRecord, error) {
 	var rec LearningAttemptRecord
 	var raw []byte
-	err := row.Scan(&rec.ID, &rec.UserID, &rec.RequestID, &rec.Activity, &rec.Skill, &rec.ItemKey, &rec.CEFRLevel, &rec.ContentVersion, &rec.RulesVersion, &rec.Prompt, &rec.CorrectAnswer, &rec.Feedback, &rec.Status, &rec.SubmittedAnswer, &rec.Correct, &rec.XPDelta, &rec.ResultConfidence, &rec.ResultLevel, &rec.ReviewAdded, &rec.CreatedAt, &raw, &rec.ExpiresAt, &rec.ProgressionApplied)
+	var completed sql.NullTime
+	err := row.Scan(&rec.ID, &rec.UserID, &rec.RequestID, &rec.Activity, &rec.Skill, &rec.ItemKey, &rec.CEFRLevel, &rec.ContentVersion, &rec.RulesVersion, &rec.Prompt, &rec.CorrectAnswer, &rec.Feedback, &rec.Status, &rec.SubmittedAnswer, &rec.Correct, &rec.XPDelta, &rec.ResultConfidence, &rec.ResultLevel, &rec.ReviewAdded, &rec.CreatedAt, &raw, &rec.ExpiresAt, &rec.ProgressionApplied, &completed)
+	if completed.Valid {
+		rec.CompletedAt = completed.Time.UTC()
+	}
 	if err == nil {
 		err = json.Unmarshal(raw, &rec.Snapshot)
 	}
@@ -513,7 +519,7 @@ func learningAnswerText(rec LearningAttemptRecord, answer string) string {
 }
 func (s *Store) GetLearningAttempt(ctx context.Context, userID, id string) (LearningAttemptRecord, error) {
 	if s.db != nil {
-		rec, err := learningAttemptFromRow(s.db.QueryRowContext(ctx, `SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied FROM learning_attempts WHERE id=$1 AND COALESCE(user_id,'')=$2`, id, userID))
+		rec, err := learningAttemptFromRow(s.db.QueryRowContext(ctx, `SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied,completed_at FROM learning_attempts WHERE id=$1 AND COALESCE(user_id,'')=$2`, id, userID))
 		if errors.Is(err, sql.ErrNoRows) {
 			err = ErrNotFound
 		}

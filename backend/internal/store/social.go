@@ -29,10 +29,7 @@ func (s *Store) TopUsers(ctx context.Context, limit int) ([]model.LeaderboardEnt
 	}
 	if s.db != nil {
 		// Both storage modes use the same versioned eligibility policy.
-		pairs := make([]string, 0, len(checkedPracticeRules))
-		for activity, rules := range checkedPracticeRules {
-			pairs = append(pairs, activity+":"+rules)
-		}
+		pairs := practiceRulePairs()
 		query := `SELECT u.id,u.display_name,SUM(a.xp_delta),u.streak FROM learning_attempts a
   JOIN users u ON u.id=a.user_id WHERE a.status='completed' AND a.correct AND a.progression_applied AND a.xp_delta=20 AND a.content_version<>'' AND a.activity||':'||a.rules_version=ANY($2)
   AND EXISTS(SELECT 1 FROM learning_daily_rewards c WHERE c.attempt_id=a.id AND c.user_id=a.user_id AND c.item_key=a.item_key AND c.content_version=a.content_version)

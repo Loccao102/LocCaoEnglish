@@ -39,6 +39,44 @@ an activity to bypass the receipt flow. Old records and personal XP are preserve
 }
 ```
 
+## Saved daily practice
+
+All daily endpoints require an account; guests receive 401 and cannot change the
+shared demo learner. See [ADR 011](decisions/011-daily-practice-recovery.md).
+
+- `GET /v1/player/daily` creates/reads the owned UTC+7 day snapshot: `date`,
+  `rulesVersion: daily-plan.v1`, `method: completed-practice.v1`, three distinct
+  `quests`, `completed`, `total`, `chestXp`, `claimable`, `claimed`, optional `receipt`.
+  Goal/weak-skill preferences choose reachable activities once; later profile or
+  confidence changes do not move that day's checklist.
+- Only supported shared attempts completed in that day count, matching each
+  quest activity. Valid wrong answers and newly completed replay rounds count
+  effort. Exact retries keep their original completion timestamp. Legacy rows,
+  lifetime confidence, local lessons, provider feedback and client accuracy do
+  not count. This is personal guided practice, not proof of unaided mastery.
+- `POST /v1/player/daily/claim` requires exactly `{date, rulesVersion}`. The server
+  verifies its saved plan/evidence and atomically records one owner/day receipt
+  with fixed **50 personal XP**. Caller-chosen rewards/unknown fields return 400;
+  missing plan, incomplete checklist, unsupported version or a new claim for an
+  earlier/future day return 409. Concurrent/exact retries return the existing
+  receipt without another award, including previously committed older days.
+- `GET /v1/player/daily/claims/{YYYY-MM-DD}` reads only the caller's receipt;
+  missing is 404, invalid date 400, unknown/corrupt saved version 409, uncertain
+  storage failure 503. Receipt fields: `date`, `rulesVersion`, `rewardXp`,
+  `claimedAt`, `legacy`, saved `plan`, and `evidence[{questId,activity,attemptId}]`.
+  Earlier claims without evidence remain explicitly `legacy-unverified`, with
+  their original reward retained and no invented proof or additional XP.
+
+The browser saves only an owner/date/version recovery reference before claiming.
+Reload/refresh uses GET to confirm; no automatic reward POST. An unconfirmed
+reference keeps the same date/rules for explicit retry, even after the day changes;
+leaving it is explicit and never deletes account history. Expired sessions, corrupt
+references, blocked browser storage and late replies after account changes have
+visible recovery paths. Chest XP is excluded from the checked-practice board.
+Migration 021/startup schema is additive. Deploy API/schema before web; rollback
+must retain snapshot/receipt readers, dated checks and claim guards. Do not reset
+user data or restore confidence-based eligibility.
+
 ## Verified learning attempts
 
 ### Checked practice community board

@@ -29,7 +29,14 @@ that all learning activities received a full manual playthrough in this pass.
 
 ## Cross-system priorities
 
-Reward-boundary implementation, 2026-10-21 (CORE-005, acceptance pending): the
+Daily practice implementation, 2026-10-22 (CORE-006/005, acceptance pending): the
+account checklist is frozen for its UTC+7 day and only dated completed shared
+attempts count effort. Confidence/legacy inference and the process-global memory
+claim map are removed. Dated immutable receipts bind one personal 50 XP reward
+to its original plan/evidence; refresh/retry restores without a second award.
+Broader cross-domain recovery and mastery trust remain open.
+
+Reward-boundary implementation, accepted through PR #21 (CORE-005): the
 generic accuracy API is retired for all activity names; lesson/placement checks
 no longer submit invented target responses/accuracy as learning evidence. Open
 lesson responses are ungraded and checked items cannot be counted repeatedly.
