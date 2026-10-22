@@ -31,6 +31,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Writing và phản hồi theo phiên bản bài | [ADR 008: bản nháp, lần nộp và kết quả chấm](decisions/008-writing-receipts.md) |
 | Lịch sử phản hồi phát âm | [ADR 009: receipt gắn với mẫu, không lưu raw audio](decisions/009-acoustic-receipts.md) |
 | Reward và bảng thành tích | [ADR 010: nghỉ điểm tự báo, tính XP từ receipt](decisions/010-checked-practice-ranking.md) |
+| Nhiệm vụ hằng ngày và khôi phục rương | [ADR 011: kế hoạch cố định, bằng chứng đúng ngày, claim nguyên tử](decisions/011-daily-practice-recovery.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

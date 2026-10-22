@@ -51,6 +51,8 @@ type Store struct {
 	learningRewards  map[string]bool
 	writingAttempts  map[string]writingRecord
 	acousticReceipts map[string]acousticRecord
+	dailyPlans       map[string]model.DailyPlanSnapshot
+	dailyClaims      map[string]model.DailyClaimReceipt
 }
 
 func New(databaseURL string) (*Store, error) {

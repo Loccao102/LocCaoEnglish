@@ -1,0 +1,15 @@
+.board {font-size:17px;line-height:1.6;min-width:0}
+.board p {font-size:17px;line-height:1.6;overflow-wrap:anywhere}
+.board h2 {font-size:26px;line-height:1.3}
+.board :global(.section-heading) {align-items:flex-start;gap:12px}
+.board :global(.daily-reward-art) {width:72px;height:72px;flex-shrink:0}
+.board :global(.quest) {min-height:64px;grid-template-columns:28px minmax(0,1fr);padding:14px;gap:12px}
+.board :global(.quest)>small {grid-column:2;font-size:16px}
+.board :global(.quest) strong,.board :global(.quest) small {font-size:17px;line-height:1.5;overflow-wrap:anywhere}
+.board :global(.quest.done) {color:#335c4b;text-decoration:none}
+.board :global(.quest.done) small {color:#3f6a58}
+.board :global(.button) {font-size:17px;min-height:48px;white-space:normal;text-align:center}
+.board :global(.daily-chest) {font-size:17px}
+.board :is(a,button):focus-visible {outline:3px solid #d49325;outline-offset:3px}
+.actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+@media(max-width:480px) {.actions {flex-direction:column}.board :global(.daily-reward-art) {width:60px;height:60px}}

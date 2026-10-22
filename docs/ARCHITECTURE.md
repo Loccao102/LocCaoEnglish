@@ -70,6 +70,16 @@ Answers under 85% accuracy enter the review queue. Review grading uses a small S
 
 ## Player journey
 
+Daily practice saves an account/day checklist once (`daily-plan.v1`, UTC+7).
+Supported shared attempts have an immutable actual completion timestamp in both
+stores; dated activity matches, including valid mistakes/fresh replays, supply
+effort evidence. A fixed personal chest award and immutable plan/evidence receipt
+commit together under one owner/day ledger. Exact completed retries never move
+to another practice day. Legacy claims stay explicitly unverified; confidence is
+never used to infer today's activity. Migration 021 is additive. Browser recovery
+retains only owner/date/rules metadata and confirms by GET, with explicit retry
+and account-change guards. See [ADR 011](decisions/011-daily-practice-recovery.md).
+
 The community board derives checked practice XP from immutable shared attempts
 and their daily claim ledger, not the mixed lifetime user counter. Generic client
 accuracy and arbitrary duel-score writes are retired. Lessons/placement remain

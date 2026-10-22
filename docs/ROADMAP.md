@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-21, main `99c8535` (PR #20). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-22, main `6e130fc` (PR #21). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -21,7 +21,7 @@ trước khi các contract core liên quan đã vững.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
   giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
   audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
-- Nền PR #20 đã qua 50 logic cases, 153 browser/API cases và đủ sáu CI jobs,
+- Nền PR #21 đã qua 50 logic cases, 161 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -39,7 +39,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | done |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | in_progress |
-| CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | planned |
+| CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | in_progress |
 | CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | planned |
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
@@ -529,7 +529,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Đang xác minh — Đóng điểm tự báo và bảng XP có receipt (`in_review`)
+### Đã nghiệm thu — Đóng điểm tự báo và bảng XP có receipt (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core005-reward-boundary`, 2026-10-21,
 tiếp nối main `4cd2104`, acoustic đã nghiệm thu qua PR #20.
@@ -545,7 +545,12 @@ tính checked XP từ receipt/daily claim, không dùng lifetime XP. Lesson/plac
 không gửi accuracy; câu mở không tự báo đúng, bookmark chỉ là tự khai có đăng nhập.
 Đã sửa crash options rỗng, khóa câu đã kiểm tra, lỗi bookmark không bị báo thành
 công giả và tăng chữ cho mobile. Local Go/vet, build và 15 browser/API cases đã
-đạt; PostgreSQL/race và CI đầy đủ cần đạt trên head cuối trước merge. Xem
+đạt. Head `9b9b528` đã đạt đủ sáu jobs tại
+[CI 152](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39500642512), gồm
+PostgreSQL/race/vet, container integration và **161/161 E2E (28.9m)**, không flaky.
+[PR #21](https://github.com/Loccao102/LocCaoEnglish/pull/21) đã merge thành main
+`6e130fc` sau kiểm tra reviews/threads và ghim expected head. Chưa deploy production;
+toàn CORE-005 vẫn `in_progress`. Xem
 [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#checked-practice-rewards--2026-10-21).
 
 **Cần làm:** cho mastery/XP/rank tiêu thụ verdict tin cậy; loại bỏ đường mới/cũ có
@@ -559,6 +564,23 @@ và audit endpoint submit điểm. Quy tắc practice repetition vẫn cho ngư�
 lại bình thường, không nhầm lẫn chống thưởng lặp với cấm luyện tập.
 
 ## CORE-006 — Khôi phục và tương thích
+
+### Đang xác minh — Daily plan cố định và bằng chứng theo ngày (`in_review`)
+
+Owner/task: Codex, branch `codex/core006-daily-recovery`, 2026-10-21, tiếp nối
+reward-boundary PR #21 đã nghiệm thu, main `6e130fc`. [ADR 011](decisions/011-daily-practice-recovery.md)
+chốt sửa confidence cũ bị tính thành luyện hôm nay trong memory, legacy rows bị
+tính trong SQL và checklist thay đổi sau mỗi bài. Daily plan gắn owner/ngày/rules;
+claim phải có completed attempts đúng ngày, ledger/receipt nguyên tử và reward
+cố định. Giữ toàn bộ XP/claim cũ, không gộp guest vào tài khoản hoặc mở rộng trusted
+rank. Đây là lát cắt CORE-006 hỗ trợ CORE-005, không nghiệm thu toàn recovery từ đó.
+
+Migration 021/startup schema bổ sung plan/receipt; giữ claim/XP/streak cũ, đánh dấu
+legacy thay vì backfill. Memory và SQL dùng actual completion time giống nhau;
+retry kết quả cũ không đổi ngày, valid wrong/fresh replay được tính công luyện.
+UI giữ owner/date/rules khi mất response, GET phục hồi và explicit retry; account
+đổi/hết hạn, storage lỗi/corrupt có đường xử lý. Đang xác minh Go/HTTP, browser
+thật và hai kích thước mobile; CI PostgreSQL/race/container trên head cuối cần đạt.
 
 **Cần làm:** mở rộng quy tắc khôi phục sang shared learning attempts; rà các ranh
 giới guest/account/offline/tài khoản hết hạn. Đánh giá nhu cầu records Cloud Hop

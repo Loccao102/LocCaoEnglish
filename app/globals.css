@@ -150,7 +150,7 @@ button { color: inherit; }
   .main-content { margin-left: 0; }
   .page-wrap { padding: 24px 16px 44px; }
   .topbar, .content-header { display: block; }
-  .top-actions { margin-top: 18px; }
+  .top-actions { margin-top: 18px; flex-wrap: wrap; white-space: normal; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .continue-card { min-height: 330px; }
   .continue-copy { max-width: 75%; }

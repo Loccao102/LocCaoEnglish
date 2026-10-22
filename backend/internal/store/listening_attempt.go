@@ -163,7 +163,7 @@ func (s *Store) RecordListeningPlayback(ctx context.Context, owner, id, contentV
 			return LearningAttemptRecord{}, err
 		}
 		defer tx.Rollback()
-		rec, err := learningAttemptFromRow(tx.QueryRowContext(ctx, `SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied FROM learning_attempts WHERE id=$1 FOR UPDATE`, id))
+		rec, err := learningAttemptFromRow(tx.QueryRowContext(ctx, `SELECT id,COALESCE(user_id,''),request_id,activity,skill,item_key,cefr_level,content_version,rules_version,prompt,correct_answer,feedback,status,submitted_answer,correct,xp_delta,result_confidence,result_level,review_added,created_at,snapshot,expires_at,progression_applied,completed_at FROM learning_attempts WHERE id=$1 FOR UPDATE`, id))
 		if errors.Is(err, sql.ErrNoRows) {
 			err = ErrNotFound
 		}
