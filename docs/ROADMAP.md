@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-22, main `a0ae3be` (PR #22). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-10-23, main `f80c43e` (PR #23). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -21,7 +21,7 @@ trước khi các contract core liên quan đã vững.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
   giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
   audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
-- Nền PR #22 đã qua 50 logic cases, 170 browser/API cases và đủ sáu CI jobs,
+- Nền PR #23 đã qua 50 logic cases, 173 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -529,7 +529,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Chờ CI — Prerequisite của chín chương có nguồn gốc (`in_review`, 2026-10-22)
+### Đã nghiệm thu — Prerequisite của chín chương có nguồn gốc (`done`, 2026-10-23)
 
 Owner/task: Codex, branch `codex/core005-campaign-evidence`, nền main `302c05b`.
 [ADR 012](decisions/012-campaign-practice-gates.md) chốt shared correct receipts,
@@ -538,8 +538,14 @@ tử với reward và giữ clear cũ. Nghiệm thu: memory/PG, chín mapping, l
 owner/version/time, retry/fresh replay, concurrency/rollback và browser/mobile.
 Không mở rộng thành mastery/pack-specific difficulty hay đổi mọi world/cosmetic gate.
 Local Go/vet, build, 13/13 mission browser/API cases (2.3m), hai ảnh mobile và
-integration đi đủ chín chương đã đạt. Chờ PostgreSQL/race và đủ sáu CI jobs trên
-head cuối; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#campaign-prerequisite-receipts--2026-10-22).
+integration đi đủ chín chương đã đạt; thêm 18/18 browser cases liên quan và kiểm
+tra khôi phục pending dialogue qua gate mới. Head `7e30c68` đạt đủ sáu jobs tại
+[CI 158](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39815676237), gồm
+PostgreSQL/race/vet, rollback/concurrency, chín chương qua container integration
+và **173/173 E2E (30.4m)**, không flaky. [PR #23](https://github.com/Loccao102/LocCaoEnglish/pull/23)
+đã merge thành main `f80c43e` sau xác minh reviews/threads và expected head.
+Chưa deploy production; toàn CORE-005/006 vẫn `in_progress`. Xem
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#campaign-prerequisite-receipts--2026-10-22).
 
 ### Đã nghiệm thu — Đóng điểm tự báo và bảng XP có receipt (`done`, 2026-10-22)
 

@@ -3,6 +3,9 @@
 Status: Accepted, 2026-10-22. Scope: CORE-005/CORE-006;
 tiếp nối [ADR 005](005-mission-evidence.md) và [ADR 011](011-daily-practice-recovery.md).
 
+Đã triển khai qua [PR #23](https://github.com/Loccao102/LocCaoEnglish/pull/23), main
+`f80c43e`; nghiệm thu 2026-10-23 (UTC+7), không bao gồm deploy production.
+
 ## Bối cảnh
 
 SQL đang mở checkpoint từ bảng accuracy cũ; memory suy từ confidence thay đổi,

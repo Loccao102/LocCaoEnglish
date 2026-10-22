@@ -2,6 +2,58 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Campaign prerequisite receipts — 2026-10-22
+
+Scope CORE-005/CORE-006, branch `codex/core005-campaign-evidence`, nền main `302c05b`;
+[ADR 012](decisions/012-campaign-practice-gates.md). Chưa deploy production.
+Đã nghiệm thu 2026-10-23 (UTC+7), [PR #23](https://github.com/Loccao102/LocCaoEnglish/pull/23),
+main `f80c43e`; code head đã kiểm tra `7e30c6853685d3e7a5b8746c46589433cccfde3b`.
+
+Trước sửa: SQL đọc bảng accuracy cũ; memory suy từ confidence, bỏ qua activity và
+freshness. Hiện cả GET và completion dùng shared correct receipts, activity/rules
+được hỗ trợ và thời điểm hoàn tất sau chương trước. First clear lưu preparation
+cùng dialogue/ledger/reward, giữ clear/receipt cũ mà không backfill bằng chứng.
+
+Local Windows: `go test ./...`, `go vet ./...`, `npm run build` đã đạt. Store cases
+kiểm tra legacy/wrong/foreign/khác activity, unsupported rules/provider, missing
+content/time, active rounds, chín mapping, bằng timestamp bị từ chối, creation so
+với completion, old retry/fresh capped replay và receipt bất biến. Existing mission
+case giữ tám concurrent claims và old dialogue/legacy clear. Local chưa có
+PostgreSQL/Docker/race toolchain; CI đã chạy dedicated `loccao_system_test`, race,
+vet và reward rollback trigger (lỗi ghi XP có chủ ý, chứng minh không lưu một phần).
+
+Browser **13/13 cases (2.3m)** trên bản production local/API memory kiểm tra lost response, reload,
+owner switch, blocked/corrupt storage, 429/503, ba trường hợp gate mới và mobile.
+Hai ảnh render thật `.cache/mission-551.png`, `.cache/mission-844.png` đã được xem:
+chữ hướng dẫn/checkpoints/ô nhập đọc được, không tràn ngang. Lượt chạy đầu dừng
+trước khi nghiệm thu vì môi trường local đặt nhầm tên biến CORS; đã khởi động lại
+API với `CORS_ORIGINS`, không thay policy ứng dụng hay bỏ assertion.
+Thêm **18/18 browser cases (23.0s)** ở core/assets/collocation/sentence-builder đã
+đạt. Một kiểm tra browser riêng xác nhận pending claim cũ vẫn giữ nguyên khi gate
+bị khóa; sau shared practice thật, reload cho retry đúng payload và nhận thưởng
+đúng một lần. Bản nháp, điều kiện khóa và nội dung hội thoại được kiểm tra thực tế.
+
+Integration mới `node scripts/verify-campaign-gates.mjs` đi đủ chín chương bằng
+shared practice thật, freshness, concurrent root claims và first-clear reward;
+đã đạt local và container integration.
+
+[CI 158](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39815676237) trên
+head `7e30c68` đạt đủ sáu jobs: frontend `119953519647` (50 logic + assets/build),
+backend `119953519677` (PG/race/vet), AI `119953519463` (22 tests), compose
+`119953519625`, integration `119953971675` và E2E `119953971507` (**173/173,
+30.4m**). Không flaky; không rerun để lấy xanh. Reviews/threads trống và base/head
+được đối chiếu trước merge ghim expected head.
+
+Nhật ký các job ngắn đã hoàn tất lúc 16:39–16:40 UTC nhưng metadata lúc đầu vẫn
+queued/in_progress. Cùng lúc GitHub báo [sự cố Actions/PR](https://www.githubstatus.com/incidents/wq8305lppdc2).
+Đã chờ metadata đồng bộ đủ sáu success, không giảm kiểm tra hay suy từ logs rằng
+PR đã được nghiệm thu. E2E kết thúc 17:12:30 UTC; sáu kết quả đã xác minh 17:12:46.
+Đây là quan sát trùng thời điểm sự cố, không khẳng định nguyên nhân hạ tầng.
+
+Broader legacy confidence/world/cosmetic policy và độ khó theo pack vẫn mở trong
+CORE-005/007. Bằng chứng v1 là guided activity preparation; không chứng nhận năng
+lực, phát âm hay mức tiến bộ đã hiệu chuẩn. Không có schema/production deployment.
+
 ## Stable daily practice recovery — 2026-10-22
 
 CORE-006/005 branch `codex/core006-daily-recovery`, based on accepted PR #21,
@@ -1190,31 +1242,3 @@ Writing feedback; saved essays survive unavailable/invalid provider results.
 
 Documentation-only acceptance validation: all 143 internal file links resolve
 and `git diff --check` passes. No app rebuild is required for these three docs.
-## Campaign prerequisite receipts — 2026-10-22
-
-Scope CORE-005/CORE-006, branch `codex/core005-campaign-evidence`, nền main `302c05b`;
-[ADR 012](decisions/012-campaign-practice-gates.md). Chưa deploy production.
-
-Trước sửa: SQL đọc bảng accuracy cũ; memory suy từ confidence, bỏ qua activity và
-freshness. Hiện cả GET và completion dùng shared correct receipts, activity/rules
-được hỗ trợ và thời điểm hoàn tất sau chương trước. First clear lưu preparation
-cùng dialogue/ledger/reward, giữ clear/receipt cũ mà không backfill bằng chứng.
-
-Local Windows: `go test ./...`, `go vet ./...`, `npm run build` đã đạt. Store cases
-kiểm tra legacy/wrong/foreign/khác activity, unsupported rules/provider, missing
-content/time, active rounds, chín mapping, bằng timestamp bị từ chối, creation so
-với completion, old retry/fresh capped replay và receipt bất biến. Existing mission
-case giữ tám concurrent claims và old dialogue/legacy clear. PostgreSQL/race cùng
-reward rollback trigger chỉ chạy khi có dedicated `loccao_system_test`; local
-chưa có PostgreSQL/Docker/race toolchain, cần đủ sáu CI jobs trước merge.
-
-Browser **13/13 cases (2.3m)** trên bản production local/API memory kiểm tra lost response, reload,
-owner switch, blocked/corrupt storage, 429/503, ba trường hợp gate mới và mobile.
-Hai ảnh render thật `.cache/mission-551.png`, `.cache/mission-844.png` đã được xem:
-chữ hướng dẫn/checkpoints/ô nhập đọc được, không tràn ngang. Lượt chạy đầu dừng
-trước khi nghiệm thu vì môi trường local đặt nhầm tên biến CORS; đã khởi động lại
-API với `CORS_ORIGINS`, không thay policy ứng dụng hay bỏ assertion.
-
-Integration mới `node scripts/verify-campaign-gates.mjs` đi đủ chín chương bằng
-shared practice thật, freshness, concurrent root claims và first-clear reward;
-đã đạt local. CI cuối sẽ được ghi tại đây trước khi nghiệm thu.
