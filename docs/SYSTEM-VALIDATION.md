@@ -54,6 +54,51 @@ Local memory data is temporary. Docker/PostgreSQL/race were not run locally.
 No production deployment, live audio quality, IELTS overall calibration or wider
 reward/rank policy is claimed by this slice.
 
+## Checked practice rewards — 2026-10-21
+
+CORE-005 branch `codex/core005-reward-boundary`, [ADR 010](decisions/010-checked-practice-ranking.md).
+This slice is in review; full CI/merge evidence will follow on the final head.
+
+- Go tests/vet pass locally (memory). New memory/PostgreSQL-parity cases retain
+  legacy personal XP while excluding it from rank, derive 20 checked XP once
+  through ten concurrent same-attempt completions, exclude wrong/replayed and
+  unsupported-rule receipts, and reopen PostgreSQL for durability when CI supplies
+  the dedicated test URL. All arbitrary activity names/duel scores reject without
+  changing XP/confidence/reviews; bookmark auth/range/provenance are checked.
+  The legacy store award method is no longer compiled into production; fixtures
+  reconstruct older rows in `_test.go` only. The old adaptive-review test now
+  submits actual wrong/correct server attempts and checks the saved reference,
+  zero wrong-answer XP, exactly 20 correct-answer XP and repetition scheduling.
+- Production build/typecheck pass, 58 routes. Actual browser/API core + reward
+  tests pass **15/15 (11.6s)**: real Word Link input, lost committed response,
+  reload/retries and exactly one checked-board contribution; generic renamed score
+  attempts; practice invitation; local placement with no shared-demo mutation;
+  lesson open responses/locked checks, failed bookmark and explicit retry.
+- `node scripts/verify-reward-boundary.mjs` passes against the final local memory
+  API: retired score writes, six concurrent identical real learning submissions,
+  one checked-board contribution and signed self-reported bookmark with no XP.
+  CI runs the same contract against the PostgreSQL container stack.
+- Local follow-up before rebase (`4ce44c9`; runtime unchanged at `ed36bf9`): an
+  actual production-browser recording action traversed
+  Go on 8082 and real Python on 8092 to a synthetic Azure `httpx` transport. The
+  completed receipt retained zero scores/word/phoneme evidence and matching hashes;
+  account history/reload and exact initial retry produced **one provider call**,
+  no stored audio and no XP. The temporary fixture services were stopped afterward.
+  This establishes end-to-end protocol/storage wiring, not live-provider quality.
+- Lesson and community renders at **390×551/844** were inspected. A first render
+  exposed old 9–10px social labels; new labels/rows are 16–20px and score/name
+  layout wraps without horizontal overflow. Lesson input has an accessible name,
+  checked responses lock and controls remain at least 48px.
+- The first full lesson run exposed an existing null-options crash on entering
+  a free-response item; fixed optional options handling. One new alert assertion
+  initially also matched Next's route announcer; it is now scoped to the lesson
+  and still requires the actual bookmark failure text. No checks were removed.
+
+No SQL migration/reset/backfill, production deployment or competitive skill
+certification. Existing lifetime XP, mixed legacy confidence and campaign unlocks
+are preserved, not retroactively verified. Real competitive sessions and legacy
+mastery/prerequisite policy remain outside this slice.
+
 ## Delivered system
 
 - `/journey` connects seven story chapters, fourteen quests, eight fair games, all twenty-four companions, learning recommendations and companion selection.

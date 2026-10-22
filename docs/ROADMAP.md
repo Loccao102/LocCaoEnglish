@@ -38,7 +38,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-002 | P0 | Vòng chơi dùng chung phía frontend | CORE-001 contract | done |
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | done |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
-| CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | planned |
+| CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | in_progress |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | planned |
 | CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | planned |
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
@@ -529,6 +529,25 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Đang xác minh — Đóng điểm tự báo và bảng XP có receipt (`in_review`)
+
+Owner/task: Codex, branch `codex/core005-reward-boundary`, 2026-10-21,
+tiếp nối main `4cd2104`, acoustic đã nghiệm thu qua PR #20.
+[ADR 010](decisions/010-checked-practice-ranking.md)
+chốt việc nghỉ endpoint accuracy cũ, bỏ gửi điểm từ lesson/placement, tính bảng
+XP từ shared receipts/daily claim và chặn duel score tự báo. Không reset XP/save,
+không tự nâng legacy confidence/prerequisite thành bằng chứng mới. Nghiệm thu
+bằng Go/PG/concurrency và browser thực tế; toàn CORE-005 còn gồm chính sách
+legacy mastery/prerequisite, không đánh dấu done từ một lát cắt.
+
+Code hiện đóng mọi activity trên `/v1/attempts` và điểm duel tự báo. Bảng cộng đồng
+tính checked XP từ receipt/daily claim, không dùng lifetime XP. Lesson/placement
+không gửi accuracy; câu mở không tự báo đúng, bookmark chỉ là tự khai có đăng nhập.
+Đã sửa crash options rỗng, khóa câu đã kiểm tra, lỗi bookmark không bị báo thành
+công giả và tăng chữ cho mobile. Local Go/vet, build và 15 browser/API cases đã
+đạt; PostgreSQL/race và CI đầy đủ cần đạt trên head cuối trước merge. Xem
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#checked-practice-rewards--2026-10-21).
+
 **Cần làm:** cho mastery/XP/rank tiêu thụ verdict tin cậy; loại bỏ đường mới/cũ có
 thể gửi score tùy ý để nhận thưởng. Phân loại dữ liệu legacy, không tự nâng cấp
 toàn bộ lịch sử cũ thành “đã xác thực”. Fair vẫn giữ contract keepsake riêng.
@@ -597,6 +616,15 @@ khối Next.js được quản lý trong AGENTS còn nguyên. Bàn giao trong
 Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình GitHub của GOV-002.
 
 ## GOV-002 — Rào chắn merge thực tế
+
+Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
+`protected:false`, required status checks ở chế độ off; danh sách repository
+rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/LocCaoEnglish/branches/main),
+[rulesets](https://api.github.com/repos/Loccao102/LocCaoEnglish/rulesets).
+Đây là bằng chứng chưa có enforcement tại thời điểm đọc, không phải đã cấu hình.
+Các merge trong đợt này vẫn chờ đủ sáu jobs và dùng expected head SHA thủ công.
+Connector hiện có chỉ cung cấp đọc branch protection/rulesets; cần quyền/công cụ
+quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Mục vẫn planned.
 
 **Cần làm:** kiểm tra branch rules/permissions và CI jobs thật trên GitHub; cấu hình
 required checks và review phù hợp với quyền/chế độ cộng tác của repository. Không

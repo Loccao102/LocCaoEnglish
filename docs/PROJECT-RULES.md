@@ -38,8 +38,11 @@ của chủ dự án thì ghi lý do ở task/PR; không tự đặt thêm vòng
 | Coach/IELTS estimates | Ghi rõ phương pháp, provider và giới hạn; không trình bày như điểm thi chính thức |
 | Speaking | Transcript match, heuristic và acoustic assessment là các loại bằng chứng khác nhau |
 
-`/v1/attempts` hiện còn nhận accuracy từ client: đây là nợ CORE-001. Không tuyên bố
-nó đã an toàn cho mastery/rank, không thêm tính năng thưởng dựa trên điểm tự báo.
+`/v1/attempts` đã nghỉ ghi cho mọi activity; không mở lại hoặc đổi tên activity để
+nhận accuracy từ client. Lịch sử/XP/confidence legacy được giữ, không tự nâng thành
+bằng chứng đã xác thực. Bảng checked-practice chỉ dùng receipt đủ điều kiện theo
+[ADR 010](decisions/010-checked-practice-ranking.md); đây vẫn là luyện tập có hỗ trợ,
+không phải chứng chỉ năng lực hay competitive anti-cheat.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 
@@ -134,9 +137,9 @@ bắt buộc đang lỗi hoặc phần nghiệm thu còn chưa đáp ứng.
 
 AGENTS giúp agent đọc luật; CONTRIBUTING và PR template đưa luật vào review.
 CI hiện có kiểm tra frontend, backend, AI, compose, integration và E2E. Tài liệu
-không thể tự cưỡng chế mọi người tuân thủ: cấu hình branch protection/required
-reviews của GitHub chưa được xác minh hoặc thay đổi trong đợt này (GOV-002).
-Không được tuyên bố merge đã bị GitHub chặn nếu chưa xác minh cấu hình đó.
+không thể tự cưỡng chế mọi người tuân thủ: lần đọc GitHub 2026-10-21 xác nhận
+main chưa protected và repository chưa có ruleset (GOV-002); chưa thay cấu hình.
+Phải chờ đủ check theo quy trình, không coi đó là GitHub đã cưỡng chế chặn merge.
 
 Ngoại lệ phải nêu phạm vi, lý do, rủi ro và việc còn lại trong PR. Yêu cầu rõ ràng
 của chủ dự án quyết định phạm vi/ưu tiên; quy tắc repo không thay thế hướng dẫn cấp

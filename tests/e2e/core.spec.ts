@@ -49,8 +49,9 @@ test("listening and social production surfaces load", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Listen & Pick" })).toBeVisible();
   await expect(page.getByRole("button", { name: /play audio/i })).toBeVisible();
   await page.goto("/social");
-  await expect(page.getByRole("heading", { name: /Compete on practice/i })).toBeVisible();
-  await expect(page.getByText(/LIVE CHALLENGES/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Practise together, track checked progress." })).toBeVisible();
+  await expect(page.locator(".social-main .eyebrow")).toContainText("PRACTICE INVITATIONS");
+  await expect(page.getByText("CHECKED PRACTICE XP", {exact: true})).toBeVisible();
 });
 
 test("content studio rejects a learner account", async ({ page }) => {

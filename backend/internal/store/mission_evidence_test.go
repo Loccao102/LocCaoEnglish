@@ -71,7 +71,7 @@ func TestMissionEvidencePersistence(t *testing.T) {
 				{Skill: "Listening", Activity: "listen-pick", ItemKey: "fixture-listen", Prompt: "l", Answer: "l", Accuracy: 1},
 				{Skill: "Speaking", Activity: "shadowing", ItemKey: "fixture-speak", Prompt: "s", Answer: "s", Accuracy: 1},
 			} {
-				if _, err = s.RecordAttempt(ctx, u.ID, in); err != nil {
+				if _, err = s.recordLegacyFixture(ctx, u.ID, in); err != nil {
 					t.Fatal(err)
 				}
 			}

@@ -21,11 +21,11 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 
 Attempt payload:
 
-This is the **current legacy contract**, not the planned trusted grading model.
-Client-reported accuracy remains a limitation for unmigrated activities. Word Link,
-Grammar Repair, Collocation Factory, Sentence Builder, Word Graph, Reading Race, Story Choice, Listen & Pick, Dictation Rush, Shadow Me and IELTS Reading/Listening reject this route with 409, including
-case/whitespace variants; use server-owned attempts below.
-Do not extend the legacy trust model to new rewards/ranking.
+`POST /v1/attempts` is retired for **all** activities, including unknown names,
+lesson/placement and case/whitespace aliases. It returns 409 after normal identity
+checks and never changes XP, confidence or review state. Use server-owned attempts
+below. The old payload is shown only for migration; do not resubmit it or rename
+an activity to bypass the receipt flow. Old records and personal XP are preserved.
 
 ```json
 {
@@ -40,6 +40,31 @@ Do not extend the legacy trust model to new rewards/ranking.
 ```
 
 ## Verified learning attempts
+
+### Checked practice community board
+
+`GET /v1/social/leaderboard?limit=20` returns `{items,onlineCount,method,disclaimer}`.
+Method is `server-checked-practice.v1`. Rank XP derives from completed, correct,
+progression-applied learning receipts with their matching daily claim, recorded
+20 XP and a supported activity/rules pair. No lifetime-counter or legacy-accuracy
+backfill. Ties use user ID ascending in both store modes; accounts with no eligible
+receipts are unranked. This includes guided transcript practice, not a claim of
+pronunciation mastery, unaided ability or anti-cheat competition. Story, mission,
+chest, Fair, local lesson/placement, IELTS estimates and acoustic feedback do not
+enter this board. Personal lifetime XP and existing unlocks remain unchanged.
+
+`POST /v1/social/challenges/{id}/submit` requires sign-in and returns 409: arbitrary
+client scores are retired. Existing entries remain unverified archive; create/list
+routes serve practice invitations only. Opening an invitation starts ordinary
+Word Link practice, with no inferred winner or competitive result.
+
+`POST /v1/lessons/{slug}/complete` requires sign-in and records a self-reported
+bookmark only, with response `evidence:"client-reported-bookmark"` and no learning
+XP/mastery/rank. Completed count must be in 0..exercise count and score in 0..1.
+Guest lesson checks stay local.
+Local placement chooses a practice-level preference without posting accuracy or
+changing skill confidence. See [ADR 010](decisions/010-checked-practice-ranking.md)
+for rollout/rollback and remaining legacy-evidence limits. No SQL migration.
 
 Deployment/validation status: [ROADMAP](ROADMAP.md). Contract: [ADR 003](decisions/003-learning-recovery.md).
 

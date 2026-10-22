@@ -77,7 +77,7 @@ Later chapters only count evidence created after the previous boss clear. Boss r
 - Adaptive Recovery queue
 - Daily Quest Chain + reward chest + streak
 - World Map, achievements, loadout and boss progression
-- Realtime Arena challenges / leaderboard
+- Community practice invitations and a board based on checked learning receipts
 
 ## Architecture
 
