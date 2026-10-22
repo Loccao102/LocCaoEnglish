@@ -16,10 +16,11 @@ var ErrMissionConflict = errors.New("this chapter already has different recorded
 var ErrMissionInput = errors.New("invalid conversation or rules version; reload this mission")
 
 type MissionReceipt struct {
-	BossID     string                     `json:"bossId"`
-	Messages   []string                   `json:"messages"`
-	Evaluation *engine.ScenarioEvaluation `json:"evaluation,omitempty"`
-	Legacy     bool                       `json:"legacy"`
+	BossID      string                     `json:"bossId"`
+	Messages    []string                   `json:"messages"`
+	Evaluation  *engine.ScenarioEvaluation `json:"evaluation,omitempty"`
+	Legacy      bool                       `json:"legacy"`
+	Preparation *CampaignPreparation       `json:"preparation,omitempty"`
 }
 type MissionCompletion struct {
 	Progression model.ProgressionState `json:"progression"`
@@ -85,69 +86,18 @@ func (s *Store) CompleteBoss(ctx context.Context, userID, bossID string, message
 	if !verdict.Complete {
 		return out, errors.New("conversation objectives are incomplete")
 	}
-	state, err := s.GetProgression(ctx, userID)
-	if err != nil {
-		return out, err
-	}
-	var boss *model.BossState
-	for i := range state.Bosses {
-		if state.Bosses[i].ID == bossID {
-			boss = &state.Bosses[i]
-			break
-		}
-	}
-	if boss == nil {
+	if _, ok := campaignGates[bossID]; !ok {
 		return out, ErrNotFound
 	}
-	if !boss.Unlocked {
-		return out, errors.New("boss gate is still locked: complete the chapter checkpoints first")
-	}
 	receipt := MissionReceipt{BossID: bossID, Messages: append([]string{}, messages...), Evaluation: &verdict}
+	var err error
 	if s.db != nil {
-		tx, err := s.db.BeginTx(ctx, nil)
-		if err != nil {
-			return out, err
-		}
-		defer tx.Rollback()
-		raw, err := json.Marshal(receipt)
-		if err != nil {
-			return out, err
-		}
-		res, err := tx.ExecContext(ctx, `INSERT INTO player_bosses(user_id,boss_id,score,reward_xp,completed_at,evidence) VALUES($1,$2,$3,$4,NOW(),$5) ON CONFLICT(user_id,boss_id) DO NOTHING`, userID, bossID, verdict.Score, boss.RewardXP, string(raw))
-		if err != nil {
-			return out, err
-		}
-		n, err := res.RowsAffected()
-		if err != nil {
-			return out, err
-		}
-		if n > 0 {
-			if _, err = tx.ExecContext(ctx, `UPDATE users SET xp=xp+$2 WHERE id=$1`, userID, boss.RewardXP); err != nil {
-				return out, err
-			}
-		}
-		if err = tx.Commit(); err != nil {
-			return out, err
-		}
+		err = s.commitMissionSQL(ctx, userID, receipt)
 	} else {
-		mem := s.progressionMemory()
-		mem.mu.Lock()
-		if mem.bosses[userID] == nil {
-			mem.bosses[userID] = map[string]time.Time{}
-		}
-		if _, exists := mem.bosses[userID][bossID]; !exists {
-			mem.bosses[userID][bossID] = time.Now().UTC()
-			if mem.receipts[userID] == nil {
-				mem.receipts[userID] = map[string]MissionReceipt{}
-			}
-			mem.receipts[userID][bossID] = cloneMissionReceipt(receipt)
-			s.mu.Lock()
-			acc := s.mem.users[userID]
-			acc.user.XP += boss.RewardXP
-			s.mem.users[userID] = acc
-			s.mu.Unlock()
-		}
-		mem.mu.Unlock()
+		err = s.commitMissionMemory(userID, receipt)
+	}
+	if err != nil {
+		return out, err
 	}
 	saved, err := s.GetMissionReceipt(ctx, userID, bossID)
 	if err != nil {
@@ -159,4 +109,118 @@ func (s *Store) CompleteBoss(ctx context.Context, userID, bossID string, message
 	out.Receipt = saved
 	out.Progression, err = s.GetProgression(ctx, userID)
 	return out, err
+}
+
+var ErrCampaignGateLocked = errors.New("boss gate is still locked: complete the chapter checkpoints first")
+
+func campaignCompletionsSQL(ctx context.Context, q dailyQuery, owner string) (map[string]*time.Time, error) {
+	rows, err := q.QueryContext(ctx, `SELECT boss_id,completed_at FROM player_bosses WHERE user_id=$1`, owner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	done := map[string]*time.Time{}
+	for rows.Next() {
+		var id string
+		var at time.Time
+		if err = rows.Scan(&id, &at); err != nil {
+			return nil, err
+		}
+		done[id] = &at
+	}
+	return done, rows.Err()
+}
+
+func (s *Store) commitMissionSQL(ctx context.Context, owner string, receipt MissionReceipt) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var user model.User
+	var profile model.PlayerProfile
+	// Serialize first clears per owner across Store instances before reading the
+	// predecessor ledger and practice receipts. Never lock a learning attempt here.
+	err = tx.QueryRowContext(ctx, `SELECT u.xp,COALESCE(p.goal,'conversation') FROM users u LEFT JOIN player_profiles p ON p.user_id=u.id WHERE u.id=$1 FOR UPDATE OF u`, owner).Scan(&user.XP, &profile.Goal)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	done, err := campaignCompletionsSQL(ctx, tx, owner)
+	if err != nil {
+		return err
+	}
+	// The winner's immutable receipt is checked by the caller.
+	if done[receipt.BossID] != nil {
+		return tx.Commit()
+	}
+	practice, err := campaignPracticeSQL(ctx, tx, owner)
+	if err != nil {
+		return err
+	}
+	if !campaignGateOpen(receipt.BossID, user, profile, done, practice) {
+		return ErrCampaignGateLocked
+	}
+	p := prepareCampaign(receipt.BossID, done, practice)
+	receipt.Preparation = &p
+	raw, err := json.Marshal(receipt)
+	if err != nil {
+		return err
+	}
+	reward := campaignGates[receipt.BossID].RewardXP
+	_, err = tx.ExecContext(ctx, `INSERT INTO player_bosses(user_id,boss_id,score,reward_xp,completed_at,evidence) VALUES($1,$2,$3,$4,clock_timestamp(),$5)`, owner, receipt.BossID, receipt.Evaluation.Score, reward, string(raw))
+	if err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE users SET xp=xp+$2 WHERE id=$1`, owner, reward); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) commitMissionMemory(owner string, receipt MissionReceipt) error {
+	mem := s.progressionMemory()
+	// Shared lock order: progression first, then account/attempt state. Holding
+	// both makes the gate, receipt, ledger and XP one indivisible memory operation.
+	mem.mu.Lock()
+	defer mem.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	acc, ok := s.mem.users[owner]
+	if !ok {
+		return ErrNotFound
+	}
+	if _, exists := mem.bosses[owner][receipt.BossID]; exists {
+		return nil
+	}
+	done := map[string]*time.Time{}
+	for id, at := range mem.bosses[owner] {
+		copy := at
+		done[id] = &copy
+	}
+	playerProfileMu.RLock()
+	profile, found := playerProfiles[owner]
+	playerProfileMu.RUnlock()
+	if !found {
+		profile = defaultPlayerProfile(owner)
+	}
+	practice := s.campaignPracticeMemory(owner)
+	if !campaignGateOpen(receipt.BossID, acc.user, profile, done, practice) {
+		return ErrCampaignGateLocked
+	}
+	p := prepareCampaign(receipt.BossID, done, practice)
+	receipt.Preparation = &p
+	if mem.bosses[owner] == nil {
+		mem.bosses[owner] = map[string]time.Time{}
+	}
+	if mem.receipts[owner] == nil {
+		mem.receipts[owner] = map[string]MissionReceipt{}
+	}
+	mem.bosses[owner][receipt.BossID] = time.Now().UTC()
+	mem.receipts[owner][receipt.BossID] = cloneMissionReceipt(receipt)
+	acc.user.XP += campaignGates[receipt.BossID].RewardXP
+	s.mem.users[owner] = acc
+	return nil
 }

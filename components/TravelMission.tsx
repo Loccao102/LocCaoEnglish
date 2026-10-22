@@ -10,12 +10,13 @@ export default function TravelMission({ scenario }: { scenario: MissionScenario 
   const { boss, draft, verdict, receipt, busy } = game;
   const checkpoints = boss?.checkpoints || [], won = !!boss?.cleared;
   const ready = checkpoints.filter(c => c.complete).length;
-  const progress = checkpoints.length ? Math.round((ready + (won ? 1 : (verdict?.stage || 0) / 3)) / (checkpoints.length + 1) * 100) : 0;
+  const progress = won ? 100 : checkpoints.length ? Math.round((ready + (verdict?.stage || 0) / 3) / (checkpoints.length + 1) * 100) : 0;
   return <div className={`mission-shell ${styles.shell}`}>
     <section className="mission-header"><div><span className="eyebrow light">{config.eyebrow}</span><h1>{config.title}</h1><p>{config.copy}</p></div><div className="mission-progress"><strong>{progress}%</strong><small>chapter</small></div></section>
     {game.error && <p role="alert" className="feedback-banner">{game.error}</p>}
     {game.storageWarning && <p role="status">{game.storageWarning}</p>}
     {!game.signedIn && !busy && <p>Sign in to keep your mission dialogue and chapter rewards. <Link href="/account">Open account →</Link></p>}
+    {game.signedIn && boss && !won && <p className={styles.explanation}>Prepare with a correct saved round in each checkpoint activity. For later chapters, finish the previous chapter first, then practise again. A new round counts even if its daily XP is already earned. Guided practice is not a skill certification.</p>}
     <div className="mission-stage-grid">{checkpoints.map((stage, i) => <article className={`mission-stage ${stage.complete ? "complete" : ""}`} key={stage.id}>
       <span>0{i + 1}</span><div><small>{stage.skill}</small><strong>{stage.title}</strong></div><div className="mission-stage-actions"><Link href={stage.route}>{stage.complete ? "Practise again ↗" : "Earn evidence ↗"}</Link><b>{stage.complete ? "✓ READY" : "NOT READY"}</b></div>
     </article>)}</div>
@@ -32,6 +33,7 @@ export default function TravelMission({ scenario }: { scenario: MissionScenario 
         {!won && <p className={styles.reply}>{verdict?.reply || config.intro}</p>}
         {won ? <div className="boss-win"><div><strong>Chapter reward saved · {boss?.rewardXp} XP</strong><p>{config.reward}</p>
           {receipt ? <p>{receipt.legacy ? "This earlier completion has no saved dialogue evidence." : "Your submitted dialogue and rule-based result are saved to your account."}</p> : <p role="status">{busy ? "Loading your saved dialogue…" : "Your chapter is complete, but its saved dialogue could not be loaded."}</p>}
+          {receipt && <p>{receipt.preparation ? "Your three preparation rounds are saved with this chapter." : "This earlier clear is kept. Its preparation rounds were not recorded."}</p>}
         </div><Link href={config.campaignRoute} className="button primary">Continue campaign →</Link></div> : boss?.unlocked && <>
           <form className={styles.form} onSubmit={e => { e.preventDefault(); game.send(); }}>
             <label htmlFor="mission-reply">Your reply</label>

@@ -44,6 +44,10 @@ nhận accuracy từ client. Lịch sử/XP/confidence legacy được giữ, kh
 bằng chứng đã xác thực. Bảng checked-practice chỉ dùng receipt đủ điều kiện theo
 [ADR 010](decisions/010-checked-practice-ranking.md); đây vẫn là luyện tập có hỗ trợ,
 không phải chứng chỉ năng lực hay competitive anti-cheat.
+Checkpoint chiến dịch dùng [ADR 012](decisions/012-campaign-practice-gates.md):
+shared bài đúng, activity/rules hợp lệ và completion sau chương trước. Không dùng
+confidence/accuracy legacy để cấp clear mới; giữ clear/XP/receipt cũ mà không bịa
+preparation evidence. Đây vẫn là guided practice, không phải mastery đã chứng nhận.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 

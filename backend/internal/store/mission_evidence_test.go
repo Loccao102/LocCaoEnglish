@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -64,15 +65,10 @@ func TestMissionEvidencePersistence(t *testing.T) {
 			if _, err = s.SavePlayerProfile(ctx, u.ID, model.PlayerProfile{Goal: "travel", CEFRLevel: "B1", DailyMinutes: 15, TargetBand: 7, Interests: []string{"travel"}}); err != nil {
 				t.Fatal(err)
 			}
-			// Seed prerequisite evidence only, not NPC turns. HTTP rejects these old APIs;
-			// browser coverage earns the same gates through actual learning attempts.
-			for _, in := range []model.AttemptInput{
-				{Skill: "Vocabulary", Activity: "word-link", ItemKey: "fixture-vocab", Prompt: "v", Answer: "v", Accuracy: 1},
-				{Skill: "Listening", Activity: "listen-pick", ItemKey: "fixture-listen", Prompt: "l", Answer: "l", Accuracy: 1},
-				{Skill: "Speaking", Activity: "shadowing", ItemKey: "fixture-speak", Prompt: "s", Answer: "s", Accuracy: 1},
-			} {
-				if _, err = s.recordLegacyFixture(ctx, u.ID, in); err != nil {
-					t.Fatal(err)
+			for _, activity := range []string{"word-link", "dictation", "shadowing"} {
+				a, answer := campaignRound(t, s, u.ID, activity, "mission-"+activity, "mission-"+activity)
+				if !campaignSubmit(t, s, u.ID, a, answer).Correct {
+					t.Fatal("prerequisite fixture")
 				}
 			}
 			before, _ := s.GetUser(ctx, u.ID)
@@ -124,6 +120,9 @@ func TestMissionEvidencePersistence(t *testing.T) {
 			if err != nil || saved.Legacy || saved.Evaluation.Evidence != engine.ConversationEvidence {
 				t.Fatal("receipt", saved, err)
 			}
+			if saved.Preparation == nil || saved.Preparation.RulesVersion != CampaignPracticeRules || len(saved.Preparation.Checkpoints) != 3 {
+				t.Fatal("concurrent first clear lost preparation", saved.Preparation)
+			}
 			saved.Messages[0] = "tampered"
 			again, _ := s.GetMissionReceipt(ctx, u.ID, "airport-crisis")
 			if again.Messages[0] != messages[0] {
@@ -136,6 +135,28 @@ func TestMissionEvidencePersistence(t *testing.T) {
 			}
 			if _, err = s.GetMissionReceipt(ctx, "other-owner", "airport-crisis"); !errors.Is(err, ErrNotFound) {
 				t.Fatal("foreign receipt visible", err)
+			}
+			// A pre-policy dialogue receipt stays readable without fabricated preparation.
+			again.Preparation = nil
+			err = nil
+			if s.db != nil {
+				raw, marshalErr := json.Marshal(again)
+				if marshalErr != nil {
+					t.Fatal(marshalErr)
+				}
+				_, err = s.db.ExecContext(ctx, `UPDATE player_bosses SET evidence=$3 WHERE user_id=$1 AND boss_id=$2`, u.ID, "airport-crisis", string(raw))
+			} else {
+				mem := s.progressionMemory()
+				mem.mu.Lock()
+				mem.receipts[u.ID]["airport-crisis"] = cloneMissionReceipt(again)
+				mem.mu.Unlock()
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			oldDialogue, err := s.CompleteBoss(ctx, u.ID, "airport-crisis", messages, engine.ConversationRulesVersion)
+			if err != nil || oldDialogue.Receipt.Legacy || oldDialogue.Receipt.Preparation != nil || !reflect.DeepEqual(oldDialogue.Receipt.Messages, messages) {
+				t.Fatal("old dialogue upgraded or lost", oldDialogue.Receipt, err)
 			}
 			// Imported clears stay legacy, without fabricated transcript or a second reward.
 			err = nil
@@ -153,6 +174,9 @@ func TestMissionEvidencePersistence(t *testing.T) {
 			legacy, err := s.GetMissionReceipt(ctx, u.ID, "hotel-reservation")
 			if err != nil || !legacy.Legacy || legacy.Evaluation != nil {
 				t.Fatal("legacy upgraded", legacy, err)
+			}
+			if b := campaignBoss(t, s, u.ID, "hotel-reservation"); !b.Cleared || !b.Unlocked {
+				t.Fatal("legacy clear relocked", b)
 			}
 			if _, err = s.CompleteBoss(ctx, u.ID, "hotel-reservation", nil, engine.ConversationRulesVersion); err != nil {
 				t.Fatal("legacy retry", err)
