@@ -2,6 +2,11 @@
 
 Date: 2026-10-11. Scope: CORE-004, nine `/missions/*` routes.
 
+Later decisions: [ADR 010](010-checked-practice-ranking.md) excludes campaign XP
+from checked rank; [ADR 012](012-campaign-practice-gates.md) replaces the legacy
+prerequisite policy described here with correct shared receipts/freshness and
+adds immutable preparation evidence. The original dialogue contract is retained.
+
 ## Problem
 
 The active `TravelMission` sent arbitrary client accuracy `.85` for every chat

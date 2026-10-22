@@ -529,6 +529,18 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Chờ CI — Prerequisite của chín chương có nguồn gốc (`in_review`, 2026-10-22)
+
+Owner/task: Codex, branch `codex/core005-campaign-evidence`, nền main `302c05b`.
+[ADR 012](decisions/012-campaign-practice-gates.md) chốt shared correct receipts,
+freshness sau chương trước, cùng policy cho GET/claim, preparation receipt nguyên
+tử với reward và giữ clear cũ. Nghiệm thu: memory/PG, chín mapping, legacy/wrong/
+owner/version/time, retry/fresh replay, concurrency/rollback và browser/mobile.
+Không mở rộng thành mastery/pack-specific difficulty hay đổi mọi world/cosmetic gate.
+Local Go/vet, build, 13/13 mission browser/API cases (2.3m), hai ảnh mobile và
+integration đi đủ chín chương đã đạt. Chờ PostgreSQL/race và đủ sáu CI jobs trên
+head cuối; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#campaign-prerequisite-receipts--2026-10-22).
+
 ### Đã nghiệm thu — Đóng điểm tự báo và bảng XP có receipt (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core005-reward-boundary`, 2026-10-21,

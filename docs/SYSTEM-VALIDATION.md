@@ -1190,3 +1190,31 @@ Writing feedback; saved essays survive unavailable/invalid provider results.
 
 Documentation-only acceptance validation: all 143 internal file links resolve
 and `git diff --check` passes. No app rebuild is required for these three docs.
+## Campaign prerequisite receipts — 2026-10-22
+
+Scope CORE-005/CORE-006, branch `codex/core005-campaign-evidence`, nền main `302c05b`;
+[ADR 012](decisions/012-campaign-practice-gates.md). Chưa deploy production.
+
+Trước sửa: SQL đọc bảng accuracy cũ; memory suy từ confidence, bỏ qua activity và
+freshness. Hiện cả GET và completion dùng shared correct receipts, activity/rules
+được hỗ trợ và thời điểm hoàn tất sau chương trước. First clear lưu preparation
+cùng dialogue/ledger/reward, giữ clear/receipt cũ mà không backfill bằng chứng.
+
+Local Windows: `go test ./...`, `go vet ./...`, `npm run build` đã đạt. Store cases
+kiểm tra legacy/wrong/foreign/khác activity, unsupported rules/provider, missing
+content/time, active rounds, chín mapping, bằng timestamp bị từ chối, creation so
+với completion, old retry/fresh capped replay và receipt bất biến. Existing mission
+case giữ tám concurrent claims và old dialogue/legacy clear. PostgreSQL/race cùng
+reward rollback trigger chỉ chạy khi có dedicated `loccao_system_test`; local
+chưa có PostgreSQL/Docker/race toolchain, cần đủ sáu CI jobs trước merge.
+
+Browser **13/13 cases (2.3m)** trên bản production local/API memory kiểm tra lost response, reload,
+owner switch, blocked/corrupt storage, 429/503, ba trường hợp gate mới và mobile.
+Hai ảnh render thật `.cache/mission-551.png`, `.cache/mission-844.png` đã được xem:
+chữ hướng dẫn/checkpoints/ô nhập đọc được, không tràn ngang. Lượt chạy đầu dừng
+trước khi nghiệm thu vì môi trường local đặt nhầm tên biến CORS; đã khởi động lại
+API với `CORS_ORIGINS`, không thay policy ứng dụng hay bỏ assertion.
+
+Integration mới `node scripts/verify-campaign-gates.mjs` đi đủ chín chương bằng
+shared practice thật, freshness, concurrent root claims và first-clear reward;
+đã đạt local. CI cuối sẽ được ghi tại đây trước khi nghiệm thu.

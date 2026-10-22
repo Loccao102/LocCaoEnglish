@@ -7,7 +7,19 @@ export type BossEvaluation = {
   completed: string[]; missing: string[]; turns: MissionTurn[]; reply: string;
   rulesVersion: string; evidence: "server-rule-based-reported-dialogue";
 };
-export type MissionReceipt = { bossId: string; messages: string[]; legacy: boolean; evaluation?: BossEvaluation };
+export type CampaignPreparation = {
+  rulesVersion: "campaign-practice.v1";
+  previousBossId?: string;
+  previousCompletedAt?: string;
+  checkpoints: {
+    checkpointId: string; attemptId: string; activity: string;
+    contentVersion: string; rulesVersion: string; completedAt: string;
+  }[];
+};
+export type MissionReceipt = {
+  bossId: string; messages: string[]; legacy: boolean;
+  evaluation?: BossEvaluation; preparation?: CampaignPreparation;
+};
 const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 export function evaluateBoss(id: string, messages: string[], token: string) {
   return apiFetch<BossEvaluation>(`/v1/player/bosses/${encodeURIComponent(id)}/evaluate`, {

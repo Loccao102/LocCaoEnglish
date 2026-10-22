@@ -89,7 +89,8 @@ backfill. Ties use user ID ascending in both store modes; accounts with no eligi
 receipts are unranked. This includes guided transcript practice, not a claim of
 pronunciation mastery, unaided ability or anti-cheat competition. Story, mission,
 chest, Fair, local lesson/placement, IELTS estimates and acoustic feedback do not
-enter this board. Personal lifetime XP and existing unlocks remain unchanged.
+enter this board. Personal lifetime XP and earned chapter clears remain unchanged;
+current campaign checkpoint readiness follows ADR 012 below.
 
 `POST /v1/social/challenges/{id}/submit` requires sign-in and returns 409: arbitrary
 client scores are retired. Existing entries remain unverified archive; create/list
@@ -635,8 +636,9 @@ an ordered server rubric; it is not a fluency or acoustic score.
   `{index, accepted, objective, feedback}`, next partner `reply`, rulesVersion and
   evidence `server-rule-based-reported-dialogue`. Evaluation does not save rewards.
 - `POST /v1/player/bosses/{id}/complete`: same payload; returns `{progression,
-  receipt}`. Receipt contains `bossId`, original `messages`, immutable `evaluation`
-  and `legacy`. Completion recomputes the rubric server-side, then atomically
+  receipt}`. Receipt contains `bossId`, original `messages`, immutable `evaluation`,
+  `legacy` and optional `preparation`. Completion recomputes the rubric server-side,
+  rechecks campaign prerequisites inside the reward transaction, then atomically
   stores receipt and existing first-clear campaign XP. Identical retry returns
   stored evidence; changed messages/version return 409. `score` is rejected (400).
 - `GET /v1/player/bosses/{id}/receipt`: the current account's receipt, or 404.
@@ -649,10 +651,32 @@ must address the current objective; repeated/irrelevant turns do not advance it.
 No per-turn learning XP/confidence is recorded. `/v1/attempts` rejects normalized
 `npc-conversation*` activities (409). Rubric limits, migration 017, startup schema,
 API-before-frontend rollout and data-preserving rollback are specified in
-[ADR 005](decisions/005-mission-evidence.md). Legacy prerequisite/ranking trust
-remains separate work. Only successful completion receipts are stored on server;
+[ADR 005](decisions/005-mission-evidence.md). Campaign preparation follows
+[ADR 012](decisions/012-campaign-practice-gates.md); broader legacy confidence/world
+unlock policy remains CORE-005. Only successful completion receipts are stored on server;
 unfinished dialogue and draft/pending operations stay in account-scoped browser
 storage, with no tokens in the saved draft. No dialogue is added to logs.
+
+### Campaign preparation (`campaign-practice.v1`)
+
+GET progression and first-clear completion use the same nine-chapter policy.
+Each checkpoint needs a correct, completed shared attempt belonging to the account,
+with nonempty content version, supported activity/rules and actual `completed_at`.
+Legacy accuracy rows, confidence changes, wrong answers, unfinished rounds, other
+owners, unsupported pronunciation providers and missing completion times do not count.
+Later chapters require the previous clear plus all three rounds completed strictly
+after its saved completion time. An identical submit retry retains its old time;
+a new correct round counts even with zero additional daily XP. Version 1 matches
+activity, not pack/CEFR or unassisted mastery. Shadow Me remains guided transcript
+matching, not pronunciation assessment.
+
+New clear receipts include `preparation:{rulesVersion,previousBossId?,
+previousCompletedAt?,checkpoints}`. Each checkpoint records `{checkpointId,attemptId,
+activity,contentVersion,rulesVersion,completedAt}` selected at first clear. Further
+practice/retries do not replace it. Existing clears stay cleared/unlocked and retain
+their dialogue/XP/cosmetics; receipts without preparation are not backfilled.
+Goal/lifetime XP still opens personal worlds. No new schema: use existing evidence
+JSON and migration 021's completion timestamps; deploy API before UI, keep old data.
 
 Allowed browser origins receive CORS headers on rate-limit errors too, including
 an exposed `Retry-After` header. The existing request limits remain unchanged;

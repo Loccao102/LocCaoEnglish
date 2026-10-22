@@ -3,6 +3,9 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test, expect, type Page, type APIRequestContext } from "@playwright/test";
 import words from "../../backend/internal/learning/catalog.json";
 import dictation from "../../backend/internal/learning/dictation_catalog.json";
+import grammar from "../../backend/internal/learning/grammar_catalog.json";
+import collocations from "../../backend/internal/learning/collocation_catalog.json";
+import story from "../../backend/internal/learning/story_catalog.json";
 import type { LearningAttempt } from "../../lib/learning-attempt";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080";
@@ -31,8 +34,11 @@ async function learner(request: APIRequestContext, unlock = true) {
   expect(created.ok(), await created.text()).toBe(true); const user = await created.json();
   const headers = { Authorization: `Bearer ${user.token}` };
   expect((await request.put(`${API}/v1/player/profile`, { headers, data: { goal: "travel", cefrLevel: "B1", dailyMinutes: 15, targetBand: 7, interests: ["travel"] } })).ok()).toBe(true);
-  if (unlock) for (const activity of ["word-link", "dictation", "shadowing"]) {
-    const response = await request.post(`${API}/v1/learning/attempts`, { headers, data: { activity, requestId: randomUUID(), cefrLevel: "B1", pack: "cefr-core" } });
+  if (unlock) for (const activity of ["word-link", "dictation", "shadowing"]) await practiceRound(request, headers, activity);
+  return { ...user, headers };
+}
+async function practiceRound(request: APIRequestContext, headers: Record<string, string>, activity: string, wrong = false) {
+    const response = await request.post(`${API}/v1/learning/attempts`, { headers, data: { activity, requestId: randomUUID(), cefrLevel: "B1", pack: activity === "story-choice" ? "hotel-check-in" : "cefr-core" } });
     expect(response.ok(), await response.text()).toBe(true); const a: LearningAttempt = await response.json();
     const versions = { contentVersion: a.contentVersion, rulesVersion: a.rulesVersion };
     // Prerequisite fixture reports playback; it does not claim a human heard it.
@@ -40,11 +46,17 @@ async function learner(request: APIRequestContext, unlock = true) {
       const event = { requestId: randomUUID(), rate: 1, ...versions };
       for (const status of ["requested", "completed"]) expect((await request.post(`${API}/v1/learning/attempts/${a.attemptId}/audio`, { headers, data: { ...event, status, ...(status === "completed" ? { provider: "browser-speech-synthesis" } : {}) } })).ok()).toBe(true);
     }
-    const answer = activity === "word-link" ? words.items.find(i => i.id === a.itemKey)!.correctAnswer : activity === "dictation" ? dictation.items.find(i => i.id === a.itemKey)!.transcript : a.prompt.question;
+    const correct = activity === "word-link" ? words.items.find(i => i.id === a.itemKey)!.correctAnswer
+      : activity === "dictation" ? dictation.items.find(i => i.id === a.itemKey)!.transcript
+      : activity === "grammar-repair" ? grammar.items.find(i => i.id === a.itemKey)!.correctAnswer
+      : activity === "collocation-factory" ? collocations.items.find(i => i.id === a.itemKey)!.correctAnswer
+      : activity === "story-choice" ? story.nodes.find(n => n.id === "arrival")!.choices!.find(c => c.good)!.label
+      : a.prompt.question;
+    const answer = wrong ? a.prompt.options.find(option => option !== correct)! : correct;
     const graded = await request.post(`${API}/v1/learning/attempts/${a.attemptId}/submit`, { headers, data: { ...versions, answer } });
-    expect(graded.ok(), await graded.text()).toBe(true); expect((await graded.json()).correct).toBe(true);
-  }
-  return { ...user, headers };
+    expect(graded.ok(), await graded.text()).toBe(true);
+    const result = await graded.json(); expect(result.correct).toBe(!wrong);
+    return { attempt: a, result, input: { ...versions, answer } };
 }
 async function signIn(page: Page, token: string) {
   // Install the test account before the first mission document. Visiting the
@@ -82,6 +94,8 @@ test("mission saves real dialogue after lost responses without per-turn XP", asy
   const receipt = await (await request.get(`${root}/receipt`, { headers: user.headers })).json();
   expect(receipt.messages).toEqual(["I did not miss my flight today.", ...lines]);
   expect(receipt.evaluation).toMatchObject({ evidence: "server-rule-based-reported-dialogue", rulesVersion: version, stage: 3 });
+  expect(receipt.preparation.rulesVersion).toBe("campaign-practice.v1");
+  expect(receipt.preparation.checkpoints.map((c: { checkpointId: string }) => c.checkpointId)).toEqual(["airport-vocab", "airport-listening", "airport-speaking"]);
   const data = { messages: receipt.messages, rulesVersion: version };
   expect((await request.post(`${root}/complete`, { headers: user.headers, data })).ok()).toBe(true);
   expect((await request.post(`${root}/complete`, { headers: user.headers, data: { ...data, messages: lines } })).status()).toBe(409);
@@ -186,6 +200,7 @@ test("mission retries a failed saved receipt without reclaiming the chapter rewa
   await page.getByRole("button", { name: "Retry loading saved completion" }).click();
   for (const line of lines) await expect(page.getByText(line, { exact: true })).toBeVisible();
   await expect(page.getByText("Your submitted dialogue and rule-based result are saved to your account.")).toBeVisible();
+  await expect(page.getByText("Your three preparation rounds are saved with this chapter.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry loading saved completion" })).toHaveCount(0);
   expect(claims).toBe(0);
   expect((await (await request.get(`${API}/v1/me`, { headers: user.headers })).json()).user.xp).toBe(210);
@@ -203,4 +218,69 @@ for (const height of [551, 844]) test(`mission is readable and usable on 390x${h
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const button of await page.getByRole("region", { name: "Mission conversation" }).getByRole("button").all()) expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(48);
   await page.screenshot({ path: `.cache/mission-${height}.png`, fullPage: true });
+});
+
+test("campaign needs the correct activity rather than wrong answers or another learner's practice", async ({ request }) => {
+  const user = await learner(request, false), other = await learner(request);
+  await practiceRound(request, user.headers, "word-link", true);
+  await practiceRound(request, user.headers, "collocation-factory");
+  for (const activity of ["dictation", "shadowing"]) await practiceRound(request, user.headers, activity);
+  const state = await (await request.get(`${API}/v1/player/progression`, { headers: user.headers })).json();
+  const boss = state.bosses.find((b: { id: string }) => b.id === "airport-crisis");
+  expect(boss.unlocked).toBe(false);
+  expect(boss.checkpoints.map((c: { complete: boolean }) => c.complete)).toEqual([false, true, true]);
+  expect((await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: version } })).status()).toBe(409);
+  expect((await request.get(`${root}/receipt`, { headers: other.headers })).status()).toBe(404);
+  await practiceRound(request, user.headers, "word-link");
+  const saved = await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: version } });
+  expect(saved.ok(), await saved.text()).toBe(true);
+  const completion = await saved.json(); expect(completion.receipt.preparation.checkpoints).toHaveLength(3);
+  expect((await request.get(`${root}/receipt`, { headers: other.headers })).status()).toBe(404);
+});
+
+test("next chapter requires practice completed after the previous clear and saves that proof", async ({ page, request }) => {
+  const user = await learner(request);
+  const old = await practiceRound(request, user.headers, "shadowing");
+  for (const activity of ["story-choice", "grammar-repair"]) await practiceRound(request, user.headers, activity);
+  const complete = await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: version } });
+  expect(complete.ok(), await complete.text()).toBe(true);
+  const cleared = await complete.json(), airport = cleared.progression.bosses.find((b: { id: string }) => b.id === "airport-crisis");
+  await signIn(page, user.token); await page.goto("/missions/hotel");
+  await expect(page.getByText("GATE LOCKED", { exact: true })).toBeVisible();
+  await expect(page.locator(".mission-stage.complete")).toHaveCount(0);
+  expect((await request.post(`${API}/v1/learning/attempts/${old.attempt.attemptId}/submit`, { headers: user.headers, data: old.input })).ok()).toBe(true);
+  await page.reload(); await expect(page.locator(".mission-stage.complete")).toHaveCount(0);
+  const replay = await practiceRound(request, user.headers, "story-choice");
+  expect(replay.result.xpDelta).toBe(0); // A new correct capped round still prepares the chapter.
+  for (const activity of ["grammar-repair", "shadowing"]) await practiceRound(request, user.headers, activity);
+  await page.reload(); await expect(page.locator(".mission-stage.complete")).toHaveCount(3);
+  await expect(input(page)).toBeEnabled();
+  const hotelLines = ["My confirmed reservation is missing.", "My confirmation number is ABC123.", "What time is breakfast tomorrow?"];
+  for (const line of hotelLines) await send(page, line);
+  await page.getByRole("button", { name: "Save chapter completion" }).click();
+  await expect(page.getByText("Your three preparation rounds are saved with this chapter.")).toBeVisible();
+  const saved = await (await request.get(`${API}/v1/player/bosses/hotel-reservation/receipt`, { headers: user.headers })).json();
+  expect(saved.preparation).toMatchObject({ rulesVersion: "campaign-practice.v1", previousBossId: "airport-crisis", previousCompletedAt: airport.completedAt });
+  expect(saved.preparation.checkpoints).toHaveLength(3);
+  for (const proof of saved.preparation.checkpoints) {
+    expect(Date.parse(proof.completedAt)).toBeGreaterThan(Date.parse(airport.completedAt));
+    const attempt = await request.get(`${API}/v1/learning/attempts/${proof.attemptId}`, { headers: user.headers });
+    expect(attempt.ok(), await attempt.text()).toBe(true); expect((await attempt.json()).result.correct).toBe(true);
+  }
+});
+
+test("earlier dialogue receipt keeps the clear without inventing preparation evidence", async ({ page, request }) => {
+  const user = await learner(request);
+  expect((await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: version } })).ok()).toBe(true);
+  await page.route("**/bosses/airport-crisis/receipt", async route => {
+    const response = await route.fetch(), old = await response.json(); delete old.preparation;
+    await route.fulfill({ response, json: old });
+  });
+  let claims = 0; page.on("request", r => { if (r.url().endsWith("/airport-crisis/complete")) claims++; });
+  await signIn(page, user.token);
+  await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
+  await expect(page.getByText("This earlier clear is kept. Its preparation rounds were not recorded.")).toBeVisible();
+  await expect(page.locator(".mission-progress strong")).toHaveText("100%");
+  for (const line of lines) await expect(page.getByText(line, { exact: true })).toBeVisible();
+  expect(claims).toBe(0);
 });
