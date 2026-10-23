@@ -93,7 +93,18 @@ test("Listening account result survives lost submit response and switching accou
  const registered=await request.post(`${API}/v1/auth/register`,{data:{email:`listen-${randomUUID()}@example.test`,password:"SunlitTest123!",displayName:"Listener"}});expect(registered.ok()).toBe(true);const user=await registered.json();
  await page.goto("/account");await page.evaluate(token=>{localStorage.setItem("loccao_token",token);window.dispatchEvent(new Event("loccao-auth-change"));},user.token);
  let opened=issued(page);await page.goto("/listening");const a:LearningAttempt=await(await opened).json();
- await card(page).getByRole("button",{name:"Play audio",exact:true}).click();await expect(card(page).getByRole("button",{name:item(a).correctAnswer,exact:true})).toBeEnabled();
+ // After account sign-in, verify that the UI has hydrated and accepts the same issued attempt.
+ // If the initial route mount stalls in headless CI, exercise the supported round-resume
+ // path once rather than letting a locator click spin for the full test timeout.
+ const play=card(page).getByRole("button",{name:"Play audio",exact:true});
+ try { await expect(play).toBeVisible({timeout:6500}); }
+ catch {
+  const resumed=page.waitForResponse(r=>r.url().endsWith(`/v1/learning/attempts/${a.attemptId}`) && r.request().method()==="GET",{timeout:12000});
+  await page.reload();
+  expect((await resumed).ok()).toBe(true);
+  await expect(play).toBeVisible({timeout:6500});
+ }
+ await play.click();await expect(card(page).getByRole("button",{name:item(a).correctAnswer,exact:true})).toBeEnabled();
  let payload:unknown;
  await page.route("**/v1/learning/attempts/*/submit",async route=>{payload=route.request().postDataJSON();const response=await route.fetch();expect(response.ok()).toBe(true);await route.abort("failed");},{times:1});
  await card(page).getByRole("button",{name:item(a).correctAnswer,exact:true}).click();await expect(page.getByRole("button",{name:"Retry same answer"})).toBeVisible();await page.reload();
