@@ -36,10 +36,24 @@ test("A real Word Link receipt contributes to the checked board once after lost 
  await expect(page.getByRole("button",{name:"Retry same answer"})).toBeVisible();
  await page.reload();await expect(page.getByText("+20 XP · Progress saved.",{exact:true})).toBeVisible();
  for(let i=0;i<3;i++)expect((await request.post(`${API}/v1/learning/attempts/${attempt.attemptId}/submit`,{headers:user.headers,data:{answer,contentVersion:attempt.contentVersion,rulesVersion:attempt.rulesVersion}})).ok()).toBe(true);
- const board=await(await request.get(`${API}/v1/social/leaderboard`,{headers:user.headers})).json();
- expect(board.items.find((row:any)=>row.userId===user.user.id).xp).toBe(20);
+ // Other E2E files leave real checked receipts in this isolated stack. A new
+ // 20-XP learner need not rank in the public top 20; check their receipt total
+ // in the supported wider view, then verify the actual public slice in the UI.
+ const response=await request.get(`${API}/v1/social/leaderboard?limit=100`,{headers:user.headers});
+ expect(response.ok()).toBe(true);const board=await response.json();
+ expect(board.items.length,"The isolated E2E fixture must fit the expanded board").toBeLessThan(100);
+ expect(board.items).toContainEqual(expect.objectContaining({userId:user.user.id,xp:20}));
+ const me=await request.get(`${API}/v1/me`,{headers:user.headers});expect(me.ok()).toBe(true);expect((await me.json()).user.xp).toBe(20);
+ const publicResponse=await request.get(`${API}/v1/social/leaderboard?limit=20`,{headers:user.headers});
+ expect(publicResponse.ok()).toBe(true);const publicBoard=await publicResponse.json();
  await page.goto("/social");await expect(page.getByText("CHECKED PRACTICE XP",{exact:true})).toBeVisible();
- await expect(page.locator(".leader-list > div").filter({hasText:user.name})).toContainText("20 checked XP");
+ const rows=page.locator(".leader-list > div");await expect(rows).toHaveCount(publicBoard.items.length);
+ for(let i=0;i<publicBoard.items.length;i++){
+  const expected=publicBoard.items[i],row=rows.nth(i);
+  await expect(row.locator("b")).toHaveText(`#${expected.rank}`);
+  await expect(row.locator("strong")).toHaveText(expected.displayName);
+  await expect(row.locator("em")).toHaveText(`${expected.xp} checked XP`);
+ }
  await page.getByRole("button",{name:"Create practice invitation"}).click();
  await expect(page.locator(".challenge-card").filter({hasText:user.name})).toContainText("Open practice");
  await expect(page.getByText(/do not create head-to-head scores/)).toBeVisible();

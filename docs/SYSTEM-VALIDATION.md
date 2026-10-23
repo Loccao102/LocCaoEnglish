@@ -24,8 +24,20 @@ hoặc race toolchain nên các mục đó chờ CI. Engine cases kiểm tra see
 không ảnh hưởng gợi ý, actual errors/empty evidence, route, zero reward quote,
 future/missing method và ngân sách ngắn.
 
-Browser/mobile, toàn bộ CI và merge vẫn chờ kết quả; không dùng bằng chứng của
-PR #23 để nghiệm thu head mới. Confidence, personal world/cosmetic grants,
+Local browser đạt 6/6 ca mới (2.2m), 15/15 ca core/reward liên quan (18.5s).
+Đã xem ảnh 390×551/844 và full cards dưới sticky nav: chữ/nút đọc được, không
+tràn ngang. [CI 161](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39980965225)
+trên `3d77de6` đạt năm jobs (gồm PG/race/vet và integration), E2E **178 passed,
+1 failed (29.3m)**. Sáu ca mới đều đạt. Ca cũ reward-boundary sai giả định account
+vừa nhận 20 XP luôn thuộc top 20; cả retry cũng lỗi vì không tìm thấy row. Điều
+tra xác nhận endpoint mặc định giới hạn 20 và tie theo user ID; dataset đầy đủ
+có nhiều hơn 20 account đủ điều kiện. Không sửa luật rank hoặc tăng XP fixture
+để ép lọt top. Sửa test đọc cửa sổ 100 cho owner receipt, giữ kiểm tra đúng 20 XP
+và so toàn bộ UI với top 20 thật; thêm regression về cửa sổ/tie trên 25 người
+bằng các round được chấm thật. Head sửa cần đủ sáu jobs mới trước merge.
+
+Toàn bộ CI và merge vẫn chờ kết quả; không dùng bằng chứng của PR #23 để nghiệm
+thu head mới. Confidence, personal world/cosmetic grants,
 daily v1 snapshots/selection và teacher analytics giữ policy cũ, tiếp tục nằm
 trong roadmap. Không có migration hoặc production deployment.
 
