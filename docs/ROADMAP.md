@@ -529,7 +529,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Đang làm — Hồ sơ luyện tập và questline từ receipt (`in_progress`, 2026-10-23)
+### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 
 Owner/task: Codex, branch `codex/core005-skill-practice`, nền main `4cdc9e7`.
 [ADR 013](decisions/013-skill-practice-summary.md) chốt projection cửa sổ 20 bài
@@ -538,6 +538,16 @@ camp không hiển thị mastery mẫu và gợi ý không hứa XP giả. Nghi�
 memory/PG, owner/version/dedup/replay/window, engine, browser/account/offline và
 ảnh mobile. Giữ confidence/XP/world/cosmetic và daily snapshots hiện tại; chưa
 thay policy grants, teacher analytics hay mastery calibration.
+
+Local Go/vet/build/TypeScript, 6/6 ca mới và 15/15 ca core/reward liên quan đã đạt;
+ảnh 390×551/844 đọc được. Lượt CI đầu phát hiện test cũ giả định sai về top 20;
+đã sửa và thêm regression 25 người, giữ nguyên luật/thưởng. Head cuối `24cb8c4`
+đạt đủ sáu jobs tại [CI 162](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39987606107),
+gồm PostgreSQL/race/vet, integration và **179/179 E2E (26.3m)**, không flaky.
+[PR #24](https://github.com/Loccao102/LocCaoEnglish/pull/24) đã merge thành main
+`9009a3e` sau đối chiếu base/head, reviews/threads và ghim expected head.
+Chưa deploy production; toàn CORE-005 vẫn `in_progress`. Xem
+[SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#skill-practice-summary-and-recommendations--2026-10-23).
 
 ### Đã nghiệm thu — Prerequisite của chín chương có nguồn gốc (`done`, 2026-10-23)
 

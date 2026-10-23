@@ -5,8 +5,10 @@ Implementation was completed before running the suites below. Failures found dur
 ## Skill practice summary and recommendations — 2026-10-23
 
 Scope CORE-005, branch `codex/core005-skill-practice`, nền main `4cdc9e7`;
-[ADR 013](decisions/013-skill-practice-summary.md). Trạng thái `in_review`;
-chưa deploy production.
+[ADR 013](decisions/013-skill-practice-summary.md). Đã nghiệm thu 2026-10-24
+(UTC+7) qua [PR #24](https://github.com/Loccao102/LocCaoEnglish/pull/24), main
+`9009a3ef6dc75d184aabddabfb12bc4bb767277e`; head cuối được kiểm tra
+`24cb8c4a491e8526907702bd9139aa22ef42e7fc`. Chưa deploy production.
 
 Thêm read projection `skill-practice.v1` trên shared receipts đúng owner,
 activity/rules/skill và completion time. Latest per activity/item/content rồi
@@ -20,7 +22,7 @@ Local Windows: `go test ./...`, `go vet ./...`, `npm run build` và TypeScript �
 đạt. Store cases dùng actual grading/retry/capped replay và fixture exclusions,
 window/tie/identity, các kỹ năng, owner separation, trả bản copy, không ghi lại
 XP/confidence. PG cases có single-connection/reopen; local không có database test
-hoặc race toolchain nên các mục đó chờ CI. Engine cases kiểm tra seeded/legacy
+hoặc race toolchain, CI đã chạy các mục đó trên `loccao_system_test`. Engine cases kiểm tra seeded/legacy
 không ảnh hưởng gợi ý, actual errors/empty evidence, route, zero reward quote,
 future/missing method và ngân sách ngắn.
 
@@ -34,10 +36,20 @@ tra xác nhận endpoint mặc định giới hạn 20 và tie theo user ID; dat
 có nhiều hơn 20 account đủ điều kiện. Không sửa luật rank hoặc tăng XP fixture
 để ép lọt top. Sửa test đọc cửa sổ 100 cho owner receipt, giữ kiểm tra đúng 20 XP
 và so toàn bộ UI với top 20 thật; thêm regression về cửa sổ/tie trên 25 người
-bằng các round được chấm thật. Head sửa cần đủ sáu jobs mới trước merge.
+bằng các round được chấm thật. Ca lỗi sửa đã chạy local sạch 1/1 (2.5s), Go/vet
+và TypeScript đã kiểm tra lại; không thay runtime trong commit sửa test.
 
-Toàn bộ CI và merge vẫn chờ kết quả; không dùng bằng chứng của PR #23 để nghiệm
-thu head mới. Confidence, personal world/cosmetic grants,
+[CI 162](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39987606107) trên
+head `24cb8c4` đạt đủ sáu jobs: frontend `120530745065` (50 logic, assets/build),
+backend `120530744876` (PG/race/vet, projection và memory regression 25 người),
+AI `120530745106`, compose `120530744563`, integration `120531145564`, E2E
+`120531145468` (**179/179, 26.3m**). Run attempt 1, không flaky. E2E kết thúc
+2026-10-23 17:01:13 UTC; sáu success đã đối chiếu trước merge ghim expected head.
+Reviews/threads trống, base `4cdc9e7` và head cuối không đổi. Main `9009a3e` có
+tree giống head đã kiểm tra. Commit nghiệm thu sau đó chỉ sửa ba file docs,
+kiểm tra link/diff; không dùng pass cũ để xác nhận code runtime khác.
+
+Confidence, personal world/cosmetic grants,
 daily v1 snapshots/selection và teacher analytics giữ policy cũ, tiếp tục nằm
 trong roadmap. Không có migration hoặc production deployment.
 

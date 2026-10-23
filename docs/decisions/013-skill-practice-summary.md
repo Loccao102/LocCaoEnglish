@@ -1,6 +1,9 @@
 # ADR 013 — Hồ sơ luyện tập và gợi ý từ bài đã kiểm tra
 
-Status: Accepted for implementation, 2026-10-23. Scope: CORE-005.
+Status: Accepted, 2026-10-23. Scope: CORE-005.
+
+Đã triển khai qua [PR #24](https://github.com/Loccao102/LocCaoEnglish/pull/24),
+main `9009a3e`; nghiệm thu 2026-10-24 (UTC+7), chưa deploy production.
 
 ## Bối cảnh
 
