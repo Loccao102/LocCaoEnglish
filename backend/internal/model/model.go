@@ -12,10 +12,22 @@ type User struct {
 }
 
 type Skill struct {
-	Name       string    `json:"name"`
-	Confidence float64   `json:"confidence"`
-	Level      int       `json:"level"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	Name       string         `json:"name"`
+	Confidence float64        `json:"confidence"`
+	Level      int            `json:"level"`
+	UpdatedAt  time.Time      `json:"updatedAt"`
+	Practice   *SkillPractice `json:"practice"`
+}
+
+// SkillPractice describes recent guided practice, not a proficiency assessment.
+// Confidence remains a separate compatibility field for older clients.
+type SkillPractice struct {
+	Method          string     `json:"method"`
+	SampleCount     int        `json:"sampleCount"`
+	CorrectCount    int        `json:"correctCount"`
+	WindowSize      int        `json:"windowSize"`
+	LastCompletedAt *time.Time `json:"lastCompletedAt"`
+	EvidenceKind    string     `json:"evidenceKind"`
 }
 
 type AttemptInput struct {
@@ -67,6 +79,8 @@ type PlanItem struct {
 }
 
 type DailyPlan struct {
+	// Method identifies the suggestion policy, independently of saved daily rewards.
+	Method      string     `json:"method"`
 	Focus       string     `json:"focus"`
 	TotalMins   int        `json:"totalMins"`
 	PotentialXP int        `json:"potentialXp"`

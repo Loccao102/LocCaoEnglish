@@ -1,57 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { DailyPlan, getPlan } from "@/lib/api";
-
-const fallback: DailyPlan = {
-  focus: "Speaking recovery",
-  totalMins: 28,
-  potentialXp: 115,
-  items: [
-    { id: "offline-1", title: "Shadow & respond", skill: "Speaking", activity: "Shadowing", reason: "Speaking is currently one of your weakest areas.", minutes: 7, xp: 30, route: "/speaking", priority: 1 },
-    { id: "offline-2", title: "IELTS micro-writing", skill: "Writing", activity: "Writing", reason: "Build controlled arguments before a full essay.", minutes: 10, xp: 35, route: "/ielts/writing", priority: 2 },
-    { id: "offline-3", title: "Dictation Rush", skill: "Dictation", activity: "Dictation", reason: "Train listening accuracy and spelling together.", minutes: 6, xp: 40, route: "/dictation", priority: 3 },
-  ],
-};
+import { usePracticePlan } from "./learning/usePracticeDashboard";
 
 export default function AdaptivePlan() {
-  const [plan, setPlan] = useState<DailyPlan>(fallback);
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    getPlan().then((value) => { setPlan(value); setLive(true); }).catch(() => setLive(false));
-  }, []);
-
-  return (
-    <section className="panel adaptive-plan">
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">TODAY&apos;S QUESTLINE</span>
-          <h2>{plan.focus}</h2>
-        </div>
-        <span className={`mode-badge ${live ? "" : "warning"}`}>{live ? "● LIVE DIRECTOR" : "OFFLINE ROUTE"}</span>
-      </div>
-
-      <div className="plan-summary">
-        <span>◷ {plan.totalMins} min run</span>
-        <span>✦ up to {plan.potentialXp} XP</span>
-        <span>{plan.items.length} quests</span>
-      </div>
-
-      <div className="plan-grid">
-        {plan.items.slice(0, 4).map((item, index) => (
-          <Link href={item.route} className="plan-step" key={item.id}>
-            <span className="plan-number">{index + 1}</span>
-            <div>
-              <small>{item.skill} · {item.minutes} min</small>
-              <strong>{item.title}</strong>
-              <p>{item.reason}</p>
-            </div>
-            <b>+{item.xp} XP →</b>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
+  const { data: plan, status, needsSignIn, refresh } = usePracticePlan();
+  return <section className="panel adaptive-plan practice-plan" aria-label="Practice suggestions">
+    <div className="section-heading">
+      <div><span className="eyebrow">WHAT TO PRACTICE NEXT</span><h2>{plan?.focus ?? (status === "guest" ? "Choose your next practice" : status === "loading" ? "Loading practice suggestions…" : "Practice suggestions unavailable")}</h2></div>
+      {plan && <button className="button ghost" onClick={refresh}>Refresh suggestions</button>}
+    </div>
+    {!plan ? <div className="practice-empty" role={status === "error" ? "alert" : "status"}>
+      <p>{status === "guest" ? "Sign in for suggestions based on your saved practice and learning goal." : status === "loading" ? "Reading your recent checked work…" : needsSignIn ? "Sign in again to see suggestions for your account." : "We could not load your suggestions. Your saved practice is unchanged."}</p>
+      {(status === "guest" || needsSignIn) && <Link className="button primary" href="/account">{needsSignIn ? "Sign in again" : "Sign in for practice suggestions"}</Link>}
+      {status === "error" && <button className="button ghost" onClick={refresh}>Retry loading suggestions</button>}
+    </div> : <>
+      <div className="plan-summary"><span>◷ About {plan.totalMins} minutes</span><span>{plan.items.length} suggested activities</span></div>
+      <p className="practice-note">Suggestions can change as you practice. Your saved daily checklist stays fixed; each activity explains its own rewards.</p>
+      <div className="plan-grid">{plan.items.slice(0, 4).map((item, index) => <Link href={item.route} className="plan-step" key={item.id}>
+        <span className="plan-number">{index + 1}</span>
+        <div><small>{item.skill} · {item.minutes} min</small><strong>{item.title}</strong><p>{item.reason}</p></div>
+        <b>Open activity →</b>
+      </Link>)}</div>
+    </>}
+  </section>;
 }

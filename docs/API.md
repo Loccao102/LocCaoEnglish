@@ -17,7 +17,34 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 - `GET /v1/dashboard`
 - `GET /v1/skills`
 - `GET /v1/plan/today`
+- `GET /v1/player/questline` (goal-aware practice suggestions)
 - `POST /v1/attempts`
+
+`GET /v1/skills` and dashboard `skills` add a `practice` summary to every skill:
+`{method:"skill-practice.v1",sampleCount,correctCount,windowSize:20,lastCompletedAt,
+evidenceKind}`. `lastCompletedAt` is nullable. See [ADR 013](decisions/013-skill-practice-summary.md).
+For each skill, the latest completion of each different `(activity,itemKey,
+contentVersion)` is selected, then the 20 most recent items are counted. Only
+owned, completed shared attempts with supported activity/rules/skill, item/content
+and a real completion time qualify. Wrong answers count practice; capped fresh
+replays replace an item's result, while exact retries do not add an item or time.
+Speaking is `transcript-match`; other supported skills are `guided-practice`;
+Writing is `not-supported` here and keeps its separate feedback history. These
+counts do not establish mastery, pronunciation quality or CEFR.
+
+Existing `confidence`, `level` and `updatedAt` remain compatibility fields with
+seeded/mixed historical values. They are **not** checked evidence. Camp displays
+the new summary and a safe unavailable state with older API responses. It requests
+personal progress only while signed in; legacy demo access to the API remains.
+Questline returns `method: skill-practice.v1`; the new camp refuses missing or
+unsupported plan methods rather than present a legacy diagnosis. Recommendations
+prioritize observed errors, then unsampled skills,
+then all-correct review, with stable name ties. They use direct activity routes
+and put the chosen profile goal after due reviews/observed errors but before
+exploration, so a short minute budget cannot hide the feedback action. They
+keep compatibility `xp`/`potentialXp` at zero rather than quote rewards. The
+actual activity decides its rewards. Existing daily snapshots/selection and
+personal world/cosmetic gates are unchanged by this read projection.
 
 Attempt payload:
 

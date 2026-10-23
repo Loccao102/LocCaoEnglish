@@ -242,7 +242,20 @@ func (s *Store) Skills(ctx context.Context, userID string) ([]model.Skill, error
 			}
 			out = append(out, sk)
 		}
-		return out, rows.Err()
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+		// Release the first query before reading attempt evidence, including on a
+		// single-connection pool. The projection never writes the legacy rows.
+		if err = rows.Close(); err != nil {
+			return nil, err
+		}
+		practice, err := skillPracticeSQL(ctx, s.db, userID)
+		if err != nil {
+			return nil, err
+		}
+		attachSkillPractice(out, practice)
+		return out, nil
 	}
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -254,6 +267,7 @@ func (s *Store) Skills(ctx context.Context, userID string) ([]model.Skill, error
 	for _, sk := range m {
 		out = append(out, sk)
 	}
+	attachSkillPractice(out, s.skillPracticeMemory(userID))
 	sort.Slice(out, func(i, j int) bool { return out[i].Confidence < out[j].Confidence })
 	return out, nil
 }

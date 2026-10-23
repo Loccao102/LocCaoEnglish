@@ -42,13 +42,21 @@ Stores presence, challenge state, pub/sub and rate limits. The realtime service 
 
 ## Skill confidence
 
-Each attempt contains a normalized accuracy from `0..1`. Confidence uses a simple EWMA:
+Compatibility skill rows retain seeded/mixed historical values. Eligible graded
+attempts update the existing EWMA using server-computed accuracy from `0..1`:
 
 ```text
 new_confidence = old_confidence * 0.75 + accuracy * 0.25
 ```
 
-This is intentionally interpretable for the MVP. A later Bayesian/IRT model can replace it behind the same store/API contracts.
+These values are personal compatibility data, not a calibrated mastery measure.
+Camp and practice suggestions use the separate `skill-practice.v1` read projection
+from completed supported shared receipts: the latest answer for each different
+activity/item/content, then the 20 most recent items per skill. They display counts
+and evidence kind, including transcript-only Speaking, without inventing proficiency
+percentages or reward quotes. See [ADR 013](decisions/013-skill-practice-summary.md).
+World/cosmetic gates and the fixed daily-plan v1 selection retain their older
+personal policy pending a separate grant ledger/migration.
 
 ## Review scheduling
 
