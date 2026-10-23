@@ -1,83 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Dashboard, getDashboard } from "@/lib/api";
-import { AUTH_EVENT, getAuthToken } from "@/lib/session";
+import usePracticeDashboard, { currentSkillPractice } from "./learning/usePracticeDashboard";
 
 export default function LiveSnapshot() {
-  const [data, setData] = useState<Dashboard | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [reload, setReload] = useState(0);
+  const { data, status, needsSignIn, refresh } = usePracticeDashboard();
 
-  useEffect(() => {
-    let generation = 0;
-    const refresh = () => {
-      const current = ++generation, token = getAuthToken();
-      setData(null); setLoading(true);
-      getDashboard().then(value => {
-        if (current === generation && token === getAuthToken()) setData(value);
-      }).catch(() => {}).finally(() => {
-        if (current === generation && token === getAuthToken()) setLoading(false);
-      });
-    };
-    const storage = (event: StorageEvent) => {
-      if (event.key === "loccao_token" || event.key === null) refresh();
-    };
-    refresh();
-    window.addEventListener(AUTH_EVENT, refresh);
-    window.addEventListener("storage", storage);
-    return () => {
-      generation++;
-      window.removeEventListener(AUTH_EVENT, refresh);
-      window.removeEventListener("storage", storage);
-    };
-  }, [reload]);
+  if (!data) return <section className="live-snapshot offline practice-snapshot" aria-label="Player practice snapshot">
+    <div role={status === "error" ? "alert" : "status"}>
+      <span className="eyebrow">PLAYER PROFILE</span>
+      <h2>{status === "guest" ? "Your practice starts here" : status === "loading" ? "Loading your progress…" : "Your progress is unavailable"}</h2>
+      <p>{status === "guest" ? "Sign in to see your saved practice. Guest rounds stay separate." : status === "loading" ? "Your saved practice will appear here." : needsSignIn ? "Sign in again to load your saved practice." : "Check your connection and try loading it again."}</p>
+      {(status === "guest" || needsSignIn) && <Link className="button ghost" href="/account">{needsSignIn ? "Sign in again" : "Sign in to see your progress"}</Link>}
+      {status === "error" && <button className="button ghost" onClick={refresh}>Retry loading progress</button>}
+    </div>
+  </section>;
 
-  if (!data) {
-    return (
-      <section className="live-snapshot offline">
-        <div>
-          <span className="eyebrow">PLAYER PROFILE</span>
-          <h2>{loading ? "Loading your progress…" : "Your progress is unavailable"}</h2>
-          <p>{loading ? "Your saved practice will appear here." : "Check your connection and try loading it again."}</p>
-          {!loading && <button className="button" onClick={() => setReload(value => value + 1)}>Retry loading progress</button>}
-        </div>
-        <span className="mode-badge warning">{loading ? "LOADING" : "UNAVAILABLE"}</span>
-      </section>
-    );
-  }
+  const summaries = data.skills.map(skill => currentSkillPractice(skill.practice));
+  const supported = summaries.filter(summary => summary && summary.evidenceKind !== "not-supported");
+  const practiced = supported.filter(summary => summary && summary.sampleCount > 0).length;
 
-  const targets = [...data.skills].sort((a, b) => a.confidence - b.confidence).slice(0, 3);
-
-  return (
-    <section className="live-snapshot">
-      <div className="snapshot-person">
-        <span className="avatar large">{data.user.displayName.slice(0, 2).toUpperCase()}</span>
-        <div>
-          <span className="eyebrow">PLAYER PROFILE</span>
-          <h2>{data.user.displayName}</h2>
-          <p>{data.user.xp.toLocaleString()} XP · 🔥 {data.user.streak} day streak · {data.dueReviews} recovery quests ready</p>
-        </div>
+  return <section className="live-snapshot practice-snapshot" aria-label="Player practice snapshot">
+    <div className="snapshot-person">
+      <span className="avatar large">{data.user.displayName.slice(0, 2).toUpperCase()}</span>
+      <div>
+        <span className="eyebrow">PLAYER PROFILE</span>
+        <h2>{data.user.displayName}</h2>
+        <p>{data.user.xp.toLocaleString()} personal XP · 🔥 {data.user.streak} day streak · {data.dueReviews} recovery items ready</p>
       </div>
-
-      <div className="snapshot-skills">
-        {targets.map((skill) => (
-          <div key={skill.name}>
-            <span><strong>{skill.name}</strong><b>{Math.round(skill.confidence * 100)}%</b></span>
-            <div className="progress"><i style={{ width: `${skill.confidence * 100}%` }} /></div>
-          </div>
-        ))}
-        <small>These are your next training targets.</small>
-      </div>
-
-      <div className="snapshot-band">
-        <small>IELTS PRACTICE</small>
-        <strong>{data.ieltsBand?.toFixed(1) ?? "—"}</strong>
-        <span>{data.ieltsBand == null ? "No overall estimate yet" : "Overall practice estimate"}</span>
-        {data.targetBand != null && <span>target {data.targetBand.toFixed(1)}</span>}
-        <Link href="/ielts">View practice history →</Link>
-      </div>
-    </section>
-  );
+    </div>
+    <div className="snapshot-skills snapshot-practice">
+      <strong>{supported.length === 0 ? "Practice summary unavailable" : practiced === 0 ? "No checked practice yet" : `${practiced} ${practiced === 1 ? "skill has" : "skills have"} recent practice`}</strong>
+      <p>{supported.length === 0 ? "Your saved profile is available. Recent practice needs an updated summary." : "Your journal shows the latest checked work, with a separate record for each skill."}</p>
+      <Link className="text-link" href="#skill-map">Open your practice journal ↓</Link>
+    </div>
+    <div className="snapshot-band">
+      <small>IELTS PRACTICE</small>
+      <strong>{data.ieltsBand?.toFixed(1) ?? "—"}</strong>
+      <span>{data.ieltsBand == null ? "No overall estimate yet" : "Overall practice estimate"}</span>
+      {data.targetBand != null && <span>target {data.targetBand.toFixed(1)}</span>}
+      <Link href="/ielts">View practice history →</Link>
+    </div>
+  </section>;
 }

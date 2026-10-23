@@ -48,6 +48,10 @@ Checkpoint chiến dịch dùng [ADR 012](decisions/012-campaign-practice-gates.
 shared bài đúng, activity/rules hợp lệ và completion sau chương trước. Không dùng
 confidence/accuracy legacy để cấp clear mới; giữ clear/XP/receipt cũ mà không bịa
 preparation evidence. Đây vẫn là guided practice, không phải mastery đã chứng nhận.
+Hồ sơ luyện tập dùng [ADR 013](decisions/013-skill-practice-summary.md): summary
+20 bài khác nhau gần nhất, latest completion mỗi bài, ghi rõ đúng/sai và loại
+bằng chứng. Không dùng confidence khởi tạo/legacy để chẩn đoán điểm yếu hoặc
+hiển thị mastery. Gợi ý không tự hứa XP ngoài contract phần thưởng của hoạt động.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 

@@ -529,6 +529,16 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Đang làm — Hồ sơ luyện tập và questline từ receipt (`in_progress`, 2026-10-23)
+
+Owner/task: Codex, branch `codex/core005-skill-practice`, nền main `4cdc9e7`.
+[ADR 013](decisions/013-skill-practice-summary.md) chốt projection cửa sổ 20 bài
+khác nhau mới nhất, latest completion mỗi bài, loại seed/legacy khỏi bằng chứng,
+camp không hiển thị mastery mẫu và gợi ý không hứa XP giả. Nghiệm thu bằng
+memory/PG, owner/version/dedup/replay/window, engine, browser/account/offline và
+ảnh mobile. Giữ confidence/XP/world/cosmetic và daily snapshots hiện tại; chưa
+thay policy grants, teacher analytics hay mastery calibration.
+
 ### Đã nghiệm thu — Prerequisite của chín chương có nguồn gốc (`done`, 2026-10-23)
 
 Owner/task: Codex, branch `codex/core005-campaign-evidence`, nền main `302c05b`.

@@ -2,6 +2,45 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Skill practice summary and recommendations — 2026-10-23
+
+Scope CORE-005, branch `codex/core005-skill-practice`, nền main `4cdc9e7`;
+[ADR 013](decisions/013-skill-practice-summary.md). Trạng thái `in_review`;
+chưa deploy production.
+
+Thêm read projection `skill-practice.v1` trên shared receipts đúng owner,
+activity/rules/skill và completion time. Latest per activity/item/content rồi
+20 bài khác nhau mỗi kỹ năng; có cả wrong/capped replays, không dùng seed/legacy
+hay feedback provider làm mastery. Dashboard/camp thay phần trăm và bản đồ mẫu
+bằng số bài thật, ghi riêng Speaking transcript/Writing history. Questline dùng
+lỗi quan sát được, bỏ dự đoán XP và dùng route thực. Profile goal nằm sau due
+review/bài có lỗi để ngân sách 5 phút không che feedback action.
+
+Local Windows: `go test ./...`, `go vet ./...`, `npm run build` và TypeScript đã
+đạt. Store cases dùng actual grading/retry/capped replay và fixture exclusions,
+window/tie/identity, các kỹ năng, owner separation, trả bản copy, không ghi lại
+XP/confidence. PG cases có single-connection/reopen; local không có database test
+hoặc race toolchain nên các mục đó chờ CI. Engine cases kiểm tra seeded/legacy
+không ảnh hưởng gợi ý, actual errors/empty evidence, route, zero reward quote,
+future/missing method và ngân sách ngắn.
+
+Local browser đạt 6/6 ca mới (2.2m), 15/15 ca core/reward liên quan (18.5s).
+Đã xem ảnh 390×551/844 và full cards dưới sticky nav: chữ/nút đọc được, không
+tràn ngang. [CI 161](https://github.com/Loccao102/LocCaoEnglish/actions/runs/39980965225)
+trên `3d77de6` đạt năm jobs (gồm PG/race/vet và integration), E2E **178 passed,
+1 failed (29.3m)**. Sáu ca mới đều đạt. Ca cũ reward-boundary sai giả định account
+vừa nhận 20 XP luôn thuộc top 20; cả retry cũng lỗi vì không tìm thấy row. Điều
+tra xác nhận endpoint mặc định giới hạn 20 và tie theo user ID; dataset đầy đủ
+có nhiều hơn 20 account đủ điều kiện. Không sửa luật rank hoặc tăng XP fixture
+để ép lọt top. Sửa test đọc cửa sổ 100 cho owner receipt, giữ kiểm tra đúng 20 XP
+và so toàn bộ UI với top 20 thật; thêm regression về cửa sổ/tie trên 25 người
+bằng các round được chấm thật. Head sửa cần đủ sáu jobs mới trước merge.
+
+Toàn bộ CI và merge vẫn chờ kết quả; không dùng bằng chứng của PR #23 để nghiệm
+thu head mới. Confidence, personal world/cosmetic grants,
+daily v1 snapshots/selection và teacher analytics giữ policy cũ, tiếp tục nằm
+trong roadmap. Không có migration hoặc production deployment.
+
 ## Campaign prerequisite receipts — 2026-10-22
 
 Scope CORE-005/CORE-006, branch `codex/core005-campaign-evidence`, nền main `302c05b`;

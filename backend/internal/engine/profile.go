@@ -2,30 +2,60 @@ package engine
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 )
 
 func BuildPlanForProfile(skills []model.Skill, reviews []model.ReviewItem, profile model.PlayerProfile) model.DailyPlan {
-	base:=BuildPlan(skills,reviews)
-	if !profile.Onboarded { return base }
-	goal:=goalQuest(profile)
-	items:=append([]model.PlanItem{goal},base.Items...)
-	seen:=map[string]bool{};dedup:=make([]model.PlanItem,0,len(items));for _,item:=range items{key:=item.Route+"|"+item.Activity;if seen[key]{continue};seen[key]=true;dedup=append(dedup,item)}
-	target:=profile.DailyMinutes;if target<5{target=15};picked:=make([]model.PlanItem,0,4);total,xp:=0,0;for _,item:=range dedup{if len(picked)>=4{break};picked=append(picked,item);total+=item.Minutes;xp+=item.XP;if total>=target{break}}
-	base.Items=picked;base.TotalMins=total;base.PotentialXP=xp;base.Focus=fmt.Sprintf("%s build · %s",strings.Title(profile.Goal),base.Focus);return base
+	base := BuildPlan(skills, reviews)
+	if !profile.Onboarded {
+		return base
+	}
+	// Keep due reviews and observed mistakes ahead of the chosen goal, even
+	// when a short daily budget would otherwise hide every feedback action.
+	errors := map[string]bool{}
+	for _, skill := range skills {
+		if hasPractice(skill) && skill.Practice.CorrectCount < skill.Practice.SampleCount {
+			errors[skill.Name] = true
+		}
+	}
+	cut := 0
+	for cut < len(base.Items) && (base.Items[cut].ID == "review-due" || errors[base.Items[cut].Skill]) {
+		cut++
+	}
+	items := append([]model.PlanItem{}, base.Items[:cut]...)
+	items = append(items, goalQuest(profile))
+	items = append(items, base.Items[cut:]...)
+	seen := map[string]bool{}
+	target := profile.DailyMinutes
+	if target < 5 {
+		target = 15
+	}
+	picked := make([]model.PlanItem, 0, 4)
+	total := 0
+	for _, item := range items {
+		if seen[item.Route] {
+			continue
+		}
+		seen[item.Route] = true
+		picked = append(picked, item)
+		total += item.Minutes
+		if len(picked) >= 4 || total >= target {
+			break
+		}
+	}
+	base.Items, base.TotalMins, base.PotentialXP = picked, total, 0
+	base.Focus = "Your goal & next practice"
+	return base
 }
-
 func goalQuest(profile model.PlayerProfile) model.PlanItem {
 	switch profile.Goal {
 	case "ielts":
-		return model.PlanItem{ID:"goal-ielts",Title:"Climb one IELTS Tower floor",Skill:"IELTS",Activity:"Challenge mode",Reason:fmt.Sprintf("Your target is band %.1f. Keep all four skills moving, not just your strongest one.",profile.TargetBand),Minutes:15,XP:45,Route:"/ielts",Priority:0}
+		return model.PlanItem{ID: "goal-ielts", Title: "Choose an IELTS practice section", Skill: "IELTS", Activity: "IELTS practice", Reason: fmt.Sprintf("You chose a target band of %.1f. Section practice has its own feedback history and does not award learning XP.", profile.TargetBand), Minutes: 15, Route: "/ielts", Priority: 0}
 	case "travel":
-		return model.PlanItem{ID:"goal-travel",Title:"Travel survival mission",Skill:"Speaking",Activity:"Scenario mission",Reason:"Your build prioritizes travel English, so today starts with language you can use under pressure.",Minutes:12,XP:45,Route:"/missions/airport",Priority:0}
+		return model.PlanItem{ID: "goal-travel", Title: "Prepare your airport mission", Skill: "Speaking", Activity: "Scenario mission", Reason: "You chose travel English. Check the saved preparation steps before starting the airport conversation.", Minutes: 12, Route: "/missions/airport", Priority: 0}
 	case "work":
-		return model.PlanItem{ID:"goal-work",Title:"Workplace speaking sprint",Skill:"Speaking",Activity:"Professional response",Reason:"Your build prioritizes practical English for meetings, interviews and collaboration.",Minutes:10,XP:40,Route:"/speaking",Priority:0}
+		return model.PlanItem{ID: "goal-work", Title: "Practise a speaking phrase", Skill: "Speaking", Activity: "Shadowing", Reason: "You chose English for work. Start with guided transcript matching; pronunciation feedback is separate.", Minutes: 7, Route: "/speaking", Priority: 0}
 	default:
-		return model.PlanItem{ID:"goal-conversation",Title:"Conversation combo",Skill:"Speaking",Activity:"Speak & respond",Reason:"Your build prioritizes comfortable everyday conversation, so speaking appears early in the run.",Minutes:9,XP:40,Route:"/speaking",Priority:0}
+		return model.PlanItem{ID: "goal-conversation", Title: "Practise a speaking phrase", Skill: "Speaking", Activity: "Shadowing", Reason: "You chose everyday conversation. Start with guided transcript matching; pronunciation feedback is separate.", Minutes: 7, Route: "/speaking", Priority: 0}
 	}
 }

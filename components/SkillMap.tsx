@@ -1,38 +1,39 @@
-const nodes = [
-  { id: "travel", label: "Travel", x: 50, y: 8, state: "mastered" },
-  { id: "airport", label: "Airport", x: 25, y: 35, state: "learning" },
-  { id: "hotel", label: "Hotel", x: 50, y: 35, state: "mastered" },
-  { id: "transport", label: "Transport", x: 75, y: 35, state: "learning" },
-  { id: "passport", label: "Passport", x: 14, y: 68, state: "weak" },
-  { id: "booking", label: "Booking", x: 39, y: 70, state: "learning" },
-  { id: "train", label: "Train", x: 68, y: 70, state: "unknown" },
-  { id: "customs", label: "Customs", x: 88, y: 70, state: "unknown" },
+"use client";
+
+import Link from "next/link";
+import usePracticeDashboard, { currentSkillPractice } from "./learning/usePracticeDashboard";
+
+const practiceRoutes = [
+  { name: "Vocabulary", route: "/games/word-link", activity: "Find word connections", icon: "◇" },
+  { name: "Grammar", route: "/games/grammar-repair", activity: "Repair a sentence", icon: "✎" },
+  { name: "Reading", route: "/reading", activity: "Read and find the evidence", icon: "▤" },
+  { name: "Listening", route: "/listening", activity: "Listen and choose", icon: "♫" },
+  { name: "Speaking", route: "/speaking", activity: "Practice a spoken response", icon: "☏" },
+  { name: "Dictation", route: "/dictation", activity: "Listen and write", icon: "⌁" },
+  { name: "Writing", route: "/ielts/writing", activity: "Open writing feedback history", icon: "✐" },
 ];
 
 export default function SkillMap() {
-  return (
-    <section className="panel skill-panel" id="skill-map">
-      <div className="section-heading">
-        <div><span className="eyebrow">KNOWLEDGE GRAPH</span><h2>Travel skill map</h2></div>
-        <div className="legend"><span><i className="dot mastered" />Mastered</span><span><i className="dot learning" />Learning</span><span><i className="dot weak" />Weak</span></div>
-      </div>
-      <div className="skill-map">
-        <svg className="skill-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <line x1="50" y1="16" x2="25" y2="42" />
-          <line x1="50" y1="16" x2="50" y2="42" />
-          <line x1="50" y1="16" x2="75" y2="42" />
-          <line x1="25" y1="43" x2="14" y2="76" />
-          <line x1="50" y1="43" x2="39" y2="77" />
-          <line x1="75" y1="43" x2="68" y2="77" />
-          <line x1="75" y1="43" x2="88" y2="77" />
-        </svg>
-        {nodes.map((node) => (
-          <button className={`skill-node ${node.state}`} style={{ left: `${node.x}%`, top: `${node.y}%` }} key={node.id} title={`${node.label} · ${node.state}`}>
-            <span>{node.state === "mastered" ? "✓" : node.state === "weak" ? "!" : "•"}</span>
-            <strong>{node.label}</strong>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
+  const { data, status, needsSignIn, refresh } = usePracticeDashboard();
+  return <section className="panel practice-journal" id="skill-map" aria-label="Skill practice journal">
+    <div className="section-heading"><div><span className="eyebrow">YOUR PRACTICE JOURNAL</span><h2>Your recent practice</h2></div>{data && <button className="button ghost" onClick={refresh}>Refresh practice</button>}</div>
+    <p className="practice-note">Up to 20 different items per skill, using your latest checked answer to each item. Repeating an item updates its result. These are practice records, not a mastery score or a CEFR level.</p>
+    {!data ? <div className="practice-empty" role={status === "error" ? "alert" : "status"}>
+      <p>{status === "guest" ? "Sign in to keep a personal journal. Guest practice is separate from your account." : status === "loading" ? "Loading your practice journal…" : needsSignIn ? "Sign in again to load your journal." : "Your practice journal is unavailable. Try loading it again."}</p>
+      {(status === "guest" || needsSignIn) && <Link className="button primary" href="/account">{needsSignIn ? "Sign in again" : "Sign in for your practice journal"}</Link>}
+      {status === "error" && <button className="button ghost" onClick={refresh}>Retry loading practice</button>}
+    </div> : <div className="practice-journal-grid">{practiceRoutes.map(({ name, route, activity, icon }) => {
+      const skill = data.skills.find(value => value.name === name);
+      const practice = currentSkillPractice(skill?.practice);
+      const writing = name === "Writing";
+      const hasSamples = practice && practice.sampleCount > 0;
+      return <article className={`practice-skill ${hasSamples ? "has-practice" : ""}`} key={name} aria-label={`${name} practice`}>
+        <div className="practice-skill-heading"><span className="practice-skill-icon" aria-hidden="true">{icon}</span><h3>{name}</h3></div>
+        <strong className="practice-skill-count">{writing ? "Writing has its own feedback history" : !practice ? "Practice summary unavailable" : practice.evidenceKind === "not-supported" ? "Separate feedback history" : hasSamples ? `${practice.correctCount} correct · ${practice.sampleCount} checked` : "No checked practice yet"}</strong>
+        <p>{writing ? "Your drafts and writing feedback stay in the Writing Lab. They are not included in this summary." : !practice ? "Your older profile is preserved. A recent practice summary is not available yet." : practice.evidenceKind === "transcript-match" ? "Transcript matches only — this does not assess pronunciation." : "Checked answers from guided practice. Help and answer review may be available."}</p>
+        {hasSamples && practice.lastCompletedAt && !writing && <small>Latest check: <time dateTime={practice.lastCompletedAt}>{new Date(practice.lastCompletedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Bangkok" })} · UTC+7</time></small>}
+        <Link className="button ghost" href={route}>{activity} →</Link>
+      </article>;
+    })}</div>}
+  </section>;
 }

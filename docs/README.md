@@ -33,6 +33,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Reward và bảng thành tích | [ADR 010: nghỉ điểm tự báo, tính XP từ receipt](decisions/010-checked-practice-ranking.md) |
 | Nhiệm vụ hằng ngày và khôi phục rương | [ADR 011: kế hoạch cố định, bằng chứng đúng ngày, claim nguyên tử](decisions/011-daily-practice-recovery.md) |
 | Điều kiện chuẩn bị cho chín chương | [ADR 012: bài đúng, freshness, preparation receipt và giữ clear cũ](decisions/012-campaign-practice-gates.md) |
+| Hồ sơ kỹ năng và gợi ý luyện tập | [ADR 013: summary từ bài đã kiểm tra, bỏ mastery mẫu và XP dự đoán](decisions/013-skill-practice-summary.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán
