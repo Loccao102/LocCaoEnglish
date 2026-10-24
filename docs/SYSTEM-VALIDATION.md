@@ -25,7 +25,14 @@ backend/frontend/contract chưa tìm thấy lỗi phải sửa. Đã xem bốn �
 390×551 và 390×844: không tràn ngang/chồng chữ, nút vào world/trang bị rõ ràng.
 PostgreSQL/race chưa chạy local (không có test database, CGO disabled); migration,
 rollback/restart/concurrent constructors/grants/equip đã có regression cho CI.
-Browser suite cuối và sáu jobs còn pending; chưa merge hoặc deploy.
+Browser: 17/17 core/assets/skill-practice liên quan đạt hai lượt; final vocabulary
+6/6 đạt trong 2.1m, retries=0. Các lượt đầu phát hiện ba lỗi selector mới: guest
+account dùng AuthPanel ngoài component, route announcer trùng role alert, và nút
+refresh trùng substring trong card bị khóa. Đã scope/exact selector theo UI thật,
+giữ nguyên assertions về không ghi guest, read-back và một PUT. Không sửa luật
+để che lỗi. Head đầu `0c82308` đạt backend PostgreSQL/race/vet, frontend, AI,
+compose và integration; E2E chưa nghiệm thu do selector cần sửa. Head tiếp theo
+phải chạy lại đủ sáu jobs sạch trước merge. Chưa merge hoặc deploy.
 
 ## Skill practice summary and recommendations — 2026-10-23
 
