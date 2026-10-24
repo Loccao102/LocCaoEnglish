@@ -529,6 +529,24 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Đang nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`in_review`, 2026-10-24)
+
+Owner/task: Codex, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`.
+[ADR 014](decisions/014-vocabulary-unlock-grants.md) chốt milestone 3 bài / 7 bài
+và 2 activity, giữ đường 300 personal XP cho Word Network, cutover một lần và
+receipt nguồn cấp quyền. Sửa anonymous equip và owner races trên progression UI.
+Nghiệm thu memory/PG/migration/restart/rollback/concurrency, bài thật/retry/equip,
+guest/account/mobile và đủ sáu CI jobs. Giữ các world/profile/XP gate khác và
+không khóa trực tiếp Word Graph; chưa nghiệm thu toàn CORE-005/006 từ lát cắt này.
+
+Code/migration/API/UI và regression đã có; review độc lập chưa có finding phải sửa.
+Go tests/vet, build 58 routes, TypeScript, 50 game cases và script integration
+milestone/retry/concurrent equip đạt local. Đã xem bốn ảnh 390×551/844, chữ và
+nút đọc được. Browser final 6/6 mới và 17/17 liên quan đạt; ba selector mới đã
+được sửa theo UI thật, không giảm assertions. Head đầu đã đạt PG/race/vet và
+integration; đủ sáu CI jobs trên head sửa cuối còn chờ trước merge. PG/race
+chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
+
 ### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 
 Owner/task: Codex, branch `codex/core005-skill-practice`, nền main `4cdc9e7`.
@@ -603,6 +621,23 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
+
+Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
+nghiệm thu ở PR #25. [ADR 015](decisions/015-profile-owner-recovery.md) chốt
+signed-in profile PUT, captured-token onboarding/placement, draft versioned theo
+owner, guest local-only và read-back khi mất phản hồi. Giữ GET demo compatibility,
+normalization và last-write-wins; không cấp XP/confidence/rank hay đổi daily plan.
+Nghiệm thu HTTP/auth/owner, browser save/reload/lost response/mismatch/storage,
+guest/legacy/placement, mobile và đủ sáu jobs. District pages/PlayerJourney tiếp
+tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
+
+Go/vet, integration API thật ở memory mode, TypeScript/build 58 routes và 10/10
+browser cases (2.6m, không retry) đã đạt. Review độc lập tìm và đóng hai lỗi mất
+draft từ placement; đã xem mười ảnh mobile. Sửa chữ mục tiêu quá nhỏ sau lượt
+browser, build lại đạt; assertion/ảnh cuối và PG/race chờ CI đủ sáu jobs trước
+merge. Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
+
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core006-daily-recovery`, 2026-10-21, tiếp nối
@@ -666,6 +701,18 @@ với `013_fair_difficulty.sql`/`EnsureFair` trước frontend gửi difficulty.
 Challenge riêng; retry không lặp; queue cũ/new payload tồn tại qua reconnect;
 PostgreSQL giữ kết quả sau restart; có commit/schema version, bằng chứng và kế
 hoạch rollback giữ dữ liệu. Đây chưa phải ủy quyền tự deploy production.
+
+## SEC-001 — Vá dependency frontend (`planned`, P0, 2026-10-24)
+
+Audit thực tế trên lockfile Next 16.3.4 ghi 3 dependency bị cảnh báo: Next
+critical, sharp và source-map-js high. Đây là dependency advisory, chưa là bằng
+chứng ứng dụng bị khai thác. Đã đối chiếu nguồn gốc: [Next image advisory](https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw),
+[sharp advisory](https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w)
+và [release 16.4.3](https://github.com/vercel/next.js/releases/tag/v16.4.3).
+Ưu tiên patch nền ngay sau lát cắt owner đang làm, không thêm nội dung mới trước.
+Nâng Next tới stable đã vá, cập nhật lockfile/transitive tương thích, đọc guide
+đang cài rồi chạy audit/build/logic/browser và sáu CI jobs. Chưa nâng dependency,
+chưa nghiệm thu và không tự deploy. Không dùng `audit fix --force` thiếu review.
 
 ## GOV-001 — Tài liệu và luật làm việc
 

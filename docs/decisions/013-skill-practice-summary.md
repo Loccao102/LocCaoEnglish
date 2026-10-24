@@ -5,6 +5,10 @@ Status: Accepted, 2026-10-23. Scope: CORE-005.
 Đã triển khai qua [PR #24](https://github.com/Loccao102/LocCaoEnglish/pull/24),
 main `9009a3e`; nghiệm thu 2026-10-24 (UTC+7), chưa deploy production.
 
+[ADR 014](014-vocabulary-unlock-grants.md) tiếp nối phần world/cosmetic bị hoãn
+ở đây, chỉ chuyển Word Network và Wordsmith sang ledger; các policy còn lại
+không tự được coi là đã chuyển đổi.
+
 ## Bối cảnh
 
 Confidence hiện trộn số khởi tạo, lịch sử cũ và kết quả luyện tập. Tài khoản mới

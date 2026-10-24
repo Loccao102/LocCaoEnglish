@@ -66,6 +66,71 @@ an activity to bypass the receipt flow. Old records and personal XP are preserve
 }
 ```
 
+## Personal world and vocabulary rewards
+
+- `GET /v1/player/progression` returns worlds, achievements and inventory. It
+  atomically records eligible vocabulary grants before returning; it awards no
+  XP. Legacy anonymous demo reads remain available where configured, while the
+  current personal-progress UI requires a signed-in account.
+- `PUT /v1/player/loadout` requires an account (guest 401), with `{cosmeticId}`.
+  It verifies ownership and the same immutable grant policy used by GET, then
+  upserts the chosen slot. Retry is idempotent and never grants XP. A lost reply
+  can be confirmed by refreshing progression; failed equip does not erase an
+  independently earned grant.
+- Word Network and Wordsmith achievement/pin add optional `unlock` metadata:
+  `{method:"vocabulary-unlocks.v1",correctItems,targetItems,activityCount,
+  targetActivities,receipt?}`. Targets are 3 items / 1 activity for Word Network,
+  7 items / 2 activities for Wordsmith; Word Network also retains its 300-personal-XP
+  alternative. Other world and cosmetic policies retain their existing rules.
+- Eligible practice is owned completed/correct Vocabulary shared receipts with
+  supported Word Link/Collocation/Word Graph rules, item/content and completion
+  time. Count each `(activity,itemKey)` once across versions, using its earliest
+  correct receipt. New capped correct replays qualify, duplicates do not add an
+  item. This is an accumulated guided-practice milestone, distinct from the
+  journal's latest-20 window; later mistakes do not revoke a recorded grant.
+- Immutable receipt: `{unlockId,method,source,recordedAt,evidence?,personalXp?}`;
+  source is `legacy-personal`, `checked-practice` or `personal-xp`. Evidence has
+  attempt ID, activity, item key, content/rules versions and completedAt. New
+  grants prefer checked practice when both paths qualify. A source never changes
+  after recording. No grant establishes mastery, CEFR or checked competitive rank.
+- Migration 022/startup cutover preserves prior confidence/XP eligibility and an
+  equipped Wordsmith pin exactly once before new demo/registrations. It freezes
+  negative decisions as well, so rerunning startup cannot grandfather new seeded
+  accounts. Legacy receipts have no invented attempt proof or historical earned
+  time; `recordedAt` is the actual capture time. See [ADR 014](decisions/014-vocabulary-unlock-grants.md).
+  Backend precedes frontend; drain old writers before cutover. No destructive
+  rollback or data reset is required.
+- Direct `/word-graph` study/practice remains public. The world grant recognizes
+  progress in menus; it is not a content authorization boundary. New UI presents
+  item/activity counts and source, not `% explored` from old confidence. Missing
+  metadata from an older API is shown as unavailable rather than verified proof.
+
+## Account profile preferences and local recovery
+
+`GET /v1/player/profile` keeps configured anonymous-demo read compatibility.
+`PUT /v1/player/profile` requires a signed-in owner; absent/invalid/expired
+credentials return 401 and cannot change the shared demo. Body `userId` does not
+override the authenticated owner. Field normalization and last-write-wins stay
+unchanged; no XP, confidence, rank or existing daily-plan snapshot is altered.
+
+Onboarding and placement pin the token captured for each request. Account forms
+load the real owner and profile before editing. Onboarding saves the submitted
+snapshot, disables edits during save and rejects late results after account
+changes. An unconfirmed save blocks another PUT until explicit read-back:
+matching normalized fields confirms current saved settings; differing values
+keep both saved and attempted settings for an explicit user choice. No automatic
+replay or claim about which earlier request committed is made.
+When device storage fails, owner-scoped tab memory preserves attempted fields
+across in-app recovery navigation, with a warning that a full reload may lose
+them. Placement blocks both reviewed-unsaved and uncertain drafts before PUT.
+
+Browser drafts use `loccao.profile-settings.v1.<userID|guest>` with a versioned,
+validated owner/status/fields envelope. Unknown/corrupt/unowned data is retained
+but never blindly applied. Guest preferences stay local and never trigger a
+personal profile read/write. The old `loccao_player_build` key is retained for
+explicit validated guest review only; it is not imported into an account.
+See [ADR 015](decisions/015-profile-owner-recovery.md) for recovery and rollout.
+
 ## Saved daily practice
 
 All daily endpoints require an account; guests receive 401 and cannot change the

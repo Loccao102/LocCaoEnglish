@@ -12,10 +12,12 @@ import (
 )
 
 type progressionMemory struct {
-	mu       sync.RWMutex
-	bosses   map[string]map[string]time.Time
-	loadout  map[string]map[string]string
-	receipts map[string]map[string]MissionReceipt
+	mu                sync.RWMutex
+	bosses            map[string]map[string]time.Time
+	loadout           map[string]map[string]string
+	receipts          map[string]map[string]MissionReceipt
+	grants            map[string]map[string]model.VocabularyUnlockReceipt
+	vocabularyCutover bool
 }
 
 var progressionMemories sync.Map
@@ -27,6 +29,7 @@ func (s *Store) progressionMemory() *progressionMemory {
 	state := &progressionMemory{
 		bosses: map[string]map[string]time.Time{}, loadout: map[string]map[string]string{},
 		receipts: map[string]map[string]MissionReceipt{},
+		grants:   map[string]map[string]model.VocabularyUnlockReceipt{},
 	}
 	actual, _ := progressionMemories.LoadOrStore(s, state)
 	return actual.(*progressionMemory)
@@ -34,11 +37,24 @@ func (s *Store) progressionMemory() *progressionMemory {
 
 func (s *Store) EnsureProgression(ctx context.Context) error {
 	if s.db == nil {
-		_ = s.progressionMemory()
+		s.ensureVocabularyUnlocksMemory()
 		return nil
 	}
-	_, err := s.db.ExecContext(ctx, progressionSchemaSQL)
-	return err
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(140014,1)`); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, progressionSchemaSQL); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, vocabularyUnlockSchemaSQL); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 func (s *Store) GetProgression(ctx context.Context, userID string) (model.ProgressionState, error) {
 	u, err := s.GetUser(ctx, userID)
@@ -49,7 +65,7 @@ func (s *Store) GetProgression(ctx context.Context, userID string) (model.Progre
 	if err != nil {
 		return model.ProgressionState{}, err
 	}
-	skills, err := s.Skills(ctx, userID)
+	unlocks, err := s.syncVocabularyUnlocks(ctx, userID)
 	if err != nil {
 		return model.ProgressionState{}, err
 	}
@@ -69,8 +85,8 @@ func (s *Store) GetProgression(ctx context.Context, userID string) (model.Progre
 	travel := buildTravelCampaign(u, profile, done, practice)
 	conversation := buildConversationCampaign(u, profile, done, practice)
 	work := buildWorkCampaign(u, profile, done, practice)
-	vocab := skillConfidence(skills, "Vocabulary")
-	wordNet := vocab >= .55 || u.XP >= 300
+	words, smith := unlocks["word-network"], unlocks["wordsmith"]
+	wordNet := words.Receipt != nil
 	arena := u.XP >= 700
 	ieltsOpen := profile.Goal == "ielts" || u.XP >= 1000 || len(history) > 0
 	sections := map[string]bool{}
@@ -78,7 +94,7 @@ func (s *Store) GetProgression(ctx context.Context, userID string) (model.Progre
 		sections[strings.ToLower(h.Section)] = true
 	}
 	ieltsProgress := minInt(100, len(sections)*25)
-	worlds := []model.WorldState{{ID: "training", Title: "Training Grounds", Description: "Daily quests, Recovery and the Arcade build your core stats.", Route: "/learn", Icon: "⌂", Unlocked: true, Progress: minInt(100, percent(u.XP, 150)), UnlockText: "Always open"}, travel.World, conversation.World, work.World, {ID: "words", Title: "Word Network", Description: "Explore meaning, collocations and word families as a connected map.", Route: "/word-graph", Icon: "◇", Unlocked: wordNet, Progress: minInt(100, int(math.Round(vocab*100))), UnlockText: "Reach 55% Vocabulary confidence or 300 XP"}, {ID: "arena", Title: "Battle Arena", Description: "Challenge other learners and put fast recall under pressure.", Route: "/social", Icon: "⚔", Unlocked: arena, Progress: minInt(100, percent(u.XP, 700)), UnlockText: "Reach 700 XP"}, {ID: "ielts", Title: "IELTS Tower", Description: "Clear four floors and build a four-skill practice estimate.", Route: "/ielts", Icon: "▤", Unlocked: ieltsOpen, Progress: ieltsProgress, UnlockText: "Choose IELTS as your goal, reach 1,000 XP, or complete an IELTS floor"}}
+	worlds := []model.WorldState{{ID: "training", Title: "Training Grounds", Description: "Daily quests, Recovery and the Arcade build your core stats.", Route: "/learn", Icon: "⌂", Unlocked: true, Progress: minInt(100, percent(u.XP, 150)), UnlockText: "Always open"}, travel.World, conversation.World, work.World, {ID: "words", Title: "Word Network", Description: "Explore meaning, collocations and word families as a connected map.", Route: "/word-graph", Icon: "◇", Unlocked: wordNet, Progress: percent(words.CorrectItems, words.TargetItems), UnlockText: "Complete 3 different vocabulary items correctly or reach 300 personal XP", Unlock: &words}, {ID: "arena", Title: "Battle Arena", Description: "Challenge other learners and put fast recall under pressure.", Route: "/social", Icon: "⚔", Unlocked: arena, Progress: minInt(100, percent(u.XP, 700)), UnlockText: "Reach 700 XP"}, {ID: "ielts", Title: "IELTS Tower", Description: "Clear four floors and build a four-skill practice estimate.", Route: "/ielts", Icon: "▤", Unlocked: ieltsOpen, Progress: ieltsProgress, UnlockText: "Choose IELTS as your goal, reach 1,000 XP, or complete an IELTS floor"}}
 	bosses := append(append(append([]model.BossState{}, travel.Bosses...), conversation.Bosses...), work.Bosses...)
 	unlockedWorlds := 0
 	for _, w := range worlds {
@@ -86,11 +102,11 @@ func (s *Store) GetProgression(ctx context.Context, userID string) (model.Progre
 			unlockedWorlds++
 		}
 	}
-	achievements := []model.Achievement{{ID: "first-spark", Title: "First Spark", Description: "Earn your first 20 XP.", Icon: "✦", Unlocked: u.XP >= 20, Progress: minInt(u.XP, 20), Target: 20}, {ID: "world-walker", Title: "World Walker", Description: "Unlock three learning worlds.", Icon: "◫", Unlocked: unlockedWorlds >= 3, Progress: minInt(unlockedWorlds, 3), Target: 3, RewardCosmetic: "traveler-badge"}, {ID: "seven-day-flame", Title: "Seven Day Flame", Description: "Keep a seven-day learning streak.", Icon: "🔥", Unlocked: u.Streak >= 7, Progress: minInt(u.Streak, 7), Target: 7}, {ID: "wordsmith", Title: "Wordsmith", Description: "Raise Vocabulary confidence to 70%.", Icon: "◇", Unlocked: vocab >= .70, Progress: minInt(70, int(math.Round(vocab*100))), Target: 70, RewardCosmetic: "wordsmith-pin"}, {ID: "tower-entry", Title: "Tower Entry", Description: "Complete your first IELTS Tower floor.", Icon: "▤", Unlocked: len(history) > 0, Progress: minInt(len(history), 1), Target: 1, RewardCosmetic: "ielts-aura"}}
+	achievements := []model.Achievement{{ID: "first-spark", Title: "First Spark", Description: "Earn your first 20 XP.", Icon: "✦", Unlocked: u.XP >= 20, Progress: minInt(u.XP, 20), Target: 20}, {ID: "world-walker", Title: "World Walker", Description: "Unlock three learning worlds.", Icon: "◫", Unlocked: unlockedWorlds >= 3, Progress: minInt(unlockedWorlds, 3), Target: 3, RewardCosmetic: "traveler-badge"}, {ID: "seven-day-flame", Title: "Seven Day Flame", Description: "Keep a seven-day learning streak.", Icon: "🔥", Unlocked: u.Streak >= 7, Progress: minInt(u.Streak, 7), Target: 7}, {ID: "wordsmith", Title: "Wordsmith", Description: "Complete 7 different vocabulary items correctly across at least 2 activities.", Icon: "◇", Unlocked: smith.Receipt != nil, Progress: minInt(7, smith.CorrectItems), Target: 7, RewardCosmetic: "wordsmith-pin", Unlock: &smith}, {ID: "tower-entry", Title: "Tower Entry", Description: "Complete your first IELTS Tower floor.", Icon: "▤", Unlocked: len(history) > 0, Progress: minInt(len(history), 1), Target: 1, RewardCosmetic: "ielts-aura"}}
 	achievements = append(achievements, travel.Achievements...)
 	achievements = append(achievements, conversation.Achievements...)
 	achievements = append(achievements, work.Achievements...)
-	cosmetics := []model.Cosmetic{{ID: "rookie-title", Name: "Adventurer", Slot: "title", Description: "The title every learner starts with.", Unlocked: true}, {ID: "traveler-badge", Name: "World Walker", Slot: "badge", Description: "A passport-style badge for opening three worlds.", Unlocked: unlockedWorlds >= 3}, {ID: "wordsmith-pin", Name: "Wordsmith Pin", Slot: "badge", Description: "Unlocked by reaching 70% Vocabulary confidence.", Unlocked: vocab >= .70}, {ID: "arena-frame", Name: "Arena Frame", Slot: "frame", Description: "A competitive profile frame unlocked with the Battle Arena.", Unlocked: arena}, {ID: "ielts-aura", Name: "Tower Aura", Slot: "aura", Description: "Unlocked after your first IELTS Tower floor.", Unlocked: len(history) > 0}}
+	cosmetics := []model.Cosmetic{{ID: "rookie-title", Name: "Adventurer", Slot: "title", Description: "The title every learner starts with.", Unlocked: true}, {ID: "traveler-badge", Name: "World Walker", Slot: "badge", Description: "A passport-style badge for opening three worlds.", Unlocked: unlockedWorlds >= 3}, {ID: "wordsmith-pin", Name: "Wordsmith Pin", Slot: "badge", Description: "A keepsake for 7 different correct vocabulary items across 2 activities.", Unlocked: smith.Receipt != nil, Unlock: &smith}, {ID: "arena-frame", Name: "Arena Frame", Slot: "frame", Description: "A competitive profile frame unlocked with the Battle Arena.", Unlocked: arena}, {ID: "ielts-aura", Name: "Tower Aura", Slot: "aura", Description: "Unlocked after your first IELTS Tower floor.", Unlocked: len(history) > 0}}
 	cosmetics = append(cosmetics, travel.Cosmetics...)
 	cosmetics = append(cosmetics, conversation.Cosmetics...)
 	cosmetics = append(cosmetics, work.Cosmetics...)
@@ -183,14 +199,6 @@ func (s *Store) playerLoadout(ctx context.Context, userID string) (map[string]st
 		out[slot] = id
 	}
 	return out, nil
-}
-func skillConfidence(skills []model.Skill, name string) float64 {
-	for _, sk := range skills {
-		if strings.EqualFold(sk.Name, name) {
-			return sk.Confidence
-		}
-	}
-	return 0
 }
 func levelFromXP(xp int) (level, into, next int) {
 	if xp < 0 {

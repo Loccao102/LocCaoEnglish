@@ -1,0 +1,32 @@
+.vocabulary-unlock-note { margin: 12px 0; color: #4d6358; font-size: 14px; line-height: 1.6; }
+.vocabulary-unlock-note strong { display: block; color: #286344; font-size: 14px; }
+.vocabulary-unlock-note p { margin: 6px 0; font-size: 14px; line-height: 1.6; color: #4d6358; }
+.progression-notice { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.progression-notice p { margin: 0; flex: 1 1 230px; font-size: 14px; line-height: 1.6; }
+.progression-notice .button, .progression-controls .button { min-height: 44px; font-size: 14px; }
+.progression-controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; align-items: center; }
+.progression-controls p { flex: 1 1 260px; margin: 0; font-size: 14px; line-height: 1.6; }
+.world-node .world-copy, .achievement > div { min-width: 0; }
+.world-node .world-copy > div:first-child span { overflow-wrap: anywhere; }
+.achievement .vocabulary-unlock-note p { margin: 6px 0; }
+.cosmetic .vocabulary-unlock-note { display: block; margin: 10px 0; }
+.cosmetic .vocabulary-unlock-note span { display: block; font-size: 13px; line-height: 1.5; letter-spacing: normal; color: #4d6358; margin-top: 5px; }
+.vocabulary-world-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.vocabulary-world-links .button { white-space: normal; min-height: 44px; }
+.world-selection-shell .sunlit-world-card { min-width: 0; }
+.world-selection-shell .sunlit-world-card small { white-space: normal; line-height: 1.5; }
+.world-selection-shell .world-select-notice { margin: 0 0 16px; }
+.profile-achievements .vocabulary-unlock-note { font-size: 13px; margin: 6px 0; }
+.profile-achievements .vocabulary-unlock-note p { font-size: 13px; }
+.profile-achievements > article { display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 12px; opacity: .65; }
+.profile-achievements > article.earned { opacity: 1; background: #eff8f1; }
+.profile-achievements > article > span { width: 28px; flex-shrink: 0; color: #35724f; }
+.profile-achievements > article strong, .profile-achievements > article small { display: block; }
+.campaign-preview h2 { margin: 8px 0 16px; }
+.campaign-preview > .button { margin-top: 16px; }
+@media (max-width: 620px) {
+  .achievement { grid-template-columns: 38px minmax(0, 1fr) 18px; gap: 10px; padding: 12px; }
+  .achievement-icon { width: 36px; height: 36px; }
+  .cosmetic { padding: 18px; }
+  .world-copy .vocabulary-unlock-note p { font-size: 14px; }
+}
