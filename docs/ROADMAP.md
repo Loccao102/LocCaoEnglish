@@ -619,6 +619,17 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Đang làm — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_progress`, 2026-10-24)
+
+Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
+nghiệm thu ở PR #25. [ADR 015](decisions/015-profile-owner-recovery.md) chốt
+signed-in profile PUT, captured-token onboarding/placement, draft versioned theo
+owner, guest local-only và read-back khi mất phản hồi. Giữ GET demo compatibility,
+normalization và last-write-wins; không cấp XP/confidence/rank hay đổi daily plan.
+Nghiệm thu HTTP/auth/owner, browser save/reload/lost response/mismatch/storage,
+guest/legacy/placement, mobile và đủ sáu jobs. District pages/PlayerJourney tiếp
+tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
+
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core006-daily-recovery`, 2026-10-21, tiếp nối
@@ -682,6 +693,18 @@ với `013_fair_difficulty.sql`/`EnsureFair` trước frontend gửi difficulty.
 Challenge riêng; retry không lặp; queue cũ/new payload tồn tại qua reconnect;
 PostgreSQL giữ kết quả sau restart; có commit/schema version, bằng chứng và kế
 hoạch rollback giữ dữ liệu. Đây chưa phải ủy quyền tự deploy production.
+
+## SEC-001 — Vá dependency frontend (`planned`, P0, 2026-10-24)
+
+Audit thực tế trên lockfile Next 16.3.4 ghi 3 dependency bị cảnh báo: Next
+critical, sharp và source-map-js high. Đây là dependency advisory, chưa là bằng
+chứng ứng dụng bị khai thác. Đã đối chiếu nguồn gốc: [Next image advisory](https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw),
+[sharp advisory](https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w)
+và [release 16.4.3](https://github.com/vercel/next.js/releases/tag/v16.4.3).
+Ưu tiên patch nền ngay sau lát cắt owner đang làm, không thêm nội dung mới trước.
+Nâng Next tới stable đã vá, cập nhật lockfile/transitive tương thích, đọc guide
+đang cài rồi chạy audit/build/logic/browser và sáu CI jobs. Chưa nâng dependency,
+chưa nghiệm thu và không tự deploy. Không dùng `audit fix --force` thiếu review.
 
 ## GOV-001 — Tài liệu và luật làm việc
 

@@ -1,0 +1,11 @@
+.profile-settings-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 18px; }
+.profile-settings-fields:disabled button { cursor: default; opacity: .6; }
+.profile-settings-fields label { display: grid; gap: 10px; }
+.profile-settings-fields select { width: 100%; min-height: 44px; padding: 10px; font: inherit; }
+.profile-settings-notice { margin-bottom: 20px; overflow-wrap: anywhere; }
+.profile-settings-notice p { line-height: 1.6; }
+.profile-settings-notice > .button { margin: 8px 10px 8px 0; }
+.profile-settings .practice-actions { flex-wrap: wrap; }
+.profile-settings .writing-workspace, .profile-settings .score-panel { min-width: 0; }
+.profile-settings .score-panel h2 { font-size: 24px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
