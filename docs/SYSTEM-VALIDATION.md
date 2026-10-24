@@ -56,7 +56,28 @@ backend/frontend/contract chưa tìm thấy lỗi phải sửa. Đã xem bốn �
 390×551 và 390×844: không tràn ngang/chồng chữ, nút vào world/trang bị rõ ràng.
 PostgreSQL/race chưa chạy local (không có test database, CGO disabled); migration,
 rollback/restart/concurrent constructors/grants/equip đã có regression cho CI.
-Browser suite cuối và sáu jobs còn pending; chưa merge hoặc deploy.
+Browser: 17/17 core/assets/skill-practice liên quan đạt hai lượt; final vocabulary
+6/6 đạt trong 2.1m, retries=0. Các lượt đầu phát hiện ba lỗi selector mới: guest
+account dùng AuthPanel ngoài component, route announcer trùng role alert, và nút
+refresh trùng substring trong card bị khóa. Đã scope/exact selector theo UI thật,
+giữ nguyên assertions về không ghi guest, read-back và một PUT. Không sửa luật
+để che lỗi. Head đầu `0c82308` đạt backend PostgreSQL/race/vet, frontend, AI,
+compose và integration; E2E chưa nghiệm thu do selector cần sửa. Head tiếp theo
+phải chạy lại đủ sáu jobs sạch trước merge. Chưa merge hoặc deploy.
+
+[CI 166](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40074601954)
+trên `abaa0ae` đạt năm jobs, gồm PostgreSQL/race/vet và integration. E2E có
+184 passed/1 flaky trong 29.5m nên strict gate từ chối nghiệm thu. Lỗi ban đầu
+là Bubble Meadow Challenge chồng nhãn `make`/`take away` tại 390×551; retry pass
+không được coi là đã sửa. Tái hiện được với seed cố định và đổi viewport:
+width:auto của label absolute bị co theo vị trí cũ, metrics cache 59px nhưng
+render sau layout giãn 88.5px. Sửa width:max-content, giữ max-width/font/hit sizes,
+và thêm regression đúng seed/resize; assertion all-eight Challenge giữ nguyên.
+Build bản sửa đạt 58 routes/TypeScript. Regression seed/resize đã thất bại trên
+bản cũ đúng lỗi make/take-away, rồi đạt trên bản sửa; cùng case all-eight
+Challenge short-phone đạt 2/2 trong 43.1s, không retry. Đã xem ảnh lỗi CI, ảnh
+tái hiện và ảnh sau sửa Bubble/Café; không giảm assertions. Suite CI tiếp theo
+có 186 cases, phải đạt đủ sáu jobs sạch; run 166 không dùng để merge.
 
 ## Skill practice summary and recommendations — 2026-10-23
 

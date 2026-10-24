@@ -542,8 +542,10 @@ không khóa trực tiếp Word Graph; chưa nghiệm thu toàn CORE-005/006 t�
 Code/migration/API/UI và regression đã có; review độc lập chưa có finding phải sửa.
 Go tests/vet, build 58 routes, TypeScript, 50 game cases và script integration
 milestone/retry/concurrent equip đạt local. Đã xem bốn ảnh 390×551/844, chữ và
-nút đọc được; browser suite cuối và đủ sáu CI jobs còn chờ trước merge. PostgreSQL
-và race chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
+nút đọc được. Browser final 6/6 mới và 17/17 liên quan đạt; ba selector mới đã
+được sửa theo UI thật, không giảm assertions. Head đầu đã đạt PG/race/vet và
+integration; đủ sáu CI jobs trên head sửa cuối còn chờ trước merge. PG/race
+chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
 
 ### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 

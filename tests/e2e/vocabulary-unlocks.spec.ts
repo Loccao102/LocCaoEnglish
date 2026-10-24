@@ -222,7 +222,7 @@ test("Lost equipment confirmation refreshes saved rewards without a duplicate mu
   await pin(page).click();
   await expect(page.getByRole("region", { name: "Personal progression", exact: true }).getByRole("alert")).toContainText("Equipment change could not be confirmed");
   await expect(pin(page)).toBeDisabled();
-  await page.getByRole("button", { name: "Refresh saved rewards" }).click();
+  await page.getByRole("button", { name: "Refresh saved rewards", exact: true }).click();
   await expect(pin(page)).toContainText("EQUIPPED"); expect(puts).toBe(1);
   const after = await progression(request, owner); expect(after.xp).toBe(before.xp);
   expect(wordsmith(after).unlock!.receipt).toEqual(wordsmith(before).unlock!.receipt);
