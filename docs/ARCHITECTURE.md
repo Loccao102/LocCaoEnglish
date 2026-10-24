@@ -55,8 +55,11 @@ from completed supported shared receipts: the latest answer for each different
 activity/item/content, then the 20 most recent items per skill. They display counts
 and evidence kind, including transcript-only Speaking, without inventing proficiency
 percentages or reward quotes. See [ADR 013](decisions/013-skill-practice-summary.md).
-World/cosmetic gates and the fixed daily-plan v1 selection retain their older
-personal policy pending a separate grant ledger/migration.
+Word Network/Wordsmith use the separate immutable personal-grant ledger in
+[ADR 014](decisions/014-vocabulary-unlock-grants.md), with a one-time legacy
+cutover, accumulated checked items and explicitly labeled personal XP. New
+seeded confidence does not award them. Other world/cosmetic gates and fixed
+daily-plan v1 selection retain their existing personal policy.
 
 ## Review scheduling
 

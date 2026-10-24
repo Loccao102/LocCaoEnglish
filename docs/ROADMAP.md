@@ -529,6 +529,24 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Đang nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`in_review`, 2026-10-24)
+
+Owner/task: Codex, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`.
+[ADR 014](decisions/014-vocabulary-unlock-grants.md) chốt milestone 3 bài / 7 bài
+và 2 activity, giữ đường 300 personal XP cho Word Network, cutover một lần và
+receipt nguồn cấp quyền. Sửa anonymous equip và owner races trên progression UI.
+Nghiệm thu memory/PG/migration/restart/rollback/concurrency, bài thật/retry/equip,
+guest/account/mobile và đủ sáu CI jobs. Giữ các world/profile/XP gate khác và
+không khóa trực tiếp Word Graph; chưa nghiệm thu toàn CORE-005/006 từ lát cắt này.
+
+Code/migration/API/UI và regression đã có; review độc lập chưa có finding phải sửa.
+Go tests/vet, build 58 routes, TypeScript, 50 game cases và script integration
+milestone/retry/concurrent equip đạt local. Đã xem bốn ảnh 390×551/844, chữ và
+nút đọc được. Browser final 6/6 mới và 17/17 liên quan đạt; ba selector mới đã
+được sửa theo UI thật, không giảm assertions. Head đầu đã đạt PG/race/vet và
+integration; đủ sáu CI jobs trên head sửa cuối còn chờ trước merge. PG/race
+chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
+
 ### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 
 Owner/task: Codex, branch `codex/core005-skill-practice`, nền main `4cdc9e7`.

@@ -1,47 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { APIError, getDashboard, getPlan, type Dashboard, type SkillPractice } from "@/lib/api";
-import { getAuthToken } from "@/lib/session";
+import { createContext, useContext, type ReactNode } from "react";
+import { getDashboard, getPlan, type Dashboard, type SkillPractice } from "@/lib/api";
 import useSignedInToken from "./useSignedInToken";
-
-type AccountResource<T> = {
-  data: T | null;
-  status: "loading" | "guest" | "ready" | "error";
-  needsSignIn: boolean;
-  refresh: () => void;
-};
-
-function useAccountResource<T>(token: string | null, load: () => Promise<T>): AccountResource<T> {
-  const [revision, setRevision] = useState(0);
-  const [state, setState] = useState<{
-    token: string;
-    data: T | null;
-    status: "loading" | "ready" | "error";
-    needsSignIn: boolean;
-  }>({ token: "", data: null, status: "loading", needsSignIn: false });
-
-  useEffect(() => {
-    let active = true;
-    if (!token) return;
-    setState({ token, data: null, status: "loading", needsSignIn: false });
-    load().then(data => {
-      if (active && token === getAuthToken()) setState({ token, data, status: "ready", needsSignIn: false });
-    }).catch(error => {
-      if (active && token === getAuthToken()) setState({
-        token, data: null, status: "error",
-        needsSignIn: error instanceof APIError && (error.status === 401 || error.status === 403),
-      });
-    });
-    return () => { active = false; };
-  }, [token, revision, load]);
-
-  const refresh = () => setRevision(value => value + 1);
-  if (token === null) return { data: null, status: "loading", needsSignIn: false, refresh };
-  if (!token) return { data: null, status: "guest", needsSignIn: false, refresh };
-  if (state.token !== token || token !== getAuthToken()) return { data: null, status: "loading", needsSignIn: false, refresh };
-  return { data: state.data, status: state.status, needsSignIn: state.needsSignIn, refresh };
-}
+import useAccountResource, { type AccountResource } from "./useAccountResource";
 
 const PracticeDashboardContext = createContext<(AccountResource<Dashboard> & { token: string | null }) | null>(null);
 
@@ -62,8 +24,8 @@ export function usePracticePlan() {
   return useAccountResource(token, loadPracticePlan);
 }
 
-async function loadPracticePlan() {
-  const plan = await getPlan();
+async function loadPracticePlan(token: string) {
+  const plan = await getPlan(token);
   if (plan.method !== "skill-practice.v1") throw new Error("Practice suggestions need an updated summary.");
   return plan;
 }
