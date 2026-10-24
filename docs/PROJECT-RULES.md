@@ -52,6 +52,11 @@ Hồ sơ luyện tập dùng [ADR 013](decisions/013-skill-practice-summary.md):
 20 bài khác nhau gần nhất, latest completion mỗi bài, ghi rõ đúng/sai và loại
 bằng chứng. Không dùng confidence khởi tạo/legacy để chẩn đoán điểm yếu hoặc
 hiển thị mastery. Gợi ý không tự hứa XP ngoài contract phần thưởng của hoạt động.
+Word Network/Wordsmith dùng [ADR 014](decisions/014-vocabulary-unlock-grants.md):
+grant tích lũy bất biến, ghi nguồn checked practice/personal XP/legacy riêng.
+Cutover giữ quyền cũ một lần; seed tài khoản mới không được thành bằng chứng.
+Không thu hồi pin sau bài sai hoặc coi personal XP/legacy là verified mastery.
+Thao tác trang bị yêu cầu tài khoản, không ghi vào shared demo của guest.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 

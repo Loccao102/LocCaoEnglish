@@ -2,6 +2,31 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Vocabulary unlock grants — 2026-10-24
+
+Scope CORE-005/006, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`;
+[ADR 014](decisions/014-vocabulary-unlock-grants.md). Đang review/xác minh, chưa
+nghiệm thu hoặc deploy production.
+
+Mục tiêu: Word Network/Wordsmith không tự nhận từ Vocabulary seed 74%; giữ
+quyền cũ qua cutover nguyên tử một lần, grant mới có nguồn và proof bất biến.
+Giữ đường 300 personal XP cho world, milestone 3 bài và 7 bài/2 activity cho
+guided practice; không tăng learning XP/rank từ grant. Equip yêu cầu đăng nhập,
+progression UI xử lý owner, late response và refresh để xác nhận kết quả lưu.
+Các kiểm tra migration/store/API/browser/mobile và sáu CI jobs sẽ ghi theo head
+thực tế; không lấy pass PR #24 để nghiệm thu thay đổi này.
+
+Local: `go test ./...`, `go vet ./...`, `npm run build` (58 routes),
+`npx tsc --noEmit`, `npm run test:game` (50/50) và
+`node scripts/verify-vocabulary-unlocks.mjs` đạt. Script dùng tài khoản/bài thật,
+3→7 bài/2 activity, capped replay, immutable receipts, concurrent GET/equip và
+foreign owner; không đổi confidence/XP bằng fixture client. Review độc lập đọc
+backend/frontend/contract chưa tìm thấy lỗi phải sửa. Đã xem bốn ảnh worlds/pin
+390×551 và 390×844: không tràn ngang/chồng chữ, nút vào world/trang bị rõ ràng.
+PostgreSQL/race chưa chạy local (không có test database, CGO disabled); migration,
+rollback/restart/concurrent constructors/grants/equip đã có regression cho CI.
+Browser suite cuối và sáu jobs còn pending; chưa merge hoặc deploy.
+
 ## Skill practice summary and recommendations — 2026-10-23
 
 Scope CORE-005, branch `codex/core005-skill-practice`, nền main `4cdc9e7`;

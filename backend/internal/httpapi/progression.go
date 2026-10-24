@@ -124,7 +124,7 @@ func (s *Server) missionReceipt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) equipCosmetic(w http.ResponseWriter, r *http.Request) {
-	id, ok := s.userID(w, r)
+	u, ok := s.signedInUser(w, r)
 	if !ok {
 		return
 	}
@@ -132,7 +132,7 @@ func (s *Server) equipCosmetic(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	state, err := s.store.EquipCosmetic(r.Context(), id, in.CosmeticID)
+	state, err := s.store.EquipCosmetic(r.Context(), u.ID, in.CosmeticID)
 	if errors.Is(err, store.ErrNotFound) {
 		problem(w, 404, "cosmetic not found")
 		return
