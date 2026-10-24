@@ -702,17 +702,24 @@ Challenge riêng; retry không lặp; queue cũ/new payload tồn tại qua reco
 PostgreSQL giữ kết quả sau restart; có commit/schema version, bằng chứng và kế
 hoạch rollback giữ dữ liệu. Đây chưa phải ủy quyền tự deploy production.
 
-## SEC-001 — Vá dependency frontend (`planned`, P0, 2026-10-24)
+## SEC-001 — Vá dependency frontend (`in_review`, P0, 2026-10-24)
 
 Audit thực tế trên lockfile Next 16.3.4 ghi 3 dependency bị cảnh báo: Next
 critical, sharp và source-map-js high. Đây là dependency advisory, chưa là bằng
 chứng ứng dụng bị khai thác. Đã đối chiếu nguồn gốc: [Next image advisory](https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw),
 [sharp advisory](https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w)
 và [release 16.4.3](https://github.com/vercel/next.js/releases/tag/v16.4.3).
-Ưu tiên patch nền ngay sau lát cắt owner đang làm, không thêm nội dung mới trước.
-Nâng Next tới stable đã vá, cập nhật lockfile/transitive tương thích, đọc guide
-đang cài rồi chạy audit/build/logic/browser và sáu CI jobs. Chưa nâng dependency,
-chưa nghiệm thu và không tự deploy. Không dùng `audit fix --force` thiếu review.
+Đang thực hiện trên `codex/sec001-frontend-dependencies`, từ profile head
+`cdd0b51`: pin Next 16.4.3, cập nhật sharp 0.35.5 và source-map-js 1.2.2 trong
+lockfile; giữ React 19.3 và các dependency không liên quan. Không đổi source,
+API, luật thưởng, schema hoặc bật thêm tính năng caching. Đọc guide trước/sau
+cài đặt rồi chạy install tái lập, audit, build/typecheck, logic, assets và native
+image smoke check. Browser production và sáu CI jobs vẫn cần nghiệm thu trên
+head cuối; không lấy kết quả PR trước làm bằng chứng cho dependency mới.
+Audit không còn advisory, build và kiểm tra logic/assets đã qua; native transform
+trong workspace Windows qua nhưng sharp trong output standalone Windows không
+load được (`ERR_DLOPEN_FAILED`). Cần đánh giá riêng lỗi đóng gói này và xác minh
+container Linux; chưa nghiệm thu, chưa deploy. Không dùng `audit fix --force`.
 
 ## GOV-001 — Tài liệu và luật làm việc
 
