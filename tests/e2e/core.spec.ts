@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { randomUUID } from "node:crypto";
 
 test("world progression is visible to the player", async ({ page }) => {
+  const created = await page.request.post(`${process.env.E2E_API_URL || "http://localhost:8080"}/v1/auth/register`, {
+    data: { email: `core-progress-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "Progress explorer" },
+  });
+  expect(created.ok()).toBe(true);
+  const { token } = await created.json();
+  await page.addInitScript(value => localStorage.setItem("loccao_token", value), token);
   await page.goto("/progress");
   await expect(page.getByRole("heading", { name: /Level \d+/i })).toBeVisible();
   await expect(page.locator(".world-path").getByRole("heading", { name: "Training Grounds" })).toBeVisible();

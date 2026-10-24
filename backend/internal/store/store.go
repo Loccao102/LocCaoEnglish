@@ -62,23 +62,52 @@ func New(databaseURL string) (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
 		if err := db.PingContext(ctx); err != nil {
 			db.Close()
 			return nil, fmt.Errorf("postgres ping: %w", err)
 		}
 		s.db = db
-		if _, err := db.ExecContext(ctx, schemaSQL); err != nil {
+		// Serialize all bootstrap DDL as well as the cutover. Concurrent first
+		// starts can otherwise race CREATE TABLE before EnsureProgression locks.
+		tx, err := db.BeginTx(ctx, nil)
+		if err != nil {
+			db.Close()
+			return nil, fmt.Errorf("begin schema initialization: %w", err)
+		}
+		defer tx.Rollback()
+		if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(140014,1)`); err != nil {
+			_ = tx.Rollback()
+			db.Close()
+			return nil, fmt.Errorf("lock schema initialization: %w", err)
+		}
+		if _, err := tx.ExecContext(ctx, schemaSQL); err != nil {
+			_ = tx.Rollback()
 			db.Close()
 			return nil, fmt.Errorf("apply schema: %w", err)
 		}
-		if _, err := db.ExecContext(ctx, learningAttemptSchemaSQL); err != nil {
+		if _, err := tx.ExecContext(ctx, learningAttemptSchemaSQL); err != nil {
+			_ = tx.Rollback()
 			db.Close()
 			return nil, fmt.Errorf("apply learning attempt schema: %w", err)
 		}
+		if err := tx.Commit(); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("commit schema initialization: %w", err)
+		}
+	}
+	// Freeze legacy eligibility before a demo or newly registered seeded account
+	// can exist. EnsureProgression remains safe to repeat later during startup.
+	progressionCtx, cancelProgression := context.WithTimeout(context.Background(), time.Minute)
+	progressionErr := s.EnsureProgression(progressionCtx)
+	cancelProgression()
+	if progressionErr != nil {
+		s.Close()
+		return nil, fmt.Errorf("initialize progression grants: %w", progressionErr)
 	}
 	if _, err := s.EnsureDemo(context.Background()); err != nil {
+		s.Close()
 		return nil, err
 	}
 	return s, nil
@@ -108,6 +137,10 @@ func (s *Store) EnsureDemo(ctx context.Context) (model.User, error) {
 			return u, err
 		}
 		u, err = s.CreateUser(ctx, "demo@loccao.local", "", "Demo Learner")
+		if errors.Is(err, ErrEmailExists) {
+			// Another initializer may create the demo after our initial lookup.
+			return s.EnsureDemo(ctx)
+		}
 		if err == nil {
 			s.demoID = u.ID
 		}

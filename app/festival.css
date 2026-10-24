@@ -53,7 +53,8 @@
 .fair-camera-controls button:hover:not(:disabled){background:#e1edce}
 .fair-label-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .fair-object-label,.fair-bank-marker{position:absolute;transform:translate(-50%,-50%);color:#244d3d;background:#fffdf0;border:2px solid #6c9273;box-shadow:0 3px 0 #5577512b,0 3px 10px #26493216;border-radius:12px;font:700 18px/1.15 'Segoe UI',sans-serif;text-align:center}
-.fair-object-label{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;padding:8px 12px;min-height:42px;max-width:150px;overflow-wrap:normal;touch-action:manipulation}
+/* Keep measured label dimensions independent of their projected left position. */
+.fair-object-label{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;padding:8px 12px;min-height:42px;width:max-content;max-width:150px;overflow-wrap:normal;touch-action:manipulation}
 .fair-object-label:hover:not(:disabled),.fair-object-label[aria-pressed=true]{background:#dff0bc;border-color:#376f48}
 .fair-object-label:disabled{cursor:default}.fair-object-label[hidden]{display:none}
 .fair-object-label[data-shape=ring],.fair-object-label[data-shape=tile]{border-radius:50%;width:40px;height:40px;min-height:40px;padding:0;font-size:21px}

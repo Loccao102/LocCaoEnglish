@@ -2,6 +2,117 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## SEC-001 — Frontend dependency patch — 2026-10-24
+
+Branch `codex/sec001-frontend-dependencies`, base profile head `cdd0b51`.
+Next is pinned to 16.4.3; the lockfile updates sharp to 0.35.5, its native
+binaries to 0.35.5 and bundled libvips packages to 1.3.4, and source-map-js to
+1.2.2. React 19.3, Three, PostCSS and unrelated package families stay unchanged.
+The three earlier dependency advisories are not evidence of an exploited app.
+No source, API, reward, schema or save changes; no caching features enabled.
+
+The installed upgrade/standalone docs were read before and after updating
+dependencies. `npm ci --no-audit --no-fund` passed (38 packages); the separate
+`npm audit --audit-level=high` passed with **0 vulnerabilities**. `test:game`
+passed **50/50**; the asset verifiers passed 41 unique assets/23 hashes and
+45 GLBs/24 animated companions. A benign 4×4 → 2×2 PNG transform passed on
+Windows Node 24.20.0 from workspace node_modules with sharp 0.35.5, librsvg
+2.63.2 and libvips 8.18.7. Requiring sharp from the generated Windows standalone
+output failed with `ERR_DLOPEN_FAILED` for the win32-x64 native module. The
+workspace success does not establish standalone packaging; this failure needs
+separate assessment, and Linux container validation remains required.
+An initial diagnostic version print had an extra parenthesis; the corrected
+version/native-transform check passed. This was local verification tooling,
+not an application failure.
+
+The E2E workflow adds the same benign resize/PNG transform inside the actual
+Linux standalone web container and checks sharp 0.35.5 with librsvg 2.63.2;
+this is pending CI, not a local Linux pass. All existing CI checks and
+flaky-test rejection remain. The Next 16.4.3 production build passed all 58
+routes and its TypeScript phase; the separate `npm run typecheck` passed.
+
+Production browser validation and all six final-head CI jobs remain pending.
+No local preview startup was attempted following the earlier automatic review
+rejection, and no production deployment or user-data cleanup was performed.
+This slice is not accepted or merged.
+
+## Account-owned profile recovery — 2026-10-24
+
+CORE-006, branch `codex/core006-profile-owner`, [ADR 015](decisions/015-profile-owner-recovery.md).
+Profile PUT now requires sign-in and ignores body ownership; GET compatibility,
+field normalization and last-write-wins remain. Onboarding and placement pin
+requests to the current account, isolate guest settings and preserve uncertain
+saves for read-back and explicit saved/attempted review. No rewards are added.
+
+Local Go tests/vet, the real memory API integration script, TypeScript and the
+58-route production build passed. Independent review found two placement data
+loss paths: replacing an existing draft, and losing an uncertain snapshot when
+device storage fails. Both were fixed; owner-keyed, cloned tab memory preserves
+failed writes across client navigation without replacing corrupt disk data or
+promising reload durability. The scoped follow-up review also closed warning
+propagation before placement's draft guard.
+
+The expanded browser suite passed **10/10 (2.6m), retries 0**, including real
+save/reload, delayed GET/PUT across account/logout changes, lost committed and
+uncommitted saves, explicit choices, corrupt/blocked/foreign storage, guest
+legacy review and both placement regressions. Ten form/recovery captures at
+390×551 and 390×844 were viewed. They exposed tiny, inline goal descriptions;
+scoped CSS now gives titles 16px and separate descriptions 14px, with font,
+layout and touch-target assertions added to the existing mobile case.
+
+The production build passed after that typography correction. Automatic
+execution review rejected restarting the local preview with only `blocked by
+policy`; the final typography assertions and new captures therefore await CI.
+CI retains the profile-only mobile captures for visual review even on success.
+PostgreSQL/race and the complete six-job final-head gate remain pending. This
+slice is not accepted or merged yet; no production deployment or user DB reset.
+
+## Vocabulary unlock grants — 2026-10-24
+
+Scope CORE-005/006, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`;
+[ADR 014](decisions/014-vocabulary-unlock-grants.md). Đang review/xác minh, chưa
+nghiệm thu hoặc deploy production.
+
+Mục tiêu: Word Network/Wordsmith không tự nhận từ Vocabulary seed 74%; giữ
+quyền cũ qua cutover nguyên tử một lần, grant mới có nguồn và proof bất biến.
+Giữ đường 300 personal XP cho world, milestone 3 bài và 7 bài/2 activity cho
+guided practice; không tăng learning XP/rank từ grant. Equip yêu cầu đăng nhập,
+progression UI xử lý owner, late response và refresh để xác nhận kết quả lưu.
+Các kiểm tra migration/store/API/browser/mobile và sáu CI jobs sẽ ghi theo head
+thực tế; không lấy pass PR #24 để nghiệm thu thay đổi này.
+
+Local: `go test ./...`, `go vet ./...`, `npm run build` (58 routes),
+`npx tsc --noEmit`, `npm run test:game` (50/50) và
+`node scripts/verify-vocabulary-unlocks.mjs` đạt. Script dùng tài khoản/bài thật,
+3→7 bài/2 activity, capped replay, immutable receipts, concurrent GET/equip và
+foreign owner; không đổi confidence/XP bằng fixture client. Review độc lập đọc
+backend/frontend/contract chưa tìm thấy lỗi phải sửa. Đã xem bốn ảnh worlds/pin
+390×551 và 390×844: không tràn ngang/chồng chữ, nút vào world/trang bị rõ ràng.
+PostgreSQL/race chưa chạy local (không có test database, CGO disabled); migration,
+rollback/restart/concurrent constructors/grants/equip đã có regression cho CI.
+Browser: 17/17 core/assets/skill-practice liên quan đạt hai lượt; final vocabulary
+6/6 đạt trong 2.1m, retries=0. Các lượt đầu phát hiện ba lỗi selector mới: guest
+account dùng AuthPanel ngoài component, route announcer trùng role alert, và nút
+refresh trùng substring trong card bị khóa. Đã scope/exact selector theo UI thật,
+giữ nguyên assertions về không ghi guest, read-back và một PUT. Không sửa luật
+để che lỗi. Head đầu `0c82308` đạt backend PostgreSQL/race/vet, frontend, AI,
+compose và integration; E2E chưa nghiệm thu do selector cần sửa. Head tiếp theo
+phải chạy lại đủ sáu jobs sạch trước merge. Chưa merge hoặc deploy.
+
+[CI 166](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40074601954)
+trên `abaa0ae` đạt năm jobs, gồm PostgreSQL/race/vet và integration. E2E có
+184 passed/1 flaky trong 29.5m nên strict gate từ chối nghiệm thu. Lỗi ban đầu
+là Bubble Meadow Challenge chồng nhãn `make`/`take away` tại 390×551; retry pass
+không được coi là đã sửa. Tái hiện được với seed cố định và đổi viewport:
+width:auto của label absolute bị co theo vị trí cũ, metrics cache 59px nhưng
+render sau layout giãn 88.5px. Sửa width:max-content, giữ max-width/font/hit sizes,
+và thêm regression đúng seed/resize; assertion all-eight Challenge giữ nguyên.
+Build bản sửa đạt 58 routes/TypeScript. Regression seed/resize đã thất bại trên
+bản cũ đúng lỗi make/take-away, rồi đạt trên bản sửa; cùng case all-eight
+Challenge short-phone đạt 2/2 trong 43.1s, không retry. Đã xem ảnh lỗi CI, ảnh
+tái hiện và ảnh sau sửa Bubble/Café; không giảm assertions. Suite CI tiếp theo
+có 186 cases, phải đạt đủ sáu jobs sạch; run 166 không dùng để merge.
+
 ## Skill practice summary and recommendations — 2026-10-23
 
 Scope CORE-005, branch `codex/core005-skill-practice`, nền main `4cdc9e7`;
