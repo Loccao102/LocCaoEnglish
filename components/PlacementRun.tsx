@@ -58,14 +58,16 @@ function PlacementQuestions({token}:{token:string}){
     const[me,loaded]=await Promise.all([getMe(token),getPlayerProfile(token)]);if(!current())return;
     const fields=profileFieldsForOwner(loaded,me.user.id);if(!fields)throw new Error("Your account settings could not be verified.");
     const draft=readProfileDraft(me.user.id);
-    if(draft.kind==="valid"&&draft.draft.status==="uncertain"){setUnconfirmed(true);throw new Error("An earlier settings save is unconfirmed. Open learning goal settings to refresh it before saving another change.");}
     if(draft.kind==="invalid"||draft.kind==="unavailable")setStorageWarning(draft.message);
+    if(draft.kind==="valid"&&draft.storageWarning)setStorageWarning(draft.storageWarning);
+    if(draft.kind==="valid"&&draft.draft.status!=="confirmed"){setUnconfirmed(true);throw new Error("Earlier settings changes need your review. Open learning goal settings before saving another change.");}
     profile={...loaded,...fields};
    }
    else {
     const draft=readProfileDraft("guest");
     const fields=draft.kind==="valid"?draft.draft.fields:DEFAULT_PROFILE_FIELDS;
     if(draft.kind==="invalid"||draft.kind==="unavailable")setStorageWarning(draft.message);
+    if(draft.kind==="valid"&&draft.storageWarning)setStorageWarning(draft.storageWarning);
     profile={...fields,userId:"guest",onboarded:true,updatedAt:new Date().toISOString()};
    }
    let saved={...profile,cefrLevel:level};

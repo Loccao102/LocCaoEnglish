@@ -53,6 +53,12 @@ mắc kẹt. Thất bại mạng vẫn hiện các lựa chọn như đã lưu x
   validate/normalize trước dùng. Có thể thêm saved fields cho lựa chọn phục hồi.
 - Dữ liệu sai shape/version/owner: giữ raw key, thông báo không đọc được; không
   spread JSON vào form, không auto PUT. Bộ nhớ vẫn cho thao tác an toàn.
+- Nếu ghi storage lỗi, module giữ snapshot riêng theo owner trong bộ nhớ của tab
+  để liên kết phục hồi qua điều hướng nội bộ không làm mất thay đổi. UI nói rõ
+  chỉ giữ trong tab, có thể mất khi full reload; không báo guest đã lưu lên thiết
+  bị khi chỉ có bản nhớ tạm. Ghi storage thành công thay bản nhớ bằng bản bền vững.
+- Placement không ghi đè draft đã có ở trạng thái `draft` hoặc `uncertain`; cần
+  giải quyết trên onboarding trước khi gửi preference mới từ kết quả placement.
 - Guest chỉnh/lưu trên thiết bị, không gọi personal profile GET/PUT; copy rõ
   local-only. Guest placement đọc/ghi cùng module validated guest preference,
   giữ 12 câu và không cấp XP/confidence/rank.

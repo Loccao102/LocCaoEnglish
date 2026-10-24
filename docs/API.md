@@ -120,6 +120,9 @@ changes. An unconfirmed save blocks another PUT until explicit read-back:
 matching normalized fields confirms current saved settings; differing values
 keep both saved and attempted settings for an explicit user choice. No automatic
 replay or claim about which earlier request committed is made.
+When device storage fails, owner-scoped tab memory preserves attempted fields
+across in-app recovery navigation, with a warning that a full reload may lose
+them. Placement blocks both reviewed-unsaved and uncertain drafts before PUT.
 
 Browser drafts use `loccao.profile-settings.v1.<userID|guest>` with a versioned,
 validated owner/status/fields envelope. Unknown/corrupt/unowned data is retained

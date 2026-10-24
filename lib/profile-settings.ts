@@ -33,9 +33,20 @@ export function profileFieldsForOwner(value: unknown, owner: string): ProfileFie
   return record(value) && value.userId === owner ? normalizeProfileFields(value) : null;
 }
 
-type DraftRead = { kind: "valid"; draft: ProfileDraft } | { kind: "missing" } | { kind: "invalid" | "unavailable"; message: string };
+type DraftRead = { kind: "valid"; draft: ProfileDraft; storageWarning?: string } | { kind: "missing" } | { kind: "invalid" | "unavailable"; message: string };
 const unreadable = "Earlier device settings could not be read safely. They have been kept unchanged.";
 const unavailable = "Device storage is unavailable. Changes can stay in this page, and signed-in settings can still be saved online.";
+// Keep failed writes across client-side navigation, without replacing unreadable
+// disk data or promising recovery after a full reload. Entries stay owner-scoped.
+const volatileDrafts = new Map<string, { draft: ProfileDraft; warning: string }>();
+const cloneDraft = (draft: ProfileDraft): ProfileDraft => ({ ...draft, fields: { ...draft.fields, interests: [...draft.fields.interests] } });
+function rememberUnstoredDraft(draft: ProfileDraft, reason: string): { ok: false; message: string } {
+  const warning = `${reason} Current changes are kept in this tab only and may be lost if you reload.`;
+  if (typeof window !== "undefined") volatileDrafts.set(draft.owner, {
+    draft: cloneDraft(draft.owner === "guest" && draft.status === "confirmed" ? { ...draft, status: "draft" } : draft), warning,
+  });
+  return { ok: false, message: warning };
+}
 
 function parseDraft(raw: string, owner: string): ProfileDraft | null {
   try {
@@ -47,6 +58,8 @@ function parseDraft(raw: string, owner: string): ProfileDraft | null {
 }
 
 export function readProfileDraft(owner: string): DraftRead {
+  const volatile = volatileDrafts.get(owner);
+  if (volatile) return { kind: "valid", draft: cloneDraft(volatile.draft), storageWarning: volatile.warning };
   try {
     const raw = window.localStorage.getItem(PROFILE_DRAFT_PREFIX + owner);
     if (raw === null) return { kind: "missing" };
@@ -58,14 +71,16 @@ export function readProfileDraft(owner: string): DraftRead {
 export function writeProfileDraft(owner: string, status: ProfileDraft["status"], input: ProfileFields): { ok: true } | { ok: false; message: string } {
   const fields = normalizeProfileFields(input);
   if (!owner || !fields) return { ok: false, message: "These settings could not be saved safely." };
+  const draft: ProfileDraft = { version: 1, owner, status, fields };
   try {
     const key = PROFILE_DRAFT_PREFIX + owner, raw = window.localStorage.getItem(key);
     // Unknown or corrupt data belongs to the user too. Do not replace it, even
     // when online saving can proceed independently of this device draft.
-    if (raw !== null && !parseDraft(raw, owner)) return { ok: false, message: unreadable };
-    window.localStorage.setItem(key, JSON.stringify({ version: 1, owner, status, fields } satisfies ProfileDraft));
+    if (raw !== null && !parseDraft(raw, owner)) return rememberUnstoredDraft(draft, unreadable);
+    window.localStorage.setItem(key, JSON.stringify(draft));
+    volatileDrafts.delete(owner);
     return { ok: true };
-  } catch { return { ok: false, message: unavailable }; }
+  } catch { return rememberUnstoredDraft(draft, unavailable); }
 }
 
 /** Only a guest's explicit review action may read this ownerless old key. */

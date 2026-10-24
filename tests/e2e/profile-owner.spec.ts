@@ -9,6 +9,7 @@ const LEGACY = "loccao_player_build";
 type Account = { token: string; user: { id: string }; headers: Record<string, string> };
 type Fields = Pick<PlayerProfile, "goal" | "cefrLevel" | "dailyMinutes" | "targetBand" | "interests">;
 const defaults: Fields = { goal: "conversation", cefrLevel: "B1", dailyMinutes: 15, targetBand: 7, interests: ["daily-life"] };
+const accountDefaults: Fields = { ...defaults, interests: ["travel", "daily-life"] };
 const editor = (page: Page) => page.getByRole("region", { name: "Learning goal settings", exact: true });
 const notice = (page: Page) => page.getByRole("region", { name: "Settings status", exact: true });
 const save = (page: Page) => editor(page).getByRole("button", { name: "Save player build", exact: true });
@@ -63,6 +64,18 @@ async function finishPlacement(page: Page) {
     await page.getByRole("button", { name: index === 11 ? "Finish calibration →" : "Lock answer →", exact: true }).click();
   }
 }
+async function recoveryImages(page: Page, state: string) {
+  for (const height of [551, 844]) {
+    await page.setViewportSize({ width: 390, height });
+    await notice(page).evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 110));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.cache/profile-${state}-${height}.png` });
+    if (state === "recovery-choice") {
+      await notice(page).getByRole("button", { name: "Review my changes", exact: true }).evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 180));
+      await page.screenshot({ path: `.cache/profile-${state}-actions-${height}.png` });
+    }
+  }
+}
 
 test("Real account settings save and reload without importing ownerless preferences or granting rewards", async ({ page, request }) => {
   const owner = await account(request);
@@ -86,7 +99,7 @@ test("Real account settings save and reload without importing ownerless preferen
   await expect(editor(page).getByLabel("Starting practice level", { exact: true })).toHaveValue("B2");
   await expect(editor(page).getByRole("button", { name: "30m", exact: true })).toHaveAttribute("aria-pressed", "true");
   const profile = await read<PlayerProfile>(request, "/v1/player/profile", owner);
-  expect(fields(profile)).toEqual({ ...defaults, goal: "work", cefrLevel: "B2", dailyMinutes: 30, interests: ["daily-life", "technology"] });
+  expect(fields(profile)).toEqual({ ...accountDefaults, goal: "work", cefrLevel: "B2", dailyMinutes: 30, interests: ["travel", "daily-life", "technology"] });
   const dashboardAfter = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
   expect(dashboardAfter.user).toEqual(dashboardBefore.user); expect(dashboardAfter.skills).toEqual(dashboardBefore.skills);
   expect(await read(request, "/v1/player/daily", owner)).toEqual(dailyBefore);
@@ -95,7 +108,21 @@ test("Real account settings save and reload without importing ownerless preferen
     await page.setViewportSize({ width: 390, height });
     await editor(page).evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 110));
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    for (const name of ["Speak comfortably", "Climb IELTS", "Travel without panic", "Use English at work"]) {
+      const typography = await goal(page, name).evaluate(button => {
+        const title = button.querySelector("strong")!, description = button.querySelector("small")!;
+        return { titleSize: parseFloat(getComputedStyle(title).fontSize), descriptionSize: parseFloat(getComputedStyle(description).fontSize),
+          titleBottom: title.getBoundingClientRect().bottom, descriptionTop: description.getBoundingClientRect().top,
+          height: button.getBoundingClientRect().height };
+      });
+      expect(typography.titleSize).toBeGreaterThanOrEqual(16);
+      expect(typography.descriptionSize).toBeGreaterThanOrEqual(14);
+      expect(typography.descriptionTop).toBeGreaterThanOrEqual(typography.titleBottom);
+      expect(typography.height).toBeGreaterThanOrEqual(44);
+    }
     await page.screenshot({ path: `.cache/profile-settings-${height}.png` });
+    await goal(page, "Speak comfortably").evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 110));
+    await page.screenshot({ path: `.cache/profile-goal-choices-${height}.png` });
     await save(page).evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 150));
     await page.screenshot({ path: `.cache/profile-save-${height}.png` });
   }
@@ -118,8 +145,24 @@ test("A late settings GET cannot load account A preferences into account B", asy
     release.resolve(); await finished.promise; await paint(page);
     await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
     await expect(goal(page, "Travel without panic")).toHaveAttribute("aria-pressed", "false");
-    expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", other))).toEqual(defaults);
+    expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", other))).toEqual(accountDefaults);
   } finally { release.resolve(); }
+  await page.unroute("**/v1/player/profile");
+  const lateError = deferred(), releaseError = deferred(), errorFinished = deferred();
+  await page.route("**/v1/player/profile", async route => {
+    if (route.request().method() !== "GET" || route.request().headers().authorization !== first.headers.Authorization) return route.continue();
+    lateError.resolve(); await releaseError.promise;
+    await route.fulfill({ status: 503, json: { error: "Late account response" } }); errorFinished.resolve();
+  });
+  try {
+    await identity(page, first.token); await lateError.promise;
+    await identity(page, "");
+    await expect(editor(page).getByRole("button", { name: "Save on this device", exact: true })).toBeEnabled();
+    releaseError.resolve(); await errorFinished.promise; await paint(page);
+    await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
+    await expect(notice(page)).toContainText("Guest settings stay on this device");
+    await expect(notice(page)).not.toContainText("could not be loaded");
+  } finally { releaseError.resolve(); }
 });
 
 test("Pending settings PUT captures its owner and cannot replace another account or the guest after logout", async ({ page, request }) => {
@@ -142,8 +185,25 @@ test("Pending settings PUT captures its owner and cannot replace another account
     await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
     await expect(notice(page)).not.toContainText("Saved to your account."); expect(puts).toBe(1);
     expect((await read<PlayerProfile>(request, "/v1/player/profile", first)).goal).toBe("work");
-    expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", other))).toEqual(defaults);
+    expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", other))).toEqual(accountDefaults);
   } finally { release.resolve(); }
+  await page.unroute("**/v1/player/profile");
+  await identity(page, first.token); await expect(save(page)).toBeEnabled();
+  const lateError = deferred(), releaseError = deferred(), errorFinished = deferred();
+  await page.route("**/v1/player/profile", async route => {
+    if (route.request().method() !== "PUT") return route.continue();
+    puts++; expect(route.request().headers().authorization).toBe(first.headers.Authorization);
+    lateError.resolve(); await releaseError.promise;
+    await route.abort("failed"); errorFinished.resolve();
+  });
+  try {
+    await goal(page, "Travel without panic").click(); await save(page).click(); await lateError.promise;
+    await identity(page, other.token); await expect(save(page)).toBeEnabled();
+    releaseError.resolve(); await errorFinished.promise; await paint(page);
+    await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
+    await expect(notice(page)).not.toContainText("Save could not be confirmed");
+    expect(puts).toBe(2); expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", other))).toEqual(accountDefaults);
+  } finally { releaseError.resolve(); }
 });
 
 test("Lost committed save blocks duplicate PUT, survives failed refresh, and reload confirms matching saved fields", async ({ page, request }) => {
@@ -160,6 +220,7 @@ test("Lost committed save blocks duplicate PUT, survives failed refresh, and rel
   await save(page).evaluate(button => { (button as HTMLButtonElement).click(); (button as HTMLButtonElement).click(); });
   await expect(notice(page)).toContainText("Save could not be confirmed");
   await expect(save(page)).toBeDisabled(); expect(puts).toBe(1);
+  await recoveryImages(page, "recovery-unconfirmed");
   failRead = true; await refresh(page).click();
   await expect(notice(page)).toContainText("Your save is still unconfirmed");
   await expect(save(page)).toBeDisabled(); expect(puts).toBe(1);
@@ -183,6 +244,7 @@ test("Uncommitted save keeps both versions until an explicit saved-or-draft choi
   await expect(notice(page).getByRole("region", { name: "Saved settings", exact: true })).toContainText("Speak comfortably");
   await expect(notice(page).getByRole("region", { name: "My changes", exact: true })).toContainText("Use English at work");
   await expect(save(page)).toBeDisabled(); expect(puts).toBe(1);
+  await recoveryImages(page, "recovery-choice");
   await notice(page).getByRole("button", { name: "Review my changes", exact: true }).click();
   await expect(save(page)).toBeEnabled();
   await expect(goal(page, "Use English at work")).toHaveAttribute("aria-pressed", "true"); expect(puts).toBe(1);
@@ -191,14 +253,16 @@ test("Uncommitted save keeps both versions until an explicit saved-or-draft choi
   await notice(page).getByRole("button", { name: "Use saved settings", exact: true }).click();
   await expect(save(page)).toBeEnabled();
   await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
-  expect(puts).toBe(2); expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", owner))).toEqual(defaults);
+  expect(puts).toBe(2); expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", owner))).toEqual(accountDefaults);
 });
 
 test("Guest settings use explicit legacy review and preserve unreadable device data without personal requests", async ({ page, request }) => {
   const legacy = JSON.stringify({ ...defaults, goal: "travel", dailyMinutes: 45 });
   const unreadable = JSON.stringify({ version: 99, owner: "guest", status: "confirmed", fields: { ...defaults, goal: "work" } });
   await page.addInitScript(({ legacyKey, legacy, key, unreadable }) => {
-    localStorage.setItem(legacyKey, legacy); localStorage.setItem(key, unreadable);
+    if (!sessionStorage.getItem("guest-device-fixture")) {
+      localStorage.setItem(legacyKey, legacy); localStorage.setItem(key, unreadable); sessionStorage.setItem("guest-device-fixture", "ready");
+    }
   }, { legacyKey: LEGACY, legacy, key: PREFIX + "guest", unreadable });
   let personalRequests = 0;
   page.on("request", request => { if (request.url().endsWith("/v1/player/profile")) personalRequests++; });
@@ -220,6 +284,26 @@ test("Guest settings use explicit legacy review and preserve unreadable device d
   expect(await page.evaluate(key => localStorage.getItem(key), PREFIX + "guest")).toBe(unreadable);
   expect(await page.evaluate(key => localStorage.getItem(key), LEGACY)).toBe(legacy);
   expect(personalRequests).toBe(0);
+  for (const raw of ["{unreadable", JSON.stringify({ version: 1, owner: "someone-else", status: "confirmed", fields: defaults }), JSON.stringify({ version: 1, owner: "guest", status: "confirmed", fields: { ...defaults, interests: null } })]) {
+    await page.evaluate(({ key, raw, legacyKey }) => { localStorage.setItem(key, raw); localStorage.setItem(legacyKey, raw); }, { key: PREFIX + "guest", raw, legacyKey: LEGACY });
+    await page.reload(); await expect(localSave).toBeEnabled();
+    await expect(notice(page)).toContainText("Earlier device settings could not be read safely");
+    await expect(goal(page, "Speak comfortably")).toHaveAttribute("aria-pressed", "true");
+    await editor(page).getByRole("button", { name: "Review earlier device settings", exact: true }).click();
+    await expect(editor(page).getByRole("button", { name: "Use earlier device settings", exact: true })).toHaveCount(0);
+    await localSave.click(); await expect(notice(page)).toContainText("Device settings could not be saved");
+    expect(await page.evaluate(key => localStorage.getItem(key), PREFIX + "guest")).toBe(raw);
+    expect(await page.evaluate(key => localStorage.getItem(key), LEGACY)).toBe(raw);
+  }
+  await page.addInitScript(prefix => {
+    const originalGet = Storage.prototype.getItem, originalSet = Storage.prototype.setItem;
+    Storage.prototype.getItem = function(key) { if (key.startsWith(prefix)) throw new DOMException("Blocked", "SecurityError"); return originalGet.call(this, key); };
+    Storage.prototype.setItem = function(key, value) { if (key.startsWith(prefix)) throw new DOMException("Blocked", "SecurityError"); originalSet.call(this, key, value); };
+  }, PREFIX);
+  await page.reload(); await expect(localSave).toBeEnabled();
+  await expect(notice(page)).toContainText("Device storage is unavailable");
+  await localSave.click(); await expect(notice(page)).toContainText("Device settings could not be saved");
+  await expect(localSave).toBeEnabled(); expect(personalRequests).toBe(0);
 });
 
 test("Blocked device draft storage still permits an honest online account save", async ({ page, request }) => {
@@ -262,4 +346,66 @@ test("Guest and signed-in placement preserve their preference owner and award no
   const after = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
   expect(after.user).toEqual(before.user); expect(after.skills).toEqual(before.skills);
   expect(await page.evaluate(key => localStorage.getItem(key), PREFIX + "guest")).toBe(guestDraft);
+});
+
+test("Placement preserves an existing account draft until the player resolves it in settings", async ({ page, request }) => {
+  const owner = await account(request);
+  const draft = JSON.stringify({ version: 1, owner: owner.user.id, status: "draft", fields: { ...defaults, goal: "travel", dailyMinutes: 45 } });
+  await page.addInitScript(({ key, draft }) => localStorage.setItem(key, draft), { key: PREFIX + owner.user.id, draft });
+  let puts = 0;
+  page.on("request", request => { if (request.url().endsWith("/v1/player/profile") && request.method() === "PUT") puts++; });
+  const before = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
+  await signIn(page, owner, "/placement"); await finishPlacement(page);
+  await expect(page.getByRole("link", { name: "Open learning goal settings", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Suggested starting level:/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Finish calibration →", exact: true })).toBeDisabled();
+  expect(puts).toBe(0);
+  expect(await page.evaluate(key => localStorage.getItem(key), PREFIX + owner.user.id)).toBe(draft);
+  expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", owner))).toEqual(accountDefaults);
+  await page.getByRole("link", { name: "Open learning goal settings", exact: true }).click();
+  await expect(notice(page).getByRole("region", { name: "My changes", exact: true })).toContainText("Travel without panic");
+  await expect(notice(page).getByRole("region", { name: "Saved settings", exact: true })).toContainText("Speak comfortably");
+  await expect(save(page)).toBeDisabled(); expect(puts).toBe(0);
+  const after = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
+  expect(after.user).toEqual(before.user); expect(after.skills).toEqual(before.skills);
+});
+
+test("Placement retains a lost save across settings navigation when device draft storage is blocked or corrupt", async ({ page, request }) => {
+  for (const mode of ["blocked", "corrupt"] as const) {
+    const owner = await account(request);
+    const corrupt = "{unreadable-profile-draft";
+    await page.goto("/placement");
+    await identity(page, owner.token);
+    await page.evaluate(({ key, mode, corrupt }) => {
+      if (mode === "corrupt") localStorage.setItem(key, corrupt);
+      else {
+        const originalGet = Storage.prototype.getItem, originalSet = Storage.prototype.setItem;
+        Storage.prototype.getItem = function(name) { if (name === key) throw new DOMException("Blocked", "SecurityError"); return originalGet.call(this, name); };
+        Storage.prototype.setItem = function(name, value) { if (name === key) throw new DOMException("Blocked", "SecurityError"); originalSet.call(this, name, value); };
+      }
+    }, { key: PREFIX + owner.user.id, mode, corrupt });
+    let puts = 0;
+    await page.route("**/v1/player/profile", route => {
+      if (route.request().method() !== "PUT") return route.continue();
+      puts++; expect(route.request().headers().authorization).toBe(owner.headers.Authorization);
+      expect(route.request().postDataJSON()).toEqual({ ...accountDefaults, cefrLevel: "A2" });
+      return route.abort("failed");
+    });
+    const before = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
+    await finishPlacement(page);
+    await expect(page.getByRole("link", { name: "Open learning goal settings", exact: true })).toBeVisible();
+    await expect(page.getByText("Current changes are kept in this tab only and may be lost if you reload.", { exact: false })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Finish calibration →", exact: true })).toBeDisabled();
+    expect(puts).toBe(1);
+    await page.getByRole("link", { name: "Open learning goal settings", exact: true }).click();
+    await expect(notice(page).getByRole("region", { name: "My changes", exact: true })).toContainText("A2");
+    await expect(notice(page).getByRole("region", { name: "Saved settings", exact: true })).toContainText("B1");
+    await expect(notice(page)).toContainText("Current changes are kept in this tab only and may be lost if you reload.");
+    await expect(save(page)).toBeDisabled(); expect(puts).toBe(1);
+    if (mode === "corrupt") expect(await page.evaluate(key => localStorage.getItem(key), PREFIX + owner.user.id)).toBe(corrupt);
+    expect(fields(await read<PlayerProfile>(request, "/v1/player/profile", owner))).toEqual(accountDefaults);
+    const after = await read<{ user: unknown; skills: unknown }>(request, "/v1/dashboard", owner);
+    expect(after.user).toEqual(before.user); expect(after.skills).toEqual(before.skills);
+    await page.unroute("**/v1/player/profile");
+  }
 });

@@ -619,7 +619,7 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Đang làm — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_progress`, 2026-10-24)
+### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
 
 Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
 nghiệm thu ở PR #25. [ADR 015](decisions/015-profile-owner-recovery.md) chốt
@@ -629,6 +629,12 @@ normalization và last-write-wins; không cấp XP/confidence/rank hay đổi da
 Nghiệm thu HTTP/auth/owner, browser save/reload/lost response/mismatch/storage,
 guest/legacy/placement, mobile và đủ sáu jobs. District pages/PlayerJourney tiếp
 tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
+
+Go/vet, integration API thật ở memory mode, TypeScript/build 58 routes và 10/10
+browser cases (2.6m, không retry) đã đạt. Review độc lập tìm và đóng hai lỗi mất
+draft từ placement; đã xem mười ảnh mobile. Sửa chữ mục tiêu quá nhỏ sau lượt
+browser, build lại đạt; assertion/ảnh cuối và PG/race chờ CI đủ sáu jobs trước
+merge. Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
 
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 

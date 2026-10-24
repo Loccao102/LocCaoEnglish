@@ -43,7 +43,7 @@ export default function useProfileSettings(token: string) {
         setState({ ...initial, owner: "guest", fields, saved: stored.kind === "valid" ? fields : null, phase: "ready",
           confirmed: stored.kind === "valid" && stored.draft.status === "confirmed",
           message: "Guest settings stay on this device. Sign in to save personal settings to an account.",
-          storageWarning: stored.kind === "invalid" || stored.kind === "unavailable" ? stored.message : "" });
+          storageWarning: stored.kind === "invalid" || stored.kind === "unavailable" ? stored.message : stored.kind === "valid" ? stored.storageWarning ?? "" : "" });
         return;
       }
 
@@ -53,7 +53,7 @@ export default function useProfileSettings(token: string) {
       const saved = typeof owner === "string" && owner ? profileFieldsForOwner(profile, owner) : null;
       if (!saved) throw new Error("Saved settings could not be verified for this account.");
       const stored = readProfileDraft(owner);
-      const storageWarning = stored.kind === "invalid" || stored.kind === "unavailable" ? stored.message : "";
+      const storageWarning = stored.kind === "invalid" || stored.kind === "unavailable" ? stored.message : stored.kind === "valid" ? stored.storageWarning ?? "" : "";
       const attempted = pending.current ?? (stored.kind === "valid" && stored.draft.status !== "confirmed" ? stored.draft.fields : null);
       if (attempted && !sameProfileFields(attempted, saved)) {
         pending.current = attempted;
