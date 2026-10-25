@@ -105,6 +105,32 @@ an activity to bypass the receipt flow. Old records and personal XP are preserve
   item/activity counts and source, not `% explored` from old confidence. Missing
   metadata from an older API is shown as unavailable rather than verified proof.
 
+## Account profile preferences and local recovery
+
+`GET /v1/player/profile` keeps configured anonymous-demo read compatibility.
+`PUT /v1/player/profile` requires a signed-in owner; absent/invalid/expired
+credentials return 401 and cannot change the shared demo. Body `userId` does not
+override the authenticated owner. Field normalization and last-write-wins stay
+unchanged; no XP, confidence, rank or existing daily-plan snapshot is altered.
+
+Onboarding and placement pin the token captured for each request. Account forms
+load the real owner and profile before editing. Onboarding saves the submitted
+snapshot, disables edits during save and rejects late results after account
+changes. An unconfirmed save blocks another PUT until explicit read-back:
+matching normalized fields confirms current saved settings; differing values
+keep both saved and attempted settings for an explicit user choice. No automatic
+replay or claim about which earlier request committed is made.
+When device storage fails, owner-scoped tab memory preserves attempted fields
+across in-app recovery navigation, with a warning that a full reload may lose
+them. Placement blocks both reviewed-unsaved and uncertain drafts before PUT.
+
+Browser drafts use `loccao.profile-settings.v1.<userID|guest>` with a versioned,
+validated owner/status/fields envelope. Unknown/corrupt/unowned data is retained
+but never blindly applied. Guest preferences stay local and never trigger a
+personal profile read/write. The old `loccao_player_build` key is retained for
+explicit validated guest review only; it is not imported into an account.
+See [ADR 015](decisions/015-profile-owner-recovery.md) for recovery and rollout.
+
 ## Saved daily practice
 
 All daily endpoints require an account; guests receive 401 and cannot change the

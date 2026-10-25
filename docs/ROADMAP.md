@@ -624,6 +624,25 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
+
+Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
+nghiệm thu ở PR #25. [ADR 015](decisions/015-profile-owner-recovery.md) chốt
+signed-in profile PUT, captured-token onboarding/placement, draft versioned theo
+owner, guest local-only và read-back khi mất phản hồi. Giữ GET demo compatibility,
+normalization và last-write-wins; không cấp XP/confidence/rank hay đổi daily plan.
+Nghiệm thu HTTP/auth/owner, browser save/reload/lost response/mismatch/storage,
+guest/legacy/placement, mobile và đủ sáu jobs. District pages/PlayerJourney tiếp
+tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
+
+Go/vet, integration API thật ở memory mode, TypeScript/build 58 routes và 10/10
+browser cases (2.6m, không retry) đã đạt. Review độc lập tìm và đóng hai lỗi mất
+draft từ placement. Sửa chữ mục tiêu quá nhỏ, build lại đạt; [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+trên `cdd0b51` đạt đủ sáu jobs, PG/race/vet, integration và 196/196 E2E (34.2m)
+không flaky. Đã xem đủ mười hai ảnh cuối 390×551/844, gồm font/choice actions.
+Sau khi đồng bộ test resize Fair, head mới vẫn cần đủ sáu jobs trước merge.
+Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
+
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 
 Owner/task: Codex, branch `codex/core006-daily-recovery`, 2026-10-21, tiếp nối
@@ -687,6 +706,28 @@ với `013_fair_difficulty.sql`/`EnsureFair` trước frontend gửi difficulty.
 Challenge riêng; retry không lặp; queue cũ/new payload tồn tại qua reconnect;
 PostgreSQL giữ kết quả sau restart; có commit/schema version, bằng chứng và kế
 hoạch rollback giữ dữ liệu. Đây chưa phải ủy quyền tự deploy production.
+
+## SEC-001 — Vá dependency frontend (`in_review`, P0, 2026-10-24)
+
+Audit thực tế trên lockfile Next 16.3.4 ghi 3 dependency bị cảnh báo: Next
+critical, sharp và source-map-js high. Đây là dependency advisory, chưa là bằng
+chứng ứng dụng bị khai thác. Đã đối chiếu nguồn gốc: [Next image advisory](https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw),
+[sharp advisory](https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w)
+và [release 16.4.3](https://github.com/vercel/next.js/releases/tag/v16.4.3).
+Đang thực hiện trên `codex/sec001-frontend-dependencies`, từ profile head
+`cdd0b51`: pin Next 16.4.3, cập nhật sharp 0.35.5 và source-map-js 1.2.2 trong
+lockfile; giữ React 19.3 và các dependency không liên quan. Không đổi source app,
+API, luật thưởng, schema hoặc bật thêm tính năng caching. Đọc guide trước/sau
+cài đặt rồi chạy install tái lập, audit, build/typecheck, logic, assets và native
+image smoke check. Browser production và sáu CI jobs vẫn cần nghiệm thu trên
+head cuối; không lấy kết quả PR trước làm bằng chứng cho dependency mới.
+Audit không còn advisory, build và logic/assets đã qua. CI 169 trên `17a5619`
+qua sáu jobs, native transform trong container Linux và 196 browser cases không
+retry/flaky. Đã xác định standalone Windows bỏ sót hai DLL của libvips, có từ bản
+Next 16.3.4; thêm tracing riêng cho DLL Windows x64. Rebuild/typecheck qua,
+standalone giữ đủ DLL đúng hash và native PNG transform qua trên Windows x64.
+Head cuối sau correction vẫn cần sáu CI jobs; chưa nghiệm thu, chưa deploy.
+Không dùng `audit fix --force`.
 
 ## GOV-001 — Tài liệu và luật làm việc
 
