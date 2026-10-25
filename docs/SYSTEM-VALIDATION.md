@@ -2,6 +2,47 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Campaign and Journey read ownership — 2026-10-25
+
+CORE-006 follow-up, branch `codex/core006-campaign-owner`, base `d8ac8b3`;
+[ADR 016](decisions/016-campaign-owner-reads.md). Three district components now
+share a presenter using captured-token, newest-request account reads. Only a
+ready response renders personal clears/checkpoints/readiness/replay links.
+Guests and unavailable reads keep existing static chapter presentation with
+explicit notices, rather than showing the configured demo's personal status.
+Journey's learning card reads independently of story/Fair identity effects;
+those domains and their save/equip behavior remain untouched.
+
+Independent source review found no actionable defect. All existing ready-account
+chapter copy, server routes, gate labels and reward sections were compared and
+preserved. The shared resource/default notices, API/backend, grants, schema and
+save formats were not changed. A production build passed 58 routes/TypeScript
+and separate typecheck using API URL `http://localhost:8080`.
+
+Local services are offline, and no replacement listener was started after the
+earlier automatic review rejection. An explicitly bounded browser replay serves
+the actual built resources and deliberate progression/dashboard render fixtures;
+other network is aborted. These fixtures are never submitted as earned rewards
+or backend gate evidence. OLD bundle RED retained two personal Replay/Enter
+actions after A→B when zero were expected. NEW bundle passed **10/10 fixture
+cases (53.8s), retries 0**: all three districts, delayed success/error, logout,
+guest/demo modes, unavailable/expired reads, reverse refresh and Journey learning
+independent of story/Fair reconnect. This is renderer/read-lifecycle evidence,
+not connected backend or production deployment acceptance.
+
+After final Journey mobile/font/hit assertions were added, the changed case
+passed separately **1/1 (15.8s), retries 0**; the other nine rendering cases were
+unchanged. Typecheck passed after the final test edit. Mobile notices use at
+least 16px text and 44px retry targets; root viewed all eight district/Journey
+captures at 390×551/844 with readable actions, no horizontal overflow and the separate
+Fair atlas intact. Generated district/Journey captures are retained by CI even
+on success for final visual review.
+
+The eleventh case uses two real accounts, compares UI with authenticated API
+reads and verifies unchanged progression/no write requests. It is included for
+CI and has not run locally. Full final-head CI and merge remain pending; this
+slice is not accepted or production-deployed.
+
 ## SEC-001 — Frontend dependency patch — 2026-10-24
 
 Branch `codex/sec001-frontend-dependencies`, base profile head `cdd0b51`.

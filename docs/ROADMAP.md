@@ -624,7 +624,7 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Đang làm — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`in_progress`, 2026-10-25)
+### Đang nghiệm thu — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`in_review`, 2026-10-25)
 
 Owner/task: Codex, branch `codex/core006-campaign-owner`, từ head SEC-001
 `d8ac8b3`. [ADR 016](decisions/016-campaign-owner-reads.md) chốt captured-token
@@ -634,7 +634,14 @@ Journey chưa có render fence ngay theo token. Giữ GET demo compatibility ở
 guest chỉ xem nội dung tĩnh có thông báo; không đổi luật gate/thưởng/save.
 Nghiệm thu đổi account/logout, late success/error, refresh đảo thứ tự,
 guest/demo, lỗi mạng/hết hạn, tách learning khỏi village/Fair, mobile và CI đủ
-sáu jobs. Lát cắt này đang triển khai, không hoàn tất toàn CORE-006.
+sáu jobs. Lát cắt này không hoàn tất toàn CORE-006.
+
+Code được review độc lập, không có finding phải sửa; build 58 routes/typecheck
+đạt. Replay production resources tái hiện lỗi A→B trên bản cũ, bản mới đạt 10/10
+fixture cases (53.8s) và ca Journey cuối 1/1 (15.8s), không retry. Đã xem ảnh
+notice/action 390×551/844. Fixture chỉ xác minh hiển thị/read lifecycle, không
+giả nhận backend gate/thưởng; ca tài khoản thật thứ 11 và đủ sáu CI jobs còn chờ.
+Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#campaign-and-journey-read-ownership--2026-10-25).
 
 ### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
 
