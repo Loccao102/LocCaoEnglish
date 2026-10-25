@@ -146,6 +146,12 @@ test("Challenge bubble labels stay separate after a wide playfield becomes a sho
   await expect(page.locator(".fair-object-label")).toHaveText(["do", "give", "make", "take away"]);
   for (const size of [{ width: 390, height: 844 }, { width: 390, height: 551 }, { width: 460, height: 551 }, { width: 390, height: 551 }]) {
     await page.setViewportSize(size);
+    // ResizeObserver runs on the browser's layout clock, independently of page.clock.
+    // Wait for the arena to receive this size before advancing its projected labels.
+    await expect.poll(() => page.locator(".fair-canvas").evaluate(host => {
+      const canvas = host.querySelector("canvas")!;
+      return parseFloat(canvas.style.width) === host.clientWidth && parseFloat(canvas.style.height) === host.clientHeight;
+    }), { message: "Arena renderer must receive the current playfield size" }).toBe(true);
     await page.clock.runFor(320);
   }
   const boxes = await page.locator(".fair-object-label").evaluateAll(elements => elements.map(element => {
