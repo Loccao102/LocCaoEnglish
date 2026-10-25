@@ -637,9 +637,11 @@ tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
 
 Go/vet, integration API thật ở memory mode, TypeScript/build 58 routes và 10/10
 browser cases (2.6m, không retry) đã đạt. Review độc lập tìm và đóng hai lỗi mất
-draft từ placement; đã xem mười ảnh mobile. Sửa chữ mục tiêu quá nhỏ sau lượt
-browser, build lại đạt; assertion/ảnh cuối và PG/race chờ CI đủ sáu jobs trước
-merge. Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
+draft từ placement. Sửa chữ mục tiêu quá nhỏ, build lại đạt; [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+trên `cdd0b51` đạt đủ sáu jobs, PG/race/vet, integration và 196/196 E2E (34.2m)
+không flaky. Đã xem đủ mười hai ảnh cuối 390×551/844, gồm font/choice actions.
+Sau khi đồng bộ test resize Fair, head mới vẫn cần đủ sáu jobs trước merge.
+Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
 
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 

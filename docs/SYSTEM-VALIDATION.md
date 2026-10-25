@@ -28,10 +28,19 @@ layout and touch-target assertions added to the existing mobile case.
 
 The production build passed after that typography correction. Automatic
 execution review rejected restarting the local preview with only `blocked by
-policy`; the final typography assertions and new captures therefore await CI.
-CI retains the profile-only mobile captures for visual review even on success.
-PostgreSQL/race and the complete six-job final-head gate remain pending. This
-slice is not accepted or merged yet; no production deployment or user DB reset.
+policy`; final typography checks consequently ran on GitHub. [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+passed all six jobs on `cdd0b51e22c102b9353fed81756dc20af7047291`, including
+PostgreSQL/race/vet, the profile integration script and **196 E2E passed (34.2m)**
+without flaky cases. All ten profile cases and the final font/layout assertions
+ran. On 2026-10-25, root downloaded artifact `12568018349` and viewed all twelve
+captures at 390×551/844: goal titles/descriptions are readable and separate,
+saved/attempted summaries and both choice actions remain reachable, with no
+horizontal overflow. CI retains profile-only mobile images even on success.
+
+The subsequently diagnosed CI167 Fair test timing race was corrected and merged
+into this branch; historical CI168 is not substituted for the fresh six-job
+gate on the changed head. Final acceptance/merge remains pending; no production
+deployment or user DB reset.
 
 ## Vocabulary unlock grants — 2026-10-24
 
