@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getDashboard, type Dashboard } from "@/lib/api";
+import { useState } from "react";
+import { getDashboard } from "@/lib/api";
 import { zones, quests } from "@/lib/game/catalog";
 import { companionById } from "@/lib/game/companions";
 import { festivalGames } from "@/lib/game/festival";
@@ -14,16 +14,18 @@ import { useFairProgress } from "./FairProgressProvider";
 import FairSaveStatus from "./FairSaveStatus";
 import CompanionPortrait from "./CompanionPortrait";
 import FairJourneyProgress from "./FairJourneyProgress";
+import useSignedInToken from "../learning/useSignedInToken";
+import useAccountResource from "../learning/useAccountResource";
+import PersonalReadNotice, { PersonalReadRefresh } from "../learning/PersonalReadNotice";
+import personalReadStyles from "../learning/PersonalReadNotice.module.css";
 
 export default function PlayerJourney() {
   const adventure = useAdventure(), fair = useFairProgress();
-  const [selected, setSelected] = useState("mam"), [message, setMessage] = useState(""), [learning, setLearning] = useState<Dashboard | null>(null), [learningError, setLearningError] = useState("");
+  const [selected, setSelected] = useState("mam"), [message, setMessage] = useState("");
+  const token = useSignedInToken();
+  const learningResource = useAccountResource(token, getDashboard);
+  const learning = learningResource.status === "ready" ? learningResource.data : null;
   const ready = adventure.status === "ready", connected = ready && fair.status === "ready" && adventure.identity === fair.owner;
-  useEffect(() => {
-    let active = true; setLearning(null); setLearningError("");
-    if (ready && adventure.identity !== "guest") void getDashboard().then(data => { if (active && data.user.id === adventure.identity) setLearning(data); }).catch(() => { if (active) setLearningError("Your learning summary could not connect. Your village and fair saves are shown separately below."); });
-    return () => { active = false; };
-  }, [ready, adventure.identity]);
   const next = nextQuest(adventure.save), current = companionById(adventure.save.character);
   const friends = friendships(adventure.save, connected ? fair.save : { version: 1, games: {} }), active = friends.find(item => item.friend.id === selected)!;
   const personality = personalityFor(selected), stamps = Object.values(fair.save.games).filter(record => record.stars > 0).length;
@@ -49,9 +51,16 @@ export default function PlayerJourney() {
     <section className="journey-next" aria-label="Suggested next adventures"><div className="journey-next-copy"><span className="eyebrow">A SMALL PLAN FOR TODAY</span><h2>Follow your curiosity.</h2><p>Pick up your story, make a new memory, or spend a few minutes on your English.</p></div><div className="journey-next-links">
       <Link href="/play" onClick={() => { if (ready && next) adventure.updateMeta({ tracked: next.id, started: true }); }}><span>01 · YOUR STORY</span><strong>{ready ? next?.title || "All seven pages are home" : "Open the village"}</strong><small>{next ? "Continue your current chapter" : "Revisit a friend or improve your stars"} →</small></Link>
       <Link href={`/festival/${nextFair.id}`}><span>02 · A FRIENDSHIP MEMORY</span><strong>{nextFair.name}</strong><small>Play with {companionById(nextFair.host).name} →</small></Link>
-      <Link href={learning?.dueReviews ? "/review" : "/camp"}><span>03 · A LITTLE ENGLISH</span><strong>{learning?.dueReviews ? `${learning.dueReviews} words to revisit` : "Your learning journal"}</strong><small>{learning ? `${learning.user.xp} account XP · find your next lesson` : "Lessons, practice and skill progress"} →</small></Link>
+      <section className={personalReadStyles.learningCard} aria-label="Personal learning summary">
+        <Link className={personalReadStyles.summaryLink} href={learning?.dueReviews ? "/review" : "/camp"}>
+          <span>03 · A LITTLE ENGLISH</span>
+          <strong>{learning?.dueReviews ? `${learning.dueReviews} words to revisit` : "Your learning journal"}</strong>
+          <small>{learning ? `${learning.user.xp} account XP · find your next lesson` : "Lessons, practice and skill progress"} →</small>
+        </Link>
+        {learningResource.status !== "ready" && <PersonalReadNotice kind="learning" {...learningResource} />}
+        {token && <PersonalReadRefresh kind="learning" refresh={learningResource.refresh} />}
+      </section>
     </div></section>
-    {learningError && <p role="status">{learningError}</p>}
     <FairJourneyProgress/>
 
     <section className="journey-chapters" aria-label="Story chapters"><div className="journey-section-title"><div><span className="eyebrow">THE BOOK OF SUN PAGES</span><h2>Seven places. One shared story.</h2></div><span>{ready ? Object.keys(adventure.save.completed).length : "—"} / {quests.length} quests</span></div><div className="journey-chapter-list">{zones.map(zone => {

@@ -35,6 +35,8 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Điều kiện chuẩn bị cho chín chương | [ADR 012: bài đúng, freshness, preparation receipt và giữ clear cũ](decisions/012-campaign-practice-gates.md) |
 | Hồ sơ kỹ năng và gợi ý luyện tập | [ADR 013: summary từ bài đã kiểm tra, bỏ mastery mẫu và XP dự đoán](decisions/013-skill-practice-summary.md) |
 | Quyền Word Network và Wordsmith | [ADR 014: ledger nguồn cấp quyền, cutover và giữ đồ cũ](decisions/014-vocabulary-unlock-grants.md) |
+| Thiết lập mục tiêu và đổi tài khoản | [ADR 015: profile owner, guest local-only và phục hồi draft](decisions/015-profile-owner-recovery.md) |
+| Đọc tiến độ chiến dịch và Journey đúng tài khoản | [ADR 016: captured-token reads, guest browsing và phục hồi](decisions/016-campaign-owner-reads.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

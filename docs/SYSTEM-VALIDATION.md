@@ -2,6 +2,155 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Campaign and Journey read ownership — 2026-10-25
+
+CORE-006 follow-up, branch `codex/core006-campaign-owner`, base `d8ac8b3`;
+[ADR 016](decisions/016-campaign-owner-reads.md). Three district components now
+share a presenter using captured-token, newest-request account reads. Only a
+ready response renders personal clears/checkpoints/readiness/replay links.
+Guests and unavailable reads keep existing static chapter presentation with
+explicit notices, rather than showing the configured demo's personal status.
+Journey's learning card reads independently of story/Fair identity effects;
+those domains and their save/equip behavior remain untouched.
+
+Independent source review found no actionable defect. All existing ready-account
+chapter copy, server routes, gate labels and reward sections were compared and
+preserved. The shared resource/default notices, API/backend, grants, schema and
+save formats were not changed. A production build passed 58 routes/TypeScript
+and separate typecheck using API URL `http://localhost:8080`.
+
+Local services are offline, and no replacement listener was started after the
+earlier automatic review rejection. An explicitly bounded browser replay serves
+the actual built resources and deliberate progression/dashboard render fixtures;
+other network is aborted. These fixtures are never submitted as earned rewards
+or backend gate evidence. OLD bundle RED retained two personal Replay/Enter
+actions after A→B when zero were expected. NEW bundle passed **10/10 fixture
+cases (53.8s), retries 0**: all three districts, delayed success/error, logout,
+guest/demo modes, unavailable/expired reads, reverse refresh and Journey learning
+independent of story/Fair reconnect. This is renderer/read-lifecycle evidence,
+not connected backend or production deployment acceptance.
+
+After final Journey mobile/font/hit assertions were added, the changed case
+passed separately **1/1 (15.8s), retries 0**; the other nine rendering cases were
+unchanged. Typecheck passed after the final test edit. Mobile notices use at
+least 16px text and 44px retry targets; root viewed all eight district/Journey
+captures at 390×551/844 with readable actions, no horizontal overflow and the separate
+Fair atlas intact. Generated district/Journey captures are retained by CI even
+on success for final visual review.
+
+The eleventh case uses two real accounts, compares UI with authenticated API
+reads and verifies unchanged progression/no write requests. It is included for
+CI and has not run locally. Full final-head CI and merge remain pending; this
+slice is not accepted or production-deployed.
+
+Fresh dependency audit on 2026-10-25 again reports zero vulnerabilities. PR28
+initially targeted the security feature branch; the existing CI filter covers
+only main-targeted PRs, so that target produced no run. It was retargeted to
+main before final validation, with the dependency on PR27 retained. No check or
+workflow filter was relaxed; the final head must run the full existing gate.
+
+## SEC-001 — Frontend dependency patch — 2026-10-24
+
+Branch `codex/sec001-frontend-dependencies`, base profile head `cdd0b51`.
+Next is pinned to 16.4.3; the lockfile updates sharp to 0.35.5, its native
+binaries to 0.35.5 and bundled libvips packages to 1.3.4, and source-map-js to
+1.2.2. React 19.3, Three, PostCSS and unrelated package families stay unchanged.
+The three earlier dependency advisories are not evidence of an exploited app.
+No application source, API, reward, schema or save changes; no caching features enabled.
+
+The installed upgrade/standalone docs were read before and after updating
+dependencies. `npm ci --no-audit --no-fund` passed (38 packages); the separate
+`npm audit --audit-level=high` passed with **0 vulnerabilities**. `test:game`
+passed **50/50**; the asset verifiers passed 41 unique assets/23 hashes and
+45 GLBs/24 animated companions. A benign 4×4 → 2×2 PNG transform passed on
+Windows Node 24.20.0 from workspace node_modules with sharp 0.35.5, librsvg
+2.63.2 and libvips 8.18.7. Requiring sharp from the generated Windows standalone
+output failed with `ERR_DLOPEN_FAILED` for the win32-x64 native module. The
+workspace success alone did not establish standalone packaging.
+An initial diagnostic version print had an extra parenthesis; the corrected
+version/native-transform check passed. This was local verification tooling,
+not an application failure.
+
+The E2E workflow adds the same benign resize/PNG transform inside the actual
+Linux standalone web container and checks sharp 0.35.5 with librsvg 2.63.2.
+Historical [CI 169](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40113272226)
+passed all six jobs on `17a5619ce33075ad3cc1b3dd587dae8d2ab517af`. E2E job
+`120929455118` records the actual standalone transform success and **196 passed
+(38.1m)**, with no retry markers, failed or flaky summaries. This verifies the
+Node 22 Alpine container, not a Windows standalone artifact. All existing CI
+checks and flaky-test rejection remain. The initial Next 16.4.3 production build
+passed all 58 routes and its TypeScript phase; the separate typecheck passed.
+
+Follow-up on 2026-10-25 found the precise Windows failure: the traced `.node`
+binary directly imports `libvips-42.dll` and `libvips-cpp-8.18.7.dll`, but neither
+DLL appears in the server trace or standalone output. Workspace/standalone addon
+hashes match; both DLLs are present in full workspace node_modules. The older
+Next 16.3.4/sharp 0.35.4 artifact has the same omission. Local full-dependency
+development does not use this incomplete standalone copy; no server was started
+to claim fresh end-to-end local runtime acceptance.
+
+The narrow correction adds `./node_modules/@img/sharp-win32-x64/lib/*.dll` to
+`outputFileTracingIncludes` under the documented all-route key `/*`, only when
+building on Windows x64. The [installed tracing guide](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)
+defines route keys and file patterns relative to the project root; server traces
+carry these extra runtime files into standalone output. Linux configuration and
+existing standalone settings stay unchanged. RED evidence in
+`.cache/sec001-windows-red.log` confirms the missing-DLL load failure before the
+configuration change. After correction, the production rebuild passed all 58
+routes and the separate typecheck passed. The standalone output contains both
+DLLs, with SHA-256 hashes equal to the installed package files. A fresh Windows
+Node process loaded sharp directly from standalone and passed the 4×4 → 2×2
+PNG transform (96 bytes), asserting sharp 0.35.5, librsvg 2.63.2 and libvips
+8.18.7. Logs: `.cache/sec001-windows-build.log`, `-typecheck.log` and `-green.log`.
+This verifies native loading in place on Windows x64; it does not claim a
+relocated Windows distribution or an HTTP/browser run. No listener was started.
+
+Production browser validation and all six final-head CI jobs after this tracing
+correction remain pending; CI 169 is historical evidence for `17a5619` only.
+No local preview startup was attempted following the earlier automatic review
+rejection, and no production deployment or user-data cleanup was performed.
+This slice is not accepted or merged.
+
+## Account-owned profile recovery — 2026-10-24
+
+CORE-006, branch `codex/core006-profile-owner`, [ADR 015](decisions/015-profile-owner-recovery.md).
+Profile PUT now requires sign-in and ignores body ownership; GET compatibility,
+field normalization and last-write-wins remain. Onboarding and placement pin
+requests to the current account, isolate guest settings and preserve uncertain
+saves for read-back and explicit saved/attempted review. No rewards are added.
+
+Local Go tests/vet, the real memory API integration script, TypeScript and the
+58-route production build passed. Independent review found two placement data
+loss paths: replacing an existing draft, and losing an uncertain snapshot when
+device storage fails. Both were fixed; owner-keyed, cloned tab memory preserves
+failed writes across client navigation without replacing corrupt disk data or
+promising reload durability. The scoped follow-up review also closed warning
+propagation before placement's draft guard.
+
+The expanded browser suite passed **10/10 (2.6m), retries 0**, including real
+save/reload, delayed GET/PUT across account/logout changes, lost committed and
+uncommitted saves, explicit choices, corrupt/blocked/foreign storage, guest
+legacy review and both placement regressions. Ten form/recovery captures at
+390×551 and 390×844 were viewed. They exposed tiny, inline goal descriptions;
+scoped CSS now gives titles 16px and separate descriptions 14px, with font,
+layout and touch-target assertions added to the existing mobile case.
+
+The production build passed after that typography correction. Automatic
+execution review rejected restarting the local preview with only `blocked by
+policy`; final typography checks consequently ran on GitHub. [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+passed all six jobs on `cdd0b51e22c102b9353fed81756dc20af7047291`, including
+PostgreSQL/race/vet, the profile integration script and **196 E2E passed (34.2m)**
+without flaky cases. All ten profile cases and the final font/layout assertions
+ran. On 2026-10-25, root downloaded artifact `12568018349` and viewed all twelve
+captures at 390×551/844: goal titles/descriptions are readable and separate,
+saved/attempted summaries and both choice actions remain reachable, with no
+horizontal overflow. CI retains profile-only mobile images even on success.
+
+The subsequently diagnosed CI167 Fair test timing race was corrected and merged
+into this branch; historical CI168 is not substituted for the fresh six-job
+gate on the changed head. Final acceptance/merge remains pending; no production
+deployment or user DB reset.
+
 ## Vocabulary unlock grants — 2026-10-24
 
 Scope CORE-005/006, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`;

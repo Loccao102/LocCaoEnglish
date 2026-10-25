@@ -1,0 +1,79 @@
+.notice {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #cbd8c4;
+  border-radius: 16px;
+  background: #f5f7ed;
+  color: #35574b;
+  overflow-wrap: anywhere;
+}
+
+.notice p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions:not(:empty) {
+  margin-top: 12px;
+}
+
+.action,
+.notice .actions .action {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 1px solid #9cb69f;
+  border-radius: 12px;
+  background: #fffdf3;
+  color: #35574b;
+  font: 600 16px/1.4 "Segoe UI", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.action:focus-visible {
+  outline: 3px solid #33795b;
+  outline-offset: 3px;
+}
+
+.campaignRead {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.campaignRead > .notice {
+  width: 100%;
+}
+
+.learningCard {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.learningCard > .summaryLink {
+  background: #e5eeee;
+}
+
+.learningCard > .summaryLink strong {
+  font-size: 18px;
+}
+
+.learningCard > .summaryLink small {
+  font-size: 14px;
+}
