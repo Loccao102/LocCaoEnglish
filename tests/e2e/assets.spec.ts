@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { villagePreview } from "../../data/village";
 
 const progression = {
@@ -8,7 +8,17 @@ const progression = {
   inventory: [{ id: "traveler-badge", name: "World Walker", description: "A passport badge", slot: "badge", unlocked: true, equipped: false }], bosses: [],
 };
 
+// These two cases exercise map rendering with explicit UI fixtures. Real
+// entitlement and account boundaries are covered by vocabulary-unlocks.spec.ts.
+async function mapFixtureIdentity(page: Page) {
+  await page.addInitScript(() => localStorage.setItem("loccao_token", "asset-map-fixture-token"));
+  await page.route("**/v1/me", route => route.fulfill({ json: {
+    user: { id: "asset-map-fixture", email: "asset-map@example.test", displayName: "Map fixture", xp: 250, streak: 1 }, role: "learner",
+  } }));
+}
+
 test("map preserves live unlocks, selection, navigation and loadout", async ({ page }) => {
+  await mapFixtureIdentity(page);
   await page.route("**/v1/player/progression", route => route.fulfill({ json: progression }));
   await page.route("**/v1/player/loadout", async route => {
     expect(route.request().postDataJSON()).toEqual({ cosmeticId: "traveler-badge" });
@@ -30,6 +40,7 @@ test("map preserves live unlocks, selection, navigation and loadout", async ({ p
 });
 
 test("offline preview is explorable, does not invent progress and retries", async ({ page }) => {
+  await mapFixtureIdentity(page);
   let live = false;
   await page.route("**/v1/player/progression", route => route.fulfill(live ? { json: progression } : { status: 503, json: { error: "Offline" } }));
   await page.goto("/progress");
@@ -40,7 +51,7 @@ test("offline preview is explorable, does not invent progress and retries", asyn
   const dimensions = await page.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
   expect(dimensions.page).toBeLessThanOrEqual(dimensions.viewport);
   live = true;
-  await page.getByRole("button", { name: "Try again" }).click();
+  await page.getByRole("button", { name: "Retry loading progress" }).click();
   await expect(page.getByRole("heading", { name: /Level 3/ })).toBeVisible();
 });
 

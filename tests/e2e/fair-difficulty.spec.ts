@@ -131,3 +131,42 @@ test("all Challenge playfields keep their controls reachable on a short phone sc
     if (game.kind === "tea") await page.screenshot({ path: testInfo.outputPath("challenge-cafe-mobile.png") });
   }
 });
+
+test("Challenge bubble labels stay separate after a wide playfield becomes a short phone", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 551 });
+  // Reproduce the CI clue and answer order, including the wrapped rightmost choice.
+  await page.addInitScript(() => {
+    crypto.randomUUID = () => "00000000-0000-4000-8000-000000000007";
+  });
+  await clock(page);
+  await page.goto("/festival/bubble-meadow");
+  await page.getByRole("radio", { name: /Challenge/ }).check();
+  await click(page, page.getByRole("button", { name: "Let’s play →" }));
+  await pause(page);
+  await expect(page.locator(".fair-object-label")).toHaveText(["do", "give", "make", "take away"]);
+  for (const size of [{ width: 390, height: 844 }, { width: 390, height: 551 }, { width: 460, height: 551 }, { width: 390, height: 551 }]) {
+    await page.setViewportSize(size);
+    // ResizeObserver runs on the browser's layout clock, independently of page.clock.
+    // Wait for the arena to receive this size before advancing its projected labels.
+    await expect.poll(() => page.locator(".fair-canvas").evaluate(host => {
+      const canvas = host.querySelector("canvas")!;
+      return parseFloat(canvas.style.width) === host.clientWidth && parseFloat(canvas.style.height) === host.clientHeight;
+    }), { message: "Arena renderer must receive the current playfield size" }).toBe(true);
+    await page.clock.runFor(320);
+  }
+  const boxes = await page.locator(".fair-object-label").evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect();
+    return { label: element.textContent, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+  }));
+  for (const [index, box] of boxes.entries()) {
+    expect(box.left).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(390);
+    expect(box.top).toBeGreaterThanOrEqual(0);
+    expect(box.bottom).toBeLessThanOrEqual(551);
+    for (const other of boxes.slice(index + 1)) {
+      expect(box.right <= other.left || other.right <= box.left || box.bottom <= other.top || other.bottom <= box.top,
+        `${box.label} and ${other.label} must remain separate after resizing`).toBe(true);
+    }
+  }
+  await page.screenshot({ path: testInfo.outputPath("challenge-bubble-resize-mobile.png") });
+});

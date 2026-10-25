@@ -2,6 +2,72 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Vocabulary unlock grants — 2026-10-24
+
+Scope CORE-005/006, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`;
+[ADR 014](decisions/014-vocabulary-unlock-grants.md). Đang review/xác minh, chưa
+nghiệm thu hoặc deploy production.
+
+Mục tiêu: Word Network/Wordsmith không tự nhận từ Vocabulary seed 74%; giữ
+quyền cũ qua cutover nguyên tử một lần, grant mới có nguồn và proof bất biến.
+Giữ đường 300 personal XP cho world, milestone 3 bài và 7 bài/2 activity cho
+guided practice; không tăng learning XP/rank từ grant. Equip yêu cầu đăng nhập,
+progression UI xử lý owner, late response và refresh để xác nhận kết quả lưu.
+Các kiểm tra migration/store/API/browser/mobile và sáu CI jobs sẽ ghi theo head
+thực tế; không lấy pass PR #24 để nghiệm thu thay đổi này.
+
+Local: `go test ./...`, `go vet ./...`, `npm run build` (58 routes),
+`npx tsc --noEmit`, `npm run test:game` (50/50) và
+`node scripts/verify-vocabulary-unlocks.mjs` đạt. Script dùng tài khoản/bài thật,
+3→7 bài/2 activity, capped replay, immutable receipts, concurrent GET/equip và
+foreign owner; không đổi confidence/XP bằng fixture client. Review độc lập đọc
+backend/frontend/contract chưa tìm thấy lỗi phải sửa. Đã xem bốn ảnh worlds/pin
+390×551 và 390×844: không tràn ngang/chồng chữ, nút vào world/trang bị rõ ràng.
+PostgreSQL/race chưa chạy local (không có test database, CGO disabled); migration,
+rollback/restart/concurrent constructors/grants/equip đã có regression cho CI.
+Browser: 17/17 core/assets/skill-practice liên quan đạt hai lượt; final vocabulary
+6/6 đạt trong 2.1m, retries=0. Các lượt đầu phát hiện ba lỗi selector mới: guest
+account dùng AuthPanel ngoài component, route announcer trùng role alert, và nút
+refresh trùng substring trong card bị khóa. Đã scope/exact selector theo UI thật,
+giữ nguyên assertions về không ghi guest, read-back và một PUT. Không sửa luật
+để che lỗi. Head đầu `0c82308` đạt backend PostgreSQL/race/vet, frontend, AI,
+compose và integration; E2E chưa nghiệm thu do selector cần sửa. Head tiếp theo
+phải chạy lại đủ sáu jobs sạch trước merge. Chưa merge hoặc deploy.
+
+[CI 166](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40074601954)
+trên `abaa0ae` đạt năm jobs, gồm PostgreSQL/race/vet và integration. E2E có
+184 passed/1 flaky trong 29.5m nên strict gate từ chối nghiệm thu. Lỗi ban đầu
+là Bubble Meadow Challenge chồng nhãn `make`/`take away` tại 390×551; retry pass
+không được coi là đã sửa. Tái hiện được với seed cố định và đổi viewport:
+width:auto của label absolute bị co theo vị trí cũ, metrics cache 59px nhưng
+render sau layout giãn 88.5px. Sửa width:max-content, giữ max-width/font/hit sizes,
+và thêm regression đúng seed/resize; assertion all-eight Challenge giữ nguyên.
+Build bản sửa đạt 58 routes/TypeScript. Regression seed/resize đã thất bại trên
+bản cũ đúng lỗi make/take-away, rồi đạt trên bản sửa; cùng case all-eight
+Challenge short-phone đạt 2/2 trong 43.1s, không retry. Đã xem ảnh lỗi CI, ảnh
+tái hiện và ảnh sau sửa Bubble/Café; không giảm assertions. Suite CI tiếp theo
+có 186 cases, phải đạt đủ sáu jobs sạch; run 166 không dùng để merge.
+
+[CI 167](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40111730981)
+trên `b55bb3e` đạt năm jobs nhưng E2E có **185 passed/1 flaky (35.9m)**.
+Regression mới đọc nhãn phải ở 391.734px sau đổi viewport 460→390; retry đạt
+không được dùng để nghiệm thu. Trace và replay tài nguyên production local
+không mở server đã tái hiện: fake clock chạy projection trước khi native
+ResizeObserver chuyển canvas/camera sang kích thước mới, nên assertion còn đọc
+vị trí cũ. Ảnh chụp ngay sau assertion đã nằm gọn trong màn hình. Sửa test chờ
+kích thước canvas thực do observer ghi rồi mới chạy frame; giữ nguyên giới hạn
+390×551 và mọi assertion không chồng nhãn. Replay chỉ xác minh renderer/layout,
+không thay thế integration API hay CI trên head mới. Kết quả kiểm tra cuối còn
+chờ; chưa merge hoặc deploy.
+
+Controlled replay giữ nguyên production bundle/CSS hiện có, fulfill tài nguyên
+từ `.next` và abort network khác, không mở listener/API. OLD test với observer
+bị trì hoãn thất bại `391.125 > 390`; NEW test chờ renderer đạt 1/1 (20.5s).
+Khi chỉ override CSS về width:auto trong replay, NEW test vẫn thất bại đúng
+assertion `make and take away must remain separate`. Vì vậy điều kiện chờ không
+che lỗi layout gốc. Đã xem ảnh GREEN; tracked correction chỉ thêm sáu dòng chờ,
+không đổi source render, giới hạn hình học, retry hay strict flaky gate.
+
 ## Skill practice summary and recommendations — 2026-10-23
 
 Scope CORE-005, branch `codex/core005-skill-practice`, nền main `4cdc9e7`;

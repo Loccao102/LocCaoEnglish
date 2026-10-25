@@ -2,15 +2,44 @@ package model
 
 import "time"
 
+// VocabularyUnlock is a guided-practice milestone, not a proficiency estimate.
+type VocabularyUnlock struct {
+	Method           string                   `json:"method"`
+	CorrectItems     int                      `json:"correctItems"`
+	TargetItems      int                      `json:"targetItems"`
+	ActivityCount    int                      `json:"activityCount"`
+	TargetActivities int                      `json:"targetActivities"`
+	Receipt          *VocabularyUnlockReceipt `json:"receipt,omitempty"`
+}
+
+type VocabularyUnlockEvidence struct {
+	AttemptID      string    `json:"attemptId"`
+	Activity       string    `json:"activity"`
+	ItemKey        string    `json:"itemKey"`
+	ContentVersion string    `json:"contentVersion"`
+	RulesVersion   string    `json:"rulesVersion"`
+	CompletedAt    time.Time `json:"completedAt"`
+}
+
+type VocabularyUnlockReceipt struct {
+	UnlockID   string                     `json:"unlockId"`
+	Method     string                     `json:"method"`
+	Source     string                     `json:"source"`
+	RecordedAt time.Time                  `json:"recordedAt"`
+	Evidence   []VocabularyUnlockEvidence `json:"evidence,omitempty"`
+	PersonalXP *int                       `json:"personalXp,omitempty"`
+}
+
 type WorldState struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Route       string `json:"route"`
-	Icon        string `json:"icon"`
-	Unlocked    bool   `json:"unlocked"`
-	Progress    int    `json:"progress"`
-	UnlockText  string `json:"unlockText"`
+	ID          string            `json:"id"`
+	Title       string            `json:"title"`
+	Description string            `json:"description"`
+	Route       string            `json:"route"`
+	Icon        string            `json:"icon"`
+	Unlocked    bool              `json:"unlocked"`
+	Progress    int               `json:"progress"`
+	UnlockText  string            `json:"unlockText"`
+	Unlock      *VocabularyUnlock `json:"unlock,omitempty"`
 }
 
 type BossCheckpoint struct {
@@ -34,34 +63,36 @@ type BossState struct {
 }
 
 type Achievement struct {
-	ID             string `json:"id"`
-	Title          string `json:"title"`
-	Description    string `json:"description"`
-	Icon           string `json:"icon"`
-	Unlocked       bool   `json:"unlocked"`
-	Progress       int    `json:"progress"`
-	Target         int    `json:"target"`
-	RewardCosmetic string `json:"rewardCosmetic,omitempty"`
+	ID             string            `json:"id"`
+	Title          string            `json:"title"`
+	Description    string            `json:"description"`
+	Icon           string            `json:"icon"`
+	Unlocked       bool              `json:"unlocked"`
+	Progress       int               `json:"progress"`
+	Target         int               `json:"target"`
+	RewardCosmetic string            `json:"rewardCosmetic,omitempty"`
+	Unlock         *VocabularyUnlock `json:"unlock,omitempty"`
 }
 
 type Cosmetic struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Slot        string `json:"slot"`
-	Description string `json:"description"`
-	Unlocked    bool   `json:"unlocked"`
-	Equipped    bool   `json:"equipped"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Slot        string            `json:"slot"`
+	Description string            `json:"description"`
+	Unlocked    bool              `json:"unlocked"`
+	Equipped    bool              `json:"equipped"`
+	Unlock      *VocabularyUnlock `json:"unlock,omitempty"`
 }
 
 type ProgressionState struct {
-	Level         int           `json:"level"`
-	XP            int           `json:"xp"`
-	XPIntoLevel   int           `json:"xpIntoLevel"`
-	XPForNext     int           `json:"xpForNext"`
-	Worlds        []WorldState  `json:"worlds"`
-	Bosses        []BossState   `json:"bosses"`
-	Achievements  []Achievement `json:"achievements"`
-	Inventory     []Cosmetic    `json:"inventory"`
+	Level        int           `json:"level"`
+	XP           int           `json:"xp"`
+	XPIntoLevel  int           `json:"xpIntoLevel"`
+	XPForNext    int           `json:"xpForNext"`
+	Worlds       []WorldState  `json:"worlds"`
+	Bosses       []BossState   `json:"bosses"`
+	Achievements []Achievement `json:"achievements"`
+	Inventory    []Cosmetic    `json:"inventory"`
 }
 
 type EquipCosmeticInput struct {
