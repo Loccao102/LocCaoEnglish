@@ -624,6 +624,18 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Đang làm — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`in_progress`, 2026-10-25)
+
+Owner/task: Codex, branch `codex/core006-campaign-owner`, từ head SEC-001
+`d8ac8b3`. [ADR 016](decisions/016-campaign-owner-reads.md) chốt captured-token
+reads cho Travel/Conversation/Work và riêng learning card của Journey. Rà soát
+route thực xác nhận district giữ completion/ready của A sau đổi sang B/guest;
+Journey chưa có render fence ngay theo token. Giữ GET demo compatibility ở API,
+guest chỉ xem nội dung tĩnh có thông báo; không đổi luật gate/thưởng/save.
+Nghiệm thu đổi account/logout, late success/error, refresh đảo thứ tự,
+guest/demo, lỗi mạng/hết hạn, tách learning khỏi village/Fair, mobile và CI đủ
+sáu jobs. Lát cắt này đang triển khai, không hoàn tất toàn CORE-006.
+
 ### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
 
 Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
