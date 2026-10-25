@@ -544,8 +544,11 @@ Go tests/vet, build 58 routes, TypeScript, 50 game cases và script integration
 milestone/retry/concurrent equip đạt local. Đã xem bốn ảnh 390×551/844, chữ và
 nút đọc được. Browser final 6/6 mới và 17/17 liên quan đạt; ba selector mới đã
 được sửa theo UI thật, không giảm assertions. Head đầu đã đạt PG/race/vet và
-integration; đủ sáu CI jobs trên head sửa cuối còn chờ trước merge. PG/race
-chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
+integration. CI 166 phát hiện nhãn Challenge chồng nhau, đã sửa intrinsic width;
+CI 167 phát hiện regression đo projection cũ trước native ResizeObserver. Tái
+hiện có kiểm soát và sửa đồng bộ test, giữ mọi assertion chặt và xác minh test
+vẫn bắt lỗi width:auto cũ. Head cuối cần đủ sáu jobs sạch trước merge. PG/race
+chưa chạy local do thiếu test database/toolchain CGO; không dùng lượt flaky nghiệm thu.
 
 ### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 
