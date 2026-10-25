@@ -43,6 +43,12 @@ reads and verifies unchanged progression/no write requests. It is included for
 CI and has not run locally. Full final-head CI and merge remain pending; this
 slice is not accepted or production-deployed.
 
+Fresh dependency audit on 2026-10-25 again reports zero vulnerabilities. PR28
+initially targeted the security feature branch; the existing CI filter covers
+only main-targeted PRs, so that target produced no run. It was retargeted to
+main before final validation, with the dependency on PR27 retained. No check or
+workflow filter was relaxed; the final head must run the full existing gate.
+
 ## SEC-001 — Frontend dependency patch — 2026-10-24
 
 Branch `codex/sec001-frontend-dependencies`, base profile head `cdd0b51`.
