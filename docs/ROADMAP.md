@@ -711,15 +711,18 @@ chứng ứng dụng bị khai thác. Đã đối chiếu nguồn gốc: [Next i
 và [release 16.4.3](https://github.com/vercel/next.js/releases/tag/v16.4.3).
 Đang thực hiện trên `codex/sec001-frontend-dependencies`, từ profile head
 `cdd0b51`: pin Next 16.4.3, cập nhật sharp 0.35.5 và source-map-js 1.2.2 trong
-lockfile; giữ React 19.3 và các dependency không liên quan. Không đổi source,
+lockfile; giữ React 19.3 và các dependency không liên quan. Không đổi source app,
 API, luật thưởng, schema hoặc bật thêm tính năng caching. Đọc guide trước/sau
 cài đặt rồi chạy install tái lập, audit, build/typecheck, logic, assets và native
 image smoke check. Browser production và sáu CI jobs vẫn cần nghiệm thu trên
 head cuối; không lấy kết quả PR trước làm bằng chứng cho dependency mới.
-Audit không còn advisory, build và kiểm tra logic/assets đã qua; native transform
-trong workspace Windows qua nhưng sharp trong output standalone Windows không
-load được (`ERR_DLOPEN_FAILED`). Cần đánh giá riêng lỗi đóng gói này và xác minh
-container Linux; chưa nghiệm thu, chưa deploy. Không dùng `audit fix --force`.
+Audit không còn advisory, build và logic/assets đã qua. CI 169 trên `17a5619`
+qua sáu jobs, native transform trong container Linux và 196 browser cases không
+retry/flaky. Đã xác định standalone Windows bỏ sót hai DLL của libvips, có từ bản
+Next 16.3.4; thêm tracing riêng cho DLL Windows x64. Rebuild/typecheck qua,
+standalone giữ đủ DLL đúng hash và native PNG transform qua trên Windows x64.
+Head cuối sau correction vẫn cần sáu CI jobs; chưa nghiệm thu, chưa deploy.
+Không dùng `audit fix --force`.
 
 ## GOV-001 — Tài liệu và luật làm việc
 
