@@ -90,10 +90,19 @@ layout and touch-target assertions added to the existing mobile case.
 
 The production build passed after that typography correction. Automatic
 execution review rejected restarting the local preview with only `blocked by
-policy`; the final typography assertions and new captures therefore await CI.
-CI retains the profile-only mobile captures for visual review even on success.
-PostgreSQL/race and the complete six-job final-head gate remain pending. This
-slice is not accepted or merged yet; no production deployment or user DB reset.
+policy`; final typography checks consequently ran on GitHub. [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+passed all six jobs on `cdd0b51e22c102b9353fed81756dc20af7047291`, including
+PostgreSQL/race/vet, the profile integration script and **196 E2E passed (34.2m)**
+without flaky cases. All ten profile cases and the final font/layout assertions
+ran. On 2026-10-25, root downloaded artifact `12568018349` and viewed all twelve
+captures at 390×551/844: goal titles/descriptions are readable and separate,
+saved/attempted summaries and both choice actions remain reachable, with no
+horizontal overflow. CI retains profile-only mobile images even on success.
+
+The subsequently diagnosed CI167 Fair test timing race was corrected and merged
+into this branch; historical CI168 is not substituted for the fresh six-job
+gate on the changed head. Final acceptance/merge remains pending; no production
+deployment or user DB reset.
 
 ## Vocabulary unlock grants — 2026-10-24
 
@@ -140,6 +149,26 @@ bản cũ đúng lỗi make/take-away, rồi đạt trên bản sửa; cùng cas
 Challenge short-phone đạt 2/2 trong 43.1s, không retry. Đã xem ảnh lỗi CI, ảnh
 tái hiện và ảnh sau sửa Bubble/Café; không giảm assertions. Suite CI tiếp theo
 có 186 cases, phải đạt đủ sáu jobs sạch; run 166 không dùng để merge.
+
+[CI 167](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40111730981)
+trên `b55bb3e` đạt năm jobs nhưng E2E có **185 passed/1 flaky (35.9m)**.
+Regression mới đọc nhãn phải ở 391.734px sau đổi viewport 460→390; retry đạt
+không được dùng để nghiệm thu. Trace và replay tài nguyên production local
+không mở server đã tái hiện: fake clock chạy projection trước khi native
+ResizeObserver chuyển canvas/camera sang kích thước mới, nên assertion còn đọc
+vị trí cũ. Ảnh chụp ngay sau assertion đã nằm gọn trong màn hình. Sửa test chờ
+kích thước canvas thực do observer ghi rồi mới chạy frame; giữ nguyên giới hạn
+390×551 và mọi assertion không chồng nhãn. Replay chỉ xác minh renderer/layout,
+không thay thế integration API hay CI trên head mới. Kết quả kiểm tra cuối còn
+chờ; chưa merge hoặc deploy.
+
+Controlled replay giữ nguyên production bundle/CSS hiện có, fulfill tài nguyên
+từ `.next` và abort network khác, không mở listener/API. OLD test với observer
+bị trì hoãn thất bại `391.125 > 390`; NEW test chờ renderer đạt 1/1 (20.5s).
+Khi chỉ override CSS về width:auto trong replay, NEW test vẫn thất bại đúng
+assertion `make and take away must remain separate`. Vì vậy điều kiện chờ không
+che lỗi layout gốc. Đã xem ảnh GREEN; tracked correction chỉ thêm sáu dòng chờ,
+không đổi source render, giới hạn hình học, retry hay strict flaky gate.
 
 ## Skill practice summary and recommendations — 2026-10-23
 

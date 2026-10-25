@@ -544,8 +544,11 @@ Go tests/vet, build 58 routes, TypeScript, 50 game cases và script integration
 milestone/retry/concurrent equip đạt local. Đã xem bốn ảnh 390×551/844, chữ và
 nút đọc được. Browser final 6/6 mới và 17/17 liên quan đạt; ba selector mới đã
 được sửa theo UI thật, không giảm assertions. Head đầu đã đạt PG/race/vet và
-integration; đủ sáu CI jobs trên head sửa cuối còn chờ trước merge. PG/race
-chưa chạy local do thiếu test database/toolchain CGO; CI chịu xác minh.
+integration. CI 166 phát hiện nhãn Challenge chồng nhau, đã sửa intrinsic width;
+CI 167 phát hiện regression đo projection cũ trước native ResizeObserver. Tái
+hiện có kiểm soát và sửa đồng bộ test, giữ mọi assertion chặt và xác minh test
+vẫn bắt lỗi width:auto cũ. Head cuối cần đủ sáu jobs sạch trước merge. PG/race
+chưa chạy local do thiếu test database/toolchain CGO; không dùng lượt flaky nghiệm thu.
 
 ### Đã nghiệm thu — Hồ sơ luyện tập và questline từ receipt (`done`, 2026-10-24)
 
@@ -634,9 +637,11 @@ tục follow-up; lát cắt này không hoàn tất toàn CORE-006.
 
 Go/vet, integration API thật ở memory mode, TypeScript/build 58 routes và 10/10
 browser cases (2.6m, không retry) đã đạt. Review độc lập tìm và đóng hai lỗi mất
-draft từ placement; đã xem mười ảnh mobile. Sửa chữ mục tiêu quá nhỏ sau lượt
-browser, build lại đạt; assertion/ảnh cuối và PG/race chờ CI đủ sáu jobs trước
-merge. Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
+draft từ placement. Sửa chữ mục tiêu quá nhỏ, build lại đạt; [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+trên `cdd0b51` đạt đủ sáu jobs, PG/race/vet, integration và 196/196 E2E (34.2m)
+không flaky. Đã xem đủ mười hai ảnh cuối 390×551/844, gồm font/choice actions.
+Sau khi đồng bộ test resize Fair, head mới vẫn cần đủ sáu jobs trước merge.
+Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#account-owned-profile-recovery--2026-10-24).
 
 ### Đã nghiệm thu — Daily plan cố định và bằng chứng theo ngày (`done`, 2026-10-22)
 
