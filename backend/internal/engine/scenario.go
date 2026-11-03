@@ -7,8 +7,14 @@ import (
 	"unicode/utf8"
 )
 
+// ConversationRulesVersion remains v2 for compatibility with existing engine
+// callers and saved drafts. New clients should send the latest version
+// explicitly to the version-aware HTTP endpoints.
 const ConversationRulesVersion = "conversation.v2"
+const LatestConversationRulesVersion = "conversation.v3"
 const ConversationEvidence = "server-rule-based-reported-dialogue"
+
+var ErrUnsupportedConversationRules = errors.New("unsupported conversation rules version")
 
 type ScenarioEvaluation struct {
 	BossID       string             `json:"bossId"`
@@ -95,8 +101,55 @@ var conversationRubrics = map[string][]conversationObjective{
 	},
 }
 
-func ValidateConversation(bossID string, messages []string) error {
-	if _, ok := conversationRubrics[bossID]; !ok {
+func SupportedConversationRulesVersion(version string) bool {
+	return version == ConversationRulesVersion || version == LatestConversationRulesVersion
+}
+
+func cloneConversationObjective(o conversationObjective) conversationObjective {
+	return conversationObjective{
+		name: o.name, reply: o.reply,
+		patterns: append([]*regexp.Regexp{}, o.patterns...), reject: o.reject,
+	}
+}
+
+func conversationPattern(pattern string) *regexp.Regexp {
+	return regexp.MustCompile(`\b(?:` + pattern + `)\b`)
+}
+
+// v3 is deliberately a small overlay. The v2 rubric remains the
+// compatibility grader for old drafts and receipts; v3 only adds authored
+// alternatives and their narrow negation checks.
+func conversationObjectives(version, bossID string) []conversationObjective {
+	base, ok := conversationRubrics[bossID]
+	if !ok || !SupportedConversationRulesVersion(version) {
+		return nil
+	}
+	result := make([]conversationObjective, len(base))
+	for i, objective := range base {
+		result[i] = cloneConversationObjective(objective)
+	}
+	if version != LatestConversationRulesVersion {
+		return result
+	}
+	switch bossID {
+	case "city-transit":
+		result[2].patterns[0] = conversationPattern("platform|ticket|depart|departure|leave|what time")
+		result[2].patterns[1] = conversationPattern("which|what|where|how|when|does|can|is|could")
+	case "weekend-plans":
+		result[1].patterns[1] = conversationPattern("meet|come|at|on|how about")
+		result[1].reject = conversationPattern(`(?:don't|do not|cannot|can't|won't) (?:meet|come)|(?:don't|do not) want to (?:meet|come)|(?:not|never) meeting|not on`)
+	case "repair-misunderstanding":
+		result[0].patterns[0] = conversationPattern("sorry|didn't understand|did not understand|what do you mean|not sure what you mean|misunderstood|confused")
+		result[0].reject = conversationPattern(`(?:not|never) confused|(?:did not|didn't) misunderstand|(?:not|never) misunderstood`)
+	}
+	return result
+}
+
+func ValidateConversationForVersion(bossID string, messages []string, version string) error {
+	if !SupportedConversationRulesVersion(version) {
+		return ErrUnsupportedConversationRules
+	}
+	if len(conversationObjectives(version, bossID)) == 0 {
 		return errors.New("unknown mission")
 	}
 	if len(messages) > 24 {
@@ -110,17 +163,21 @@ func ValidateConversation(bossID string, messages []string) error {
 	return nil
 }
 
+func ValidateConversation(bossID string, messages []string) error {
+	return ValidateConversationForVersion(bossID, messages, ConversationRulesVersion)
+}
+
 var conversationWords = regexp.MustCompile(`[a-z0-9]+(?:'[a-z]+)?`)
 
 func normalizedConversation(text string) string {
 	return strings.Join(conversationWords.FindAllString(strings.ToLower(strings.ReplaceAll(text, "’", "'")), -1), " ")
 }
-func EvaluateBossConversation(bossID string, messages []string) ScenarioEvaluation {
-	result := ScenarioEvaluation{BossID: bossID, Completed: []string{}, Missing: []string{}, Turns: []ConversationTurn{}, RulesVersion: ConversationRulesVersion, Evidence: ConversationEvidence}
-	objectives := conversationRubrics[bossID]
-	if ValidateConversation(bossID, messages) != nil || len(objectives) == 0 {
-		return result
+func EvaluateBossConversationForVersion(bossID string, messages []string, version string) (ScenarioEvaluation, error) {
+	result := ScenarioEvaluation{BossID: bossID, Completed: []string{}, Missing: []string{}, Turns: []ConversationTurn{}, RulesVersion: version, Evidence: ConversationEvidence}
+	if err := ValidateConversationForVersion(bossID, messages, version); err != nil {
+		return result, err
 	}
+	objectives := conversationObjectives(version, bossID)
 	seen := map[string]bool{}
 	for index, message := range messages {
 		text := normalizedConversation(message)
@@ -172,5 +229,12 @@ func EvaluateBossConversation(bossID string, messages []string) ScenarioEvaluati
 	} else {
 		result.Reply = objectives[result.Stage].reply
 	}
+	return result, nil
+}
+
+// EvaluateBossConversation preserves the original v2 behavior for direct
+// engine callers. Version-aware paths must use EvaluateBossConversationForVersion.
+func EvaluateBossConversation(bossID string, messages []string) ScenarioEvaluation {
+	result, _ := EvaluateBossConversationForVersion(bossID, messages, ConversationRulesVersion)
 	return result
 }

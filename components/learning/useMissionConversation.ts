@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, type BossState, type ProgressionState } from "@/lib/api";
 import { AUTH_EVENT, getAuthToken } from "@/lib/session";
-import { claimBoss, evaluateBoss, getMissionReceipt, MISSION_RULES, type BossEvaluation, type MissionReceipt } from "@/lib/missions";
+import { claimBoss, evaluateBoss, getMissionReceipt, MISSION_RULES, supportedMissionRules, type MissionRulesVersion, type BossEvaluation, type MissionReceipt } from "@/lib/missions";
 
-type Draft = { version: string; messages: string[]; text: string; pending?: "evaluate" | "claim" };
+type Draft = { version: MissionRulesVersion; messages: string[]; text: string; pending?: "evaluate" | "claim" };
 const fresh = (): Draft => ({ version: MISSION_RULES, messages: [], text: "" });
 function read(key: string): Draft | null {
   const raw = localStorage.getItem(key); if (!raw) return null;
   const invalid = () => new Error("This saved dialogue could not be read. Its data has been kept; restart this mission to begin again.");
   let d: Draft;
   try { d = JSON.parse(raw) as Draft; } catch { throw invalid(); }
-  if (!d || d.version !== MISSION_RULES || !Array.isArray(d.messages) || d.messages.length > 24 ||
+  if (!d || !supportedMissionRules(d.version) || !Array.isArray(d.messages) || d.messages.length > 24 ||
     d.messages.some(m => typeof m !== "string" || !m.trim() || new TextEncoder().encode(m).length > 1024) ||
     typeof d.text !== "string" || d.text.length > 1024 || d.pending && !["claim", "evaluate"].includes(d.pending)) {
     throw invalid();
@@ -50,7 +50,9 @@ export default function useMissionConversation(bossId: string) {
       const found = state.bosses.find(b => b.id === bossId) || null; setBoss(found);
       if (found?.cleared) {
         const saved = await getMissionReceipt(bossId, token); if (!current(n, token)) return;
-        setReceipt(saved); setVerdict(saved.evaluation || null); keep({ ...fresh(), messages: saved.messages });
+        const savedVersion = saved.evaluation?.rulesVersion;
+        setReceipt(saved); setVerdict(saved.evaluation || null);
+        keep({ ...fresh(), ...(supportedMissionRules(savedVersion) ? { version: savedVersion } : {}), messages: saved.messages });
       } else {
         let saved: Draft;
         const cached = memoryDraft.current?.key === identity.current.key ? memoryDraft.current.value : null;
@@ -61,7 +63,8 @@ export default function useMissionConversation(bossId: string) {
         }
         keep(saved);
         if (found?.unlocked) {
-          const evaluation = await evaluateBoss(bossId, saved.messages, token); if (!current(n, token)) return;
+          const evaluation = await evaluateBoss(bossId, saved.messages, token, saved.version); if (!current(n, token)) return;
+          if (evaluation.bossId !== bossId || evaluation.rulesVersion !== saved.version) throw new Error("The saved dialogue could not be checked. Reload this mission and try again.");
           setVerdict(evaluation);
           if (saved.pending === "evaluate") keep({ ...saved, pending: undefined });
         }
@@ -83,11 +86,13 @@ export default function useMissionConversation(bossId: string) {
     keep({ ...data.current, messages, text: "", pending: kind });
     try {
       if (kind === "claim") {
-        const result = await claimBoss(bossId, messages, token); if (!current(n, token)) return;
+        const result = await claimBoss(bossId, messages, token, data.current.version); if (!current(n, token)) return;
         setBoss(result.progression.bosses.find(b => b.id === bossId) || null); setReceipt(result.receipt);
         setVerdict(result.receipt.evaluation || null);
       } else {
-        const result = await evaluateBoss(bossId, messages, token); if (!current(n, token)) return; setVerdict(result);
+        const result = await evaluateBoss(bossId, messages, token, data.current.version); if (!current(n, token)) return;
+        if (result.bossId !== bossId || result.rulesVersion !== data.current.version) throw new Error("The saved dialogue could not be checked. Retry the same reply.");
+        setVerdict(result);
       }
       keep({ ...data.current, pending: undefined });
     } catch (e) { if (current(n, token)) setError(e instanceof Error ? e.message : "Could not save. Retry the same dialogue."); }

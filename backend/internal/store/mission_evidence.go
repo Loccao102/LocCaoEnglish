@@ -69,7 +69,7 @@ func sameMission(r MissionReceipt, messages []string, version string) bool {
 // per-turn learning attempt or Speaking confidence is created from this rubric.
 func (s *Store) CompleteBoss(ctx context.Context, userID, bossID string, messages []string, version string) (MissionCompletion, error) {
 	var out MissionCompletion
-	if version != engine.ConversationRulesVersion || engine.ValidateConversation(bossID, messages) != nil {
+	if !engine.SupportedConversationRulesVersion(version) || engine.ValidateConversationForVersion(bossID, messages, version) != nil {
 		return out, ErrMissionInput
 	}
 	if saved, err := s.GetMissionReceipt(ctx, userID, bossID); err == nil {
@@ -82,7 +82,10 @@ func (s *Store) CompleteBoss(ctx context.Context, userID, bossID string, message
 	} else if !errors.Is(err, ErrNotFound) {
 		return out, err
 	}
-	verdict := engine.EvaluateBossConversation(bossID, messages)
+	verdict, err := engine.EvaluateBossConversationForVersion(bossID, messages, version)
+	if err != nil {
+		return out, ErrMissionInput
+	}
 	if !verdict.Complete {
 		return out, errors.New("conversation objectives are incomplete")
 	}
@@ -90,7 +93,6 @@ func (s *Store) CompleteBoss(ctx context.Context, userID, bossID string, message
 		return out, ErrNotFound
 	}
 	receipt := MissionReceipt{BossID: bossID, Messages: append([]string{}, messages...), Evaluation: &verdict}
-	var err error
 	if s.db != nil {
 		err = s.commitMissionSQL(ctx, userID, receipt)
 	} else {

@@ -2,6 +2,38 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Versioned mission paraphrases — 2026-11-03
+
+CORE-004, branch codex/core004-mission-paraphrases, based on PR #28 runtime
+84fe2b2. New browser drafts use conversation.v3; saved v2 drafts and pending
+claims keep v2 for evaluation/retry/receipt recovery. Explicit restart creates
+v3. The server dispatches both versions, preserves the original v2 wrapper,
+and keeps existing owner checks, preparation gates and atomic first-clear reward.
+No SQL migration. See ADR 005 and the mission API section for rollout/rollback.
+
+V3 covers authored departure-time questions, day/time proposals and explicit
+misunderstanding replies. Negated proposals/misunderstanding still fail. A direct
+“What is the departure time?” remains valid; a specific politeness word is not
+required. This is guided pattern-based practice, not broad semantic assessment.
+
+Regression coverage includes the nine canonical rubrics in both versions,
+version-specific positives/negatives, HTTP owner/unsupported-version behavior,
+v3 concurrent first claims across stores, exact/cross-version retry, a pending
+v2 browser completion, explicit v2-to-v3 restart and real chapter receipts for
+new time-proposal/misunderstanding dialogue. CI retains the two new mobile images.
+
+Before the user's request to stop local execution, the frontend build (58 routes)
+and typecheck passed; backend memory tests/vet passed on an earlier working copy.
+The local browser suite was interrupted; its new heavy fixture reached the real
+shared rate window. The added compatibility cases now receive a separate rate
+window without changing the server limiter, skipping tests or relaxing assertions.
+No full final-head local browser or PostgreSQL pass is claimed. Local preview,
+API, AI and browser workers were stopped on request; subsequent validation is
+GitHub Actions only. Later source edits, including the direct departure question
+and true concurrent-first-claim regression, require that fresh CI gate.
+
+Status: in_review, pending final-head six-job CI and review. No deployment.
+
 ## Campaign and Journey read ownership — 2026-10-25
 
 CORE-006 follow-up, branch `codex/core006-campaign-owner`, base `d8ac8b3`;

@@ -6,6 +6,8 @@ import dictation from "../../backend/internal/learning/dictation_catalog.json";
 import grammar from "../../backend/internal/learning/grammar_catalog.json";
 import collocations from "../../backend/internal/learning/collocation_catalog.json";
 import story from "../../backend/internal/learning/story_catalog.json";
+import listening from "../../backend/internal/learning/listening_catalog.json";
+import sentences from "../../backend/internal/learning/sentence_catalog.json";
 import type { LearningAttempt } from "../../lib/learning-attempt";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080";
@@ -42,17 +44,22 @@ async function practiceRound(request: APIRequestContext, headers: Record<string,
     expect(response.ok(), await response.text()).toBe(true); const a: LearningAttempt = await response.json();
     const versions = { contentVersion: a.contentVersion, rulesVersion: a.rulesVersion };
     // Prerequisite fixture reports playback; it does not claim a human heard it.
-    if (activity === "dictation") {
+    if (activity === "dictation" || activity === "listen-pick") {
       const event = { requestId: randomUUID(), rate: 1, ...versions };
       for (const status of ["requested", "completed"]) expect((await request.post(`${API}/v1/learning/attempts/${a.attemptId}/audio`, { headers, data: { ...event, status, ...(status === "completed" ? { provider: "browser-speech-synthesis" } : {}) } })).ok()).toBe(true);
     }
     const correct = activity === "word-link" ? words.items.find(i => i.id === a.itemKey)!.correctAnswer
+      : activity === "listen-pick" ? listening.items.find(i => i.id === a.itemKey)!.correctAnswer
       : activity === "dictation" ? dictation.items.find(i => i.id === a.itemKey)!.transcript
       : activity === "grammar-repair" ? grammar.items.find(i => i.id === a.itemKey)!.correctAnswer
       : activity === "collocation-factory" ? collocations.items.find(i => i.id === a.itemKey)!.correctAnswer
       : activity === "story-choice" ? story.nodes.find(n => n.id === "arrival")!.choices!.find(c => c.good)!.label
       : a.prompt.question;
-    const answer = wrong ? a.prompt.options.find(option => option !== correct)! : correct;
+    let answer = wrong ? a.prompt.options.find(option => option !== correct)! : correct;
+    if (activity === "sentence-builder") {
+      const chunks = [...a.prompt.chunks!];
+      answer = JSON.stringify(sentences.items.find(i => i.id === a.itemKey)!.chunks.map(text => chunks.splice(chunks.findIndex(c => c.text === text), 1)[0].id));
+    }
     const graded = await request.post(`${API}/v1/learning/attempts/${a.attemptId}/submit`, { headers, data: { ...versions, answer } });
     expect(graded.ok(), await graded.text()).toBe(true);
     const result = await graded.json(); expect(result.correct).toBe(!wrong);
@@ -93,10 +100,10 @@ test("mission saves real dialogue after lost responses without per-turn XP", asy
   await page.reload(); await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
   const receipt = await (await request.get(`${root}/receipt`, { headers: user.headers })).json();
   expect(receipt.messages).toEqual(["I did not miss my flight today.", ...lines]);
-  expect(receipt.evaluation).toMatchObject({ evidence: "server-rule-based-reported-dialogue", rulesVersion: version, stage: 3 });
+  expect(receipt.evaluation).toMatchObject({ evidence: "server-rule-based-reported-dialogue", rulesVersion: "conversation.v3", stage: 3 });
   expect(receipt.preparation.rulesVersion).toBe("campaign-practice.v1");
   expect(receipt.preparation.checkpoints.map((c: { checkpointId: string }) => c.checkpointId)).toEqual(["airport-vocab", "airport-listening", "airport-speaking"]);
-  const data = { messages: receipt.messages, rulesVersion: version };
+  const data = { messages: receipt.messages, rulesVersion: receipt.evaluation.rulesVersion };
   expect((await request.post(`${root}/complete`, { headers: user.headers, data })).ok()).toBe(true);
   expect((await request.post(`${root}/complete`, { headers: user.headers, data: { ...data, messages: lines } })).status()).toBe(409);
   expect((await (await request.get(`${API}/v1/me`, { headers: user.headers })).json()).user.xp).toBe(210);
@@ -283,4 +290,88 @@ test("earlier dialogue receipt keeps the clear without inventing preparation evi
   await expect(page.locator(".mission-progress strong")).toHaveText("100%");
   for (const line of lines) await expect(page.getByText(line, { exact: true })).toBeVisible();
   expect(claims).toBe(0);
+});
+
+test("a pending v2 completion retains its version and immutable receipt after the v3 rollout", async ({ page, request }) => {
+  // These additional account/receipt cases use a fresh real rate window, keeping
+  // the server limit and every assertion intact after the existing suite.
+  await separateRateWindow();
+  const user = await learner(request);
+  const key = `loccao.mission.v2.${user.user.id}.airport-crisis`;
+  await page.addInitScript(({ key, messages }) => {
+    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ version: "conversation.v2", messages, text: "", pending: "claim" }));
+  }, { key, messages: lines });
+  const evaluation = page.waitForRequest(r => r.url().endsWith("/airport-crisis/evaluate"));
+  await signIn(page, user.token);
+  expect((await evaluation).postDataJSON()).toEqual({ messages: lines, rulesVersion: "conversation.v2" });
+  await expect(page.getByRole("button", { name: "Restart dialogue" })).toBeDisabled();
+  const claimed = page.waitForRequest(r => r.url().endsWith("/airport-crisis/complete"));
+  await page.getByRole("button", { name: "Retry same completion" }).click();
+  expect((await claimed).postDataJSON()).toEqual({ messages: lines, rulesVersion: "conversation.v2" });
+  await expect(page.getByText("Chapter reward saved · 150 XP")).toBeVisible();
+  await page.reload();
+  for (const line of lines) await expect(page.getByText(line, { exact: true })).toBeVisible();
+  const receipt = await (await request.get(`${root}/receipt`, { headers: user.headers })).json();
+  expect(receipt.evaluation.rulesVersion).toBe("conversation.v2");
+  expect((await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: "conversation.v3" } })).status()).toBe(409);
+  const retry = await request.post(`${root}/complete`, { headers: user.headers, data: { messages: lines, rulesVersion: "conversation.v2" } });
+  expect(retry.ok(), await retry.text()).toBe(true); expect((await retry.json()).receipt).toEqual(receipt);
+  expect((await (await request.get(`${API}/v1/me`, { headers: user.headers })).json()).user.xp).toBe(210);
+});
+
+test("a restored v2 draft stays v2 until the player explicitly restarts", async ({ page, request }) => {
+  const user = await learner(request), key = `loccao.mission.v2.${user.user.id}.airport-crisis`;
+  await page.addInitScript(({ key, message }) => {
+    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ version: "conversation.v2", messages: [message], text: "My older unsent reply" }));
+  }, { key, message: lines[0] });
+  const restored = page.waitForRequest(r => r.url().endsWith("/airport-crisis/evaluate"));
+  await signIn(page, user.token);
+  expect((await restored).postDataJSON().rulesVersion).toBe("conversation.v2");
+  await expect(input(page)).toHaveValue("My older unsent reply");
+  await page.reload(); await expect(input(page)).toHaveValue("My older unsent reply");
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).version, key)).toBe("conversation.v2");
+  const fresh = page.waitForRequest(r => r.url().endsWith("/airport-crisis/evaluate"));
+  await page.getByRole("button", { name: "Restart dialogue" }).click();
+  expect((await fresh).postDataJSON()).toEqual({ messages: [], rulesVersion: "conversation.v3" });
+  await expect(input(page)).toHaveValue("");
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).version, key)).toBe("conversation.v3");
+});
+
+test("v3 accepts natural time proposals and misunderstanding replies through actual chapter receipts", async ({ page, request }) => {
+  const user = await learner(request, false);
+  expect((await request.put(`${API}/v1/player/profile`, { headers: user.headers, data: { goal: "conversation", cefrLevel: "B1", dailyMinutes: 15, targetBand: 7, interests: ["daily-life"] } })).ok()).toBe(true);
+  for (const activity of ["collocation-factory", "listen-pick", "shadowing"]) await practiceRound(request, user.headers, activity);
+  const cafe = await request.post(`${API}/v1/player/bosses/cafe-connection/complete`, { headers: user.headers, data: { rulesVersion: "conversation.v2", messages: ["Hi, my name is Loc.", "What do you enjoy doing?", "It was nice to meet you."] } });
+  expect(cafe.ok(), await cafe.text()).toBe(true);
+  for (const activity of ["sentence-builder", "listen-pick", "shadowing"]) await practiceRound(request, user.headers, activity);
+  await signIn(page, user.token); await page.goto("/missions/plans");
+  await send(page, "How about visiting the museum?");
+  await send(page, "I do not want to meet on Sunday."); await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
+  const proposal = page.waitForRequest(r => r.url().endsWith("/weekend-plans/evaluate"));
+  await send(page, "How about Sunday afternoon?");
+  expect((await proposal).postDataJSON().rulesVersion).toBe("conversation.v3");
+  await expect(page.getByText("OBJECTIVES 2/3")).toBeVisible();
+  await send(page, "Sounds good, see you there.");
+  await page.getByRole("button", { name: "Save chapter completion" }).click();
+  await expect(page.getByText("Chapter reward saved · 160 XP")).toBeVisible();
+  const plans = await (await request.get(`${API}/v1/player/bosses/weekend-plans/receipt`, { headers: user.headers })).json();
+  expect(plans.evaluation.rulesVersion).toBe("conversation.v3");
+  expect(plans.messages).toContain("How about Sunday afternoon?");
+  for (const activity of ["grammar-repair", "collocation-factory", "shadowing"]) await practiceRound(request, user.headers, activity);
+  await page.goto("/missions/misunderstanding");
+  await send(page, "I am not confused about your cancellation message."); await expect(page.getByText("OBJECTIVES 0/3")).toBeVisible();
+  await send(page, "I misunderstood your cancellation message."); await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
+  await page.reload(); await expect(page.getByText("OBJECTIVES 1/3")).toBeVisible();
+  await send(page, "What I meant is that I can arrive later.");
+  await send(page, "Got it, now I understand.");
+  await page.getByRole("button", { name: "Save chapter completion" }).click();
+  await expect(page.getByText("Chapter reward saved · 200 XP")).toBeVisible();
+  const receipt = await (await request.get(`${API}/v1/player/bosses/repair-misunderstanding/receipt`, { headers: user.headers })).json();
+  expect(receipt.evaluation).toMatchObject({ rulesVersion: "conversation.v3", stage: 3, complete: true });
+  expect(receipt.messages).toContain("I misunderstood your cancellation message.");
+  for (const height of [551, 844]) {
+    await page.setViewportSize({ width: 390, height });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.cache/mission-v3-saved-${height}.png`, fullPage: true });
+  }
 });
