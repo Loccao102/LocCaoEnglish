@@ -1359,3 +1359,41 @@ Writing feedback; saved essays survive unavailable/invalid provider results.
 
 Documentation-only acceptance validation: all 143 internal file links resolve
 and `git diff --check` passes. No app rebuild is required for these three docs.
+
+## GitHub final-head acceptance audit — 2026-11-03
+
+Roadmap IDs: CORE-005/006 and SEC-001. This audit reconciles GitHub with the
+historical pending notes below; it does not treat an open PR as merged or deployed.
+The original local `codex/core003-listen-pick` working tree was preserved. Review
+and fresh validation use a separate checkout of PR #28 head `84fe2b2`.
+
+| PR / runtime head | Final-head CI | Evidence from E2E job log | State at audit |
+| --- | --- | --- | --- |
+| [#25](https://github.com/Loccao102/LocCaoEnglish/pull/25) / `3c462a060eb8664acdefeb9e35709dab6a4c9e55` | [170](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40163608508) | 186 passed (28.9m) | Merged as `2e6379c` |
+| [#26](https://github.com/Loccao102/LocCaoEnglish/pull/26) / `17cecb96c7e9f1a1b0fb12363f87bbe9fac71e59` | [174](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40202949527) | 196 passed (31.7m) | Open, depends on merged #25 |
+| [#27](https://github.com/Loccao102/LocCaoEnglish/pull/27) / `012e721475d33a421a7492aa7c5c31ee90893fe5` | [175](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40202953194) | 196 passed (37.8m), standalone image transform | Open, depends on #26 |
+| [#28](https://github.com/Loccao102/LocCaoEnglish/pull/28) / `84fe2b27f9dc7c8209996e0df9f9487210cec604` | [176](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40203645937) | 207 passed (33.7m), including real-account district reads | Open, depends on #27 |
+
+Each run has six completed successful jobs: frontend, backend, AI service,
+compose, integration and E2E. The backend jobs ran PostgreSQL/race/vet. The
+strict flaky-test gate was retained; the final E2E logs have passed summaries
+without failed/flaky summaries or retry execution. Submitted reviews and inline
+threads for #26–#28 were empty when read. Independent source review found no
+actionable runtime defect in the owner/recovery or dependency changes.
+
+Fresh local validation on the unchanged combined runtime `84fe2b2`:
+`npm ci`, `npm audit --audit-level=high` (zero advisories at the time checked),
+`npm run build` (58 routes/TypeScript), separate typecheck, Go tests/vet and a
+fresh-process 4×4 → 2×2 PNG transform using standalone sharp 0.35.5/librsvg
+2.63.2 passed. Windows standalone contains both required libvips DLLs. This
+audit does not claim relocation testing, model calibration or production deployment.
+
+The seven-day CI screenshots were no longer available when queried on November 3.
+Local production standalone/browser validation regenerates the mobile evidence;
+its results and visual inspection are recorded here after completion. Fixture
+read/render tests are distinguished from genuine local account/API tests; the
+local API uses temporary memory, with durable/race evidence supplied by CI.
+
+These documentation updates change no runtime, contract, reward or save format.
+The exact runtime hashes above remain the scope of each CI result. Later code
+changes require fresh checks; the full CORE-004/005/006 items remain in progress.

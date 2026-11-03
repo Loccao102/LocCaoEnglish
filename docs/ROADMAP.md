@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-10-23, main `f80c43e` (PR #23). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-11-03, main `2e6379c` (PR #25). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -529,7 +529,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Đang nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`in_review`, 2026-10-24)
+### Đã nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`done`, xác nhận 2026-11-03)
 
 Owner/task: Codex, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`.
 [ADR 014](decisions/014-vocabulary-unlock-grants.md) chốt milestone 3 bài / 7 bài
@@ -736,3 +736,44 @@ Lệnh kiểm tra + kết quả + revision:
 Phần chưa xác minh / blocker / điều kiện gỡ:
 Bước tiếp theo:
 ```
+
+## Đối chiếu nghiệm thu GitHub — 2026-11-03
+
+Owner/task: Codex, branch `codex/roadmap-acceptance-20261103`; phạm vi
+CORE-005/006 và SEC-001. Đối chiếu GitHub thay cho bản nháp local CORE-003 cũ;
+không đưa lại code đã được merge. Main hiện là PR #25, `2e6379c`.
+
+- Word Network/Wordsmith đã merge qua [PR #25](https://github.com/Loccao102/LocCaoEnglish/pull/25).
+  Head `3c462a0` đạt đủ sáu jobs tại [CI 170](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40163608508),
+  gồm PostgreSQL/race/vet và 186 E2E (28.9m); ghi chú chờ CI trong lịch sử trên
+  đã được giải quyết. Toàn CORE-005/006 vẫn `in_progress`.
+- Thiết lập mục tiêu đúng tài khoản và khôi phục lần lưu chưa xác nhận:
+  [PR #26](https://github.com/Loccao102/LocCaoEnglish/pull/26), `17cecb9`,
+  [CI 174](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40202949527),
+  đủ sáu jobs và 196 E2E (31.7m). `in_review`: đã kiểm tra, chưa merge.
+- SEC-001, cập nhật dependency và giữ DLL cho standalone Windows:
+  [PR #27](https://github.com/Loccao102/LocCaoEnglish/pull/27), `012e721`,
+  [CI 175](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40202953194),
+  đủ sáu jobs, native transform Linux và 196 E2E (37.8m). `in_review`, ready
+  for review; cài lại/audit 0 advisory/build/native Windows đạt ngày 2026-11-03.
+- Tiến độ Travel/Conversation/Work và learning summary Journey đúng owner:
+  [PR #28](https://github.com/Loccao102/LocCaoEnglish/pull/28), `84fe2b2`,
+  [CI 176](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40203645937),
+  đủ sáu jobs và 207 E2E (33.7m), gồm ca hai tài khoản/API thật. `in_review`,
+  đã kiểm tra, chưa merge; không thay gate/thưởng hoặc village/Fair save.
+
+Review độc lập không có lỗi runtime cần sửa; reviews/threads GitHub không còn
+yêu cầu phải xử lý tại thời điểm đọc. Trên runtime tổng hợp `84fe2b2`,
+21/21 browser cases local đạt (4.8m, không retry), đã xem 20 ảnh mobile
+390×551/844. Thứ tự merge phụ thuộc: #26 → #27 → #28. Chưa merge/deploy
+trong đợt đối chiếu này; commit tài liệu không thay runtime được CI xác minh.
+Bằng chứng và giới hạn ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#github-final-head-acceptance-audit--2026-11-03).
+
+Bước P0 tiếp theo, `planned` trong CORE-004: chỉnh rubric hội thoại cho những
+paraphrase tự nhiên đang bị bỏ sót, trước khi mở rộng nội dung. Ví dụ cần test:
+“Could you tell me the departure time?” (city-transit), “How about Sunday
+afternoon?” (weekend-plans) và “I misunderstood your cancellation message.”
+(repair-misunderstanding). Phải chốt rules version và cách giữ attempt/receipt cũ
+trước đổi pattern; vẫn chặn spam, phủ định, nhảy bước và thưởng lặp. Đây là
+phạm vi biên soạn rubric có giới hạn, không tuyên bố đã hiểu ngữ nghĩa sâu hoặc
+đã hiệu chuẩn IELTS overall. Không triển khai lát cắt mới trong PR tài liệu này.
