@@ -123,6 +123,8 @@ jobs:
         run: node scripts/verify-campaign-gates.mjs
       - name: Vocabulary unlock receipts and signed-in equipment
         run: node scripts/verify-vocabulary-unlocks.mjs
+      - name: Account-owned profile settings and fixed daily snapshot
+        run: node scripts/verify-profile-owner.mjs
       - name: Neural TTS fallback route
         run: |
           curl -fsS -X POST http://localhost:8080/v1/ai/tts \
@@ -180,6 +182,14 @@ jobs:
         with:
           name: browser-failure-evidence
           path: test-results/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: profile-mobile-review
+          path: .cache/profile-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
           retention-days: 7
       - if: always()
         run: docker compose down -v

@@ -2,6 +2,46 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Account-owned profile recovery — 2026-10-24
+
+CORE-006, branch `codex/core006-profile-owner`, [ADR 015](decisions/015-profile-owner-recovery.md).
+Profile PUT now requires sign-in and ignores body ownership; GET compatibility,
+field normalization and last-write-wins remain. Onboarding and placement pin
+requests to the current account, isolate guest settings and preserve uncertain
+saves for read-back and explicit saved/attempted review. No rewards are added.
+
+Local Go tests/vet, the real memory API integration script, TypeScript and the
+58-route production build passed. Independent review found two placement data
+loss paths: replacing an existing draft, and losing an uncertain snapshot when
+device storage fails. Both were fixed; owner-keyed, cloned tab memory preserves
+failed writes across client navigation without replacing corrupt disk data or
+promising reload durability. The scoped follow-up review also closed warning
+propagation before placement's draft guard.
+
+The expanded browser suite passed **10/10 (2.6m), retries 0**, including real
+save/reload, delayed GET/PUT across account/logout changes, lost committed and
+uncommitted saves, explicit choices, corrupt/blocked/foreign storage, guest
+legacy review and both placement regressions. Ten form/recovery captures at
+390×551 and 390×844 were viewed. They exposed tiny, inline goal descriptions;
+scoped CSS now gives titles 16px and separate descriptions 14px, with font,
+layout and touch-target assertions added to the existing mobile case.
+
+The production build passed after that typography correction. Automatic
+execution review rejected restarting the local preview with only `blocked by
+policy`; final typography checks consequently ran on GitHub. [CI 168](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40112559574)
+passed all six jobs on `cdd0b51e22c102b9353fed81756dc20af7047291`, including
+PostgreSQL/race/vet, the profile integration script and **196 E2E passed (34.2m)**
+without flaky cases. All ten profile cases and the final font/layout assertions
+ran. On 2026-10-25, root downloaded artifact `12568018349` and viewed all twelve
+captures at 390×551/844: goal titles/descriptions are readable and separate,
+saved/attempted summaries and both choice actions remain reachable, with no
+horizontal overflow. CI retains profile-only mobile images even on success.
+
+The subsequently diagnosed CI167 Fair test timing race was corrected and merged
+into this branch; historical CI168 is not substituted for the fresh six-job
+gate on the changed head. Final acceptance/merge remains pending; no production
+deployment or user DB reset.
+
 ## Vocabulary unlock grants — 2026-10-24
 
 Scope CORE-005/006, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`;

@@ -57,6 +57,10 @@ grant tích lũy bất biến, ghi nguồn checked practice/personal XP/legacy r
 Cutover giữ quyền cũ một lần; seed tài khoản mới không được thành bằng chứng.
 Không thu hồi pin sau bài sai hoặc coi personal XP/legacy là verified mastery.
 Thao tác trang bị yêu cầu tài khoản, không ghi vào shared demo của guest.
+Thiết lập mục tiêu theo [ADR 015](decisions/015-profile-owner-recovery.md): PUT
+profile cần tài khoản, form/draft gắn đúng owner, guest chỉ lưu trên thiết bị.
+Mất phản hồi phải đọc lại trước khi gửi thay đổi khác; không tự replay draft hoặc
+nhập preference không rõ owner vào tài khoản, không coi lỗi mạng là đã đồng bộ.
 `answer` mới phải phân biệt câu trả lời thật của người chơi với đáp án chuẩn, không
 ghi đáp án mẫu như thể người chơi đã trả lời đúng.
 
