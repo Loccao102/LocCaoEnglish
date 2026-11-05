@@ -4,7 +4,8 @@
 .personal { margin-top: 1.5rem; border-top: 1px solid #87b8a4; padding-top: 1rem; }
 .personal p { font-size: 16px; line-height: 1.6; }
 .personal strong { font-size: 1.5rem; }
-.personal button { min-height: 44px; white-space: normal; margin: .5rem .5rem 0 0; }
+.personal button { min-height: 44px; white-space: normal; margin: .5rem .5rem 0 0; font-size: 16px; }
+.personal button:not(:global(.primary)) { background: #e8f5ef; color: #153e35; border-color: #b8d7c7; }
 .personal a { display: inline-flex; align-items: center; min-height: 44px; color: #fff; text-decoration: underline; }
 @media (max-width: 500px) {
   .shell > header { padding: 1.5rem; }

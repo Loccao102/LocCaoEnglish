@@ -2,6 +2,23 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Final combined follow-up — 2026-11-05
+
+PR #35's initial head `3230a73` passed all six jobs in
+[CI 190](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41961041186),
+including PostgreSQL/race/vet and **225 E2E (36.8m)** with no flaky summary.
+Course, teacher and mission artifacts from that exact run were inspected.
+The course recovery/refresh buttons inherited white text over a pale default
+button background. This visual defect was not caught by the earlier size checks.
+The follow-up sets explicit scoped colours and readable action text; the existing
+phone case now checks computed foreground/background contrast for both actions.
+Teacher singular learner copy is also corrected. No API/reward/save change.
+
+The updated combination retains the original commits of PR #31–#34, refined
+mission typography, review scheduling (#36), and Content Studio ownership (#37).
+It needs a fresh six-job CI and image inspection; CI 190 does not validate these
+later changes. No local tests/build/services and no production deployment.
+
 ## Content Studio owner boundary — 2026-11-05
 
 CORE-006, branch `codex/core006-content-ui`, base review `e9a881a`; ADR 020.

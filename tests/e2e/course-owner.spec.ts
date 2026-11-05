@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import type { Course, CourseProgress } from "../../lib/platform";
 
 const API = process.env.E2E_API_URL || "http://localhost:8080";
@@ -10,6 +10,21 @@ const course: Course = { id: "course-render", slug, title: "English B1 Foundatio
   { slug: "airport-check-in-sprint", title: "Airport Check-in Sprint", skill: "Vocabulary", level: "B1", position: 0, estimatedMins: 10 },
 ] };
 const progress = (enrolled = false, completedLessons = 0): CourseProgress => ({ courseId: course.id, courseSlug: slug, enrolled, completedLessons, totalLessons: 3, percent: Math.floor(completedLessons / 3 * 100), averageScore: 1 });
+async function expectReadableAction(action: Locator) {
+  await expect(action).toBeEnabled();
+  const contrast = await action.evaluate(el => {
+    const style = getComputedStyle(el);
+    const luminance = (color: string) => {
+      const parts = color.match(/[\d.]+/g)?.map(Number);
+      if (!parts || parts.length < 3 || (parts.length > 3 && parts[3] !== 1)) throw new Error("Expected opaque button colours");
+      const linear = parts.slice(0, 3).map(value => value / 255).map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+      return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+    };
+    const foreground = luminance(style.color), background = luminance(style.backgroundColor);
+    return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+  });
+  expect(contrast, "Course recovery action text must remain readable on its button").toBeGreaterThanOrEqual(4.5);
+}
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>(done => { resolve = done; });
@@ -154,6 +169,7 @@ test("course catalog survives unavailable progress and phone recovery is readabl
     await retry.scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect((await retry.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expectReadableAction(retry);
     expect(Number.parseFloat(await panel(page).locator("p").first().evaluate(el => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
     await page.screenshot({ path: `.cache/course-owner-unavailable-${height}.png`, fullPage: true });
   }
@@ -163,6 +179,7 @@ test("course catalog survives unavailable progress and phone recovery is readabl
   await expect(page.getByRole("button", { name: "Enroll in course" })).toBeVisible();
   for (const height of [551, 844]) {
     await page.setViewportSize({ width: 390, height });
+    await expectReadableAction(page.getByRole("button", { name: "Refresh course progress" }));
     await page.screenshot({ path: `.cache/course-owner-ready-${height}.png`, fullPage: true });
   }
 });

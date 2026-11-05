@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-11-05, main `54273c3` (đã gồm PR #25–#30). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-11-05, main `7805b50` (đã gồm PR #25–#30 và #32). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -31,11 +31,15 @@ trước khi các contract core liên quan đã vững.
 (hero nhiệm vụ), [#32](https://github.com/Loccao102/LocCaoEnglish/pull/32)
 (teacher practice), [#33](https://github.com/Loccao102/LocCaoEnglish/pull/33)
 (Adventure actual answers), [#34](https://github.com/Loccao102/LocCaoEnglish/pull/34)
-(course ownership) đều có source/regression và đang `in_review`. Branch
+(course ownership) đã có source/regression; #32 đã merge sau CI 187, các phần
+còn lại tiếp tục `in_review`. Branch
 `codex/roadmap-integration-20261105` giữ toàn bộ commit của bốn PR, chỉ giải
 conflict docs và hợp nhất hai nhóm hàm captured-token ở `lib/platform.ts`.
 Phải có CI đủ sáu jobs và xem ảnh trên bản tổng hợp trước tích hợp main; không
 suy kết quả CI của từng nhánh thành đã kiểm tra tổ hợp. Không chạy local/deploy.
+CI 190 trên `3230a73` đã qua sáu jobs và 225 E2E. Xem ảnh phát hiện nút khôi
+phục khóa học thiếu tương phản; bản tổng hợp tiếp theo giữ thêm mission refinement,
+review receipts (#36), Content Studio (#37) và sửa nút này. Phải kiểm tra head mới.
 
 CORE-001 → CORE-002 → CORE-003/CORE-004 → CORE-005 → CORE-006 → CORE-007 → CONTENT-001.
 DEP-001 và GOV-002 có thể làm khi đủ điều kiện độc lập, không cần chờ thêm nội dung.
@@ -580,7 +584,11 @@ là learner reports, không hiển thị score/confidence cũ thành kết quả
 và fallback API cũ an toàn. Không thay schema, save, XP hay chính sách cấp quyền.
 Nghiệm thu memory/PG/race/HTTP role, browser tài khoản thật + render lifecycle,
 mobile 390×551/844 và đủ CI trên head cuối. Chỉ kiểm tra trên GitHub Actions
-theo yêu cầu người dùng; chưa nghiệm thu. Contract: ADR 017.
+theo yêu cầu người dùng. Head `695b3ad` đã qua sáu jobs tại
+[CI 187](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41959011220),
+216 E2E (41.6m), không flaky. Hai ảnh mobile đã xem, review không có blocker;
+[PR #32](https://github.com/Loccao102/LocCaoEnglish/pull/32) đã merge thành
+`7805b50`. Lát cắt đã nghiệm thu; toàn CORE-005 vẫn in_progress. Contract: ADR 017.
 
 ### Câu trả lời gốc và provenance của Adventure (`in_review`, 2026-11-05)
 
