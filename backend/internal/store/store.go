@@ -507,6 +507,7 @@ CREATE TABLE IF NOT EXISTS review_schedule_receipts(
  item_key TEXT NOT NULL,
  quality INTEGER NOT NULL CHECK(quality >= 0 AND quality <= 5),
  rules_version TEXT NOT NULL,
+ expected_due_at TIMESTAMPTZ NOT NULL,
  scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  due_at TIMESTAMPTZ NOT NULL,
  interval_days INTEGER NOT NULL,
@@ -515,4 +516,7 @@ CREATE TABLE IF NOT EXISTS review_schedule_receipts(
  PRIMARY KEY(owner_id,request_id)
 );
 CREATE INDEX IF NOT EXISTS idx_review_schedule_receipts_owner ON review_schedule_receipts(owner_id,scheduled_at DESC);
+ALTER TABLE review_schedule_receipts ADD COLUMN IF NOT EXISTS expected_due_at TIMESTAMPTZ;
+UPDATE review_schedule_receipts SET expected_due_at=due_at WHERE expected_due_at IS NULL;
+ALTER TABLE review_schedule_receipts ALTER COLUMN expected_due_at SET NOT NULL;
 `

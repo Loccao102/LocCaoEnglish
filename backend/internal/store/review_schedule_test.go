@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/model"
 )
@@ -39,6 +40,21 @@ func reviewScheduleSeedItem(t *testing.T, s *Store, userID, item string) {
 	}
 }
 
+func reviewScheduleDueAt(t *testing.T, s *Store, userID, itemKey string) time.Time {
+	t.Helper()
+	items, err := s.ReviewQueue(context.Background(), userID, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range items {
+		if item.ItemKey == itemKey {
+			return item.DueAt
+		}
+	}
+	t.Fatalf("missing review item %q", itemKey)
+	return time.Time{}
+}
+
 func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 	skillPracticeStores(t, func(t *testing.T, s *Store, _ string) {
 		ctx := context.Background()
@@ -47,7 +63,7 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 		if err != nil || len(before) != 1 {
 			t.Fatalf("seed review: %v %#v", err, before)
 		}
-		in := ReviewScheduleRequest{RequestID: "receipt-request-1", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}
+		in := ReviewScheduleRequest{RequestID: "receipt-request-1", Quality: 5, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: before[0].DueAt}
 		first, err := s.ScheduleReview(ctx, u.ID, "receipt-item", in)
 		if err != nil {
 			t.Fatal(err)
@@ -61,7 +77,7 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 		if !reflect.DeepEqual(afterFirst, afterRetry) || afterFirst[0].IntervalDays != 3 {
 			t.Fatalf("retry applied a second transition: first=%#v retry=%#v", afterFirst, afterRetry)
 		}
-		if _, err = s.ScheduleReview(ctx, u.ID, "receipt-item", ReviewScheduleRequest{RequestID: in.RequestID, Quality: 1, RulesVersion: in.RulesVersion}); !errors.Is(err, ErrReviewScheduleConflict) {
+		if _, err = s.ScheduleReview(ctx, u.ID, "receipt-item", ReviewScheduleRequest{RequestID: in.RequestID, Quality: 1, RulesVersion: in.RulesVersion, ExpectedDueAt: in.ExpectedDueAt}); !errors.Is(err, ErrReviewScheduleConflict) {
 			t.Fatalf("changed quality must conflict, got %v", err)
 		}
 		if _, err = s.ReviewScheduleReceipt(ctx, u.ID, in.RequestID); err != nil {
@@ -77,7 +93,7 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 		if _, err = s.ReviewScheduleReceipt(ctx, foreign.ID, in.RequestID); !errors.Is(err, ErrNotFound) {
 			t.Fatalf("foreign receipt must be hidden, got %v", err)
 		}
-		if _, err = s.ScheduleReview(ctx, u.ID, "missing-item", ReviewScheduleRequest{RequestID: "missing-request", Quality: 4, RulesVersion: in.RulesVersion}); !errors.Is(err, ErrNotFound) {
+		if _, err = s.ScheduleReview(ctx, u.ID, "missing-item", ReviewScheduleRequest{RequestID: "missing-request", Quality: 4, RulesVersion: in.RulesVersion, ExpectedDueAt: in.ExpectedDueAt}); !errors.Is(err, ErrNotFound) {
 			t.Fatalf("missing item must be 404/not found, got %v", err)
 		}
 		if _, err = s.ReviewScheduleReceipt(ctx, u.ID, "missing-request"); !errors.Is(err, ErrNotFound) {
@@ -99,7 +115,8 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 			})
 			reviewScheduleSeedItem(t, s, u.ID, "rollback-item")
 			beforeRollback, _ := s.ReviewQueue(ctx, u.ID, 10)
-			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}); err == nil {
+			rollbackDue := reviewScheduleDueAt(t, s, u.ID, "rollback-item")
+			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: rollbackDue}); err == nil {
 				t.Fatal("receipt trigger should force atomic rollback")
 			}
 			afterRollback, _ := s.ReviewQueue(ctx, u.ID, 10)
@@ -120,7 +137,7 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 			if _, err = s.db.ExecContext(ctx, fmt.Sprintf(`DROP TRIGGER %s ON review_schedule_receipts`, trigger)); err != nil {
 				t.Fatal(err)
 			}
-			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}); err != nil {
+			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: rollbackDue}); err != nil {
 				t.Fatal("valid retry after rollback failed", err)
 			}
 		}
@@ -134,7 +151,7 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 			s.db.SetMaxOpenConns(8)
 		}
 		u := reviewScheduleFixture(t, s, "review-concurrent-"+newID()+"@example.test", "concurrent-item")
-		request := ReviewScheduleRequest{RequestID: "concurrent-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}
+		request := ReviewScheduleRequest{RequestID: "concurrent-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, s, u.ID, "concurrent-item")}
 		const workers = 8
 		results := make(chan model.ReviewScheduleReceipt, workers)
 		errs := make(chan error, workers)
@@ -178,7 +195,7 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 		if len(due) != 0 || len(items) != 1 {
 			t.Fatalf("due-only projection parity: due=%#v all=%#v", due, items)
 		}
-		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "invalid-quality", Quality: 6, RulesVersion: ReviewScheduleRulesVersion}); !errors.Is(err, ErrReviewScheduleInput) {
+		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "invalid-quality", Quality: 6, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: request.ExpectedDueAt}); !errors.Is(err, ErrReviewScheduleInput) {
 			t.Fatalf("invalid quality should rollback/no-op, got %v", err)
 		}
 		if _, err = s.ReviewScheduleReceipt(ctx, u.ID, "invalid-quality"); !errors.Is(err, ErrNotFound) {
@@ -190,12 +207,12 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 		split.Add(2)
 		go func() {
 			defer split.Done()
-			_, err := s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion})
+			_, err := s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, s, u.ID, "concurrent-item")})
 			claims <- err
 		}()
 		go func() {
 			defer split.Done()
-			_, err := s.ScheduleReview(ctx, u.ID, "split-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion})
+			_, err := s.ScheduleReview(ctx, u.ID, "split-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, s, u.ID, "split-item")})
 			claims <- err
 		}()
 		split.Wait()
@@ -223,6 +240,12 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 				t.Fatalf("losing item was updated: %#v", item)
 			}
 		}
+		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "stale-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: request.ExpectedDueAt}); !errors.Is(err, ErrReviewScheduleConflict) {
+			t.Fatalf("stale due snapshot must conflict, got %v", err)
+		}
+		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "fresh-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, s, u.ID, "concurrent-item")}); err != nil {
+			t.Fatalf("fresh due snapshot should allow a new schedule: %v", err)
+		}
 	})
 }
 
@@ -240,7 +263,7 @@ func TestReviewScheduleReceiptSurvivesPostgresStoreRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	u := reviewScheduleFixture(t, first, "review-restart-"+newID()+"@example.test", "restart-item")
-	want, err := first.ScheduleReview(context.Background(), u.ID, "restart-item", ReviewScheduleRequest{RequestID: "restart-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion})
+	want, err := first.ScheduleReview(context.Background(), u.ID, "restart-item", ReviewScheduleRequest{RequestID: "restart-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, first, u.ID, "restart-item")})
 	if err != nil {
 		first.Close()
 		t.Fatal(err)

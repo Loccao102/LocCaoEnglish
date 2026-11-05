@@ -62,15 +62,16 @@ type ReviewItem struct {
 // scheduling request. It deliberately contains only the scheduling snapshot;
 // review prompts and answers remain available through the owner-scoped queue.
 type ReviewScheduleReceipt struct {
-	RequestID    string    `json:"requestId"`
-	ItemKey      string    `json:"itemKey"`
-	Quality      int       `json:"quality"`
-	RulesVersion string    `json:"rulesVersion"`
-	ScheduledAt  time.Time `json:"scheduledAt"`
-	DueAt        time.Time `json:"dueAt"`
-	IntervalDays int       `json:"intervalDays"`
-	Ease         float64   `json:"ease"`
-	Failures     int       `json:"failures"`
+	RequestID     string    `json:"requestId"`
+	ItemKey       string    `json:"itemKey"`
+	Quality       int       `json:"quality"`
+	RulesVersion  string    `json:"rulesVersion"`
+	ExpectedDueAt time.Time `json:"expectedDueAt"`
+	ScheduledAt   time.Time `json:"scheduledAt"`
+	DueAt         time.Time `json:"dueAt"`
+	IntervalDays  int       `json:"intervalDays"`
+	Ease          float64   `json:"ease"`
+	Failures      int       `json:"failures"`
 }
 
 type Dashboard struct {

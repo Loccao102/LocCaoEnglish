@@ -70,18 +70,18 @@ func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
 		t.Fatal("legacy path changed the review item")
 	}
 	for _, body := range []map[string]any{
-		{"requestId": "missing-quality", "rulesVersion": store.ReviewScheduleRulesVersion},
-		{"requestId": "null-quality", "quality": nil, "rulesVersion": store.ReviewScheduleRulesVersion},
+		{"requestId": "missing-quality", "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion},
+		{"requestId": "null-quality", "quality": nil, "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion},
 	} {
 		if response := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, body); response.Code != http.StatusBadRequest {
 			t.Fatalf("missing/null quality must be rejected: %d %s", response.Code, response.Body.String())
 		}
 	}
-	created := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion})
+	created := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion})
 	if created.Code != http.StatusOK {
 		t.Fatalf("receipt endpoint failed: %d %s", created.Code, created.Body.String())
 	}
-	retry := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion})
+	retry := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion})
 	if retry.Code != http.StatusOK || retry.Body.String() != created.Body.String() {
 		t.Fatalf("receipt retry changed response: %d %s", retry.Code, retry.Body.String())
 	}

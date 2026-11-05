@@ -19,13 +19,14 @@ var (
 )
 
 type ReviewScheduleRequest struct {
-	RequestID    string
-	Quality      int
-	RulesVersion string
+	RequestID     string
+	Quality       int
+	RulesVersion  string
+	ExpectedDueAt time.Time
 }
 
 func validateReviewScheduleRequest(in ReviewScheduleRequest) error {
-	if strings.TrimSpace(in.RequestID) == "" || len([]rune(in.RequestID)) > 120 {
+	if strings.TrimSpace(in.RequestID) == "" || len([]rune(in.RequestID)) > 120 || in.ExpectedDueAt.IsZero() {
 		return ErrReviewScheduleInput
 	}
 	if in.Quality < 0 || in.Quality > 5 {
@@ -38,7 +39,7 @@ func validateReviewScheduleRequest(in ReviewScheduleRequest) error {
 }
 
 func sameReviewScheduleRequest(receipt model.ReviewScheduleReceipt, itemKey string, in ReviewScheduleRequest) bool {
-	return receipt.ItemKey == itemKey && receipt.Quality == in.Quality && receipt.RulesVersion == in.RulesVersion
+	return receipt.ItemKey == itemKey && receipt.Quality == in.Quality && receipt.RulesVersion == in.RulesVersion && receipt.ExpectedDueAt.Equal(in.ExpectedDueAt)
 }
 
 func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in ReviewScheduleRequest) (model.ReviewScheduleReceipt, error) {
@@ -76,12 +77,16 @@ func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in R
 
 	var interval, failures int
 	var ease float64
-	err = tx.QueryRowContext(ctx, `SELECT interval_days,ease,failures FROM review_items WHERE user_id=$1 AND item_key=$2 FOR UPDATE`, userID, itemKey).Scan(&interval, &ease, &failures)
+	var storedDueAt time.Time
+	err = tx.QueryRowContext(ctx, `SELECT interval_days,ease,failures,due_at FROM review_items WHERE user_id=$1 AND item_key=$2 FOR UPDATE`, userID, itemKey).Scan(&interval, &ease, &failures, &storedDueAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return model.ReviewScheduleReceipt{}, ErrNotFound
 	}
 	if err != nil {
 		return model.ReviewScheduleReceipt{}, err
+	}
+	if !storedDueAt.Equal(in.ExpectedDueAt) {
+		return model.ReviewScheduleReceipt{}, ErrReviewScheduleConflict
 	}
 	// A competing request with the same id may have committed while this
 	// transaction waited for the review row. Re-read the receipt after the row
@@ -104,13 +109,13 @@ func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in R
 	if _, err = tx.ExecContext(ctx, `UPDATE review_items SET interval_days=$3,ease=$4,failures=$5,due_at=$6 WHERE user_id=$1 AND item_key=$2`, userID, itemKey, interval, ease, failures, dueAt); err != nil {
 		return model.ReviewScheduleReceipt{}, err
 	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO review_schedule_receipts(owner_id,request_id,item_key,quality,rules_version,scheduled_at,due_at,interval_days,ease,failures) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, userID, in.RequestID, itemKey, in.Quality, in.RulesVersion, now, dueAt, interval, ease, failures); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO review_schedule_receipts(owner_id,request_id,item_key,quality,rules_version,expected_due_at,scheduled_at,due_at,interval_days,ease,failures) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, userID, in.RequestID, itemKey, in.Quality, in.RulesVersion, in.ExpectedDueAt, now, dueAt, interval, ease, failures); err != nil {
 		return model.ReviewScheduleReceipt{}, err
 	}
 	if err := tx.Commit(); err != nil {
 		return model.ReviewScheduleReceipt{}, err
 	}
-	return model.ReviewScheduleReceipt{RequestID: in.RequestID, ItemKey: itemKey, Quality: in.Quality, RulesVersion: in.RulesVersion, ScheduledAt: now, DueAt: dueAt, IntervalDays: interval, Ease: ease, Failures: failures}, nil
+	return model.ReviewScheduleReceipt{RequestID: in.RequestID, ItemKey: itemKey, Quality: in.Quality, RulesVersion: in.RulesVersion, ExpectedDueAt: in.ExpectedDueAt, ScheduledAt: now, DueAt: dueAt, IntervalDays: interval, Ease: ease, Failures: failures}, nil
 }
 
 func (s *Store) scheduleReviewMemory(userID, itemKey string, in ReviewScheduleRequest) (model.ReviewScheduleReceipt, error) {
@@ -138,12 +143,15 @@ func (s *Store) scheduleReviewMemory(userID, itemKey string, in ReviewScheduleRe
 	if !ok {
 		return model.ReviewScheduleReceipt{}, ErrNotFound
 	}
+	if !r.DueAt.Equal(in.ExpectedDueAt) {
+		return model.ReviewScheduleReceipt{}, ErrReviewScheduleConflict
+	}
 	interval, ease, failures := nextReview(r.IntervalDays, r.Ease, r.Failures, in.Quality)
 	now := time.Now().UTC().Truncate(time.Microsecond)
 	dueAt := now.Add(time.Duration(interval) * 24 * time.Hour)
 	r.IntervalDays, r.Ease, r.Failures, r.DueAt = interval, ease, failures, dueAt
 	items[itemKey] = r
-	receipt := model.ReviewScheduleReceipt{RequestID: in.RequestID, ItemKey: itemKey, Quality: in.Quality, RulesVersion: in.RulesVersion, ScheduledAt: now, DueAt: dueAt, IntervalDays: interval, Ease: ease, Failures: failures}
+	receipt := model.ReviewScheduleReceipt{RequestID: in.RequestID, ItemKey: itemKey, Quality: in.Quality, RulesVersion: in.RulesVersion, ExpectedDueAt: in.ExpectedDueAt, ScheduledAt: now, DueAt: dueAt, IntervalDays: interval, Ease: ease, Failures: failures}
 	s.mem.reviewReceipts[userID][in.RequestID] = receipt
 	return receipt, nil
 }
@@ -172,7 +180,7 @@ func (s *Store) ReviewScheduleReceipt(ctx context.Context, userID, requestID str
 }
 
 func reviewScheduleReceiptTx(ctx context.Context, tx *sql.Tx, ownerID, requestID string, lock bool) (model.ReviewScheduleReceipt, bool, error) {
-	query := `SELECT request_id,item_key,quality,rules_version,scheduled_at,due_at,interval_days,ease,failures FROM review_schedule_receipts WHERE owner_id=$1 AND request_id=$2`
+	query := `SELECT request_id,item_key,quality,rules_version,expected_due_at,scheduled_at,due_at,interval_days,ease,failures FROM review_schedule_receipts WHERE owner_id=$1 AND request_id=$2`
 	if lock {
 		query += ` FOR UPDATE`
 	}
@@ -180,14 +188,14 @@ func reviewScheduleReceiptTx(ctx context.Context, tx *sql.Tx, ownerID, requestID
 }
 
 func reviewScheduleReceiptDB(ctx context.Context, db *sql.DB, ownerID, requestID string) (model.ReviewScheduleReceipt, bool, error) {
-	return scanReviewScheduleReceipt(db.QueryRowContext(ctx, `SELECT request_id,item_key,quality,rules_version,scheduled_at,due_at,interval_days,ease,failures FROM review_schedule_receipts WHERE owner_id=$1 AND request_id=$2`, ownerID, requestID))
+	return scanReviewScheduleReceipt(db.QueryRowContext(ctx, `SELECT request_id,item_key,quality,rules_version,expected_due_at,scheduled_at,due_at,interval_days,ease,failures FROM review_schedule_receipts WHERE owner_id=$1 AND request_id=$2`, ownerID, requestID))
 }
 
 type reviewScheduleScanner interface{ Scan(...any) error }
 
 func scanReviewScheduleReceipt(row reviewScheduleScanner) (model.ReviewScheduleReceipt, bool, error) {
 	var receipt model.ReviewScheduleReceipt
-	if err := row.Scan(&receipt.RequestID, &receipt.ItemKey, &receipt.Quality, &receipt.RulesVersion, &receipt.ScheduledAt, &receipt.DueAt, &receipt.IntervalDays, &receipt.Ease, &receipt.Failures); errors.Is(err, sql.ErrNoRows) {
+	if err := row.Scan(&receipt.RequestID, &receipt.ItemKey, &receipt.Quality, &receipt.RulesVersion, &receipt.ExpectedDueAt, &receipt.ScheduledAt, &receipt.DueAt, &receipt.IntervalDays, &receipt.Ease, &receipt.Failures); errors.Is(err, sql.ErrNoRows) {
 		return model.ReviewScheduleReceipt{}, false, nil
 	} else if err != nil {
 		return model.ReviewScheduleReceipt{}, false, err

@@ -25,6 +25,7 @@ from 0 through 5. The response is an immutable, owner-scoped receipt:
   "itemKey": "word-link:happy",
   "quality": 4,
   "rulesVersion": "review-schedule.v1",
+  "expectedDueAt": "2026-11-05T00:00:00Z",
   "scheduledAt": "2026-11-05T00:00:00Z",
   "dueAt": "2026-11-08T00:00:00Z",
   "intervalDays": 3,
@@ -34,7 +35,9 @@ from 0 through 5. The response is an immutable, owner-scoped receipt:
 ```
 
 The exact same owner/request/item/quality returns the stored receipt without a
-second SRS transition. Reusing a request ID for another item or quality is a
+second SRS transition. The request must also carry the queue item's
+`expectedDueAt`; a stale tab or lost local request receives `409` without a
+transition, while a fresh due snapshot may schedule again. Reusing a request ID for another item or quality is a
 `409`; the old quality-only request is also a `409` safe-upgrade response, and
 unknown rules versions are rejected with `409`. Unknown or foreign items are
 `404` and do not create receipts. `GET /v1/review/grades/{requestId}` recovers

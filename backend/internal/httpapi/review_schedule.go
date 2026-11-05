@@ -3,6 +3,7 @@ package httpapi
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/Loccao102/LocCaoEnglish/backend/internal/store"
 )
@@ -20,9 +21,10 @@ func (s *Server) reviewSchedule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var in struct {
-		RequestID    string `json:"requestId"`
-		Quality      *int   `json:"quality"`
-		RulesVersion string `json:"rulesVersion"`
+		RequestID     string    `json:"requestId"`
+		Quality       *int      `json:"quality"`
+		RulesVersion  string    `json:"rulesVersion"`
+		ExpectedDueAt time.Time `json:"expectedDueAt"`
 	}
 	if !decode(w, r, &in) {
 		return
@@ -33,11 +35,11 @@ func (s *Server) reviewSchedule(w http.ResponseWriter, r *http.Request) {
 		problem(w, http.StatusConflict, "review scheduling requires requestId and rulesVersion")
 		return
 	}
-	if in.Quality == nil {
-		problem(w, http.StatusBadRequest, "quality is required")
+	if in.Quality == nil || in.ExpectedDueAt.IsZero() {
+		problem(w, http.StatusBadRequest, "quality and expectedDueAt are required")
 		return
 	}
-	receipt, err := s.store.ScheduleReview(r.Context(), u.ID, r.PathValue("itemKey"), store.ReviewScheduleRequest{RequestID: in.RequestID, Quality: *in.Quality, RulesVersion: in.RulesVersion})
+	receipt, err := s.store.ScheduleReview(r.Context(), u.ID, r.PathValue("itemKey"), store.ReviewScheduleRequest{RequestID: in.RequestID, Quality: *in.Quality, RulesVersion: in.RulesVersion, ExpectedDueAt: in.ExpectedDueAt})
 	switch {
 	case errors.Is(err, store.ErrNotFound):
 		problem(w, http.StatusNotFound, "review item not found")
