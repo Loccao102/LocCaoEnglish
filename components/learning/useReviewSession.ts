@@ -21,6 +21,8 @@ const matches = (receipt: ReviewGradeReceipt, pending: Pending) => receipt.reque
   receipt.itemKey === pending.itemKey && receipt.quality === pending.quality && receipt.expectedDueAt === pending.expectedDueAt && receipt.rulesVersion === pending.rulesVersion &&
   Number.isFinite(Date.parse(receipt.dueAt)) && Number.isFinite(Date.parse(receipt.scheduledAt)) &&
   Number.isInteger(receipt.intervalDays) && receipt.intervalDays >= 1 && Number.isFinite(receipt.ease) && receipt.ease >= 1.3 && Number.isInteger(receipt.failures) && receipt.failures >= 0;
+const validItem = (item: ReviewItem) => !!item && typeof item.itemKey === "string" && !!item.itemKey && typeof item.kind === "string" &&
+  typeof item.prompt === "string" && typeof item.answer === "string" && typeof item.dueAt === "string" && Number.isFinite(Date.parse(item.dueAt));
 
 /** Mounted with an identity key; pending operations never move to a new owner. */
 export default function useReviewSession(token: string) {
@@ -85,7 +87,7 @@ export default function useReviewSession(token: string) {
     const data = await fetchReviewQueue(token);
     if (!current(seq)) return;
     if (data.rulesVersion !== REVIEW_RULES || data.dueOnly !== true) throw new Error("Unsupported review schedule service");
-    if (data.items !== null && !Array.isArray(data.items)) throw new Error("Invalid queue response");
+    if (data.items !== null && (!Array.isArray(data.items) || !data.items.every(validItem))) throw new Error("Invalid queue response");
     supported.current = true;
     const pendingItem = reference.current ? (data.items || []).find(item => item.itemKey === reference.current!.itemKey) : null;
     const missing = !!reference.current && !pendingItem;
@@ -126,7 +128,7 @@ export default function useReviewSession(token: string) {
   }
   function grade(quality: number) {
     const item = state.items[0];
-    if (locked.current || reference.current || !owner.current || corrupt.current || !supported.current || state.phase !== "ready" || !item || token !== getAuthToken()) return;
+    if (!active.current || locked.current || reference.current || !owner.current || corrupt.current || !supported.current || state.phase !== "ready" || !item || token !== getAuthToken()) return;
     let requestId: string;
     try { requestId = crypto.randomUUID(); }
     catch { patch({ error: "A recovery reference could not be created. Refresh this page before scheduling." }); return; }
@@ -135,7 +137,7 @@ export default function useReviewSession(token: string) {
     void send(pending);
   }
   function leaveReference() {
-    if (locked.current || (!corrupt.current && !state.missing && !state.outdated) || token !== getAuthToken()) return;
+    if (!active.current || locked.current || (!corrupt.current && !state.missing && !state.outdated) || token !== getAuthToken()) return;
     reference.current = null; corrupt.current = false; persist(null);
     patch({ pending: null, error: "", missing: false, outdated: false, phase: "loading" });
     void refresh();

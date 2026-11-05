@@ -10,7 +10,7 @@ import styles from "./ReviewTrainer.module.css";
 export default function ReviewTrainer() {
   const token = useSignedInToken();
   if (token === null) return <p role="status">Loading your review queue…</p>;
-  if (!token) return <p>Sign in to review your saved items. <Link href="/account">Sign in for reviews</Link></p>;
+  if (!token) return <div className={styles.trainer}><p>Sign in to review your saved items. <Link href="/account">Sign in for reviews</Link></p></div>;
   return <AccountReviews key={token} token={token} />;
 }
 
