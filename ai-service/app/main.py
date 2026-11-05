@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from contextlib import asynccontextmanager
 from collections import Counter
 from typing import Any
 
@@ -11,7 +12,19 @@ from pydantic import BaseModel, Field
 from app.roleplay import roleplay_reply
 from app.writing import WritingRequest, writing_score
 
-app = FastAPI(title="LocCaoEnglish AI Service", version="0.4.0")
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    # One pool per AI-service worker instead of a new TLS handshake for every
+    # LLM or speech request. FastAPI closes idle/active connections on shutdown.
+    limits = httpx.Limits(max_connections=40, max_keepalive_connections=12, keepalive_expiry=30.0)
+    async with httpx.AsyncClient(timeout=35, limits=limits) as client:
+        application.state.outbound_http = client
+        try:
+            yield
+        finally:
+            del application.state.outbound_http
+
+app = FastAPI(title="LocCaoEnglish AI Service", version="0.4.0", lifespan=lifespan)
 
 LLM_CHAT_URL = os.getenv("LLM_CHAT_URL", "").strip()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
@@ -66,8 +79,17 @@ async def llm_json(system: str, user: dict[str, Any]) -> dict[str, Any] | None:
     if LLM_API_KEY: headers["Authorization"]=f"Bearer {LLM_API_KEY}"
     payload={"model":LLM_MODEL,"temperature":0.2,"response_format":{"type":"json_object"},"messages":[{"role":"system","content":system},{"role":"user","content":json.dumps(user,ensure_ascii=False)}]}
     try:
-        async with httpx.AsyncClient(timeout=35) as client:
-            response=await client.post(LLM_CHAT_URL,headers=headers,json=payload);response.raise_for_status();data=response.json();content=data["choices"][0]["message"]["content"];return json.loads(content)
+        client = getattr(app.state, "outbound_http", None)
+        if client is None:
+            # Direct unit calls without ASGI lifespan preserve standalone usage.
+            async with httpx.AsyncClient(timeout=35) as temporary:
+                response = await temporary.post(LLM_CHAT_URL, headers=headers, json=payload)
+        else:
+            response = await client.post(LLM_CHAT_URL, headers=headers, json=payload, timeout=35)
+        response.raise_for_status()
+        data = response.json()
+        content = data["choices"][0]["message"]["content"]
+        return json.loads(content)
     except Exception: return None
 
 @app.get("/health")
