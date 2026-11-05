@@ -22,7 +22,7 @@ function editableLesson(value: Lesson): Lesson {
 export default function ContentStudio() {
   const token = useSignedInToken();
   if (token === null) return <div className="panel" role="status">Checking permissions…</div>;
-  if (!token) return <div className={`notice error ${styles.studio}`} role="alert"><p>Teacher/admin role required. Sign in with a teacher or admin account to open Content Studio.</p><Link href="/account">Sign in</Link></div>;
+  if (!token) return <div className={`notice error ${styles.studio}`} role="alert" aria-label="Content Studio access"><p>Teacher/admin role required. Sign in with a teacher or admin account to open Content Studio.</p><Link href="/account">Sign in</Link></div>;
   return <ContentStudioAccount key={token} token={token} />;
 }
 
@@ -96,8 +96,8 @@ function ContentStudioAccount({ token }: { token: string }) {
   }
 
   if (loading) return <div className="panel" role="status">Checking permissions…</div>;
-  if (loadError) return <div className={`notice error ${styles.studio}`} role="alert"><p>{loadError}</p><button className="button" disabled={busy} onClick={() => void refresh()}>Retry Content Studio</button><Link href="/account">Sign in again</Link></div>;
-  if (role !== "teacher" && role !== "admin") return <div className={`notice error ${styles.studio}`} role="alert"><p>{permissionMessage}</p><Link href="/account">Sign in again</Link></div>;
+  if (loadError) return <div className={`notice error ${styles.studio}`} role="alert" aria-label="Content Studio access"><p>{loadError}</p><button className="button" disabled={busy} onClick={() => void refresh()}>Retry Content Studio</button><Link href="/account">Sign in again</Link></div>;
+  if (role !== "teacher" && role !== "admin") return <div className={`notice error ${styles.studio}`} role="alert" aria-label="Content Studio access"><p>{permissionMessage}</p><Link href="/account">Sign in again</Link></div>;
   return <div className={`studio-layout ${styles.studio}`}>
     <aside className="studio-list"><div className="section-heading"><div><span className="eyebrow">CONTENT CMS</span><h2>Lessons</h2></div><button className="button ghost" disabled={busy} onClick={() => setLesson(emptyLesson())}>New</button></div><button className="button" disabled={busy} onClick={() => void refresh()}>Refresh lesson list</button>{items.map(item => <button key={item.slug} disabled={busy} onClick={() => setLesson(item)} className={lesson.slug === item.slug ? "active" : ""}><strong>{item.title}</strong><small>{item.status} · {item.level} · {item.skill}</small></button>)}</aside>
     <section className="studio-editor"><div className="form-grid">
