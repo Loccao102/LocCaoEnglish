@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-11-05, main `30b6276` (các merge đã nghiệm thu tới PR #46).
+Cập nhật nền: 2026-11-05, main `ff7ef88` (các merge đã nghiệm thu tới PR #49).
 PR #43 là probe thất bại có kiểm soát, đã đóng và không merge. Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
@@ -42,8 +42,12 @@ Các phần #38–#42 nằm trong PR #44 `2c2550a`, đã đạt CI 216 đủ sá
 (45.1m), merge `68f4e3e`. SEC-002 PR #45 `dd0f05f` đạt CI 217 đủ sáu jobs/252
 E2E (39.7m), merge `a372827`. PR #46 `9638dec` đạt CI 219 đủ sáu jobs/252 E2E
 (44.4m), merge `30b6276`. Không retry/flaky; reviews/threads trống, kiểm tra
-expected head và merged tree giữ đúng source đã kiểm tra. Không suy sang Fair
-conflict/performance đang phát triển tiếp.
+expected head và merged tree giữ đúng source đã kiểm tra. Không suy sang các
+nhánh phát triển tiếp theo.
+PR #49 `94998a8` đã đạt CI 225 đủ sáu jobs/256 E2E (40.7m), focused 31 (47.9s),
+hai ảnh recovery đã xem; merge `ff7ef88` giữ ancestry #47/#48. Catalog bài học,
+AI HTTP pool và Fair conflict recovery đã được nghiệm thu trong phạm vi; Bridge
+v2/label layout và catalog course tiếp tục cần source gate mới.
 Không chạy local/deploy. [Audit reward](REWARD-BOUNDARY-AUDIT.md) chốt phạm vi
 CORE-005 trên main đã merge; các mục core khác giữ tiêu chí độc lập.
 
@@ -67,7 +71,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
 | SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | done |
 | PERF-001 | P1 | Đo và giảm truy vấn catalog lặp, giữ đúng dữ liệu công khai/owner | Contract core hiện có | in_progress |
-| PERF-002 | P1 | Tái sử dụng outbound HTTP connection cho LLM/TTS | AI lifespan/provider contract | in_progress |
+| PERF-002 | P1 | Tái sử dụng outbound HTTP connection cho LLM/TTS | AI lifespan/provider contract | done |
 | PERF-003 | P1 | Tránh bố trí/ghi lại nhãn 3D khi input projection không đổi | Fair renderer/input hiện có | in_progress |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
@@ -112,6 +116,19 @@ CI báo số đo đúng điều kiện, không suy p95 production từ fixture n
 app/build/test/benchmark trên máy người dùng. ListCourses là follow-up sau khi
 lát cắt đầu đã được xác minh; không tự tuyên bố toàn app đã tối ưu.
 
+### PERF-001 tiếp nối — Catalog course trong một snapshot (`in_progress`)
+
+Owner/task: Codex, `codex/perf001-course-projection`, 2026-11-05. Source bài học
+đã đạt PostgreSQL/race/vet và benchmark CI 225; browser/integration acceptance
+tiếp tục riêng. Catalog course hiện vẫn lấy slug rồi GetCourse cho từng course:
+`1 + 2N` calls, detail hai calls. Lát cắt tiếp nối đọc gộp published courses và
+published lesson metadata trong một query/snapshot, giữ đúng course và authored
+lesson order, empty Lessons `[]`, ErrNotFound/slug rỗng, memory path và owner/
+enrollment/bookmark/progress hiện có. Không đổi API/schema/cache/reward.
+Nghiệm thu query budget List/Get bằng test-only counter, so sánh baseline cũ,
+draft/hidden/empty/option order, publication snapshot và benchmark cô lập trên
+GitHub; không chạy local hoặc dùng timing fixture để suy production p95.
+
 ## PERF-002 — HTTP pool cho AI
 
 Owner/task: Codex, tích hợp [PR #47](https://github.com/Loccao102/LocCaoEnglish/pull/47)
@@ -124,6 +141,9 @@ với các thay đổi main/Fair mới. Không coi test giả lập là provider
 đo throughput/latency mạng; không thêm secret, live provider call hay deploy.
 Acoustic/Writing provider riêng chưa thuộc tối ưu này. Đọc source đang dùng
 `app.server` trỏ cùng `app.main.app`, không chỉ sửa entry point không được import.
+Đã tích hợp vào PR #49, source `94998a8` đạt CI 225 đủ sáu jobs/256 E2E,
+merge `ff7ef88`. Đây là nghiệm thu pooling/protocol/lifecycle, không phải số
+đo latency/throughput provider thật; không chạy local/deploy.
 
 ## PERF-003 — Không lặp label layout không đổi
 
@@ -803,7 +823,7 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Fair: hai tab hoàn thành cùng checkpoint (`in_progress`, 2026-11-05)
+### Fair: hai tab hoàn thành cùng checkpoint (`done`, 2026-11-05)
 
 Owner/task: Codex, `codex/core006-fair-conflict`, nền `9638dec`. Hai tab resume
 cùng run ID rồi hoàn thành khác stars/time/feathers có thể để lại queue khác
@@ -818,6 +838,8 @@ API read additive; save/queue/checkpoint hiện có giữ version và dữ liệ
 cũ thiếu receipt phải giữ pending rõ ràng. Nghiệm thu memory/PG/restart/owner,
 409 locked/not-found, hai tab, late response/account switch, reload, storage
 blocked và phone actions; chỉ chạy runtime trên GitHub Actions.
+Đã nghiệm thu qua PR #49 `94998a8`, CI 225 đủ sáu jobs/256 E2E và focused 31;
+ảnh 390×551/844 cuối đã xem, merge `ff7ef88`. Không xóa queued copy để nghiệm thu.
 
 ### Khóa học theo catalog đang công khai (`done`, 2026-11-05)
 
@@ -970,8 +992,8 @@ Owner/task: Codex, `codex/core007-bridge-topology`, nền performance `94998a8`.
 Người dùng yêu cầu tiếp tục chức năng nâng cao và tối ưu hiệu năng. Ba puzzle
 cũ được giữ cho Practice/checkpoint v1; Adventure/Challenge mới dùng topology
 v2 xác định theo seed/round, đổi đường đi và cổng nối trên cùng grid 3×3 thay
-vì chỉ xáo rotation. Adventure dùng đường vòng tối thiểu năm tile, Challenge
-thêm đường dài/serpentine tối thiểu bảy tile; mỗi puzzle có route canonical
+vì chỉ xáo rotation. Adventure dùng mẫu canonical 5–6 tile, Challenge có mẫu
+canonical 7–9 tile, gồm serpentine; mỗi puzzle có route canonical
 được kiểm tra reciprocal và budget từ số turn cần thiết + allowance hiện có.
 Không đổi số vòng, stars, hearts, keepsake/XP hay thêm game/map/nhân vật.
 

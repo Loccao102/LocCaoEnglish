@@ -52,9 +52,20 @@ still awaits the remaining browser gate. These are measurements for that run,
 not production percentiles or a universal speed guarantee. Later source changes
 require their own checks; no local benchmark was executed.
 
-ListCourses has a similar loop and is a separate follow-up. Pagination, query
-indexes, payload size and client rendering need their own measured scopes;
-this change does not claim the entire application is optimized.
+The course catalog follow-up replaces ListCourses' `1 + 2N` reads and the found
+GetCourse lookup's two reads with one LEFT JOIN snapshot each. Published course
+and lesson filters remain separate so a course with no visible lessons is still
+returned with `Lessons: []`. Nil lookup means list, while a lookup for empty slug
+still returns not found. Metadata, authored lesson position, enrollment/progress,
+owner, bookmarks and memory behavior remain unchanged. There is no cache/schema
+change; publication edits are visible to the next request.
+
+Course PostgreSQL regressions reuse the test-only counter for small/larger
+catalogs, compare the genuine legacy response, check draft/hidden/empty cases,
+republishing and concurrent course/lesson revisions. A separate CI-only benchmark
+compares both paths on the same fixture; numbers remain pending for this new
+source. Pagination, query indexes and payload size need their own measured
+scopes; this does not claim the entire application is optimized.
 
 ## Outbound AI connections
 
@@ -88,7 +99,10 @@ writes over explicit 250ms samples for paused and running stationary scenes,
 verify invalidation after resize/selection, and require moving targets to keep
 updating. CI retains JSON samples. This metric describes redundant DOM work;
 it does not establish FPS, GPU utilization, battery savings or device-wide
-latency. New-head checks and visual review remain pending.
+latency. Source `935e029` passed all 38 focused checks in run 42000126798 (2.5m).
+Both Adventure/Challenge 250ms samples recorded pausedWrites=0 and runningWrites=0;
+live countdown, selection, resize and moving-box checks also passed. The complete
+source gate and final re-captured 3D screenshots remain separate.
 
 ## Visual verification found during recovery review
 

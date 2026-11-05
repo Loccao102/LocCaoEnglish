@@ -51,8 +51,8 @@ jobs:
       - run: go mod download
       - run: go test -race ./...
       - run: go vet ./...
-      - name: Measure relative lesson catalog cost and database calls
-        run: go test -run '^$' -bench '^BenchmarkListLessonsPostgres$' -benchmem -benchtime=250ms -count=1 ./internal/store
+      - name: Measure relative lesson/course catalog cost and database calls
+        run: go test -run '^$' -bench '^(BenchmarkListLessonsPostgres|BenchmarkCourseCatalogPostgres)$' -benchmem -benchtime=250ms -count=1 ./internal/store
 
   ai-service:
     runs-on: ubuntu-latest

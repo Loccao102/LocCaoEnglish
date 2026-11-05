@@ -2,7 +2,39 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Course catalog snapshot follow-up — 2026-11-05
+
+PERF-001, `codex/perf001-course-projection`, parent Bridge fix `935e029`.
+Both ListCourses and a found GetCourse lookup now use one joined read, replacing
+`1 + 2N`/two database calls. Published courses survive an empty/all-hidden lesson
+list as [], while draft courses/lessons remain excluded. Lookup of empty slug
+still returns ErrNotFound. Course/lesson ordering and fields, memory behavior,
+owner/enrollment/progress/bookmarks/XP and schema are unchanged.
+
+New PostgreSQL tests count queries through the existing test-only connector,
+compare the original legacy result at small/larger corpora, verify empty/hidden/
+republished content and require one committed course/lesson revision under
+concurrent writes. The CI benchmark compares both catalogs under the same
+limits and reports database calls/op, latency and allocations. New-head runtime
+checks/results and final 3D captures are pending; only static checks ran locally.
+
+PR 49 source `94998a8` passed all six jobs/256 E2E (40.7m) in CI 225, plus31
+focused cases (47.9s). Both dark-text Fair recovery images were inspected.
+Reviews/threads were empty and combined main tree equalled tested source before
+merge `ff7ef88`, preserving PR47/48 ancestry. This resolves parent acceptance;
+it does not accept the new course/topology/label source. No production deploy.
+
 ## Bridge topology v2 and unchanged label projections — 2026-11-05
+
+Follow-up evidence on `935e029`: focused run 13 (42000126798) passed all 38 cases
+in 2.5m. Both retained label samples measured zero repeated attribute writes in
+250ms paused and running stationary scenes, with independent live-timer/input/
+moving-target assertions passing. Four Bridge phone images were inspected; one
+Adventure 844 capture showed labels before the WebGL scene's first presentation
+after reload. The capture now explicitly advances a rendering frame and permits
+the compositor to paint. This changes evidence timing, not gameplay/renderer
+rules. Final new-head images still require inspection; that earlier blank image
+is not accepted as visual proof. Full head CI remains separate.
 
 CORE-007/PERF-003, `codex/core007-bridge-topology`, parent `94998a8`. Fresh
 advanced Bridge runs select distinct seeded topology templates, preserving v1

@@ -91,6 +91,10 @@ async function playMode(page: Page, mode: "Adventure" | "Challenge", height: 551
   await click(page, page.getByRole("button", { name: "Let’s play →" }));
   await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 10000));
   await expect(page.locator(".fair-challenge-status")).toContainText(mode);
+  // A reload can install the label layer before WebGL presents its first
+  // frame. Advance rendering and let the compositor paint before evidence.
+  await page.clock.runFor(320);
+  await page.waitForTimeout(80);
   await page.screenshot({ path: `.cache/bridge-topology-${mode.toLowerCase()}-${height}.png` });
   for (let round = 0; round < 3; round++) {
     await expect(page.locator(".fair-objective")).toContainText(`ROUND ${round + 1} / 3`);
