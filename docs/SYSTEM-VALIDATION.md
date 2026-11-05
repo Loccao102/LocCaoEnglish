@@ -14,7 +14,14 @@ moving targets, following camera, resize/zoom/rebuild and input still invalidate
 Simulation/rendering/animation clocks remain unchanged.
 
 New unit/browser scenarios, phone captures and MutationObserver samples are
-pending new-head CI. No local app/build/tests/services or human playtest results.
+pending new-head CI. Fast run 12 on `92ab5b0` stopped at one Bridge checkpoint
+poll failure (six cases passed). The inspected failure image shows round 3,
+200 points and three hearts while the last periodic checkpoint still says
+round 2: fake time had frozen before the next one-second save tick. The test
+now first requires the actual visible round, then permits that next tick before
+asserting the saved round. No gameplay, difficulty, budget or star assertion is
+changed. New head must pass independently. No local app/build/tests/services
+or human playtest results.
 Parent run 41994506696 passed 31 focused checks (47.9s); both Fair conflict phone
 images were inspected and confirm the dark text follow-up. That narrow result
 does not establish acceptance of this new topology/renderer code.

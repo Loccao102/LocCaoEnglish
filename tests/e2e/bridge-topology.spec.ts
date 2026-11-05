@@ -60,8 +60,7 @@ async function checkpoint(page: Page) {
 }
 
 async function solveRound(page: Page, level: "adventure" | "expert", round: number) {
-  await expect.poll(async () => (await checkpoint(page))?.session?.state?.round).toBe(round);
-  const saved = await checkpoint(page);
+  const saved = await roundCheckpoint(page, round);
   expect(saved?.session?.state?.challenge?.bridgeTopologyVersion).toBe(2);
   const challenge = saved.session.state.challenge;
   const puzzle = bridgeTopologyPuzzle(challenge.seed, saved.session.state.round, level);
@@ -72,6 +71,15 @@ async function solveRound(page: Page, level: "adventure" | "expert", round: numb
   }
   await click(page, page.getByRole("button", { name: "Send boat →" }));
   await page.clock.runFor(3200);
+}
+
+async function roundCheckpoint(page: Page, round: number) {
+  await expect(page.locator(".fair-objective")).toContainText(`ROUND ${round + 1} / 3`);
+  // Recovery writes run once per second. Frozen fake time can stop after the
+  // visible transition but just before the next periodic checkpoint tick.
+  if ((await checkpoint(page))?.session?.state?.round !== round) await page.clock.runFor(1100);
+  await expect.poll(async () => (await checkpoint(page))?.session?.state?.round).toBe(round);
+  return checkpoint(page);
 }
 
 async function playMode(page: Page, mode: "Adventure" | "Challenge", height: 551 | 844) {
@@ -130,7 +138,7 @@ test("a genuine v1 bridge checkpoint resumes and solves the original puzzle thro
 
   for (let round = 0; round < 3; round++) {
     await expect(page.locator(".fair-objective")).toContainText(`ROUND ${round + 1} / 3`);
-    const current = await page.evaluate(checkpointKey => JSON.parse(localStorage.getItem(checkpointKey)!), key);
+    const current = await roundCheckpoint(page, round);
     expect(current.session.state.challenge.bridgeTopologyVersion).toBeUndefined();
     const challenge = current.session.state.challenge;
     const puzzle = legacyPuzzle(challenge.seed, current.session.state.round);
