@@ -572,6 +572,18 @@ Nghiệm thu memory/PG/race/HTTP role, browser tài khoản thật + render life
 mobile 390×551/844 và đủ CI trên head cuối. Chỉ kiểm tra trên GitHub Actions
 theo yêu cầu người dùng; chưa nghiệm thu. Contract: ADR 017.
 
+### Câu trả lời gốc và provenance của Adventure (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core005-adventure-provenance`, nền main `54273c3`.
+Rà store cho thấy first-clear Adventure ghi đáp án chuẩn vào `attempts.answer`
+kể cả câu người chơi trả lời sai, đồng thời để source/version thành legacy mặc
+định. Sửa ghi đúng câu trả lời đã nộp, source story-guided riêng, hash catalog và
+phiên bản luật đang dùng. Không đổi chấm điểm, reward/first-clear transaction,
+save/API hoặc review answer chuẩn; không sửa/backfill lịch sử cũ. Không đưa quest
+Adventure vào shared learning practice, mastery hoặc checked-practice rank.
+Nghiệm thu PostgreSQL đúng/sai/first-clear concurrent/retry/replay/restart và
+giữ lịch sử legacy; chỉ qua GitHub Actions theo yêu cầu, chưa nghiệm thu.
+
 ### Đã nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`done`, xác nhận 2026-11-03)
 
 Owner/task: Codex, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`.
