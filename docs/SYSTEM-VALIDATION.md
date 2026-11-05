@@ -2,6 +2,44 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## GitHub required-check enforcement — 2026-11-05
+
+GOV-002. The reviewed JSON request was applied through GitHub REST using existing
+repository administration authority, after reading an empty ruleset list and
+unprotected main. Rule [26589636](https://github.com/Loccao102/LocCaoEnglish/rules/26589636)
+read back active for main, no bypass actors, PR/resolved-thread requirement,
+zero mandatory approvals, and the exact six Actions checks from app 15368.
+Force pushes/deletion are blocked; strict latest-base/linear-history are off.
+Effective main rules and `protected:true` were independently read back; the
+connection reports it cannot bypass. No new credentials or grants.
+
+Controlled [PR #43](https://github.com/Loccao102/LocCaoEnglish/pull/43), head
+`20ffcd69048332c88eef2dbc26299b7a399d1903`, added one deliberately failing test.
+[CI 212](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41973468716)
+frontend log shows **1 deliberate failure, 50 existing game tests passed (3.0s)**.
+Backend/AI/compose/integration passed and E2E skipped after failure. No existing
+assertion was changed. Before attempting the rejection proof, reads verified
+open non-draft PR, exact head, main target, active/no-bypass rule, and conflict-free
+code with GitHub merge state `blocked`. The ordinary connected REST merge
+returned **HTTP 405**: `Repository rule violations found` / `Required status
+check "frontend" is failing.` Main remained `7805b50b5ae99aad020bf7d2039e878e9b32545a`
+before/after. The probe was closed without merging; its evidence is retained.
+History protections were verified by read-back, without destructive probes.
+This proves required-check enforcement, not human approval or whole-project safety.
+
+## Fast GitHub recovery UI verification — 2026-11-05
+
+The additive helper workflow ran the existing auth/content/colour cases on a
+disposable stack. [Run 3](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41972957190)
+on `245d304` reports **19 passed (58.4s)**, no failed/flaky summary or retry.
+Run 2 on `a37f5bf` also passed **19 (55.8s)**; its eight ratio-guide/action images
+at 390×551/844 were downloaded and viewed. The runtime is unchanged between
+those two heads; only workflow scheduling/docs differ. CMS captures were also
+reviewed, with the existing scrollable form and readable controls.
+The exact current full six-job/251-case matrix is still separately required.
+Superseded runs were cancelled rather than reported as accepted. All execution
+is on GitHub; no local application/build/tests or production deployment.
+
 ## Dashboard overall-band boundary — 2026-11-05
 
 CORE-004, branch `codex/core004-overall-boundary`, base `4fa1b77`.

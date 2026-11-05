@@ -12,7 +12,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | [CONTRIBUTING](../CONTRIBUTING.md) | Quy trình nhận việc, phát triển, kiểm tra và PR |
 | [DEFINITION-OF-DONE](DEFINITION-OF-DONE.md) | Điều kiện được gọi một thay đổi là hoàn tất |
 | [AGENTS](../AGENTS.md) | Chỉ dẫn tự đọc cho coding agent ở root repository |
-| [GITHUB-MERGE-GATE](GITHUB-MERGE-GATE.md) | Đề xuất cấu hình có thể review và phép thử enforcement; chưa áp dụng |
+| [GITHUB-MERGE-GATE](GITHUB-MERGE-GATE.md) | Cấu hình đang áp dụng và bằng chứng GitHub chặn required check thất bại |
 
 ## Đọc theo miền
 

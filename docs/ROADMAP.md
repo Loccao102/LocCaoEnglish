@@ -58,7 +58,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
-| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | in_progress |
+| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -907,42 +907,39 @@ Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình 
 
 ## GOV-002 — Rào chắn merge thực tế
 
-Owner/task: Codex, `codex/gov002-protection-proposal`, 2026-11-05. Đã so tên
-sáu check thật và app ID 15368, chuẩn bị [policy JSON](proposals/main-required-ci.json)
-và [kế hoạch áp dụng/read-back/PR lỗi](GITHUB-MERGE-GATE.md). File chưa áp dụng.
-Rà UI chỉ đọc mở được settings/form, chưa xác nhận quyền ghi hoặc submit. Connector
-không có thao tác ghi administration; chưa tạo probe hay thử bypass. Mục còn thiếu
-cấu hình thật và bằng chứng chặn merge, không done từ proposal hoặc CI xanh.
+Owner/task: Codex, 2026-11-05. Đã áp dụng và xác minh ruleset
+[26589636](https://github.com/Loccao102/LocCaoEnglish/rules/26589636) cho main:
+PR bắt buộc; sáu check frontend/backend/ai-service/compose/integration/e2e từ
+Actions app 15368; resolve review threads; không bypass, không force push/xóa
+nhánh. Không gán CODEOWNERS/người duyệt; số approval bắt buộc là 0 vì chưa có
+reviewer độc lập được phân công. Không bắt latest-base/linear-history, giữ
+ancestry của stacked PR và review tổ hợp thực tế. Read-back effective rules,
+protected:true và current_user_can_bypass:never đã xác nhận cấu hình hoạt động.
 
-GitHub-only feedback: `codex/github-recovery-ui-check` bổ sung workflow riêng
-chạy 19 ca đăng nhập/soạn bài/pha màu trên stack dùng một lần để phát hiện lỗi
-sớm. Bộ sáu jobs/full E2E hiện có giữ nguyên và vẫn cần trước tích hợp runtime.
-Workflow không áp dụng policy, không thay required check names hay hạ assertion;
-thất bại đầu tiên dừng lượt nhanh để sửa, flaky vẫn làm lỗi. Chưa nghiệm thu.
+[PR thử #43](https://github.com/Loccao102/LocCaoEnglish/pull/43), head `20ffcd6`,
+[CI 212](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41973468716)
+chỉ thất bại test chủ đích; 50 game tests cũ đạt. GitHub báo blocked và từ chối
+merge thông thường với expected head bằng HTTP 405, nêu rõ frontend đang lỗi.
+Main giữ nguyên `7805b50` trước/sau phép thử. PR đã đóng, không merge; không bỏ
+assertion hoặc dùng bypass. Bằng chứng/giới hạn tại
+[GITHUB-MERGE-GATE](GITHUB-MERGE-GATE.md) và SYSTEM-VALIDATION.
+Phạm vi enforcement đã done; không có nghĩa human approval, gameplay hay toàn
+dự án đã được nghiệm thu. Không deploy production hoặc đổi quyền người dùng/app.
 
-Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
-required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
-branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
-Kết nối chưa hỗ trợ thao tác áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
-Mục chưa hoàn tất; không dùng checklist/CI xanh để thay bằng chứng enforcement.
+Ban đầu 2026-10-21 và lần đọc đầu 2026-11-05, main chưa protected/rulesets rỗng.
+Connector chỉ có read administration; rà UI không submit. Sau đó đã xác minh
+quyền quản trị qua xác thực GitHub CLI hiện có và áp dụng REST, không tạo quyền
+hoặc credential mới. JSON trong docs là template của request đã áp dụng, không
+phải cơ chế tự bật policy khi commit file.
 
-Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
-`protected:false`, required status checks ở chế độ off; danh sách repository
-rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/LocCaoEnglish/branches/main),
-[rulesets](https://api.github.com/repos/Loccao102/LocCaoEnglish/rulesets).
-Đây là bằng chứng chưa có enforcement tại thời điểm đọc, không phải đã cấu hình.
-Các merge trong đợt này vẫn chờ đủ sáu jobs và dùng expected head SHA thủ công.
-Connector hiện có chỉ cung cấp đọc branch protection/rulesets; cần quyền/công cụ
-quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Chưa nghiệm thu.
+Workflow phản hồi nhanh bổ sung 19 ca đăng nhập/soạn bài/pha màu, đã đạt 19/19
+(58.4s) trên `245d304`. Bộ sáu jobs/full E2E giữ nguyên, vẫn cần trước tích hợp
+runtime. Các revision bị thay thế được dừng, không coi là pass. CI helper và
+các chức năng đang kiểm tra đầy đủ riêng; enforcement không thay cho nghiệm thu.
 
-**Cần làm:** kiểm tra branch rules/permissions và CI jobs thật trên GitHub; cấu hình
-required checks và review phù hợp với quyền/chế độ cộng tác của repository. Không
-tự điền CODEOWNERS cho người chưa được phân công. Ghi những điều được kiểm tra tự
-động và những điều reviewer vẫn phải đọc (kiến trúc, dữ liệu, gameplay, license).
-
-**Hoàn tất khi:** xác minh một PR có required check thất bại không thể merge theo
-quyền thông thường, branch đích và tên check đúng, review/bypass rules được ghi rõ.
-Files docs/PR checklist không được coi là đã hoàn thành mục này.
+**Tiêu chí đã đạt:** required check thất bại chặn merge theo quyền thông thường,
+đúng nhánh/tên check, review/bypass được ghi rõ. Cấu hình không được suy từ file
+checklist. Vẫn review kiến trúc, dữ liệu, ngữ nghĩa, trải nghiệm và license.
 
 ## Mẫu cập nhật một mục
 
