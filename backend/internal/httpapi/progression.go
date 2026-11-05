@@ -46,11 +46,11 @@ func (s *Server) evaluateBoss(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	if in.RulesVersion != engine.ConversationRulesVersion {
+	if !engine.SupportedConversationRulesVersion(in.RulesVersion) {
 		problem(w, 409, "conversation rules changed; reload this mission")
 		return
 	}
-	if err := engine.ValidateConversation(r.PathValue("id"), in.Messages); err != nil {
+	if err := engine.ValidateConversationForVersion(r.PathValue("id"), in.Messages, in.RulesVersion); err != nil {
 		problem(w, 400, err.Error())
 		return
 	}
@@ -79,7 +79,12 @@ func (s *Server) evaluateBoss(w http.ResponseWriter, r *http.Request) {
 		problem(w, 409, "boss gate is still locked")
 		return
 	}
-	write(w, 200, engine.EvaluateBossConversation(bossID, in.Messages))
+	verdict, err := engine.EvaluateBossConversationForVersion(bossID, in.Messages, in.RulesVersion)
+	if err != nil {
+		problem(w, 400, err.Error())
+		return
+	}
+	write(w, 200, verdict)
 }
 
 func (s *Server) completeBoss(w http.ResponseWriter, r *http.Request) {

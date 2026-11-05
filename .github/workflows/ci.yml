@@ -220,5 +220,13 @@ jobs:
             test-results/**/journey-learning-unavailable-*.png
           if-no-files-found: ignore
           retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mission-v3-mobile-review
+          path: .cache/mission-v3-saved-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
       - if: always()
         run: docker compose down -v

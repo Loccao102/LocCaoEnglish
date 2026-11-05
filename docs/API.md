@@ -723,7 +723,7 @@ All three endpoints require an authenticated account; guest demo requests return
 an ordered server rubric; it is not a fluency or acoustic score.
 
 - `POST /v1/player/bosses/{id}/evaluate`: `{messages: string[], rulesVersion:
-  "conversation.v2"}`. An unlocked chapter is required. Returns `bossId`, stage,
+  "conversation.v2" | "conversation.v3"}`. An unlocked chapter is required. Returns `bossId`, stage,
   objective-coverage score, complete, completed/missing objectives, per-turn
   `{index, accepted, objective, feedback}`, next partner `reply`, rulesVersion and
   evidence `server-rule-based-reported-dialogue`. Evaluation does not save rewards.
@@ -748,6 +748,17 @@ API-before-frontend rollout and data-preserving rollback are specified in
 unlock policy remains CORE-005. Only successful completion receipts are stored on server;
 unfinished dialogue and draft/pending operations stay in account-scoped browser
 storage, with no tokens in the saved draft. No dialogue is added to logs.
+
+New browser dialogues default to `conversation.v3`. Restored v2 drafts keep v2
+for evaluation, exact pending retries and completion; explicit restart creates
+v3. The existing owner/boss draft key remains readable. The server retains the
+unchanged v2 grader, and selects the rubric from the supplied supported version.
+V3 adds narrowly authored departure-time questions, day/time suggestions and
+misunderstanding phrases, with relevant negative checks. It does not claim
+general semantic grading. Unsupported versions return 409. Completed receipts
+are never recomputed; changing the version of an existing claim conflicts even
+when its messages match. No SQL migration or reward change. Ship the dual-version
+API before new web clients, and retain v3 decoding/grading on backend rollback.
 
 ### Campaign preparation (`campaign-practice.v1`)
 

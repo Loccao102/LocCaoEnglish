@@ -194,3 +194,133 @@ func TestMissionEvidencePersistence(t *testing.T) {
 		})
 	}
 }
+
+func TestMissionVersionedV3ClaimAndExactRetryMemoryPostgres(t *testing.T) {
+	urls := map[string]string{"memory": ""}
+	if url := os.Getenv("TEST_DATABASE_URL"); url != "" {
+		if !strings.Contains(url, "loccao_system_test") {
+			t.Fatal("dedicated test DB required")
+		}
+		urls["postgres"] = url
+	}
+	for mode, url := range urls {
+		t.Run(mode, func(t *testing.T) {
+			ctx := context.Background()
+			s, err := New(url)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer s.Close()
+			for _, ensure := range []func(context.Context) error{s.EnsureIELTS, s.EnsurePlayerProfiles, s.EnsureProgression, s.EnsureProgression} {
+				if err := ensure(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if s.db != nil {
+				migration, err := os.ReadFile("../../migrations/017_mission_evidence.sql")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err = s.db.ExecContext(ctx, string(migration)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			u, err := s.CreateUser(ctx, fmt.Sprintf("mission-v3-%d@example.test", time.Now().UnixNano()), "hash", "Versioned Role Player")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if s.db != nil {
+				defer s.db.ExecContext(ctx, `DELETE FROM users WHERE id=$1`, u.ID)
+			}
+			if _, err = s.SavePlayerProfile(ctx, u.ID, model.PlayerProfile{Goal: "travel", CEFRLevel: "B1", DailyMinutes: 15, TargetBand: 7, Interests: []string{"travel"}}); err != nil {
+				t.Fatal(err)
+			}
+			completePractice := func(activity, request, item string) {
+				a, answer := campaignRound(t, s, u.ID, activity, request, item)
+				if !campaignSubmit(t, s, u.ID, a, answer).Correct {
+					t.Fatalf("practice fixture was not correct: %s", activity)
+				}
+			}
+			completePractice("word-link", "v3-airport-vocab", "v3-airport-vocab")
+			completePractice("listen-pick", "v3-airport-listening", "v3-airport-listening")
+			completePractice("shadowing", "v3-airport-speaking", "v3-airport-speaking")
+			airport := []string{"I missed my flight today.", "Could you rebook me on the next flight?", "Yes please, book it. Which gate should I use?"}
+			if _, err = s.CompleteBoss(ctx, u.ID, "airport-crisis", airport, engine.ConversationRulesVersion); err != nil {
+				t.Fatal("v2 prerequisite claim", err)
+			}
+			if cleared := campaignBoss(t, s, u.ID, "airport-crisis").CompletedAt; cleared != nil {
+				for !time.Now().UTC().After(*cleared) {
+					time.Sleep(time.Millisecond)
+				}
+			}
+			completePractice("story-choice", "v3-hotel-reading", "v3-hotel-reading")
+			completePractice("grammar-repair", "v3-hotel-grammar", "v3-hotel-grammar")
+			completePractice("shadowing", "v3-hotel-speaking", "v3-hotel-speaking")
+			if hotelBoss := campaignBoss(t, s, u.ID, "hotel-reservation"); !hotelBoss.Unlocked {
+				t.Fatalf("hotel gate did not open: %+v", hotelBoss.Checkpoints)
+			}
+			hotel := []string{"My confirmed reservation is missing.", "My confirmation number is ABC123.", "What time is breakfast tomorrow?"}
+			if _, err = s.CompleteBoss(ctx, u.ID, "hotel-reservation", hotel, engine.ConversationRulesVersion); err != nil {
+				t.Fatal("v2 second-chapter claim", err)
+			}
+			if cleared := campaignBoss(t, s, u.ID, "hotel-reservation").CompletedAt; cleared != nil {
+				for !time.Now().UTC().After(*cleared) {
+					time.Sleep(time.Millisecond)
+				}
+			}
+			completePractice("collocation-factory", "v3-transit-vocab", "v3-transit-vocab")
+			completePractice("listen-pick", "v3-transit-listening", "v3-transit-listening")
+			completePractice("shadowing", "v3-transit-speaking", "v3-transit-speaking")
+			if transitBoss := campaignBoss(t, s, u.ID, "city-transit"); !transitBoss.Unlocked {
+				t.Fatalf("city gate did not open: %+v", transitBoss.Checkpoints)
+			}
+			transit := []string{"I need to get to Central station.", "Which line is the fastest route?", "Could you tell me the departure time?"}
+			before, _ := s.GetUser(ctx, u.ID)
+			second := s
+			if url != "" {
+				second, err = New(url)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer second.Close()
+			}
+			var wg sync.WaitGroup
+			results := make(chan error, 8)
+			start := make(chan struct{})
+			for i := 0; i < 8; i++ {
+				wg.Add(1)
+				go func(i int) {
+					defer wg.Done()
+					<-start
+					st := s
+					if i%2 == 1 {
+						st = second
+					}
+					retry, e := st.CompleteBoss(ctx, u.ID, "city-transit", transit, engine.LatestConversationRulesVersion)
+					if e == nil && (retry.Receipt.Evaluation == nil || retry.Receipt.Evaluation.RulesVersion != engine.LatestConversationRulesVersion || !reflect.DeepEqual(retry.Receipt.Messages, transit)) {
+						e = errors.New("v3 retry changed immutable receipt")
+					}
+					results <- e
+				}(i)
+			}
+			close(start)
+			wg.Wait()
+			close(results)
+			for e := range results {
+				if e != nil {
+					t.Fatal(e)
+				}
+			}
+			if _, err = s.CompleteBoss(ctx, u.ID, "city-transit", transit, engine.ConversationRulesVersion); !errors.Is(err, ErrMissionConflict) {
+				t.Fatalf("cross-version retry was accepted: %v", err)
+			}
+			after, _ := s.GetUser(ctx, u.ID)
+			if after.XP != before.XP+220 {
+				t.Fatalf("v3 retry repeated reward: before=%d after=%d", before.XP, after.XP)
+			}
+			if _, err = s.GetMissionReceipt(ctx, "other-owner", "city-transit"); !errors.Is(err, ErrNotFound) {
+				t.Fatalf("foreign owner saw v3 receipt: %v", err)
+			}
+		})
+	}
+}

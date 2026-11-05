@@ -23,6 +23,10 @@ func TestOrderedMissionRubrics(t *testing.T) {
 			if !good.Complete || good.Stage != 3 || good.Evidence != ConversationEvidence || len(good.Turns) != 3 {
 				t.Fatalf("valid conversation: %+v", good)
 			}
+			latest, err := EvaluateBossConversationForVersion(id, lines, LatestConversationRulesVersion)
+			if err != nil || !latest.Complete || latest.Stage != 3 || len(latest.Turns) != 3 {
+				t.Fatalf("valid v3 conversation: %+v, %v", latest, err)
+			}
 			reversed := []string{lines[2], lines[1], lines[0]}
 			if got := EvaluateBossConversation(id, reversed); got.Complete || got.Stage != 1 {
 				t.Fatalf("retroactive credit: %+v", got)

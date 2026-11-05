@@ -509,6 +509,19 @@ không tạo điểm giả, XP hoặc band. Chưa deploy hay hiệu chuẩn prov
 CORE-004 vẫn `in_progress`. Chi tiết tại
 [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
 
+### CORE-004 — Paraphrase có phiên bản (`in_review`, 2026-11-03)
+
+Owner/task: Codex, branch `codex/core004-mission-paraphrases`; từ runtime PR #28
+`84fe2b2` trong lúc đồng bộ các merge được nghiệm thu. Phạm vi: nhận đúng ba
+cách diễn đạt tự nhiên cho city-transit/weekend-plans/repair-misunderstanding,
+chốt `conversation.v3` và giữ grader `conversation.v2` cho draft/pending cũ.
+Không đổi gate, first-clear reward hoặc schema; không chấm lại receipt đã lưu.
+Contract/rollout ở [ADR 005](decisions/005-mission-evidence.md).
+Nghiệm thu: đúng/sai/phủ định/spam/thứ tự, version/owner, retry/concurrency,
+v2 draft recovery và browser v3/receipt/reload; PG/vet/build và CI cuối.
+Code và regression đã có; kiểm tra cuối chuyển sang GitHub Actions theo yêu cầu
+người dùng không chạy trên máy. Chưa nghiệm thu; toàn CORE-004 vẫn `in_progress`.
+
 ### Tiêu chí hoàn tất toàn CORE-004
 
 **Cần làm:** thêm provenance cho verdict: objective grading, transcript match,

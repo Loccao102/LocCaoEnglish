@@ -99,3 +99,28 @@ reload/retry, auth races, legacy rejection, corrupt storage and two mobile sizes
 Prerequisite playback events are fixtures, not evidence of a human listening.
 See [validation](../SYSTEM-VALIDATION.md) for results and [roadmap](../ROADMAP.md)
 for status; no playtest or general semantic accuracy is claimed.
+
+## CORE-004 follow-up — Versioned mission paraphrases (implemented, pending CI; 2026-11-03)
+
+Accept three narrowly authored conversational alternatives without changing the
+saved v2 rubric: departure-time questions in city-transit, a day/time proposal
+in weekend-plans, and an explicit misunderstanding in repair-misunderstanding.
+The existing dialogue contract remains guided pattern-based reported evidence.
+
+New drafts use conversation.v3. The server continues to evaluate/complete
+conversation.v2 using its unchanged rubric. Drafts retain their original version
+in the existing owner/boss local key; evaluation, pending retry and completion
+send that version. Explicit restart creates a new v3 draft. Stored receipts are
+returned unchanged and never regraded; identical old-version retries retain the
+old result and reward, while a different version conflicts with the saved claim.
+
+No SQL migration or reward/gate change. Backend supports both versions before
+frontend starts v3. A web rollback can continue to use v2. A backend rollback
+must keep the v3 grader for saved v3 drafts/receipts or disable new evaluations
+while keeping receipt reads/idempotent retries; never reinterpret a v3 dialogue
+as v2 or remove user drafts. All nine canonical dialogues, ordering, exact-repeat
+and negative checks remain. This does not claim general semantic understanding.
+
+Acceptance requires versioned engine regressions, owner/HTTP/version/claim tests,
+PostgreSQL/concurrency and browser v2 draft recovery/v3 dialogue completion,
+reload/lost-response behavior and mobile verification on the final revision.
