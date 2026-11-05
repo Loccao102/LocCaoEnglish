@@ -27,6 +27,8 @@ general help from the existing charged target recipe. Recipe presentation groups
 the current session's pigments by count; it does not change evaluation or seeds.
 The opening dialog also uses the selected mode's existing challenge description
 instead of the two-paint Practice instructions for every mode.
+Reference examples use three-drop red/white ratios absent from the current
+authored targets; a red/yellow 2:1 example would have exposed the coral recipe.
 No new results, telemetry, rewards or save fields.
 
 New browser cases play all four rounds through actual pigment/submit controls in
