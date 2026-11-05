@@ -14,6 +14,12 @@ the longest title gets retained screenshots. No grading/API/save/reward change.
 Source-only local review and diff checks; build/browser validation runs only in
 GitHub Actions per user request. Status: in_review pending final-head CI/images.
 
+CI 186 on `0cf5e1f` passed six jobs and 212 E2E (39.9m). Viewing its four
+mission images exposed an awkward emergency word break and tight 100% digits.
+Phone typography/progress sizing is refined, with per-word and inner-ring text
+bounds added to the browser checks. That earlier pass remains scoped to its
+own source; the refined head requires fresh CI and visual review.
+
 ## GitHub merge acceptance — 2026-11-05
 
 All six jobs passed on each final source head: PR #27 `20a3180` / CI 179
