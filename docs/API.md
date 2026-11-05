@@ -12,6 +12,32 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 - `POST /v1/auth/register`
 - `POST /v1/auth/login`
 
+## Teacher practice reporting
+
+`GET /v1/admin/analytics` requires a signed-in teacher or admin; guests receive
+401 and learner accounts 403 even where anonymous demo reads are enabled.
+The additive contract has `method: "teacher-practice.v1"` and
+`practice: {windowDays:7,attempts7d,correct7d,active7d,skills:[{skill,attempts,
+correct,learners,evidenceKind}]}`. See [ADR 017](decisions/017-teacher-practice-analytics.md).
+Only account-owned, completed shared practice with a supported activity/rules/skill,
+nonempty item/content version and a completion in the inclusive rolling seven-day
+window qualifies. Demo, guest, active/legacy, story clears and IELTS estimates
+are excluded. Shared Story Choice remains eligible Reading practice; Adventure
+quest rewards are a separate source. Correct and incorrect completions both count; fresh replays count
+as rounds, while an exact retry uses the same stored completion. Speaking is
+`transcript-match`, other supported skills are `guided-practice`; no mastery,
+pronunciation quality or calibrated CEFR is inferred. An empty period has zero
+counts and an empty skill list, not a fabricated score.
+
+Existing top-level `active7d`, `attempts7d`, `averageAccuracy`, `skills` confidence
+and lesson scores remain deprecated compatibility projections with mixed historical
+sources. New reporting must use `practice`, and treat missing/unknown methods as
+unavailable. `learners` excludes the seeded demo. Published lesson starts/completions
+are kept separate and labelled learner reports. This read does not change any
+rewards, saves or grants. The browser captures its token for both role and report
+reads, hides prior data during refresh/account changes and ignores late responses.
+No raw learner answers, essays or audio are added to the aggregate response.
+
 ## Learner state
 
 - `GET /v1/dashboard`

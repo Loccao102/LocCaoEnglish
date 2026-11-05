@@ -3,12 +3,12 @@ package model
 import "time"
 
 type CourseLesson struct {
-	Slug        string `json:"slug"`
-	Title       string `json:"title"`
-	Skill       string `json:"skill"`
-	Level       string `json:"level"`
-	Position    int    `json:"position"`
-	EstimatedMins int  `json:"estimatedMins"`
+	Slug          string `json:"slug"`
+	Title         string `json:"title"`
+	Skill         string `json:"skill"`
+	Level         string `json:"level"`
+	Position      int    `json:"position"`
+	EstimatedMins int    `json:"estimatedMins"`
 }
 
 type Course struct {
@@ -24,23 +24,49 @@ type Course struct {
 }
 
 type CourseProgress struct {
-	CourseID          string  `json:"courseId"`
-	CourseSlug        string  `json:"courseSlug"`
-	Enrolled          bool    `json:"enrolled"`
-	CompletedLessons  int     `json:"completedLessons"`
-	TotalLessons      int     `json:"totalLessons"`
-	Percent           int     `json:"percent"`
-	AverageScore      float64 `json:"averageScore"`
+	CourseID         string  `json:"courseId"`
+	CourseSlug       string  `json:"courseSlug"`
+	Enrolled         bool    `json:"enrolled"`
+	CompletedLessons int     `json:"completedLessons"`
+	TotalLessons     int     `json:"totalLessons"`
+	Percent          int     `json:"percent"`
+	AverageScore     float64 `json:"averageScore"`
 }
 
-type SkillAnalytics struct { Skill string `json:"skill"`; AverageConfidence float64 `json:"averageConfidence"`; Learners int `json:"learners"` }
-type LessonAnalytics struct { Slug string `json:"slug"`; Title string `json:"title"`; Started int `json:"started"`; Completed int `json:"completed"`; AverageScore float64 `json:"averageScore"` }
+type SkillAnalytics struct {
+	Skill             string  `json:"skill"`
+	AverageConfidence float64 `json:"averageConfidence"`
+	Learners          int     `json:"learners"`
+}
+type LessonAnalytics struct {
+	Slug         string  `json:"slug"`
+	Title        string  `json:"title"`
+	Started      int     `json:"started"`
+	Completed    int     `json:"completed"`
+	AverageScore float64 `json:"averageScore"`
+}
+type TeacherPracticeSkillAnalytics struct {
+	Skill        string `json:"skill"`
+	Attempts     int    `json:"attempts"`
+	Correct      int    `json:"correct"`
+	Learners     int    `json:"learners"`
+	EvidenceKind string `json:"evidenceKind"`
+}
+type TeacherPracticeAnalytics struct {
+	WindowDays int                             `json:"windowDays"`
+	Attempts7d int                             `json:"attempts7d"`
+	Correct7d  int                             `json:"correct7d"`
+	Active7d   int                             `json:"active7d"`
+	Skills     []TeacherPracticeSkillAnalytics `json:"skills"`
+}
 type AnalyticsSnapshot struct {
-	Learners        int               `json:"learners"`
-	Active7d        int               `json:"active7d"`
-	Attempts7d      int               `json:"attempts7d"`
-	AverageAccuracy float64           `json:"averageAccuracy"`
-	CompletedLessons int              `json:"completedLessons"`
-	Skills          []SkillAnalytics  `json:"skills"`
-	Lessons         []LessonAnalytics `json:"lessons"`
+	Method           string                   `json:"method"`
+	Learners         int                      `json:"learners"`
+	Active7d         int                      `json:"active7d"`
+	Attempts7d       int                      `json:"attempts7d"`
+	AverageAccuracy  float64                  `json:"averageAccuracy"`
+	CompletedLessons int                      `json:"completedLessons"`
+	Skills           []SkillAnalytics         `json:"skills"`
+	Lessons          []LessonAnalytics        `json:"lessons"`
+	Practice         TeacherPracticeAnalytics `json:"practice"`
 }

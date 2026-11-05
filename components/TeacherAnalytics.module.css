@@ -1,0 +1,23 @@
+.report { min-width: 0; font-size: 1rem; line-height: 1.6; overflow-wrap: anywhere; }
+.report h2 { font-size: 1.5rem; line-height: 1.3; }
+.report h3 { margin: 0; font-size: 1.125rem; }
+.report p { font-size: 1rem; }
+.report button, .report a { min-height: 44px; }
+.report a { display: inline-flex; align-items: center; }
+.report button { white-space: normal; }
+.heading { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
+.heading > div { flex: 1 1 28rem; min-width: 0; }
+.totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
+.totals > div, .skills article, .lessons { border: 1px solid #cbded7; background: #fff; padding: 1.25rem; border-radius: 1rem; }
+.totals dt { font-size: 1rem; color: #475e56; }
+.totals dd { margin: .5rem 0 0; font-size: 2rem; font-weight: 800; line-height: 1.2; }
+.totals small { font-size: 1rem; font-weight: 500; }
+.note { padding: 1rem; background: #edf7f2; border-radius: 1rem; color: #294f41; }
+.skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 1.5rem 0; }
+.skills > h2, .skills > p { grid-column: 1 / -1; }
+.skills article p { margin: .5rem 0 0; }
+.lessons ul { list-style: none; padding: 0; }
+.lessons li { display: grid; gap: .25rem; border-top: 1px solid #dce7e2; padding: 1rem 0; }
+.lessons span { color: #475e56; }
+@media (max-width: 800px) { .totals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 500px) { .totals, .skills { grid-template-columns: minmax(0, 1fr); } }
