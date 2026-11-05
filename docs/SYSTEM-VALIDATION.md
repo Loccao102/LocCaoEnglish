@@ -2,6 +2,68 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## SEC-001 — Frontend dependency patch — 2026-10-24
+
+Branch `codex/sec001-frontend-dependencies`, base profile head `cdd0b51`.
+Next is pinned to 16.4.3; the lockfile updates sharp to 0.35.5, its native
+binaries to 0.35.5 and bundled libvips packages to 1.3.4, and source-map-js to
+1.2.2. React 19.3, Three, PostCSS and unrelated package families stay unchanged.
+The three earlier dependency advisories are not evidence of an exploited app.
+No application source, API, reward, schema or save changes; no caching features enabled.
+
+The installed upgrade/standalone docs were read before and after updating
+dependencies. `npm ci --no-audit --no-fund` passed (38 packages); the separate
+`npm audit --audit-level=high` passed with **0 vulnerabilities**. `test:game`
+passed **50/50**; the asset verifiers passed 41 unique assets/23 hashes and
+45 GLBs/24 animated companions. A benign 4×4 → 2×2 PNG transform passed on
+Windows Node 24.20.0 from workspace node_modules with sharp 0.35.5, librsvg
+2.63.2 and libvips 8.18.7. Requiring sharp from the generated Windows standalone
+output failed with `ERR_DLOPEN_FAILED` for the win32-x64 native module. The
+workspace success alone did not establish standalone packaging.
+An initial diagnostic version print had an extra parenthesis; the corrected
+version/native-transform check passed. This was local verification tooling,
+not an application failure.
+
+The E2E workflow adds the same benign resize/PNG transform inside the actual
+Linux standalone web container and checks sharp 0.35.5 with librsvg 2.63.2.
+Historical [CI 169](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40113272226)
+passed all six jobs on `17a5619ce33075ad3cc1b3dd587dae8d2ab517af`. E2E job
+`120929455118` records the actual standalone transform success and **196 passed
+(38.1m)**, with no retry markers, failed or flaky summaries. This verifies the
+Node 22 Alpine container, not a Windows standalone artifact. All existing CI
+checks and flaky-test rejection remain. The initial Next 16.4.3 production build
+passed all 58 routes and its TypeScript phase; the separate typecheck passed.
+
+Follow-up on 2026-10-25 found the precise Windows failure: the traced `.node`
+binary directly imports `libvips-42.dll` and `libvips-cpp-8.18.7.dll`, but neither
+DLL appears in the server trace or standalone output. Workspace/standalone addon
+hashes match; both DLLs are present in full workspace node_modules. The older
+Next 16.3.4/sharp 0.35.4 artifact has the same omission. Local full-dependency
+development does not use this incomplete standalone copy; no server was started
+to claim fresh end-to-end local runtime acceptance.
+
+The narrow correction adds `./node_modules/@img/sharp-win32-x64/lib/*.dll` to
+`outputFileTracingIncludes` under the documented all-route key `/*`, only when
+building on Windows x64. The [installed tracing guide](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)
+defines route keys and file patterns relative to the project root; server traces
+carry these extra runtime files into standalone output. Linux configuration and
+existing standalone settings stay unchanged. RED evidence in
+`.cache/sec001-windows-red.log` confirms the missing-DLL load failure before the
+configuration change. After correction, the production rebuild passed all 58
+routes and the separate typecheck passed. The standalone output contains both
+DLLs, with SHA-256 hashes equal to the installed package files. A fresh Windows
+Node process loaded sharp directly from standalone and passed the 4×4 → 2×2
+PNG transform (96 bytes), asserting sharp 0.35.5, librsvg 2.63.2 and libvips
+8.18.7. Logs: `.cache/sec001-windows-build.log`, `-typecheck.log` and `-green.log`.
+This verifies native loading in place on Windows x64; it does not claim a
+relocated Windows distribution or an HTTP/browser run. No listener was started.
+
+Production browser validation and all six final-head CI jobs after this tracing
+correction remain pending; CI 169 is historical evidence for `17a5619` only.
+No local preview startup was attempted following the earlier automatic review
+rejection, and no production deployment or user-data cleanup was performed.
+This slice is not accepted or merged.
+
 ## Account-owned profile recovery — 2026-10-24
 
 CORE-006, branch `codex/core006-profile-owner`, [ADR 015](decisions/015-profile-owner-recovery.md).
