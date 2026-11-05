@@ -58,7 +58,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
-| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | planned |
+| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | in_progress |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -579,7 +579,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Báo cáo giáo viên từ checked practice (`in_review`, 2026-11-05)
+### Báo cáo giáo viên từ checked practice (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core005-teacher-practice` / `codex/core005-teacher-ui`,
 nền main `54273c3`. Route `/admin/analytics` vẫn tính accuracy từ bảng attempts
@@ -907,10 +907,17 @@ Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình 
 
 ## GOV-002 — Rào chắn merge thực tế
 
+Owner/task: Codex, `codex/gov002-protection-proposal`, 2026-11-05. Đã so tên
+sáu check thật và app ID 15368, chuẩn bị [policy JSON](proposals/main-required-ci.json)
+và [kế hoạch áp dụng/read-back/PR lỗi](GITHUB-MERGE-GATE.md). File chưa áp dụng.
+Rà UI chỉ đọc mở được settings/form, chưa xác nhận quyền ghi hoặc submit. Connector
+không có thao tác ghi administration; chưa tạo probe hay thử bypass. Mục còn thiếu
+cấu hình thật và bằng chứng chặn merge, không done từ proposal hoặc CI xanh.
+
 Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
 required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
 branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
-Chưa có công cụ/quyền áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
+Kết nối chưa hỗ trợ thao tác áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
 Mục chưa hoàn tất; không dùng checklist/CI xanh để thay bằng chứng enforcement.
 
 Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
@@ -920,7 +927,7 @@ rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/L
 Đây là bằng chứng chưa có enforcement tại thời điểm đọc, không phải đã cấu hình.
 Các merge trong đợt này vẫn chờ đủ sáu jobs và dùng expected head SHA thủ công.
 Connector hiện có chỉ cung cấp đọc branch protection/rulesets; cần quyền/công cụ
-quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Mục vẫn planned.
+quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Chưa nghiệm thu.
 
 **Cần làm:** kiểm tra branch rules/permissions và CI jobs thật trên GitHub; cấu hình
 required checks và review phù hợp với quyền/chế độ cộng tác của repository. Không
