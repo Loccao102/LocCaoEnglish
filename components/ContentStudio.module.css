@@ -1,0 +1,71 @@
+.studio {
+  width: 100%;
+  min-width: 0;
+}
+
+.studio :global(.studio-layout) {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.32fr) minmax(0, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+
+.studio :global(.studio-list),
+.studio :global(.studio-editor) {
+  min-width: 0;
+}
+
+.studio :global(.studio-list) > button {
+  width: 100%;
+  min-height: 52px;
+  text-align: left;
+}
+
+.studio :global(input),
+.studio :global(select),
+.studio :global(textarea),
+.studio :global(button) {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.studio :global(input),
+.studio :global(select),
+.studio :global(button) {
+  min-height: 44px;
+}
+
+.studio :global(input),
+.studio :global(select),
+.studio :global(textarea) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.studio :global(textarea) {
+  min-height: 88px;
+  line-height: 1.45;
+}
+
+.studio :global(.exercise-editor) {
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .studio :global(.studio-layout) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .studio :global(.studio-list) {
+    max-height: 38vh;
+    overflow: auto;
+  }
+
+  .studio :global(.form-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .studio :global(.span-2) {
+    grid-column: auto;
+  }
+}

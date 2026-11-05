@@ -23,16 +23,37 @@ test("learner cannot open teacher content", async ({ page }) => {
 test("late teacher response cannot repopulate after account switch", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("loccao_token", "teacher-a"));
   let release!: () => void;
+  let listStarted!: () => void;
   const delayed = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { listStarted = resolve; });
   await page.route("**/v1/me", route => {
     const current = route.request().headers().authorization?.replace("Bearer ", "");
     const currentRole = current === "teacher-a" ? "teacher" : "learner";
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { id: current }, role: currentRole }) });
   });
-  await page.route("**/v1/admin/lessons", async route => { await delayed; await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) }); });
-  await page.goto("/admin/content");
+  await page.route("**/v1/admin/lessons", async route => { listStarted(); await delayed; await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) }); });
+  const navigation = page.goto("/admin/content");
+  await started;
   await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
   release();
+  await navigation;
+  await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
+  await expect(page.getByText("Teacher A draft")).toHaveCount(0);
+});
+
+test("loaded teacher content is cleared for learner and logout", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("loccao_token", "teacher-a"));
+  await page.route("**/v1/me", route => {
+    const token = route.request().headers().authorization?.replace("Bearer ", "");
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { id: token }, role: token === "teacher-a" ? "teacher" : "learner" }) });
+  });
+  await page.route("**/v1/admin/lessons", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) }));
+  await page.goto("/admin/content");
+  await expect(page.getByText("Teacher A draft")).toBeVisible();
+  await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
+  await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
+  await expect(page.getByText("Teacher A draft")).toHaveCount(0);
+  await page.evaluate(() => { localStorage.removeItem("loccao_token"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
   await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
   await expect(page.getByText("Teacher A draft")).toHaveCount(0);
 });
@@ -40,31 +61,50 @@ test("late teacher response cannot repopulate after account switch", async ({ pa
 test("save sends the captured owner token", async ({ page }) => {
   await openStudio(page, "teacher-a");
   await expect(page.getByText("Teacher A draft")).toBeVisible();
+  await page.getByRole("button", { name: /Teacher A draft/ }).click();
   let seen = "";
+  let release!: () => void;
+  const delayedSave = new Promise<void>(resolve => { release = resolve; });
   await page.unroute("**/v1/admin/lessons");
   await page.route("**/v1/admin/lessons", route => {
     seen = route.request().headers().authorization;
     if (route.request().method() === "DELETE") return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "offline" }) });
-    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(lesson) });
+    if (route.request().method() === "GET") return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) });
+    return delayed.then(() => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...lesson, title: "Saved title" }) }));
   });
   await page.getByLabel("Title").fill("Saved title");
   await page.getByRole("button", { name: "Save lesson" }).click();
   await expect.poll(() => seen).toBe("Bearer teacher-a");
-  page.on("dialog", dialog => void dialog.accept());
-  await page.getByRole("button", { name: "Delete" }).click();
-  await expect(page.getByRole("status")).toContainText("could not be deleted");
+  await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
+  release();
+  await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
+  await expect(page.getByText("Saved title")).toHaveCount(0);
 });
 
-test("list failure offers an explicit retry", async ({ page }) => {
+test("delete failure keeps the selected lesson and reports retry", async ({ page }) => {
+  await openStudio(page, "teacher-a");
+  await page.getByRole("button", { name: /Teacher A draft/ }).click();
+  await page.unroute("**/v1/admin/lessons");
+  await page.route("**/v1/admin/lessons", route => {
+    if (route.request().method() === "DELETE") return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "offline" }) });
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) });
+  });
+  page.on("dialog", dialog => void dialog.accept());
+  await page.getByRole("button", { name: "Delete" }).click();
+  await expect(page.getByRole("status")).toContainText("Deletion could not be confirmed");
+  await expect(page.getByLabel("Title")).toHaveValue("Teacher A draft");
+});
+
+test("unauthorized list failure offers an explicit retry", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("loccao_token", "teacher-a"));
   let attempts = 0;
   await page.route("**/v1/me", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { id: "teacher-a" }, role: "teacher" }) }));
   await page.route("**/v1/admin/lessons", route => {
     attempts++;
-    return route.fulfill(attempts === 1 ? { status: 503, contentType: "application/json", body: JSON.stringify({ error: "offline" }) } : { status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) });
+    return route.fulfill(attempts === 1 ? { status: 401, contentType: "application/json", body: JSON.stringify({ error: "sign in required" }) } : { status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) });
   });
   await page.goto("/admin/content");
-  await expect(page.getByRole("alert")).toContainText("Content Studio is unavailable");
+  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
   await page.getByRole("button", { name: "Retry Content Studio" }).click();
   await expect(page.getByText("Teacher A draft")).toBeVisible();
 });
@@ -72,8 +112,13 @@ test("list failure offers an explicit retry", async ({ page }) => {
 test("content studio remains readable on narrow screens", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 551 });
   await openStudio(page, "teacher-a");
+  await expect(page.getByText("Teacher A draft")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect(page.getByLabel("Title")).toHaveCSS("font-size", "16px");
+  await expect.poll(() => page.evaluate(() => [...document.querySelectorAll("button, input, select, textarea")].every(el => { const box = el.getBoundingClientRect(); return box.width >= 44 && box.height >= 44; }))).toBe(true);
   await page.screenshot({ path: ".cache/content-owner-390.png", fullPage: true });
-  await page.setViewportSize({ width: 844, height: 551 });
-  await page.screenshot({ path: ".cache/content-owner-844.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: ".cache/content-owner-390x844.png", fullPage: true });
   await expect(page.getByText("Teacher A draft")).toBeVisible();
 });
