@@ -94,8 +94,8 @@ test("IELTS Reading API owns the answer key, validates selections and records on
   expect(dashboard.ok()).toBe(true); expect((await dashboard.json()).ieltsBand).toBeNull();
   await page.evaluate(token => { localStorage.setItem("loccao_token", token); window.dispatchEvent(new Event("loccao-auth-change")); }, owner.token);
   await page.goto("/camp");
-  await expect(page.locator(".snapshot-band").getByText("No overall estimate yet", { exact: true })).toBeVisible();
-  await expect(page.locator(".snapshot-band strong")).toHaveText("—");
+  await expect(page.locator(".snapshot-band").getByText("No combined band is calculated", { exact: true })).toBeVisible();
+  await expect(page.locator(".snapshot-band strong")).toHaveText("By skill");
   await expect(page.locator(".snapshot-band").getByText("6.0", { exact: true })).toHaveCount(0);
   await page.goto("/ielts");
   const historyCard = page.getByRole("region", { name: "IELTS practice history" });
