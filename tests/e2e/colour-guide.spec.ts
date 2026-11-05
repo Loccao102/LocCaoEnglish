@@ -34,8 +34,8 @@ for (const [mode, drops] of [["Adventure", 3], ["Challenge", 4]] as const) {
     await click(page, page.getByRole("button", { name: "? How to play", exact: true }));
     const guide = page.getByRole("region", { name: "Paint mixing guide" });
     await expect(guide).toContainText(`${drops} drops in total`);
-    await expect(guide).toContainText("Red : Yellow = 1 : 2");
-    await expect(guide).toContainText("Red : Yellow = 2 : 1");
+    await expect(guide).toContainText("Red : White = 1 : 2");
+    await expect(guide).toContainText("Red : White = 2 : 1");
     await expect(guide).toContainText("not the recipe for your current target");
     await expect(page.getByLabel("Target paint recipe")).toHaveCount(0);
     await page.clock.runFor(5000);
