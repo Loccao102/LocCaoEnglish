@@ -22,7 +22,7 @@ func TestCourseEnrollmentRequiresAccountAndStaysOwnerScoped(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = st.Close() })
+	t.Cleanup(st.Close)
 	if err := st.EnsureContent(ctx); err != nil {
 		t.Fatal(err)
 	}

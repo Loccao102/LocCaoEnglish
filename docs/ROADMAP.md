@@ -637,6 +637,18 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Tiến độ và đăng ký khóa học đúng tài khoản (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-course-owner`, nền main `54273c3`.
+Route `/courses/[slug]` đọc demo progress cho guest và giữ tiến độ A sau đổi
+tài khoản; thao tác enroll dùng token tại lúc gửi thay vì owner của màn hình.
+Tách catalog công khai khỏi progress cá nhân, captured-token read/write và bỏ
+phản hồi cũ. Guest chỉ đọc catalog; POST enroll yêu cầu đăng nhập, GET demo cũ
+giữ tương thích. Enrollment theo owner/course đã idempotent, không đổi XP/save.
+Nghiệm thu auth/owner/retry, lost response, account/logout/late reads+writes,
+catalog vẫn đọc khi progress lỗi, browser tài khoản thật và mobile 390×551/844.
+Chỉ kiểm tra qua GitHub Actions; chưa nghiệm thu. Contract: ADR 018.
+
 ### Đang nghiệm thu — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`in_review`, 2026-10-25)
 
 Owner/task: Codex, branch `codex/core006-campaign-owner`, từ head SEC-001

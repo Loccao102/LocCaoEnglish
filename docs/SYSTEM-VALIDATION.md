@@ -2,6 +2,23 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Course enrollment ownership and recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-course-owner`, base main `54273c3`; ADR 018.
+The active course page now separates public catalog from captured-owner personal
+progress/enrollment. Guest views do not consume demo progress. Late reads and
+writes cannot replace the current account, network errors retain lesson links,
+and lost enrollment replies can be confirmed by a read. The API disallows guest
+enrollment while preserving existing progress reads and idempotent account writes.
+No reward/schema/save change, and no guest-data import/reset.
+
+HTTP auth/isolation/retry/no-XP coverage, a real-account browser enrollment/reload,
+render fixtures for late read/error/write, lost response/expired identity and
+390×551/844 images are included. Fixtures exercise presentation only and never
+claim earned lesson progress. Only source/diff review ran locally, per user
+request; final-head CI and image inspection remain pending. Status: in_review,
+not production-deployed.
+
 ## Versioned mission paraphrases — 2026-11-03
 
 CORE-004, branch codex/core004-mission-paraphrases, based on PR #28 runtime
