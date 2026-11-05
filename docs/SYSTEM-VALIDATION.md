@@ -2,6 +2,33 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Mission hero mobile correction — 2026-11-05
+
+CORE-004, branch `codex/core004-mission-mobile`, base main `54273c3`.
+CI 181's 390px saved-receipt images exposed a long heading clipped inside the
+mission hero. Page-level horizontal-scroll assertions did not detect the hidden
+text. The hero now wraps its flexible content/progress circle and permits long
+heading words to wrap. Added browser coverage of all nine actual mission routes
+at 390×551/844, checking text ranges and badge bounds as well as page overflow;
+the longest title gets retained screenshots. No grading/API/save/reward change.
+Source-only local review and diff checks; build/browser validation runs only in
+GitHub Actions per user request. Status: in_review pending final-head CI/images.
+
+## GitHub merge acceptance — 2026-11-05
+
+All six jobs passed on each final source head: PR #27 `20a3180` / CI 179
+(196 E2E, 37.7m), PR #28 `e924a57` / CI 180 (207 E2E, 36.9m), and PR #30
+`a679850` / CI 181 (210 E2E, 37.4m). Job logs contain no flaky summary or retry
+execution. PostgreSQL/race/vet, frontend/asset checks, AI, compose, integration
+and the standalone native image transform passed. Links and merged revisions
+are recorded in [ROADMAP](ROADMAP.md#nghiệm-thu-và-merge-github--2026-11-05).
+PR #26 was already merged as `ec44478` using CI 174; PR #27/#28/#30 now merged
+as `a2f311b`/`92ba90b`/`5170415`, followed by docs PR #29 as `54273c3`.
+Both mission receipt captures from CI 181 were downloaded and viewed; readable
+receipt/actions, with the pre-existing clipped hero tracked separately above.
+No new local execution and no production deployment. Whole-core completion,
+provider calibration or human playtesting is not implied by these CI results.
+
 ## Versioned mission paraphrases — 2026-11-03
 
 CORE-004, branch codex/core004-mission-paraphrases, based on PR #28 runtime
@@ -32,7 +59,8 @@ API, AI and browser workers were stopped on request; subsequent validation is
 GitHub Actions only. Later source edits, including the direct departure question
 and true concurrent-first-claim regression, require that fresh CI gate.
 
-Status: in_review, pending final-head six-job CI and review. No deployment.
+Accepted 2026-11-05: current head `a679850` passed six-job CI 181 and 210 E2E;
+see the merge acceptance above. No deployment.
 
 ## Campaign and Journey read ownership — 2026-10-25
 
