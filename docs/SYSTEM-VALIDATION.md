@@ -2,6 +2,112 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Published course catalog and coherent progress — 2026-11-05
+
+CORE-006, branch `codex/core006-course-catalog`, base `9dc252c`; ADR 018.
+Source review found PostgreSQL's denominator filtered published lessons while
+its numerator included hidden bookmarks. Memory used stale seeded lesson metadata.
+Both projections now use current published members; counts share one SQL snapshot
+or memory read lock. Bookmarks survive unpublish/republish, owner isolation and
+idempotent enrollment remain. Empty catalogs return [], with explicit browser
+copy and safe compatibility for the old null list. Invalid shapes are not an
+empty successful response. No persistence migration, rewards or history rewrites.
+
+Memory/PostgreSQL regressions use isolated owned fixtures, sequential visibility
+changes, refreshed metadata, owner/enrollment, returned-slice isolation, concurrent
+publication/count reads and a second PostgreSQL store after republish. Existing
+rows and user data are not reset; dedicated loccao_system_test is mandatory.
+The browser's new catalog-empty/null/invalid/retry case uses labelled fixtures,
+in addition to the existing genuine-account enrollment/reload checks. Phone
+captures are retained. The helper now runs 27 existing/new focused cases; full
+252-case E2E and six jobs remain required. No local tests/build/services, only
+source/diff review and Go formatting; all execution pending GitHub Actions.
+
+## GitHub required-check enforcement — 2026-11-05
+
+GOV-002. The reviewed JSON request was applied through GitHub REST using existing
+repository administration authority, after reading an empty ruleset list and
+unprotected main. Rule [26589636](https://github.com/Loccao102/LocCaoEnglish/rules/26589636)
+read back active for main, no bypass actors, PR/resolved-thread requirement,
+zero mandatory approvals, and the exact six Actions checks from app 15368.
+Force pushes/deletion are blocked; strict latest-base/linear-history are off.
+Effective main rules and `protected:true` were independently read back; the
+connection reports it cannot bypass. No new credentials or grants.
+
+Controlled [PR #43](https://github.com/Loccao102/LocCaoEnglish/pull/43), head
+`20ffcd69048332c88eef2dbc26299b7a399d1903`, added one deliberately failing test.
+[CI 212](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41973468716)
+frontend log shows **1 deliberate failure, 50 existing game tests passed (3.0s)**.
+Backend/AI/compose/integration passed and E2E skipped after failure. No existing
+assertion was changed. Before attempting the rejection proof, reads verified
+open non-draft PR, exact head, main target, active/no-bypass rule, and conflict-free
+code with GitHub merge state `blocked`. The ordinary connected REST merge
+returned **HTTP 405**: `Repository rule violations found` / `Required status
+check "frontend" is failing.` Main remained `7805b50b5ae99aad020bf7d2039e878e9b32545a`
+before/after. The probe was closed without merging; its evidence is retained.
+History protections were verified by read-back, without destructive probes.
+This proves required-check enforcement, not human approval or whole-project safety.
+
+## Fast GitHub recovery UI verification — 2026-11-05
+
+The additive helper workflow ran the existing auth/content/colour cases on a
+disposable stack. [Run 3](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41972957190)
+on `245d304` reports **19 passed (58.4s)**, no failed/flaky summary or retry.
+Run 2 on `a37f5bf` also passed **19 (55.8s)**; its eight ratio-guide/action images
+at 390×551/844 were downloaded and viewed. The runtime is unchanged between
+those two heads; only workflow scheduling/docs differ. CMS captures were also
+reviewed, with the existing scrollable form and readable controls.
+The exact current full six-job/251-case matrix is still separately required.
+Superseded runs were cancelled rather than reported as accepted. All execution
+is on GitHub; no local application/build/tests or production deployment.
+
+## Dashboard overall-band boundary — 2026-11-05
+
+CORE-004, branch `codex/core004-overall-boundary`, base `4fa1b77`.
+The current server returns null for dashboard overall IELTS band, but the active
+camp snapshot could display a non-null legacy API value as an overall estimate.
+The widget now links separate skill results without using that legacy field;
+the user's target remains separately labelled. No overall calculation, history,
+schema, API or provider change. The existing old-dashboard browser regression
+now injects 8.5, verifies it is not shown while target 7.0 remains, and captures
+390×551/844. Source/diff review only locally; final-head CI/images pending.
+
+## Authentication intent recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-auth-intent`, base `37234f8`; ADR 021.
+The active login/register UI now commits a validated response only while the
+same mounted form intent and starting token remain current. Guest selection,
+external account changes and navigation invalidate old requests before token
+writes. A pending reference prevents duplicate submissions; failed or blocked
+storage never displays a saved sign-in. Account profile visibility follows the
+shared token subscription. Server auth API, account creation and data stay intact.
+
+Six browser cases distinguish synthetic held-response/shape/storage fixtures
+from real dedicated-account registration/sign-out/login/reload. No new layout,
+server permissions, schema, token lifetime or credential persistence. Source/diff
+review only locally; final-head GitHub CI remains pending. No deployment.
+
+## Colour ratio teaching and playtest preparation — 2026-11-05
+
+CORE-007, branch `codex/core007-playtest-protocol`, based on `ae0eec9`.
+The previous generic Colour Studio help always instructed two paints, including
+three/four-drop advanced sessions. A scoped guide now reads the active session's
+drop count, explains equal parts with labelled ratio examples and distinguishes
+general help from the existing charged target recipe. Recipe presentation groups
+the current session's pigments by count; it does not change evaluation or seeds.
+The opening dialog also uses the selected mode's existing challenge description
+instead of the two-paint Practice instructions for every mode.
+Reference examples use three-drop red/white ratios absent from the current
+authored targets; a red/yellow 2:1 example would have exposed the coral recipe.
+No new results, telemetry, rewards or save fields.
+
+New browser cases play all four rounds through actual pigment/submit controls in
+Practice, Adventure and Challenge, including reversed recipe order, assistance
+accounting, pause/help and restored hint state. Phone guide/action captures use
+390×551/844. Source/diff review only locally; GitHub Actions and image inspection
+remain pending. The manual playtest protocol covers eight games and explicitly
+contains no participant results, tuning evidence or claim of balanced difficulty.
+
 ## Final combined follow-up — 2026-11-05
 
 PR #35's initial head `3230a73` passed all six jobs in

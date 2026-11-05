@@ -54,11 +54,11 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | in_progress |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | in_progress |
-| CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | planned |
+| CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | in_progress |
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
-| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | planned |
+| GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -315,6 +315,16 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 
+### Không suy overall từ dashboard cũ (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core004-overall-boundary`, nền `4fa1b77`.
+`/camp` dùng LiveSnapshot, vẫn render `dashboard.ieltsBand` thành overall dù
+backend hiện tại luôn trả null và API cũ có thể gửi estimate thiếu nguồn gốc.
+Thẻ IELTS chỉ dẫn tới kết quả từng kỹ năng, giữ target do người dùng chọn và
+không tính/hiện combined band từ trường legacy. Không đổi API/schema/history.
+Nghiệm thu fixture API cũ có band khác null, target riêng và ảnh mobile qua CI.
+Overall đã hiệu chuẩn và provider thật tiếp tục là phần chưa nghiệm thu.
+
 Lát cắt mission: Codex, `codex/core004-mission-evidence`, 2026-10-11,
 `done` trong phạm vi guided rubric, nghiệm thu 2026-10-12. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
 từ khóa toàn transcript bằng rubric theo thứ tự, có ngữ cảnh, bỏ qua spam/lặp
@@ -569,7 +579,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Báo cáo giáo viên từ checked practice (`in_review`, 2026-11-05)
+### Báo cáo giáo viên từ checked practice (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core005-teacher-practice` / `codex/core005-teacher-ui`,
 nền main `54273c3`. Route `/admin/analytics` vẫn tính accuracy từ bảng attempts
@@ -697,6 +707,28 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Khóa học theo catalog đang công khai (`in_review`, 2026-11-05)
+
+Owner/task: Codex, `codex/core006-course-catalog`, nền `9dc252c`.
+Rà nguồn xác nhận PostgreSQL dùng total của bài published nhưng đếm cả bookmark
+của bài đã ẩn, có thể vượt 100%; memory giữ catalog seed cũ sau sửa/unpublish.
+Đồng bộ catalog/metadata và đếm published trong cùng snapshot đọc, giữ bookmark
+khi ẩn và phục hồi khi publish lại. Course không còn bài trả mảng rỗng và UI có
+thông báo, tương thích API cũ trả null; lỗi catalog không bị coi là rỗng hợp lệ.
+Không đổi API shape/schema, XP hay xóa lịch sử. Nghiệm thu memory/PG, owner,
+publish/unpublish/republish, catalog rỗng và browser qua GitHub Actions.
+
+### Ý định đăng nhập và phản hồi đến muộn (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-auth-intent`, nền `37234f8`.
+AuthPanel gọi helper tự ghi token ngay khi POST trả về; chọn Play as guest,
+rời trang hoặc đổi tài khoản lúc request chờ vẫn có thể bị đăng nhập lại bởi
+phản hồi cũ. Tách request khỏi ghi token, chỉ commit nếu form còn mount và ý định
+hiện tại/token nền chưa đổi; logout/storage/auth event hủy ý định trước. Không
+đổi auth API, credentials, thời hạn token hay nhập dữ liệu guest. Nghiệm thu late
+login/register sau logout/unmount/account-switch, lặp submit, lỗi/storage và
+đăng nhập thật trên GitHub. Không tuyên bố toàn recovery hoàn tất từ lát cắt này.
+
 ### Content Studio đúng phiên đăng nhập (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-content-ui`, nền review `e9a881a`.
@@ -807,6 +839,17 @@ phá dữ liệu. Nếu quyết định tách atlas theo mức, phải có ADR/m
 
 ## CORE-007 — Độ khó và chiều sâu có bằng chứng
 
+Owner/task: Codex, branch `codex/core007-playtest-protocol`, 2026-11-05.
+Lát cắt đầu tiên: kế hoạch quan sát thủ công cho tám Fair games và ba mức khó,
+phân biệt kỹ năng ngôn ngữ với trí nhớ/vận động; chưa thu telemetry hoặc bịa kết
+quả. Colour Studio cần hướng dẫn đúng số giọt cho từng mode, ví dụ tỷ lệ và
+recipe hint thể hiện số phần, dùng dữ liệu của session hiện có. Hướng dẫn nguyên
+tắc không hiện đáp án vòng hiện tại; recipe cụ thể giữ assistance/star contract.
+Không đổi seed, puzzle, thời gian, save hay luật chấm. Nghiệm thu browser input
+thật, pause/help/reload/assistance, ba mode và ảnh 390×551/844 trên GitHub.
+Chơi thử với người thật và điều chỉnh dựa trên kết quả vẫn chưa được thực hiện;
+toàn CORE-007 không done từ tài liệu hoặc kiểm tra tự động.
+
 **Cần làm:** định nghĩa mục đích học, quyết định người chơi phải đưa ra và lỗi cần
 feedback cho mỗi mode. Đo trong playtest thời gian giải, lỗi, trợ giúp, hoàn thành,
 chơi lại; chốt dữ liệu/retention trước bổ sung telemetry lưu server.
@@ -875,29 +918,39 @@ Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình 
 
 ## GOV-002 — Rào chắn merge thực tế
 
-Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
-required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
-branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
-Chưa có công cụ/quyền áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
-Mục chưa hoàn tất; không dùng checklist/CI xanh để thay bằng chứng enforcement.
+Owner/task: Codex, 2026-11-05. Đã áp dụng và xác minh ruleset
+[26589636](https://github.com/Loccao102/LocCaoEnglish/rules/26589636) cho main:
+PR bắt buộc; sáu check frontend/backend/ai-service/compose/integration/e2e từ
+Actions app 15368; resolve review threads; không bypass, không force push/xóa
+nhánh. Không gán CODEOWNERS/người duyệt; số approval bắt buộc là 0 vì chưa có
+reviewer độc lập được phân công. Không bắt latest-base/linear-history, giữ
+ancestry của stacked PR và review tổ hợp thực tế. Read-back effective rules,
+protected:true và current_user_can_bypass:never đã xác nhận cấu hình hoạt động.
 
-Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
-`protected:false`, required status checks ở chế độ off; danh sách repository
-rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/LocCaoEnglish/branches/main),
-[rulesets](https://api.github.com/repos/Loccao102/LocCaoEnglish/rulesets).
-Đây là bằng chứng chưa có enforcement tại thời điểm đọc, không phải đã cấu hình.
-Các merge trong đợt này vẫn chờ đủ sáu jobs và dùng expected head SHA thủ công.
-Connector hiện có chỉ cung cấp đọc branch protection/rulesets; cần quyền/công cụ
-quản trị để áp dụng policy rồi xác minh PR lỗi thực sự bị chặn. Mục vẫn planned.
+[PR thử #43](https://github.com/Loccao102/LocCaoEnglish/pull/43), head `20ffcd6`,
+[CI 212](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41973468716)
+chỉ thất bại test chủ đích; 50 game tests cũ đạt. GitHub báo blocked và từ chối
+merge thông thường với expected head bằng HTTP 405, nêu rõ frontend đang lỗi.
+Main giữ nguyên `7805b50` trước/sau phép thử. PR đã đóng, không merge; không bỏ
+assertion hoặc dùng bypass. Bằng chứng/giới hạn tại
+[GITHUB-MERGE-GATE](GITHUB-MERGE-GATE.md) và SYSTEM-VALIDATION.
+Phạm vi enforcement đã done; không có nghĩa human approval, gameplay hay toàn
+dự án đã được nghiệm thu. Không deploy production hoặc đổi quyền người dùng/app.
 
-**Cần làm:** kiểm tra branch rules/permissions và CI jobs thật trên GitHub; cấu hình
-required checks và review phù hợp với quyền/chế độ cộng tác của repository. Không
-tự điền CODEOWNERS cho người chưa được phân công. Ghi những điều được kiểm tra tự
-động và những điều reviewer vẫn phải đọc (kiến trúc, dữ liệu, gameplay, license).
+Ban đầu 2026-10-21 và lần đọc đầu 2026-11-05, main chưa protected/rulesets rỗng.
+Connector chỉ có read administration; rà UI không submit. Sau đó đã xác minh
+quyền quản trị qua xác thực GitHub CLI hiện có và áp dụng REST, không tạo quyền
+hoặc credential mới. JSON trong docs là template của request đã áp dụng, không
+phải cơ chế tự bật policy khi commit file.
 
-**Hoàn tất khi:** xác minh một PR có required check thất bại không thể merge theo
-quyền thông thường, branch đích và tên check đúng, review/bypass rules được ghi rõ.
-Files docs/PR checklist không được coi là đã hoàn thành mục này.
+Workflow phản hồi nhanh bổ sung 19 ca đăng nhập/soạn bài/pha màu, đã đạt 19/19
+(58.4s) trên `245d304`. Bộ sáu jobs/full E2E giữ nguyên, vẫn cần trước tích hợp
+runtime. Các revision bị thay thế được dừng, không coi là pass. CI helper và
+các chức năng đang kiểm tra đầy đủ riêng; enforcement không thay cho nghiệm thu.
+
+**Tiêu chí đã đạt:** required check thất bại chặn merge theo quyền thông thường,
+đúng nhánh/tên check, review/bypass được ghi rõ. Cấu hình không được suy từ file
+checklist. Vẫn review kiến trúc, dữ liệu, ngữ nghĩa, trải nghiệm và license.
 
 ## Mẫu cập nhật một mục
 

@@ -15,7 +15,15 @@ The fair is an original southern island in Sunlit Village. Eight neighbours each
 | Colour Studio | Dâu | Combine two primary/white paint pots into a requested colour; see the mix on a flower sculpture | 4 mixes |
 | Bridge Builder | Sỏi | Rotate nine path tiles, connect reciprocal edges from entrance to exit, and send a boat | 3 layouts |
 
-Each session starts with three hearts. Mistakes show specific feedback and remove one heart. A successful round awards 100 points; completing a game adds 25 points per remaining heart and records 1–3 stars. A finished game unlocks its host's friendship memory. Replays can improve best scores and stars. There is no countdown, payment, energy gate or account-currency reward.
+Each session starts with three hearts. Mistakes show specific feedback and remove one heart. A successful round awards 100 points. Practice has no countdown and adds 25 points per remaining heart on completion. Advanced modes account for assistance in result stars and have game-specific countdowns; Cloud Hop uses route goals without a countdown. See [GAMEPLAY-FOUNDATION](GAMEPLAY-FOUNDATION.md) for the current difficulty contract. A finished game unlocks its host's friendship memory. Replays can improve personal scores and stars. There is no payment, energy gate or account-currency reward.
+
+Colour Studio's How to play guide explains equal drops, repeated pigments and
+1:2 versus 2:1 ratios, using the active session's required drop count. Generic
+guidance is free and pauses play. An advanced target's exact recipe remains behind
+the disclosed assistance control; the card groups its existing recipe into
+counts instead of listing repeated colour names. No recipe, seed, checkpoint or
+scoring rule changes. See the [playtest plan](PLAYTEST-PROTOCOL.md) for human
+validation still needed; colour samples are illustrative, not physical paint.
 
 The 3D arena uses the same original companion factory as the village and character page. Walking games have acceleration and braking, click destinations, contact-triggered interactions, bounded ground, solid building/bed/post-box bases and visible carried items. Cloud Hop adds vertical velocity, gravity, airborne ring collection and hazard checkpoints. Recipe games show ingredient layers or mixed paint. Bridge Builder validates a connected graph, then moves a little boat along the successful path. Correct actions produce a celebration; mistakes produce a sad expression and encouraging feedback.
 

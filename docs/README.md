@@ -12,6 +12,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | [CONTRIBUTING](../CONTRIBUTING.md) | Quy trình nhận việc, phát triển, kiểm tra và PR |
 | [DEFINITION-OF-DONE](DEFINITION-OF-DONE.md) | Điều kiện được gọi một thay đổi là hoàn tất |
 | [AGENTS](../AGENTS.md) | Chỉ dẫn tự đọc cho coding agent ở root repository |
+| [GITHUB-MERGE-GATE](GITHUB-MERGE-GATE.md) | Cấu hình đang áp dụng và bằng chứng GitHub chặn required check thất bại |
 
 ## Đọc theo miền
 
@@ -22,6 +23,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Thế giới, quest và story rewards | [ADVENTURE](ADVENTURE.md) |
 | Hội chợ, độ khó, checkpoint | [FRIENDSHIP-FAIR](FRIENDSHIP-FAIR.md), [GAMEPLAY-FOUNDATION](GAMEPLAY-FOUNDATION.md) |
 | Vấn đề gameplay đã rà soát | [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md) |
+| Kế hoạch đo độ khó bằng chơi thử | [PLAYTEST-PROTOCOL](PLAYTEST-PROTOCOL.md) — kế hoạch, chưa có kết quả người chơi |
 | Nhân vật và assets | [CHIBI-CAST](CHIBI-CAST.md), [SUNLIT-VILLAGE](SUNLIT-VILLAGE.md) |
 | Quyết định kiến trúc | [ADR 001: nguồn tiến độ riêng](decisions/001-unified-player-journey.md), [ADR 002: core trước nội dung](decisions/002-core-first-development.md) |
 | Speaking và nguồn gốc kết quả | [ADR 004: transcript và phản hồi phát âm](decisions/004-speaking-evidence.md) |
@@ -41,6 +43,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Tiến độ và đăng ký khóa học | [ADR 018: tài khoản sở hữu và đọc lại sau lỗi](decisions/018-course-owner-recovery.md) |
 | Lịch ôn và khôi phục thao tác chấm | [ADR 019: receipt, retry và snapshot lịch đến hạn](decisions/019-review-schedule-receipts.md) |
 | Soạn bài theo phiên đăng nhập | [ADR 020: role, draft và captured-token editor](decisions/020-content-studio-owner-fence.md) |
+| Đăng nhập và lựa chọn chơi khách | [ADR 021: chỉ ghi token khi ý định đăng nhập còn hiệu lực](decisions/021-auth-intent-fencing.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

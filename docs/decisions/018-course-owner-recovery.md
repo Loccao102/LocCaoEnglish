@@ -27,6 +27,25 @@ later. A personal-read failure also hides the public lesson list.
 - Course completion remains a personal lesson report, not checked mastery or an
   independent score. Do not display missing progress as a fabricated zero percent.
 
+## Current published catalog projection
+
+The 2026-11-05 follow-up fixes a read inconsistency: PostgreSQL counted hidden
+lesson bookmarks against a published-only denominator, while memory mode kept
+seeded course metadata after lesson edits. Both modes now project membership
+through current published lessons and refresh their metadata. PostgreSQL counts
+the numerator/denominator in one statement; memory uses one catalog/progress
+read lock. Publishing cannot produce a mixed count above 100% within a progress
+response. This fixes the counts rather than clamping an inconsistent percentage.
+
+Unpublishing neither deletes nor rewrites bookmarks. Republish restores those
+personal completions. The legacy averageScore field remains self-reported and
+limited to visible started bookmarks, including partial ones as in the existing
+PostgreSQL contract; memory now matches it. It is still not shown as checked
+mastery or used for XP/rank. Empty courses return lessons as an empty array;
+the browser also accepts the old API's null empty list, while invalid/missing
+catalog shapes remain errors. No payload/schema/save version changes or backfill.
+The API read fix can deploy independently; rollback preserves all stored rows.
+
 ## Rollout and compatibility
 
 No migration/save format change. Ship the signed-in API boundary before the

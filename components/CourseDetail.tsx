@@ -21,7 +21,10 @@ function CourseView({ slug }: { slug: string }) {
   useEffect(() => {
     let active = true;
     setError(false);
-    void getCourse(slug).then(data => { if (active) setCourse(data); })
+    void getCourse(slug).then(data => {
+      if (!data || data.lessons !== null && !Array.isArray(data.lessons)) throw new Error("Invalid course catalog");
+      if (active) setCourse({ ...data, lessons: data.lessons || [] });
+    })
       .catch(() => { if (active) setError(true); });
     return () => { active = false; };
   }, [slug, retry]);
@@ -35,6 +38,7 @@ function CourseView({ slug }: { slug: string }) {
       <PersonalCourse key={token ?? "loading"} token={token} slug={slug} />
     </header>
     <section className="course-lessons" aria-label="Course lessons">
+      {course.lessons.length === 0 && <p>No published lessons in this course yet.</p>}
       {course.lessons.map((lesson, index) => <Link href={`/learn/${lesson.slug}`} key={lesson.slug}>
         <span>{index + 1}</span><div><small>{lesson.skill} · {lesson.level} · {lesson.estimatedMins} min</small><strong>{lesson.title}</strong></div><b>Start →</b>
       </Link>)}

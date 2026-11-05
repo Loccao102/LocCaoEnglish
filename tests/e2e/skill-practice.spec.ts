@@ -157,8 +157,9 @@ test("Older dashboard and plan responses do not invent personal results or confi
   await page.route("**/v1/dashboard", async route => {
     const response = await route.fetch();
     expect(response.ok()).toBe(true);
-    const data: Dashboard = await response.json();
+    const data: Dashboard & { ieltsBand: number; targetBand: number } = await response.json();
     for (const skill of data.skills) delete skill.practice;
+    data.ieltsBand = 8.5; data.targetBand = 7;
     await route.fulfill({ response, json: data });
   });
   await page.route("**/v1/player/questline", async route => {
@@ -174,6 +175,16 @@ test("Older dashboard and plan responses do not invent personal results or confi
   await expect(skillCard(page, "Vocabulary")).toContainText("Practice summary unavailable");
   await expect(journal(page)).not.toContainText(/\d+%|\d+ correct · \d+ checked|Mastered/);
   await expect(snapshot(page)).not.toContainText(/\d+%/);
+  await expect(snapshot(page)).toContainText("By skill");
+  await expect(snapshot(page)).toContainText("No combined band is calculated");
+  await expect(snapshot(page)).toContainText("target 7.0");
+  await expect(snapshot(page)).not.toContainText("8.5");
+  for (const height of [551, 844]) {
+    await page.setViewportSize({ width: 390, height });
+    await snapshot(page).locator(".snapshot-band").scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.cache/skill-practice-ielts-${height}.png` });
+  }
   await expect(suggestions(page).getByRole("button", { name: "Retry loading suggestions" })).toBeVisible();
   await expect(suggestions(page).locator(".plan-step")).toHaveCount(0);
   await expect(suggestions(page)).not.toContainText(/Your weakest areas|999|up to \d+ XP/);

@@ -1,0 +1,11 @@
+.guide { color: #294d40; text-align: left; min-width: 0; }
+.guide h3 { font-size: 20px; margin: 12px 0; }
+section.guide p { font-size: 16px; line-height: 1.5; color: #294d40; margin: 12px 0; }
+.examples { display: grid; gap: 10px; }
+.examples > div { display: grid; gap: 7px; padding: 12px; border: 1px solid #bacbb6; border-radius: 12px; background: #fffaf0; }
+.examples strong, .examples small { font-size: 16px; line-height: 1.4; }
+.examples span { display: flex; flex-wrap: wrap; gap: 8px; }
+.examples i { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border: 1px solid #6a6b55; border-radius: 50%; font-size: 16px; font-style: normal; font-weight: 700; color: #302c20; }
+.red { background: #ee947d; }
+.white { background: #fdf4d7; }
+.status p.recipe { font-size: 16px; line-height: 1.4; color: #294d40; }
