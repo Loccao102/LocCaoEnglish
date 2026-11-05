@@ -2,6 +2,20 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Adventure actual-answer provenance — 2026-11-05
+
+CORE-005, branch `codex/core005-adventure-provenance`, base main `54273c3`.
+The PostgreSQL first-clear writer previously recorded the catalog's correct
+answer even for a wrong submitted answer, with default legacy source/version.
+It now stores the original answer and distinct guided-story provenance, catalog
+hash and unchanged rule version. Review corrections, grading, first-clear
+reward, save/API shape and historical rows are preserved. No migration or
+promotion into shared practice/rank. Existing whole-story PostgreSQL coverage
+now verifies all 42 original answers after partial clears and improved replays.
+Concurrent first-clear, restart and legacy retention checks are included in CI.
+No local build/test/service run per user request; status in_review pending the
+final-head GitHub Actions gate. No deployment.
+
 ## Versioned mission paraphrases — 2026-11-03
 
 CORE-004, branch codex/core004-mission-paraphrases, based on PR #28 runtime

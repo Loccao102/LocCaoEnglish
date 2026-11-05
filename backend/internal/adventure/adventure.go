@@ -2,7 +2,9 @@
 package adventure
 
 import (
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -10,6 +12,20 @@ import (
 
 //go:embed catalog.json
 var files embed.FS
+
+// Story evidence is guided practice with a public authored catalog. It is not
+// shared-learning, acoustic or competitive evidence.
+const EvidenceSource = "server-story-guided"
+const RulesVersion = "adventure.v1"
+
+func ContentVersion() string {
+	data, err := files.ReadFile("catalog.json")
+	if err != nil {
+		panic(err)
+	}
+	hash := sha256.Sum256(data)
+	return "adventure.catalog.sha256:" + hex.EncodeToString(hash[:])
+}
 
 type Question struct {
 	Kind    string   `json:"kind"`

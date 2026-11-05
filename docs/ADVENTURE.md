@@ -114,6 +114,20 @@ The server accepts answers and companion IDs, never client-supplied XP, coins or
 
 PostgreSQL stores each account save in `player_adventures`. `EnsureAdventure` applies the table definition at API startup; `backend/migrations/010_adventure.sql` contains the same idempotent DDL. An action holds a row lock and updates the save, first-clear account XP, skill evidence and review items in one transaction. The existing in-memory development store also supports adventure actions, but its data disappears on server restart; the game displays this limitation.
 
+New PostgreSQL first clears store the actual submitted answer for each question
+in `attempts.answer`, including incorrect answers. The correct answer remains in
+the authored catalog and review item. Records use `grading_source:
+server-story-guided`, the embedded catalog's SHA-256 content version and
+`rules_version: adventure.v1`. These identify unchanged guided story grading;
+the public catalog does not establish independent recall, mastery or rank.
+Improving replay stars never replaces the original first-clear answers. Earlier
+rows are retained as legacy, because their original wrong answers cannot be
+reconstructed. No backfill or save/schema migration is performed; the provenance
+columns already exist in the shared startup schema. Ship the API update before
+consuming the new source; an older binary may write legacy rows again, and those
+must stay unverified. Memory mode keeps existing transient story/skill/review
+behavior and does not claim a durable question-answer history.
+
 Position, tracked quest and field notes are stored locally per account under `loccao.adventure.meta.<playerId>.v1`. Field-note IDs are validated against the authored catalog. Quest progress, XP, coins and companion ownership are server-owned. Current challenge answers survive an in-tab pause, but are deliberately discarded when leaving the challenge or reloading; completed quests are retained.
 
 A signed-in connection error offers retry, sign-in or an explicit separate guest adventure. It does not silently substitute the shared demo player. An action error preserves the submitted answers so the player can retry. Guest saves are not uploaded automatically on sign-in.
