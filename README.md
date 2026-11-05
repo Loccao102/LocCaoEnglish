@@ -136,3 +136,11 @@ IELTS Writing/Speaking results are practice estimates, not official examiner sco
 Visit /festival for eight new 3D mini-games and a friendship scrapbook, or use the southern bridge in /play. Bubble Meadow, Little Garden, Echo Pond, Tea Time, Parcel Trail, Cloud Hop, Colour Studio and Bridge Builder have distinct movement, memory, recipe or spatial mechanics. The game library now contains 20 games and learning activities. Finished fair games save best scores, stars and character memories to the signed-in account, with a separate guest scrapbook on the current device. Offline completed runs wait in an account-specific queue and retry without duplicating visits.
 
 All 24 friends have round chibi models, personal stories, traits, favourites, dreams and individual idle mannerisms. The reusable collection now contains 45 GLB models with a character bible and fair-game catalog. See docs/FRIENDSHIP-FAIR.md and docs/CHIBI-CAST.md.
+
+## Tối ưu HTTP connection pool cho AI service
+
+Vòng đời FastAPI nay giữ một `httpx.AsyncClient` dùng chung **trong từng worker** cho cả LLM chat API và Azure neural TTS. Pool tối đa 40 kết nối, tối đa 12 keep-alive và đóng khi worker dừng, giúp giảm tạo lại TCP/TLS connection ở mỗi yêu cầu.
+
+Khối gọi LLM và TTS vẫn có timeout riêng (LLM 35 giây, TTS 25 giây), và giữ cơ chế fallback hiện có khi provider không cấu hình hoặc lỗi. Các hàm gọi trực tiếp ngoài ASGI lifespan vẫn có thể dùng HTTP client tạm cho test/script; không thay đổi API JSON hay yêu cầu thêm environment variable.
+
+Kiểm thử dùng HTTPX MockTransport, không gửi dữ liệu tới nhà cung cấp thật. Chưa đo benchmark mạng thật vì kết quả còn phụ thuộc Azure/LLM provider, RTT và số user đồng thời.

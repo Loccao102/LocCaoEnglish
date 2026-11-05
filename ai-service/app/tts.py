@@ -5,7 +5,7 @@ import re
 from typing import Any
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/v1", tags=["tts"])
@@ -35,7 +35,7 @@ def fallback(req: TTSRequest, reason: str | None = None) -> dict[str, Any]:
     }
 
 
-async def synthesize(req: TTSRequest) -> dict[str, Any]:
+async def synthesize(req: TTSRequest, client: httpx.AsyncClient | None = None) -> dict[str, Any]:
     if not AZURE_SPEECH_KEY or not AZURE_SPEECH_REGION:
         return fallback(req)
     voice = req.voice if VOICE_RE.match(req.voice) else "en-US-JennyNeural"
@@ -53,9 +53,12 @@ async def synthesize(req: TTSRequest) -> dict[str, Any]:
         "User-Agent": "LocCaoEnglish",
     }
     try:
-        async with httpx.AsyncClient(timeout=25) as client:
-            response = await client.post(endpoint, headers=headers, content=ssml.encode("utf-8"))
-            response.raise_for_status()
+        if client is None:
+            async with httpx.AsyncClient(timeout=25) as temporary:
+                response = await temporary.post(endpoint, headers=headers, content=ssml.encode("utf-8"))
+        else:
+            response = await client.post(endpoint, headers=headers, content=ssml.encode("utf-8"), timeout=25)
+        response.raise_for_status()
         return {
             "provider": "azure-speech-neural-tts",
             "audioBase64": base64.b64encode(response.content).decode("ascii"),
@@ -71,5 +74,5 @@ async def synthesize(req: TTSRequest) -> dict[str, Any]:
 
 
 @router.post("/tts/synthesize")
-async def tts(req: TTSRequest) -> dict[str, Any]:
-    return await synthesize(req)
+async def tts(req: TTSRequest, request: Request) -> dict[str, Any]:
+    return await synthesize(req, getattr(request.app.state, "outbound_http", None))
