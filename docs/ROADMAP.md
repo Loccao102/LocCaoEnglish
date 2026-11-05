@@ -27,6 +27,16 @@ trước khi các contract core liên quan đã vững.
 
 ## Thứ tự mặc định
 
+Đợt GitHub-only 2026-11-05: [PR #31](https://github.com/Loccao102/LocCaoEnglish/pull/31)
+(hero nhiệm vụ), [#32](https://github.com/Loccao102/LocCaoEnglish/pull/32)
+(teacher practice), [#33](https://github.com/Loccao102/LocCaoEnglish/pull/33)
+(Adventure actual answers), [#34](https://github.com/Loccao102/LocCaoEnglish/pull/34)
+(course ownership) đều có source/regression và đang `in_review`. Branch
+`codex/roadmap-integration-20261105` giữ toàn bộ commit của bốn PR, chỉ giải
+conflict docs và hợp nhất hai nhóm hàm captured-token ở `lib/platform.ts`.
+Phải có CI đủ sáu jobs và xem ảnh trên bản tổng hợp trước tích hợp main; không
+suy kết quả CI của từng nhánh thành đã kiểm tra tổ hợp. Không chạy local/deploy.
+
 CORE-001 → CORE-002 → CORE-003/CORE-004 → CORE-005 → CORE-006 → CORE-007 → CONTENT-001.
 DEP-001 và GOV-002 có thể làm khi đủ điều kiện độc lập, không cần chờ thêm nội dung.
 CORE-001 phải giao được một luồng Word Link hoàn chỉnh trước khi chuyển hàng loạt
@@ -525,7 +535,7 @@ receipt mobile từ CI; lỗi hero dài được tách xử lý bên dưới. [P
 đã merge thành `5170415`. Không chạy lại local theo yêu cầu người dùng, chưa
 deploy production; toàn CORE-004 vẫn `in_progress`.
 
-### CORE-004 — Tiêu đề nhiệm vụ trên điện thoại (`in_progress`, 2026-11-05)
+### CORE-004 — Tiêu đề nhiệm vụ trên điện thoại (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core004-mission-mobile`, nền main `54273c3`.
 Ảnh receipt từ CI 181 cho thấy tiêu đề “Repair the misunderstanding.” bị cắt
@@ -555,7 +565,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Báo cáo giáo viên từ checked practice (`in_progress`, 2026-11-05)
+### Báo cáo giáo viên từ checked practice (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core005-teacher-practice` / `codex/core005-teacher-ui`,
 nền main `54273c3`. Route `/admin/analytics` vẫn tính accuracy từ bảng attempts
@@ -572,7 +582,7 @@ Nghiệm thu memory/PG/race/HTTP role, browser tài khoản thật + render life
 mobile 390×551/844 và đủ CI trên head cuối. Chỉ kiểm tra trên GitHub Actions
 theo yêu cầu người dùng; chưa nghiệm thu. Contract: ADR 017.
 
-### Câu trả lời gốc và provenance của Adventure (`in_progress`, 2026-11-05)
+### Câu trả lời gốc và provenance của Adventure (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core005-adventure-provenance`, nền main `54273c3`.
 Rà store cho thấy first-clear Adventure ghi đáp án chuẩn vào `attempts.answer`
@@ -831,6 +841,12 @@ khối Next.js được quản lý trong AGENTS còn nguyên. Bàn giao trong
 Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình GitHub của GOV-002.
 
 ## GOV-002 — Rào chắn merge thực tế
+
+Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
+required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
+branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
+Chưa có công cụ/quyền áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
+Mục chưa hoàn tất; không dùng checklist/CI xanh để thay bằng chứng enforcement.
 
 Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
 `protected:false`, required status checks ở chế độ off; danh sách repository

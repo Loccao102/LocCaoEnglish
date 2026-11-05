@@ -2,6 +2,16 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Combined roadmap verification — 2026-11-05
+
+Branch `codex/roadmap-integration-20261105` merges PR #31/#32/#33/#34 with
+their original commits preserved. Resolutions retain both added documentation
+sections and combine token-aware course/enrollment and analytics functions in
+`lib/platform.ts`. No grading or reward conflict was resolved by dropping a side.
+The full source combination requires its own six-job CI and retained-image
+inspection, independent of each feature branch's result. No local app/build/test
+was run. Status: in_review; not merged or deployed at this point.
+
 ## Mission hero mobile correction — 2026-11-05
 
 CORE-004, branch `codex/core004-mission-mobile`, base main `54273c3`.
