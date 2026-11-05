@@ -1,9 +1,11 @@
 .studio {
   width: 100%;
   min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 16px;
 }
 
-.studio :global(.studio-layout) {
+.studio:global(.studio-layout) {
   display: grid;
   grid-template-columns: minmax(190px, 0.32fr) minmax(0, 1fr);
   gap: 20px;
@@ -29,6 +31,11 @@
   font-size: 16px;
 }
 
+.studio p, .studio label { font-size: 16px; }
+.studio button, .studio a { min-width: 44px; min-height: 44px; white-space: normal; }
+.studio a { display: inline-flex; align-items: center; }
+.studio :global(.exercise-editor-head) { flex-wrap: wrap; }
+
 .studio :global(input),
 .studio :global(select),
 .studio :global(button) {
@@ -52,7 +59,7 @@
 }
 
 @media (max-width: 760px) {
-  .studio :global(.studio-layout) {
+  .studio:global(.studio-layout) {
     grid-template-columns: minmax(0, 1fr);
   }
 

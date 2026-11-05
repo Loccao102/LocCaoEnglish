@@ -689,6 +689,18 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Content Studio đúng phiên đăng nhập (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-content-ui`, nền review `e9a881a`.
+Teacher mở `/admin/content` rồi chuyển sang learner/guest vẫn thấy danh sách
+draft và form cũ. Token-keyed editor và captured-token role/list/save/delete
+loại view/phản hồi cũ, không gọi admin API cho guest/learner. Quyền API giữ nguyên.
+401/403 khóa view; lỗi mạng giữ bản sửa của owner hiện tại, có refresh/read-back,
+không báo saved/deleted từ lỗi. Không đổi schema, dữ liệu lesson hay nhập draft.
+Nghiệm thu role/account/logout, late reads/writes, retry/lost response, busy,
+empty catalog/nullable options và mobile 390×551/844 qua GitHub Actions.
+Contract: [ADR 020](decisions/020-content-studio-owner-fence.md). Chưa nghiệm thu.
+
 ### Khôi phục lịch ôn và owner của Review queue (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-review-owner` / `codex/core006-review-receipts`,

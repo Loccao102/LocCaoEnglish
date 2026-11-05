@@ -12,6 +12,18 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 - `POST /v1/auth/register`
 - `POST /v1/auth/login`
 
+## Content Studio account boundary
+
+Admin lesson reads/writes retain their existing teacher/admin authorization.
+The browser now captures its token for role, list, save and delete requests and
+replaces the editor tree when identity changes. A learner/guest does not request
+the admin catalog. Late reads/writes cannot repopulate another account's form.
+401/403 seals the editor; unavailable reads and unconfirmed writes have explicit
+recovery. List refresh preserves the current owner's unsaved form until the
+user chooses a saved entry. No draft import, lesson/schema migration or new
+permission is introduced. [ADR 020](decisions/020-content-studio-owner-fence.md)
+records the UI contract; API authorization remains the server boundary.
+
 ## Review scheduling and recovery
 
 `GET /v1/review?dueOnly=true&limit=30` requires an account and returns

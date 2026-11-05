@@ -2,6 +2,24 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Content Studio owner boundary — 2026-11-05
+
+CORE-006, branch `codex/core006-content-ui`, base review `e9a881a`; ADR 020.
+The active admin editor previously retained teacher drafts after a token change.
+Role/list and mutation continuations now capture/check identity, and the token
+keys the editor tree. Guests/learners do not read the admin list; 401/403 hides
+protected content. Network failures preserve current-owner edits while the view
+is sealed for reauthorization, with explicit list refresh after uncertain writes.
+No API permissions, saved lessons or schema changed.
+
+Synthetic browser fixtures cover role/owner/logout, held reads/writes, captured
+tokens, retry/expiry and save/delete failures; they never write real content.
+Phone captures use 390×551/844 with scoped font/hit-target/overflow assertions.
+Root static review corrected fixture routes, async gates, response shapes and
+selector scope without weakening the intended behavior. Existing HTTP/role
+checks remain. No local build/test/service execution, per user request; final-head
+CI and image inspection pending. Status: in_review, not deployed.
+
 ## Review schedule receipts and recovery — 2026-11-05
 
 CORE-006, branch `codex/core006-review-owner`, based on combined `3230a73`.

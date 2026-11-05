@@ -24,6 +24,14 @@ message. Delete retains the existing user confirmation. Guest and learner views
 show a permission boundary without requesting admin lesson data. No server
 contract or lesson data migration is required.
 
+Failed role/list reads seal the protected view. A network failure keeps the
+current account's selected edits in memory until an explicit retry checks its
+role again; a token change discards that tree. A 401/403 from a write also seals
+the editor. Lost replies are unconfirmed, with an explicit list refresh rather
+than a fabricated saved/deleted result. Refresh does not replace unsaved fields;
+opening a saved list entry is an explicit choice. No local draft store or
+cross-account draft import is introduced.
+
 ## Consequences
 
 Account changes cannot display the previous teacher's draft in the active editor,
