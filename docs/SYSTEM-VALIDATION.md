@@ -10,6 +10,8 @@ three/four-drop advanced sessions. A scoped guide now reads the active session's
 drop count, explains equal parts with labelled ratio examples and distinguishes
 general help from the existing charged target recipe. Recipe presentation groups
 the current session's pigments by count; it does not change evaluation or seeds.
+The opening dialog also uses the selected mode's existing challenge description
+instead of the two-paint Practice instructions for every mode.
 No new results, telemetry, rewards or save fields.
 
 New browser cases play all four rounds through actual pigment/submit controls in

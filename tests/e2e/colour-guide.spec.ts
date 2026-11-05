@@ -15,6 +15,7 @@ async function setup(page: Page, mode: string) {
   });
   await page.goto("/festival/colour-studio");
   await page.getByRole("radio", { name: new RegExp(mode) }).check();
+  await expect(page.getByRole("dialog")).toContainText(mode === "Practice" ? "Choose two paint pots" : mode === "Adventure" ? "Measure three paint drops" : "Balance four drops");
   await click(page, page.getByRole("button", { name: "Let’s play →" }));
   await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 10_000));
 }
