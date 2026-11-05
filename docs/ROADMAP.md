@@ -54,7 +54,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 | in_progress |
 | CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | in_progress |
-| CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | planned |
+| CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | in_progress |
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
@@ -806,6 +806,17 @@ attempt cũ thành phần thưởng mới; snapshot không hợp lệ có đư�
 phá dữ liệu. Nếu quyết định tách atlas theo mức, phải có ADR/migration trước code.
 
 ## CORE-007 — Độ khó và chiều sâu có bằng chứng
+
+Owner/task: Codex, branch `codex/core007-playtest-protocol`, 2026-11-05.
+Lát cắt đầu tiên: kế hoạch quan sát thủ công cho tám Fair games và ba mức khó,
+phân biệt kỹ năng ngôn ngữ với trí nhớ/vận động; chưa thu telemetry hoặc bịa kết
+quả. Colour Studio cần hướng dẫn đúng số giọt cho từng mode, ví dụ tỷ lệ và
+recipe hint thể hiện số phần, dùng dữ liệu của session hiện có. Hướng dẫn nguyên
+tắc không hiện đáp án vòng hiện tại; recipe cụ thể giữ assistance/star contract.
+Không đổi seed, puzzle, thời gian, save hay luật chấm. Nghiệm thu browser input
+thật, pause/help/reload/assistance, ba mode và ảnh 390×551/844 trên GitHub.
+Chơi thử với người thật và điều chỉnh dựa trên kết quả vẫn chưa được thực hiện;
+toàn CORE-007 không done từ tài liệu hoặc kiểm tra tự động.
 
 **Cần làm:** định nghĩa mục đích học, quyết định người chơi phải đưa ra và lỗi cần
 feedback cho mỗi mode. Đo trong playtest thời gian giải, lỗi, trợ giúp, hoàn thành,

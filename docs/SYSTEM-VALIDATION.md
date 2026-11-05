@@ -2,6 +2,23 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Colour ratio teaching and playtest preparation — 2026-11-05
+
+CORE-007, branch `codex/core007-playtest-protocol`, based on `ae0eec9`.
+The previous generic Colour Studio help always instructed two paints, including
+three/four-drop advanced sessions. A scoped guide now reads the active session's
+drop count, explains equal parts with labelled ratio examples and distinguishes
+general help from the existing charged target recipe. Recipe presentation groups
+the current session's pigments by count; it does not change evaluation or seeds.
+No new results, telemetry, rewards or save fields.
+
+New browser cases play all four rounds through actual pigment/submit controls in
+Practice, Adventure and Challenge, including reversed recipe order, assistance
+accounting, pause/help and restored hint state. Phone guide/action captures use
+390×551/844. Source/diff review only locally; GitHub Actions and image inspection
+remain pending. The manual playtest protocol covers eight games and explicitly
+contains no participant results, tuning evidence or claim of balanced difficulty.
+
 ## Final combined follow-up — 2026-11-05
 
 PR #35's initial head `3230a73` passed all six jobs in

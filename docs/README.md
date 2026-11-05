@@ -22,6 +22,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Thế giới, quest và story rewards | [ADVENTURE](ADVENTURE.md) |
 | Hội chợ, độ khó, checkpoint | [FRIENDSHIP-FAIR](FRIENDSHIP-FAIR.md), [GAMEPLAY-FOUNDATION](GAMEPLAY-FOUNDATION.md) |
 | Vấn đề gameplay đã rà soát | [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md) |
+| Kế hoạch đo độ khó bằng chơi thử | [PLAYTEST-PROTOCOL](PLAYTEST-PROTOCOL.md) — kế hoạch, chưa có kết quả người chơi |
 | Nhân vật và assets | [CHIBI-CAST](CHIBI-CAST.md), [SUNLIT-VILLAGE](SUNLIT-VILLAGE.md) |
 | Quyết định kiến trúc | [ADR 001: nguồn tiến độ riêng](decisions/001-unified-player-journey.md), [ADR 002: core trước nội dung](decisions/002-core-first-development.md) |
 | Speaking và nguồn gốc kết quả | [ADR 004: transcript và phản hồi phát âm](decisions/004-speaking-evidence.md) |
