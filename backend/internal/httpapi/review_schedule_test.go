@@ -69,6 +69,14 @@ func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
 	if len(before) != len(after) || before[0].IntervalDays != after[0].IntervalDays {
 		t.Fatal("legacy path changed the review item")
 	}
+	for _, body := range []map[string]any{
+		{"requestId": "missing-quality", "rulesVersion": store.ReviewScheduleRulesVersion},
+		{"requestId": "null-quality", "quality": nil, "rulesVersion": store.ReviewScheduleRulesVersion},
+	} {
+		if response := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, body); response.Code != http.StatusBadRequest {
+			t.Fatalf("missing/null quality must be rejected: %d %s", response.Code, response.Body.String())
+		}
+	}
 	created := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion})
 	if created.Code != http.StatusOK {
 		t.Fatalf("receipt endpoint failed: %d %s", created.Code, created.Body.String())

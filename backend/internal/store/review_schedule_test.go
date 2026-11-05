@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
 	"os"
 	"reflect"
 	"sync"
@@ -21,15 +23,20 @@ func reviewScheduleFixture(t *testing.T, s *Store, email, item string) model.Use
 	if s.db != nil {
 		t.Cleanup(func() { _, _ = s.db.ExecContext(ctx, `DELETE FROM users WHERE id=$1`, u.ID) })
 	}
+	reviewScheduleSeedItem(t, s, u.ID, item)
+	return u
+}
+
+func reviewScheduleSeedItem(t *testing.T, s *Store, userID, item string) {
+	t.Helper()
 	snapshot := LearningSnapshot{Input: model.LearningAttemptStartInput{Activity: "word-link", CEFRLevel: "A1", Pack: "cefr-core"}, Prompt: model.LearningAttemptPrompt{Word: item, Relation: "synonym", Options: []string{"glad", "sad"}}}
-	attempt, _, err := s.StartLearningAttempt(ctx, u.ID, "receipt-seed-"+newID(), "word-link", "Vocabulary", item, "A1", "receipt-content.v1", "word-link.v1", item+" — choose a synonym", "glad", "Practice.", snapshot)
+	attempt, _, err := s.StartLearningAttempt(context.Background(), userID, "receipt-seed-"+newID(), "word-link", "Vocabulary", item, "A1", "receipt-content.v1", "word-link.v1", item+" — choose a synonym", "glad", "Practice.", snapshot)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.SubmitLearningAttempt(ctx, u.ID, attempt.ID, "sad", model.LearningAttemptSubmitInput{ContentVersion: attempt.ContentVersion, RulesVersion: attempt.RulesVersion}); err != nil {
+	if _, err = s.SubmitLearningAttempt(context.Background(), userID, attempt.ID, "sad", model.LearningAttemptSubmitInput{ContentVersion: attempt.ContentVersion, RulesVersion: attempt.RulesVersion}); err != nil {
 		t.Fatal(err)
 	}
-	return u
 }
 
 func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
@@ -64,6 +71,9 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		if s.db != nil {
+			t.Cleanup(func() { _, _ = s.db.ExecContext(ctx, `DELETE FROM users WHERE id=$1`, foreign.ID) })
+		}
 		if _, err = s.ReviewScheduleReceipt(ctx, foreign.ID, in.RequestID); !errors.Is(err, ErrNotFound) {
 			t.Fatalf("foreign receipt must be hidden, got %v", err)
 		}
@@ -73,12 +83,56 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 		if _, err = s.ReviewScheduleReceipt(ctx, u.ID, "missing-request"); !errors.Is(err, ErrNotFound) {
 			t.Fatalf("missing item must not leave phantom receipt, got %v", err)
 		}
+		if s.db != nil {
+			blocked := "review_receipt_block_" + u.ID
+			trigger := "review_receipt_block_trigger_" + u.ID
+			fnSQL := fmt.Sprintf(`CREATE OR REPLACE FUNCTION %s() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.owner_id = '%s' THEN RAISE EXCEPTION 'review receipt test rollback'; END IF; RETURN NEW; END $$`, blocked, u.ID)
+			if _, err = s.db.ExecContext(ctx, fnSQL); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = s.db.ExecContext(ctx, fmt.Sprintf(`CREATE TRIGGER %s BEFORE INSERT ON review_schedule_receipts FOR EACH ROW EXECUTE FUNCTION %s()`, trigger, blocked)); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				_, _ = s.db.ExecContext(ctx, fmt.Sprintf(`DROP TRIGGER IF EXISTS %s ON review_schedule_receipts`, trigger))
+				_, _ = s.db.ExecContext(ctx, fmt.Sprintf(`DROP FUNCTION IF EXISTS %s()`, blocked))
+			})
+			reviewScheduleSeedItem(t, s, u.ID, "rollback-item")
+			beforeRollback, _ := s.ReviewQueue(ctx, u.ID, 10)
+			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}); err == nil {
+				t.Fatal("receipt trigger should force atomic rollback")
+			}
+			afterRollback, _ := s.ReviewQueue(ctx, u.ID, 10)
+			findInterval := func(items []model.ReviewItem, key string) int {
+				for _, item := range items {
+					if item.ItemKey == key {
+						return item.IntervalDays
+					}
+				}
+				return 0
+			}
+			if findInterval(beforeRollback, "rollback-item") != findInterval(afterRollback, "rollback-item") {
+				t.Fatalf("failed receipt insert changed review item: before=%#v after=%#v", beforeRollback, afterRollback)
+			}
+			if _, err = s.ReviewScheduleReceipt(ctx, u.ID, "rollback-request"); !errors.Is(err, ErrNotFound) {
+				t.Fatalf("failed receipt insert left a receipt: %v", err)
+			}
+			if _, err = s.db.ExecContext(ctx, fmt.Sprintf(`DROP TRIGGER %s ON review_schedule_receipts`, trigger)); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = s.ScheduleReview(ctx, u.ID, "rollback-item", ReviewScheduleRequest{RequestID: "rollback-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}); err != nil {
+				t.Fatal("valid retry after rollback failed", err)
+			}
+		}
 	})
 }
 
 func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 	skillPracticeStores(t, func(t *testing.T, s *Store, _ string) {
 		ctx := context.Background()
+		if s.db != nil {
+			s.db.SetMaxOpenConns(8)
+		}
 		u := reviewScheduleFixture(t, s, "review-concurrent-"+newID()+"@example.test", "concurrent-item")
 		request := ReviewScheduleRequest{RequestID: "concurrent-request", Quality: 5, RulesVersion: ReviewScheduleRulesVersion}
 		const workers = 8
@@ -130,6 +184,45 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 		if _, err = s.ReviewScheduleReceipt(ctx, u.ID, "invalid-quality"); !errors.Is(err, ErrNotFound) {
 			t.Fatalf("invalid request must not create receipt, got %v", err)
 		}
+		reviewScheduleSeedItem(t, s, u.ID, "split-item")
+		claims := make(chan error, 2)
+		var split sync.WaitGroup
+		split.Add(2)
+		go func() {
+			defer split.Done()
+			_, err := s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion})
+			claims <- err
+		}()
+		go func() {
+			defer split.Done()
+			_, err := s.ScheduleReview(ctx, u.ID, "split-item", ReviewScheduleRequest{RequestID: "split-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion})
+			claims <- err
+		}()
+		split.Wait()
+		close(claims)
+		var successes, conflicts int
+		for err := range claims {
+			switch {
+			case err == nil:
+				successes++
+			case errors.Is(err, ErrReviewScheduleConflict):
+				conflicts++
+			default:
+				t.Fatalf("same request on different items returned unexpected error: %v", err)
+			}
+		}
+		if successes != 1 || conflicts != 1 {
+			t.Fatalf("same request must have one winner and one conflict: successes=%d conflicts=%d", successes, conflicts)
+		}
+		items, err = s.ReviewQueue(ctx, u.ID, 10)
+		if err != nil || len(items) != 2 {
+			t.Fatalf("split race queue: %v %#v", err, items)
+		}
+		for _, item := range items {
+			if item.ItemKey == "split-item" && item.IntervalDays != 1 {
+				t.Fatalf("losing item was updated: %#v", item)
+			}
+		}
 	})
 }
 
@@ -137,6 +230,10 @@ func TestReviewScheduleReceiptSurvivesPostgresStoreRestart(t *testing.T) {
 	databaseURL := os.Getenv("TEST_DATABASE_URL")
 	if databaseURL == "" {
 		t.Skip("set TEST_DATABASE_URL for PostgreSQL restart coverage")
+	}
+	parsed, err := url.Parse(databaseURL)
+	if err != nil || (parsed.Scheme != "postgres" && parsed.Scheme != "postgresql") || parsed.Path != "/loccao_system_test" {
+		t.Fatal("dedicated loccao_system_test database required")
 	}
 	first, err := New(databaseURL)
 	if err != nil {
@@ -153,11 +250,13 @@ func TestReviewScheduleReceiptSurvivesPostgresStoreRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		_, _ = second.db.ExecContext(context.Background(), `DELETE FROM users WHERE id=$1`, u.ID)
+		second.Close()
+	}()
 	got, err := second.ReviewScheduleReceipt(context.Background(), u.ID, "restart-request")
 	if err != nil || !reflect.DeepEqual(want, got) {
 		second.Close()
 		t.Fatalf("receipt did not survive restart: want=%#v got=%#v err=%v", want, got, err)
 	}
-	_, _ = second.db.ExecContext(context.Background(), `DELETE FROM users WHERE id=$1`, u.ID)
-	second.Close()
 }

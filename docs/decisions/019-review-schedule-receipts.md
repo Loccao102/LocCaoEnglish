@@ -14,7 +14,7 @@ contract.
 
 ## Decision
 
-Add authenticated `POST /v1/review/{itemKey}` with
+Add authenticated `POST /v1/review/{itemKey}/grades` with
 `{requestId, quality, rulesVersion}` and the fixed `review-schedule.v1` rules
 version. `requestId` is required and at most 120 runes; quality is an integer
 from 0 through 5. The response is an immutable, owner-scoped receipt:
@@ -48,8 +48,13 @@ only, so receipts remain recoverable if a queue item is removed. No XP,
 confidence, mastery, or answer data is written by this contract.
 
 The existing `GET /v1/review` demo-compatible queue remains unchanged. The API
-ships before the web client; rollback keeps v1 receipt reads and scheduling
-available, while clients must continue using request IDs for writes.
+also accepts `GET /v1/review?dueOnly=true` for the authenticated due-only
+projection; that response carries `dueOnly: true` and the
+`review-schedule.v1` marker. The legacy `POST /v1/review/{itemKey}` path is
+reserved and returns `409` so an older client cannot silently perform a
+non-idempotent grade. The API ships before the web client; rollback keeps v1
+receipt reads and scheduling available, while clients must continue using
+request IDs for writes.
 
 ## Consequences
 

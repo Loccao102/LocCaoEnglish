@@ -21,7 +21,7 @@ func (s *Server) reviewSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 	var in struct {
 		RequestID    string `json:"requestId"`
-		Quality      int    `json:"quality"`
+		Quality      *int   `json:"quality"`
 		RulesVersion string `json:"rulesVersion"`
 	}
 	if !decode(w, r, &in) {
@@ -33,7 +33,11 @@ func (s *Server) reviewSchedule(w http.ResponseWriter, r *http.Request) {
 		problem(w, http.StatusConflict, "review scheduling requires requestId and rulesVersion")
 		return
 	}
-	receipt, err := s.store.ScheduleReview(r.Context(), u.ID, r.PathValue("itemKey"), store.ReviewScheduleRequest{RequestID: in.RequestID, Quality: in.Quality, RulesVersion: in.RulesVersion})
+	if in.Quality == nil {
+		problem(w, http.StatusBadRequest, "quality is required")
+		return
+	}
+	receipt, err := s.store.ScheduleReview(r.Context(), u.ID, r.PathValue("itemKey"), store.ReviewScheduleRequest{RequestID: in.RequestID, Quality: *in.Quality, RulesVersion: in.RulesVersion})
 	switch {
 	case errors.Is(err, store.ErrNotFound):
 		problem(w, http.StatusNotFound, "review item not found")

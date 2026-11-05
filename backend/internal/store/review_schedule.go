@@ -57,6 +57,13 @@ func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in R
 		return model.ReviewScheduleReceipt{}, err
 	}
 	defer tx.Rollback()
+	// Serialize the first claim for one owner/request pair even when competing
+	// calls target different review rows. Without this lock both transactions
+	// can pass the missing-receipt check and one loses the unique insert as a
+	// 500 instead of returning the immutable receipt/conflict contract.
+	if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtext('review-schedule.v1:' || $1), hashtext($2))`, userID, in.RequestID); err != nil {
+		return model.ReviewScheduleReceipt{}, err
+	}
 
 	if receipt, found, err := reviewScheduleReceiptTx(ctx, tx, userID, in.RequestID, false); err != nil {
 		return model.ReviewScheduleReceipt{}, err
@@ -92,7 +99,7 @@ func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in R
 	}
 
 	interval, ease, failures = nextReview(interval, ease, failures, in.Quality)
-	now := time.Now().UTC()
+	now := time.Now().UTC().Truncate(time.Microsecond)
 	dueAt := now.Add(time.Duration(interval) * 24 * time.Hour)
 	if _, err = tx.ExecContext(ctx, `UPDATE review_items SET interval_days=$3,ease=$4,failures=$5,due_at=$6 WHERE user_id=$1 AND item_key=$2`, userID, itemKey, interval, ease, failures, dueAt); err != nil {
 		return model.ReviewScheduleReceipt{}, err
@@ -109,6 +116,14 @@ func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in R
 func (s *Store) scheduleReviewMemory(userID, itemKey string, in ReviewScheduleRequest) (model.ReviewScheduleReceipt, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if receipts := s.mem.reviewReceipts[userID]; receipts != nil {
+		if receipt, ok := receipts[in.RequestID]; ok {
+			if !sameReviewScheduleRequest(receipt, itemKey, in) {
+				return model.ReviewScheduleReceipt{}, ErrReviewScheduleConflict
+			}
+			return receipt, nil
+		}
+	}
 	items := s.mem.reviews[userID]
 	if items == nil {
 		return model.ReviewScheduleReceipt{}, ErrNotFound
@@ -119,18 +134,12 @@ func (s *Store) scheduleReviewMemory(userID, itemKey string, in ReviewScheduleRe
 	if s.mem.reviewReceipts[userID] == nil {
 		s.mem.reviewReceipts[userID] = map[string]model.ReviewScheduleReceipt{}
 	}
-	if receipt, ok := s.mem.reviewReceipts[userID][in.RequestID]; ok {
-		if !sameReviewScheduleRequest(receipt, itemKey, in) {
-			return model.ReviewScheduleReceipt{}, ErrReviewScheduleConflict
-		}
-		return receipt, nil
-	}
 	r, ok := items[itemKey]
 	if !ok {
 		return model.ReviewScheduleReceipt{}, ErrNotFound
 	}
 	interval, ease, failures := nextReview(r.IntervalDays, r.Ease, r.Failures, in.Quality)
-	now := time.Now().UTC()
+	now := time.Now().UTC().Truncate(time.Microsecond)
 	dueAt := now.Add(time.Duration(interval) * 24 * time.Hour)
 	r.IntervalDays, r.Ease, r.Failures, r.DueAt = interval, ease, failures, dueAt
 	items[itemKey] = r
