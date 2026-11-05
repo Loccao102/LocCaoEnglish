@@ -1,6 +1,7 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-11-05, main `c601292` (đã gồm PR #25–#37). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-11-05, main `30b6276` (các merge đã nghiệm thu tới PR #46).
+PR #43 là probe thất bại có kiểm soát, đã đóng và không merge. Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -37,8 +38,12 @@ nút khôi phục khóa học; source `651c946` đạt sáu jobs tại
 [CI 201](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41970949503),
 242 E2E (44.3m), không retry/flaky. Ảnh mission/review/content/course đã xem;
 merge thành `c601292` sau đối chiếu checks, review threads và expected head.
-Không suy kết quả này sang #38–#45. Các thay đổi pha màu, auth intent, IELTS
-snapshot, published course catalog và SEC-002 đang được nghiệm thu trên head riêng.
+Các phần #38–#42 nằm trong PR #44 `2c2550a`, đã đạt CI 216 đủ sáu jobs/252 E2E
+(45.1m), merge `68f4e3e`. SEC-002 PR #45 `dd0f05f` đạt CI 217 đủ sáu jobs/252
+E2E (39.7m), merge `a372827`. PR #46 `9638dec` đạt CI 219 đủ sáu jobs/252 E2E
+(44.4m), merge `30b6276`. Không retry/flaky; reviews/threads trống, kiểm tra
+expected head và merged tree giữ đúng source đã kiểm tra. Không suy sang Fair
+conflict/performance đang phát triển tiếp.
 Không chạy local/deploy. [Audit reward](REWARD-BOUNDARY-AUDIT.md) chốt phạm vi
 CORE-005 trên main đã merge; các mục core khác giữ tiêu chí độc lập.
 
@@ -60,7 +65,8 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
 | GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
-| SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | in_progress |
+| SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | done |
+| PERF-001 | P1 | Đo và giảm truy vấn catalog lặp, giữ đúng dữ liệu công khai/owner | Contract core hiện có | in_progress |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -84,7 +90,25 @@ chối admin/teacher routes; quyền được operator cấp tồn tại sau res
 quyền không bị tự nâng lại; first read đồng thời không ghi đè quyết định operator.
 Kiểm tra memory, PostgreSQL/race, HTTP, CLI và teacher E2E trên GitHub. Schema/API
 response không đổi; phải có hướng dẫn audit role cũ, rollout/retry theo user ID.
-Chưa chạy local hoặc deploy; chưa đánh dấu done khi CI head mới chưa đạt.
+Đã nghiệm thu source `dd0f05f`: CI 217 đủ sáu jobs, PG/race/vet, operator fixture
+thật và 252 E2E (39.7m); PR #45 merge thành `a372827`. Không chạy local/deploy.
+Done áp dụng code/CI; audit role legacy trước production vẫn là việc operator,
+không tự thu hồi role hoặc suy rằng production đã được vá.
+
+## PERF-001 — Catalog không truy vấn lặp theo số bài
+
+Owner/task: Codex, `codex/perf001-lesson-catalog`, 2026-11-05; người dùng yêu cầu
+bổ sung tối ưu hiệu năng. Điểm vào thật `/learn` → LessonCatalog → GET /v1/lessons
+→ ListLessons. SQL hiện lấy slug rồi gọi GetLesson cho từng bài, lặp schema,
+metadata và exercises: `2 + 3N` database statements, trong đó một schema batch
+có nhiều lệnh DDL. Phạm vi đầu: bulk read catalog trong số statement cố định,
+giữ published/admin filter, metadata, thứ tự bài/exercises và shape/API hiện có.
+Không cache dữ liệu cá nhân, không đổi save/XP, không thêm pagination contract.
+Nghiệm thu query budget đo được trong PostgreSQL CI, tương đương kết quả với
+luồng cũ, draft/empty/options/order/publication và concurrent reads; benchmark
+CI báo số đo đúng điều kiện, không suy p95 production từ fixture nhỏ. Không chạy
+app/build/test/benchmark trên máy người dùng. ListCourses là follow-up sau khi
+lát cắt đầu đã được xác minh; không tự tuyên bố toàn app đã tối ưu.
 
 ## CORE-001 — Server-owned attempt
 
@@ -336,7 +360,7 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 
-### Không suy overall từ dashboard cũ (`in_review`, 2026-11-05)
+### Không suy overall từ dashboard cũ (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core004-overall-boundary`, nền `4fa1b77`.
 `/camp` dùng LiveSnapshot, vẫn render `dashboard.ieltsBand` thành overall dù
@@ -345,6 +369,9 @@ Thẻ IELTS chỉ dẫn tới kết quả từng kỹ năng, giữ target do ng�
 không tính/hiện combined band từ trường legacy. Không đổi API/schema/history.
 Nghiệm thu fixture API cũ có band khác null, target riêng và ảnh mobile qua CI.
 Overall đã hiệu chuẩn và provider thật tiếp tục là phần chưa nghiệm thu.
+Đã xem hai ảnh 390×551/844; assertion Reading dùng nhãn cũ được sửa tại
+`2c2550a`, giữ kiểm tra null-band/không hiện điểm giả. CI 216 đủ sáu jobs/252
+E2E; đã merge qua PR #44 `68f4e3e`, không suy thành overall đã hiệu chuẩn.
 
 Lát cắt mission: Codex, `codex/core004-mission-evidence`, 2026-10-11,
 `done` trong phạm vi guided rubric, nghiệm thu 2026-10-12. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
@@ -746,7 +773,23 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Khóa học theo catalog đang công khai (`in_review`, 2026-11-05)
+### Fair: hai tab hoàn thành cùng checkpoint (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, `codex/core006-fair-conflict`, nền `9638dec`. Hai tab resume
+cùng run ID rồi hoàn thành khác stars/time/feathers có thể để lại queue khác
+kết quả đã chốt. Server từ chối đúng bằng 409, UI hiện chỉ retry mạng vô hạn.
+Phạm vi: đọc receipt Fair đúng owner/run, phân biệt conflict đã lưu với course
+locked; hiển thị kết quả server và queued copy để người chơi chọn giữ bản đã lưu.
+Trước ngừng thử lại bản trùng phải archive nguyên payload gốc theo owner, xác minh
+lại receipt và local payload chưa đổi. Giữ nguyên cả key queue gốc; chỉ loại đúng
+raw copy đã archive khỏi danh sách pending. Không xóa/sửa queue hoặc overwrite ledger.
+Retry bản đã archive không dùng ID mới để nhận thêm visits, không cấp XP/rank.
+API read additive; save/queue/checkpoint hiện có giữ version và dữ liệu cũ, API
+cũ thiếu receipt phải giữ pending rõ ràng. Nghiệm thu memory/PG/restart/owner,
+409 locked/not-found, hai tab, late response/account switch, reload, storage
+blocked và phone actions; chỉ chạy runtime trên GitHub Actions.
+
+### Khóa học theo catalog đang công khai (`done`, 2026-11-05)
 
 Owner/task: Codex, `codex/core006-course-catalog`, nền `9dc252c`.
 Rà nguồn xác nhận PostgreSQL dùng total của bài published nhưng đếm cả bookmark
@@ -756,8 +799,10 @@ khi ẩn và phục hồi khi publish lại. Course không còn bài trả mản
 thông báo, tương thích API cũ trả null; lỗi catalog không bị coi là rỗng hợp lệ.
 Không đổi API shape/schema, XP hay xóa lịch sử. Nghiệm thu memory/PG, owner,
 publish/unpublish/republish, catalog rỗng và browser qua GitHub Actions.
+Source `2c2550a` đã qua CI 216 đủ sáu jobs/252 E2E, ảnh rỗng và nút retry đã xem;
+PR #44 merge `68f4e3e`. Không thay benchmark hay tính thưởng từ kết quả này.
 
-### Ý định đăng nhập và phản hồi đến muộn (`in_review`, 2026-11-05)
+### Ý định đăng nhập và phản hồi đến muộn (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-auth-intent`, nền `37234f8`.
 AuthPanel gọi helper tự ghi token ngay khi POST trả về; chọn Play as guest,
@@ -767,6 +812,8 @@ hiện tại/token nền chưa đổi; logout/storage/auth event hủy ý địn
 đổi auth API, credentials, thời hạn token hay nhập dữ liệu guest. Nghiệm thu late
 login/register sau logout/unmount/account-switch, lặp submit, lỗi/storage và
 đăng nhập thật trên GitHub. Không tuyên bố toàn recovery hoàn tất từ lát cắt này.
+Head `502bae3` đạt CI 209 đủ sáu jobs/251 E2E (44.5m); tổ hợp `2c2550a` đạt
+CI 216/252 E2E, đã merge qua PR #44 `68f4e3e`.
 
 ### Content Studio đúng phiên đăng nhập (`done`, 2026-11-05)
 
@@ -895,6 +942,10 @@ recipe hint thể hiện số phần, dùng dữ liệu của session hiện có
 tắc không hiện đáp án vòng hiện tại; recipe cụ thể giữ assistance/star contract.
 Không đổi seed, puzzle, thời gian, save hay luật chấm. Nghiệm thu browser input
 thật, pause/help/reload/assistance, ba mode và ảnh 390×551/844 trên GitHub.
+Lát cắt hướng dẫn/kế hoạch đã nghiệm thu: `ff91a41` đạt CI 208 đủ sáu jobs/245
+E2E (42.2m), cả tám ảnh hướng dẫn/actions đã xem; tổ hợp `2c2550a` đạt CI 216 và
+merge qua PR #44. Chưa có người chơi thật, số liệu cân bằng hay topology bridge
+mới; toàn CORE-007 tiếp tục in_progress.
 Chơi thử với người thật và điều chỉnh dựa trên kết quả vẫn chưa được thực hiện;
 toàn CORE-007 không done từ tài liệu hoặc kiểm tra tự động.
 

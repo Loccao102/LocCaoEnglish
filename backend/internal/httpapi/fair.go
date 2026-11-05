@@ -19,6 +19,7 @@ func (s *Server) registerFairRoutes(mux *http.ServeMux) {
 		}
 		write(w, 200, map[string]any{"save": save, "playerId": u.ID, "displayName": u.DisplayName, "storageMode": s.store.Mode()})
 	})
+	mux.HandleFunc("GET /v1/fair/completions/{runId}", s.fairCompletion)
 	mux.HandleFunc("POST /v1/fair/completions", func(w http.ResponseWriter, r *http.Request) {
 		u, ok := s.signedInUser(w, r)
 		if !ok {

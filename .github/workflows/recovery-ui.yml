@@ -22,6 +22,15 @@ on:
       - tests/e2e/auth-intent.spec.ts
       - tests/e2e/content-owner.spec.ts
       - tests/e2e/colour-guide.spec.ts
+      - components/game/FairProgressProvider.tsx
+      - components/game/FairSaveStatus.tsx
+      - components/game/FairConflictRecovery.tsx
+      - components/game/FairConflictRecovery.module.css
+      - lib/game/fair-progress.ts
+      - lib/game/fair-conflicts.ts
+      - backend/internal/store/fair_receipt*.go
+      - backend/internal/httpapi/fair*.go
+      - tests/e2e/fair-conflict.spec.ts
 
 permissions:
   contents: read
@@ -57,8 +66,8 @@ jobs:
           done
           docker compose logs web api
           exit 1
-      - name: Check current authentication, course, content and colour interactions
-        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/course-owner.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts --max-failures=1
+      - name: Check authentication, course, content, colour and Fair recovery
+        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/course-owner.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts tests/e2e/fair-conflict.spec.ts --max-failures=1
         env:
           E2E_BASE_URL: http://127.0.0.1:3000
       - uses: actions/upload-artifact@v4
@@ -75,6 +84,7 @@ jobs:
             .cache/colour-guide-*.png
             .cache/content-owner-*.png
             .cache/course-owner-*.png
+            .cache/fair-conflict-*.png
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

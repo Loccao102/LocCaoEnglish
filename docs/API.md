@@ -14,6 +14,14 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 
 ## Content Studio account boundary
 
+Fair conflict recovery adds account-only `GET /v1/fair/completions/{runId}` with
+`{method:"fair-keepsake.v1",playerId,completion,save}`. The receipt is the exact
+immutable first completion, not reconstructed from aggregate totals. Invalid ID
+400, absent/foreign 404, guest/invalid auth 401; no writes or rewards. See
+[ADR 023](decisions/023-fair-conflict-recovery.md) for queued-copy recovery and
+old API compatibility. A 409 without a valid owned receipt never authorizes
+discarding or replacing a pending result.
+
 Admin lesson reads/writes require a stored teacher/admin assignment. Public
 registration always starts as learner, even if its unverified email appears in
 obsolete ADMIN_EMAILS/TEACHER_EMAILS configuration. Privileged roles are assigned

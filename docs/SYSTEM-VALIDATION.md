@@ -2,6 +2,40 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Accepted integration through PR 46 — 2026-11-05
+
+Main `30b6276` preserves all accepted source commits through PR 46, excluding
+the deliberately failing closed probe PR 43. PR 44 head `2c2550a` passed all six
+jobs in [CI 216](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41978413009),
+252 E2E (45.1m), then merged as `68f4e3e`. PR 45 role hardening `dd0f05f` passed
+[CI 217](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41979106768),
+all six and 252 E2E (39.7m), including its real operator-created teacher fixture,
+then merged as `a372827`. Documentation PR 46 `9638dec` passed
+[CI 219](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41980489843),
+all six and 252 E2E (44.4m), then merged as `30b6276`.
+
+No flaky/retry results were accepted. Reviews and threads were empty; each merge
+pinned its expected head after verifying the combined tree was identical to the
+tested source. Active required checks remained enforced without a bypass. This
+resolves the pending CI notes for those exact heads earlier in this document.
+No local app/build/tests/services or production deployment were performed.
+
+## Fair queued conflict recovery — 2026-11-05
+
+CORE-006, `codex/core006-fair-conflict`, based on `9638dec`; ADR 023. The new
+owner-scoped receipt read distinguishes a first committed result from a locked
+course. Conflicting copies remain byte-for-byte in their original queue key;
+an explicit archived-copy marker stops retrying only that exact copy. Canonical
+ledger/save, visits and learning XP are unchanged. Other queued runs can sync;
+old API/404/auth/storage failures preserve pending data. The local archive is
+visible and downloadable for the same account, with no automatic guest import.
+
+Added memory/PostgreSQL immutable receipt/owner/restart tests, HTTP auth/status,
+archive preservation/idempotency and browser recovery/reload/late-read/storage/
+download/phone checks. Offline queue fixtures label the two-tab handoff output;
+they do not replace the separate actual 3D full-clear/checkpoint regressions.
+New source CI and phone image inspection are pending. Static checks only locally.
+
 ## CORE-005 software boundary acceptance — 2026-11-05
 
 Branch `codex/roadmap-core005-acceptance`; active-route audit on source `dd0f05f`,

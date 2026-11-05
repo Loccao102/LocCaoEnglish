@@ -1,6 +1,7 @@
 import { festivalById, festivalGames } from "./festival";
 import { courseById, fairCourses, courseMedals, mergeCourse, type CourseRecord, type CourseResult } from "./fair-courses";
 import { difficulties, isDifficulty, type Difficulty } from "./challenge";
+import { isArchivedFairCopy } from "./fair-conflicts";
 
 export type FairRecord = { best: number; stars: number; visits: number; lastPlayedAt?: string;levels?:Partial<Record<Difficulty,{stars:number;visits:number}>> };
 export type FairSave = { version: 1; games: Record<string, FairRecord>; courses?:Record<string,CourseRecord> };
@@ -62,9 +63,13 @@ export function queuedFair(owner: string): (FairCompletion & { at: string })[] {
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (!key?.startsWith(prefix)) continue;
-    const value = parseStored(key) as FairCompletion & { at: string } | null;
+    const raw = localStorage.getItem(key);
+    let value: FairCompletion & { at: string } | null;
+    try { value = raw ? JSON.parse(raw) : null; }
+    catch { throw new Error("A queued memory could not be read. It has been kept for recovery."); }
     if (!value || key !== prefix + value.runId || !festivalById(value.gameId) || !Number.isInteger(value.stars) || value.stars < 1 || value.stars > 3 || typeof value.at !== "string") throw new Error("A queued memory needs recovery. No saved results have been removed.");
     applyFair(emptyFair(),value,value.at);
+    if (raw && isArchivedFairCopy(fairPrefix(owner), value.runId, raw)) continue;
     entries.push(value);
   }
   return entries.sort((a, b) => a.at.localeCompare(b.at) || a.runId.localeCompare(b.runId));
