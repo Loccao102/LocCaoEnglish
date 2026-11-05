@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS review_schedule_receipts(
  item_key TEXT NOT NULL,
  quality INTEGER NOT NULL CHECK(quality >= 0 AND quality <= 5),
  rules_version TEXT NOT NULL,
+ expected_due_at TIMESTAMPTZ NOT NULL,
  scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  due_at TIMESTAMPTZ NOT NULL,
  interval_days INTEGER NOT NULL,

@@ -12,6 +12,40 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 - `POST /v1/auth/register`
 - `POST /v1/auth/login`
 
+## Review scheduling and recovery
+
+`GET /v1/review?dueOnly=true&limit=30` requires an account and returns
+`{items,rulesVersion:"review-schedule.v1",dueOnly:true}`; it filters due dates
+before applying the limit. The legacy GET without `dueOnly=true` retains its
+demo-compatible all-items behavior. New clients require the versioned marker
+before offering scheduling, rather than treat a missing API/queue as empty.
+
+`POST /v1/review/{itemKey}/grades` requires an account and
+`{requestId,quality,expectedDueAt,rulesVersion:"review-schedule.v1"}`. Quality
+must be an explicitly supplied integer 0–5 and expectedDueAt the item's saved
+due timestamp. A receipt contains those inputs, itemKey, scheduledAt, dueAt,
+intervalDays, ease and failures. It contains no prompt/answer. Exact retries
+return the immutable receipt; changing the request's payload or submitting a
+stale due snapshot returns 409 without a second SRS transition. The schedule
+and receipt commit atomically. Missing/foreign items return 404 with no receipt.
+The legacy POST `/v1/review/{itemKey}` is retired with 409; a new client against
+an older server uses a distinct child path and cannot silently grade twice.
+
+`GET /v1/review/grades/{requestId}` recovers only the signed-in owner's receipt;
+missing/foreign receipts are 404. A receipt survives removal of its queue item.
+No XP, confidence or mastery is awarded. Scheduling remains a learner self-rating,
+independent of checked answer evidence. See [ADR 019](decisions/019-review-schedule-receipts.md).
+
+The browser keeps only owner/request/item/rating/version/due-snapshot metadata
+in `loccao.review-grade.v1.<owner>`. It reads back a pending receipt on reload
+before offering new ratings, and never replays it automatically under another
+account. Network failures retain the reference and item; only a matching receipt
+confirms scheduling. Old/corrupt references remain until explicit recovery choice.
+If storage is blocked, the current tab keeps the reference, with no full-reload
+durability claim. Migration 023/startup DDL creates the additive receipt table;
+old review rows are preserved, not backfilled. API before web; rollback retains
+the receipt route/schema, version and legacy rejection. No queue reset is needed.
+
 ## Teacher practice reporting
 
 `GET /v1/admin/analytics` requires a signed-in teacher or admin; guests receive

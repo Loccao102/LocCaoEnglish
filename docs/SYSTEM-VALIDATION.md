@@ -2,6 +2,28 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Review schedule receipts and recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-review-owner`, based on combined `3230a73`.
+The active review UI previously swallowed a scheduling error, removed the item
+and reported completion anyway, while account switches retained the old queue.
+New authenticated receipt scheduling, owner-keyed UI and metadata-only pending
+references preserve unconfirmed work. Read-back and exact retry do not advance
+the SRS interval twice. An expected-due precondition also rejects two tabs with
+different request IDs grading the same displayed snapshot. Self-ratings still
+award no XP or mastery. The legacy POST is retired; the new child route is safe
+against an old API that ignores unknown body fields.
+
+Store/HTTP regressions cover memory/PostgreSQL, real concurrent receipt claims,
+same-ID different items, different-ID stale snapshots, scoped insert-failure
+rollback, restart, missing/foreign ownership, receipt recovery after item removal,
+required fields and due filtering. Browser cases cover real lost committed
+responses, immutable retry, owner changes/late response, storage failures/corrupt
+references, older/unavailable APIs, stale snapshots and phone images.
+Source review corrected precision, race assertions and unreleased migration
+alignment. No local tests/build/services were run, per user instruction. Status:
+in_review pending final-head GitHub Actions and visual review. No deployment.
+
 ## Combined roadmap verification — 2026-11-05
 
 Branch `codex/roadmap-integration-20261105` merges PR #31/#32/#33/#34 with

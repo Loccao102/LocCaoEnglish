@@ -65,3 +65,7 @@ Review scheduling can be safely retried after a timeout and the UI can recover
 pending grades after account changes. The receipt table adds a small durable
 record per authenticated grade. The legacy quality-only client must upgrade
 before writing again.
+
+This is the first unreleased receipt schema: migration 023 and startup DDL both
+create `expected_due_at` with the original table. No precondition is fabricated
+from a result's later due date, and existing review rows are not rewritten.

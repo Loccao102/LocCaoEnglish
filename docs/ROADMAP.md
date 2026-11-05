@@ -689,6 +689,19 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Khôi phục lịch ôn và owner của Review queue (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-review-owner` / `codex/core006-review-receipts`,
+nền integration `3230a73`. `/review` đang bỏ lỗi ghi lịch, xóa câu khỏi UI rồi báo
+đã lên lịch; queue chỉ tải lúc mount và POST dùng token mới nhất. Thay bằng
+owner-scoped queue và operation `review-schedule.v1` có request ID, receipt và
+pending metadata qua reload; không bỏ câu khi chưa xác nhận. API yêu cầu account,
+exact retry không nhân interval, đổi payload conflict, receipt owner riêng và
+giao dịch nguyên tử; giữ SRS formula, không XP/mastery. Không tự nhập guest queue.
+Migration additive và rollback giữ receipts; contract ADR 019 trước rollout.
+Nghiệm thu đúng/sai retry/lost response/reload/concurrency/owner/auth/old contract,
+PG/restart/rollback, storage lỗi/corrupt, browser thật và mobile. Chỉ GitHub Actions.
+
 ### Tiến độ và đăng ký khóa học đúng tài khoản (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-course-owner`, nền main `54273c3`.

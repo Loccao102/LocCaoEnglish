@@ -17,6 +17,7 @@ import (
 )
 
 func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
+	t.Setenv("ALLOW_ANONYMOUS_DEMO", "true")
 	st, err := store.New("")
 	if err != nil {
 		t.Fatal(err)
@@ -55,13 +56,22 @@ func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
 		handler.ServeHTTP(response, req)
 		return response
 	}
-	if response := call(http.MethodPost, "/v1/review/http-review-item", "", map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion}); response.Code != http.StatusUnauthorized {
+	if response := call(http.MethodPost, "/v1/review/http-review-item/grades", "", map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion}); response.Code != http.StatusUnauthorized {
 		t.Fatalf("receipt write must require sign-in: %d %s", response.Code, response.Body.String())
 	}
 	if response := call(http.MethodPost, "/v1/review/http-review-item", ownerToken, map[string]any{"quality": 4}); response.Code != http.StatusConflict {
 		t.Fatalf("old quality-only path must safe-upgrade: %d %s", response.Code, response.Body.String())
 	}
 	before, _ := st.ReviewQueue(ctx, owner.ID, 10)
+	if guest := call(http.MethodGet, "/v1/review?dueOnly=true", "", nil); guest.Code != http.StatusUnauthorized {
+		t.Fatalf("due-only queue must require account despite demo mode: %d", guest.Code)
+	}
+	if demo := call(http.MethodGet, "/v1/review", "", nil); demo.Code != http.StatusOK {
+		t.Fatalf("legacy demo queue compatibility changed: %d", demo.Code)
+	}
+	if guest := call(http.MethodGet, "/v1/review/grades/http-request", "", nil); guest.Code != http.StatusUnauthorized {
+		t.Fatalf("receipt reads must require an account: %d", guest.Code)
+	}
 	if response := call(http.MethodPost, "/v1/review/http-review-item", ownerToken, map[string]any{"requestId": "http-request", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion}); response.Code != http.StatusConflict {
 		t.Fatalf("old path must never grade even with new body: %d %s", response.Code, response.Body.String())
 	}
@@ -72,6 +82,8 @@ func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
 	for _, body := range []map[string]any{
 		{"requestId": "missing-quality", "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion},
 		{"requestId": "null-quality", "quality": nil, "expectedDueAt": before[0].DueAt, "rulesVersion": store.ReviewScheduleRulesVersion},
+		{"requestId": "missing-snapshot", "quality": 4, "rulesVersion": store.ReviewScheduleRulesVersion},
+		{"requestId": "null-snapshot", "quality": 4, "expectedDueAt": nil, "rulesVersion": store.ReviewScheduleRulesVersion},
 	} {
 		if response := call(http.MethodPost, "/v1/review/http-review-item/grades", ownerToken, body); response.Code != http.StatusBadRequest {
 			t.Fatalf("missing/null quality must be rejected: %d %s", response.Code, response.Body.String())
@@ -87,6 +99,15 @@ func TestReviewScheduleHTTPRequiresReceiptEndpointAndOwner(t *testing.T) {
 	}
 	if recovered := call(http.MethodGet, "/v1/review/grades/http-request", ownerToken, nil); recovered.Code != http.StatusOK {
 		t.Fatalf("owner receipt recovery failed: %d %s", recovered.Code, recovered.Body.String())
+	}
+	due := call(http.MethodGet, "/v1/review?dueOnly=true", ownerToken, nil)
+	var projection struct {
+		Items        []model.ReviewItem `json:"items"`
+		RulesVersion string             `json:"rulesVersion"`
+		DueOnly      bool               `json:"dueOnly"`
+	}
+	if err := json.Unmarshal(due.Body.Bytes(), &projection); err != nil || due.Code != http.StatusOK || !projection.DueOnly || projection.RulesVersion != store.ReviewScheduleRulesVersion || len(projection.Items) != 0 {
+		t.Fatalf("due-only versioned contract: %d %s error=%v", due.Code, due.Body.String(), err)
 	}
 	if hidden := call(http.MethodGet, "/v1/review/grades/http-request", foreignToken, nil); hidden.Code != http.StatusNotFound {
 		t.Fatalf("foreign receipt must be hidden: %d %s", hidden.Code, hidden.Body.String())

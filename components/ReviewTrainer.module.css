@@ -1,0 +1,10 @@
+.trainer { min-width: 0; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.trainer p { font-size: 16px; line-height: 1.6; }
+.trainer button, .trainer a { min-height: 44px; }
+.trainer button { white-space: normal; font-size: 16px; margin: .5rem .5rem .5rem 0; }
+.trainer a { display: inline-flex; align-items: center; }
+.trainer :global(.review-meta), .trainer :global(.review-prompt small) { font-size: 14px; }
+.trainer :global(.review-answer strong) { font-size: 22px; }
+.trainer :global(.review-card) { margin: 1rem 0; }
+.pending, .saved { padding: 1rem; border: 1px solid #9ebfaf; border-radius: 1rem; background: #f1f9f4; margin: 1rem 0; }
+.pending { background: #fff8e7; border-color: #d7be75; }

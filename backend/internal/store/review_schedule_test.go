@@ -202,6 +202,14 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 			t.Fatalf("invalid request must not create receipt, got %v", err)
 		}
 		reviewScheduleSeedItem(t, s, u.ID, "split-item")
+		beforeSplit, err := s.ReviewQueue(ctx, u.ID, 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		originals := map[string]model.ReviewItem{}
+		for _, row := range beforeSplit {
+			originals[row.ItemKey] = row
+		}
 		claims := make(chan error, 2)
 		var split sync.WaitGroup
 		split.Add(2)
@@ -235,9 +243,17 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 		if err != nil || len(items) != 2 {
 			t.Fatalf("split race queue: %v %#v", err, items)
 		}
+		winner, err := s.ReviewScheduleReceipt(ctx, u.ID, "split-request")
+		if err != nil {
+			t.Fatal(err)
+		}
 		for _, item := range items {
-			if item.ItemKey == "split-item" && item.IntervalDays != 1 {
-				t.Fatalf("losing item was updated: %#v", item)
+			if item.ItemKey == winner.ItemKey {
+				if item.IntervalDays != winner.IntervalDays || item.Ease != winner.Ease || item.Failures != winner.Failures || !item.DueAt.Equal(winner.DueAt) {
+					t.Fatalf("winner and receipt differ: item=%#v receipt=%#v", item, winner)
+				}
+			} else if !reflect.DeepEqual(item, originals[item.ItemKey]) {
+				t.Fatalf("losing item was updated: before=%#v after=%#v", originals[item.ItemKey], item)
 			}
 		}
 		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "stale-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: request.ExpectedDueAt}); !errors.Is(err, ErrReviewScheduleConflict) {
@@ -245,6 +261,82 @@ func TestReviewScheduleConcurrentFirstClaimAndDueProjection(t *testing.T) {
 		}
 		if _, err = s.ScheduleReview(ctx, u.ID, "concurrent-item", ReviewScheduleRequest{RequestID: "fresh-request", Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: reviewScheduleDueAt(t, s, u.ID, "concurrent-item")}); err != nil {
 			t.Fatalf("fresh due snapshot should allow a new schedule: %v", err)
+		}
+	})
+}
+
+func TestReviewScheduleTwoTabsCannotAdvanceTheSameSnapshotTwice(t *testing.T) {
+	skillPracticeStores(t, func(t *testing.T, s *Store, _ string) {
+		if s.db != nil {
+			s.db.SetMaxOpenConns(8)
+		}
+		ctx := context.Background()
+		u := reviewScheduleFixture(t, s, "review-tabs-"+newID()+"@example.test", "two-tabs")
+		dueAt := reviewScheduleDueAt(t, s, u.ID, "two-tabs")
+		start := make(chan struct{})
+		results := make(chan error, 2)
+		var wg sync.WaitGroup
+		for _, id := range []string{"tab-first", "tab-second"} {
+			wg.Add(1)
+			go func(id string) {
+				defer wg.Done()
+				<-start
+				_, err := s.ScheduleReview(ctx, u.ID, "two-tabs", ReviewScheduleRequest{RequestID: id, Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: dueAt})
+				results <- err
+			}(id)
+		}
+		close(start)
+		wg.Wait()
+		close(results)
+		successes, conflicts := 0, 0
+		for err := range results {
+			if err == nil {
+				successes++
+			} else if errors.Is(err, ErrReviewScheduleConflict) {
+				conflicts++
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if successes != 1 || conflicts != 1 {
+			t.Fatalf("two displayed copies scheduled twice: successes=%d conflicts=%d", successes, conflicts)
+		}
+		rows, err := s.ReviewQueue(ctx, u.ID, 10)
+		if err != nil || len(rows) != 1 || rows[0].IntervalDays != 3 {
+			t.Fatalf("two tabs changed interval twice: rows=%#v error=%v", rows, err)
+		}
+		receipts := 0
+		for _, id := range []string{"tab-first", "tab-second"} {
+			if _, err := s.ReviewScheduleReceipt(ctx, u.ID, id); err == nil {
+				receipts++
+			} else if !errors.Is(err, ErrNotFound) {
+				t.Fatal(err)
+			}
+		}
+		if receipts != 1 {
+			t.Fatalf("stale tab created a phantom receipt: %d", receipts)
+		}
+		if s.db != nil {
+			if _, err := s.db.ExecContext(ctx, `DELETE FROM review_items WHERE user_id=$1 AND item_key=$2`, u.ID, "two-tabs"); err != nil {
+				t.Fatal(err)
+			}
+		} else {
+			s.mu.Lock()
+			delete(s.mem.reviews, u.ID)
+			s.mu.Unlock()
+		}
+		for _, id := range []string{"tab-first", "tab-second"} {
+			stored, err := s.ReviewScheduleReceipt(ctx, u.ID, id)
+			if errors.Is(err, ErrNotFound) {
+				continue
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			retry, err := s.ScheduleReview(ctx, u.ID, "two-tabs", ReviewScheduleRequest{RequestID: id, Quality: 4, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: dueAt})
+			if err != nil || !reflect.DeepEqual(stored, retry) {
+				t.Fatalf("item removal broke exact retry: stored=%#v retry=%#v error=%v", stored, retry, err)
+			}
 		}
 	})
 }

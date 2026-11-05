@@ -162,14 +162,25 @@ func (s *Server) plan(w http.ResponseWriter, r *http.Request) {
 	write(w, 200, engine.BuildPlan(skills, reviews))
 }
 func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
-	id, ok := s.userID(w, r)
-	if !ok {
-		return
+	dueOnly := r.URL.Query().Get("dueOnly") == "true"
+	var id string
+	if dueOnly {
+		u, ok := s.signedInUser(w, r)
+		if !ok {
+			return
+		}
+		id = u.ID
+	} else {
+		var ok bool
+		id, ok = s.userID(w, r)
+		if !ok {
+			return
+		}
 	}
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	var items []model.ReviewItem
 	var err error
-	if r.URL.Query().Get("dueOnly") == "true" {
+	if dueOnly {
 		items, err = s.store.DueReviewQueue(r.Context(), id, limit)
 	} else {
 		items, err = s.store.ReviewQueue(r.Context(), id, limit)
@@ -178,7 +189,7 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 		problem(w, 500, err.Error())
 		return
 	}
-	if r.URL.Query().Get("dueOnly") == "true" {
+	if dueOnly {
 		write(w, 200, map[string]any{"items": items, "dueOnly": true, "rulesVersion": store.ReviewScheduleRulesVersion})
 		return
 	}
