@@ -53,6 +53,9 @@ func TestTeacherPracticeEligibilityWindowAndRetryMemoryAndPostgres(t *testing.T)
 		skillPracticeFixture(t, s, fixture(owner.ID, "word-link", "Vocabulary", true, now))
 		skillPracticeFixture(t, s, fixture(other.ID, "word-link", "Vocabulary", false, now.Add(-2*time.Hour)))
 		skillPracticeFixture(t, s, fixture(owner.ID, "shadowing", "Speaking", true, now.Add(-time.Hour)))
+		// Shared Story Choice is checked guided Reading practice. Adventure
+		// chapter clears are a different source and remain excluded below.
+		skillPracticeFixture(t, s, fixture(owner.ID, "story-choice", "Reading", true, now.Add(-time.Hour)))
 
 		// The lower boundary is inclusive; an older and a future receipt are not.
 		boundary := fixture(owner.ID, "grammar-repair", "Grammar", true, now.Add(-7*24*time.Hour))
@@ -103,7 +106,7 @@ func TestTeacherPracticeEligibilityWindowAndRetryMemoryAndPostgres(t *testing.T)
 		if !reflect.DeepEqual(before, after) {
 			t.Fatal("analytics projection mutated learner state")
 		}
-		if got.WindowDays != 7 || got.Attempts7d != 4 || got.Correct7d != 3 || got.Active7d != 2 {
+		if got.WindowDays != 7 || got.Attempts7d != 5 || got.Correct7d != 4 || got.Active7d != 2 {
 			t.Fatalf("unexpected totals: %#v", got)
 		}
 		vocabulary := teacherPracticeSkill(t, got, "Vocabulary")
@@ -117,6 +120,10 @@ func TestTeacherPracticeEligibilityWindowAndRetryMemoryAndPostgres(t *testing.T)
 		speaking := teacherPracticeSkill(t, got, "Speaking")
 		if speaking.Attempts != 1 || speaking.Correct != 1 || speaking.Learners != 1 || speaking.EvidenceKind != "transcript-match" {
 			t.Fatalf("unexpected transcript projection: %#v", speaking)
+		}
+		reading := teacherPracticeSkill(t, got, "Reading")
+		if reading.Attempts != 1 || reading.Correct != 1 || reading.EvidenceKind != "guided-practice" {
+			t.Fatalf("shared Story Choice was confused with Adventure rewards: %#v", reading)
 		}
 
 		// Retrying the same server attempt is idempotent: it must remain one row

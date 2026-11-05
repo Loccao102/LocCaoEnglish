@@ -22,7 +22,8 @@ correct,learners,evidenceKind}]}`. See [ADR 017](decisions/017-teacher-practice-
 Only account-owned, completed shared practice with a supported activity/rules/skill,
 nonempty item/content version and a completion in the inclusive rolling seven-day
 window qualifies. Demo, guest, active/legacy, story clears and IELTS estimates
-are excluded. Correct and incorrect completions both count; fresh replays count
+are excluded. Shared Story Choice remains eligible Reading practice; Adventure
+quest rewards are a separate source. Correct and incorrect completions both count; fresh replays count
 as rounds, while an exact retry uses the same stored completion. Speaking is
 `transcript-match`, other supported skills are `guided-practice`; no mastery,
 pronunciation quality or calibrated CEFR is inferred. An empty period has zero

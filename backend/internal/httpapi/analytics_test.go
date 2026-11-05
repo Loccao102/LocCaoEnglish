@@ -24,7 +24,7 @@ func TestTeacherAnalyticsHTTPAuthAndEmptyPracticeContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = st.Close() })
+	t.Cleanup(st.Close)
 	social := realtime.New("")
 	t.Cleanup(social.Close)
 	authn := auth.New("analytics-http-test", time.Hour)

@@ -22,9 +22,11 @@ rõ ràng, dùng được như nhau ở memory và PostgreSQL.
   completion time trong cửa sổ UTC đóng `[now-7d, now]`, activity/rules/skill
   đúng catalog dùng bởi `skill_practice` và `checked_practice`. Sai vẫn là một
   lần luyện tập. Retry cùng server attempt là một receipt, không nhân đôi.
-- Loại demo, active, legacy, story/IELTS/unknown và mọi receipt thiếu hoặc sai
+- Loại demo, active, legacy, Adventure quest/IELTS/unknown và mọi receipt thiếu hoặc sai
   provenance. Projection chỉ đọc; không ghi reward, XP, confidence, level hay
   world state.
+- Story Choice (`story-choice`) thuộc shared guided Reading practice, vẫn được
+  tính khi đúng policy. Đây không phải quest clear của Adventure/Sunlit Village.
 - Giữ nguyên các trường analytics cũ như giá trị compatibility đã deprecated.
   UI mới không trình bày chúng như evidence hiện tại; policy mới sau này phải
   dùng method version mới.

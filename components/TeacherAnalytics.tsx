@@ -36,7 +36,7 @@ export default function TeacherAnalytics() {
           <div><dt>Checked rounds</dt><dd>{data.practice.attempts7d}</dd></div>
           <div><dt>Correct checked rounds</dt><dd>{data.practice.correct7d} <small>of {data.practice.attempts7d}</small></dd></div>
         </dl>
-        <p className={styles.note}>Guided practice and transcript matching are shown separately below. These counts do not measure mastery, CEFR, independent recall or pronunciation. Legacy scores, story clears and IELTS estimates are excluded.</p>
+        <p className={styles.note}>Guided practice and transcript matching are shown separately below. These counts do not measure mastery, CEFR, independent recall or pronunciation. Legacy scores, Adventure quest rewards and IELTS estimates are excluded.</p>
         <section aria-label="Checked practice by skill" className={styles.skills}>
           <h2>Practice by skill</h2>
           {!data.practice.skills.length ? <p>No checked practice in this period.</p>
