@@ -13,7 +13,7 @@
 }
 
 .recovery h3, .recovery h4 { margin: 0 0 8px; }
-.recovery.recovery p, .recovery.recovery li { font-size: 16px; line-height: 1.5; }
+.recovery.recovery p, .recovery.recovery li { color: #153e35; font-size: 16px; line-height: 1.5; }
 .recovery article { margin-top: 16px; padding-top: 16px; border-top: 1px solid #b8c9bf; }
 .recovery button, .recovery summary {
   min-height: 44px;

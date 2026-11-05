@@ -67,6 +67,7 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
 | SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | done |
 | PERF-001 | P1 | Đo và giảm truy vấn catalog lặp, giữ đúng dữ liệu công khai/owner | Contract core hiện có | in_progress |
+| PERF-002 | P1 | Tái sử dụng outbound HTTP connection cho LLM/TTS | AI lifespan/provider contract | in_progress |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -100,7 +101,7 @@ không tự thu hồi role hoặc suy rằng production đã được vá.
 Owner/task: Codex, `codex/perf001-lesson-catalog`, 2026-11-05; người dùng yêu cầu
 bổ sung tối ưu hiệu năng. Điểm vào thật `/learn` → LessonCatalog → GET /v1/lessons
 → ListLessons. SQL hiện lấy slug rồi gọi GetLesson cho từng bài, lặp schema,
-metadata và exercises: `2 + 3N` database statements, trong đó một schema batch
+metadata và exercises: `2 + 3N` database calls, trong đó một schema batch
 có nhiều lệnh DDL. Phạm vi đầu: bulk read catalog trong số statement cố định,
 giữ published/admin filter, metadata, thứ tự bài/exercises và shape/API hiện có.
 Không cache dữ liệu cá nhân, không đổi save/XP, không thêm pagination contract.
@@ -109,6 +110,19 @@ luồng cũ, draft/empty/options/order/publication và concurrent reads; benchma
 CI báo số đo đúng điều kiện, không suy p95 production từ fixture nhỏ. Không chạy
 app/build/test/benchmark trên máy người dùng. ListCourses là follow-up sau khi
 lát cắt đầu đã được xác minh; không tự tuyên bố toàn app đã tối ưu.
+
+## PERF-002 — HTTP pool cho AI
+
+Owner/task: Codex, tích hợp [PR #47](https://github.com/Loccao102/LocCaoEnglish/pull/47)
+`29a126b` vào nhánh nghiệm thu hiệu năng. LLM JSON coach và Azure neural TTS
+trước tạo AsyncClient mỗi request. Dùng một client trong lifespan mỗi worker,
+giới hạn pool 40/keepalive 12, đóng khi shutdown; giữ timeout 35s/25s, fallback,
+API/schema và standalone synthesize usage. Không giữ prompt/result trong cache.
+Nghiệm thu protocol/lifespan qua MockTransport, integration/build và CI tổ hợp
+với các thay đổi main/Fair mới. Không coi test giả lập là provider thật hoặc số
+đo throughput/latency mạng; không thêm secret, live provider call hay deploy.
+Acoustic/Writing provider riêng chưa thuộc tối ưu này. Đọc source đang dùng
+`app.server` trỏ cùng `app.main.app`, không chỉ sửa entry point không được import.
 
 ## CORE-001 — Server-owned attempt
 
