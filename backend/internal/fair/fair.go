@@ -70,6 +70,8 @@ var ErrInvalid = errors.New("invalid fair completion")
 var ErrConflict = errors.New("this run was already saved with a different result")
 var ErrLocked = errors.New("complete the previous course before starting this one")
 var runPattern = regexp.MustCompile(`^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$`)
+
+func ValidRunID(id string) bool { return runPattern.MatchString(id) }
 var games = func() map[string]Game {
 	var list []Game
 	if err := json.Unmarshal(catalogJSON, &list); err != nil {
@@ -107,7 +109,7 @@ func Validate(c Completion) error {
 	if c.Difficulty != "" && c.Difficulty != "practice" && c.Difficulty != "adventure" && c.Difficulty != "expert" {
 		return ErrInvalid
 	}
-	if _, ok := games[c.GameID]; !ok || c.Stars < 1 || c.Stars > 3 || !runPattern.MatchString(c.RunID) {
+	if _, ok := games[c.GameID]; !ok || c.Stars < 1 || c.Stars > 3 || !ValidRunID(c.RunID) {
 		return ErrInvalid
 	}
 	if c.CourseID != "" {

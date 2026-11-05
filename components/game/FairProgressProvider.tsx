@@ -3,20 +3,34 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch, APIError } from "@/lib/api";
 import { AUTH_EVENT, getAuthToken } from "@/lib/session";
-import { availableCourses, emptyFair, FAIR_EVENT, fairPrefix, guestFair, mergeFair, parseStored, queuedFair, queueFair, restoreFair, type FairRun, type FairSave } from "@/lib/game/fair-progress";
+import { applyFair, availableCourses, emptyFair, FAIR_EVENT, fairPrefix, guestFair, mergeFair, parseStored, queuedFair, queueFair, restoreFair, type FairRun, type FairSave } from "@/lib/game/fair-progress";
+import { archiveFairConflict, archivedFairCopies, queuedFairRaw, sameFairCompletion, type FairConflict, type FairConflictArchive, type FairReceipt, type QueuedFairCopy } from "@/lib/game/fair-conflicts";
 import { isDifficulty, type Difficulty } from "@/lib/game/challenge";
 import { courseUnlocked, type CourseRecord, type CourseResult } from "@/lib/game/fair-courses";
 
 type Identity = { owner: string; name: string; storageMode: string };
-type Snapshot = Identity & { save: FairSave; status: "loading" | "ready" | "error"; pending: number; syncing: boolean; warning: string };
+type Snapshot = Identity & { save: FairSave; status: "loading" | "ready" | "error"; pending: number; syncing: boolean; warning: string; conflicts: FairConflict[]; archived: FairConflictArchive[]; resolving: boolean };
 type APIState = { save: FairSave; playerId: string; displayName: string; storageMode: string };
-const initial: Snapshot = { owner: "", name: "Adventurer", storageMode: "device", save: emptyFair(), status: "loading", pending: 0, syncing: false, warning: "" };
+const initial: Snapshot = { owner: "", name: "Adventurer", storageMode: "device", save: emptyFair(), status: "loading", pending: 0, syncing: false, warning: "", conflicts: [], archived: [], resolving: false };
 const identityKey = "loccao.fair.session.v1";
-const FairContext = createContext<(Snapshot & { courses:Record<string,CourseRecord>;refresh: () => Promise<void>; begin: (gameId: string,courseId?:string,difficulty?:Difficulty) => FairRun; complete: (run: FairRun, stars: number,result?:CourseResult) => Promise<string> }) | null>(null);
+const FairContext = createContext<(Snapshot & { courses:Record<string,CourseRecord>;refresh: () => Promise<void>; resolveConflict: (runId: string) => Promise<void>; begin: (gameId: string,courseId?:string,difficulty?:Difficulty) => FairRun; complete: (run: FairRun, stars: number,result?:CourseResult) => Promise<string> }) | null>(null);
+
+async function readReceipt(owner: string, token: string, queued: QueuedFairCopy): Promise<FairReceipt> {
+  const result = await apiFetch<FairReceipt>(`/v1/fair/completions/${encodeURIComponent(queued.runId)}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (result?.method !== "fair-keepsake.v1" || result.playerId !== owner || result.completion?.runId !== queued.runId ||
+    result.save?.version !== 1 || !result.save.games || Array.isArray(result.save.games)) throw new Error("The saved memory could not be verified. Your queued copy is kept.");
+  applyFair(emptyFair(), result.completion, new Date().toISOString());
+  const saved = restoreFair(result.save), record = saved.games[result.completion.gameId];
+  if (!record || record.visits < 1 || record.stars < result.completion.stars || (result.completion.courseId && !saved.courses?.[result.completion.courseId])) {
+    throw new Error("The saved memory could not be verified. Your queued copy is kept.");
+  }
+  return { ...result, save: saved };
+}
 
 export function FairProgressProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Snapshot>(initial);
   const verifiedToken = useRef("");
+  const resolving = useRef(false);
   const stateRef = useRef(state), generation = useRef(0), flight = useRef<{ version: number; task: Promise<boolean> } | null>(null);
   const patch = useCallback((value: Partial<Snapshot>) => { stateRef.current = { ...stateRef.current, ...value }; setState(stateRef.current); }, []);
   const current = useCallback((version: number, token: string) => generation.current === version && getAuthToken() === token, []);
@@ -30,13 +44,35 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
 
   const sync = useCallback((owner: string, token: string, version: number): Promise<boolean> => {
     if (flight.current?.version === version) return flight.current.task;
+    if (resolving.current) return Promise.resolve(false);
     const task = (async () => {
       if (!current(version, token)) return false;
       patch({ syncing: true });
       try {
+        const conflicts: FairConflict[] = [];
+        let blocked = false;
         for (const entry of queuedFair(owner)) {
           if (!current(version, token)) return false;
-          const result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: entry.runId, gameId: entry.gameId, stars: entry.stars,difficulty:entry.difficulty,courseId:entry.courseId,elapsedMs:entry.elapsedMs,feathers:entry.feathers }) });
+          const queuedRaw = queuedFairRaw(fairPrefix(owner), entry);
+          let result: { save: FairSave };
+          try {
+            result = await apiFetch<{ save: FairSave }>("/v1/fair/completions", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ runId: entry.runId, gameId: entry.gameId, stars: entry.stars,difficulty:entry.difficulty,courseId:entry.courseId,elapsedMs:entry.elapsedMs,feathers:entry.feathers }) });
+          } catch (error) {
+            if (!(error instanceof APIError) || error.status !== 409) throw error;
+            try {
+              const receipt = await readReceipt(owner, token, entry);
+              if (!current(version, token)) return false;
+              // A 409 may also mean a locked course. Only a real owned receipt
+              // can offer conflict recovery; neither a 404 nor aggregate totals
+              // establish that this exact run was committed.
+              conflicts.push({ queued: entry, queuedRaw, saved: receipt.completion });
+              patch({ save: confirmed(owner, receipt.save), conflicts: [...conflicts] });
+            } catch (receiptError) {
+              if (receiptError instanceof APIError && receiptError.status === 401) throw receiptError;
+              blocked = true;
+            }
+            continue;
+          }
           if (!current(version, token)) return false;
           const save = confirmed(owner, result.save);
           // Cache first. If storage fails, leave the run queued for an idempotent retry.
@@ -44,8 +80,9 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem(`${fairPrefix(owner)}run.${entry.runId}`);
           patch({ save, pending: queuedFair(owner).length });
         }
-        if (current(version, token)) patch({ warning: "", pending: 0 });
-        return true;
+        const pending = queuedFair(owner).length;
+        if (current(version, token)) patch({ conflicts, pending, archived: archivedFairCopies(fairPrefix(owner)), warning: conflicts.length ? "Another tab saved a different copy of a memory. Review the saved result below; your local copy is kept." : blocked ? "A queued memory could not be checked against its saved result. It is kept here; update the connection and retry sync." : "" });
+        return pending === 0;
       } catch (error) {
         if (current(version, token)) patch({ warning: error instanceof APIError && error.status === 401 ? "Sign in again to sync your queued memories. They are kept for this account." : "Your memories are waiting on this device. Reconnect and retry to save them to your account." });
         return false;
@@ -55,6 +92,33 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
     void task.finally(() => { if (flight.current?.task === task) flight.current = null; });
     return task;
   }, [confirmed, current, patch]);
+
+  const resolveConflict = useCallback(async (runId: string) => {
+    const owner = stateRef.current.owner, token = getAuthToken(), version = generation.current;
+    const conflict = stateRef.current.conflicts.find(item => item.queued.runId === runId);
+    if (!conflict || !owner || owner === "guest" || !token || token !== verifiedToken.current || resolving.current || stateRef.current.syncing) return;
+    resolving.current = true;
+    patch({ resolving: true });
+    let resolved = false;
+    let keepingCopy = false;
+    try {
+      const receipt = await readReceipt(owner, token, conflict.queued);
+      if (!current(version, token)) return;
+      if (!sameFairCompletion(receipt.completion, conflict.saved)) throw new Error("The saved result changed. Retry sync before choosing a copy.");
+      const save = confirmed(owner, receipt.save);
+      keepingCopy = true;
+      localStorage.setItem(`${fairPrefix(owner)}snapshot`, JSON.stringify(save));
+      archiveFairConflict(fairPrefix(owner), conflict);
+      patch({ save, archived: archivedFairCopies(fairPrefix(owner)), conflicts: stateRef.current.conflicts.filter(item => item.queued.runId !== runId), pending: queuedFair(owner).length, warning: "Your queued copy is kept on this device. The saved result is unchanged." });
+      resolved = true;
+    } catch (error) {
+      if (current(version, token)) patch({ warning: keepingCopy ? "The local copy could not be confirmed in this browser. Your queued data is kept. Retry sync to check it again." : error instanceof APIError && error.status === 401 ? "Sign in again to check this saved memory. Your local copy is kept." : error instanceof Error ? error.message : "The local copy could not be kept. No queued data was removed." });
+    } finally {
+      resolving.current = false;
+      if (current(version, token)) patch({ resolving: false });
+    }
+    if (resolved && current(version, token)) await sync(owner, token, version);
+  }, [confirmed, current, patch, sync]);
 
   const refresh = useCallback(async () => {
     const version = ++generation.current, token = getAuthToken();
@@ -77,7 +141,7 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(identityKey, JSON.stringify({ ...identity, token }));
         localStorage.setItem(`${fairPrefix(identity.owner)}snapshot`, JSON.stringify(save));
         const pending = queuedFair(identity.owner).length;
-        patch({ pending });
+        patch({ pending, archived: archivedFairCopies(fairPrefix(identity.owner)) });
         if (pending) await sync(identity.owner, token, version);
       } catch { patch({ warning: "Your account is connected, but this browser cannot keep offline memories." }); }
     } catch (error) {
@@ -107,7 +171,10 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
         try {
           const owner = stateRef.current.owner;
           if (owner === "guest") patch({ save: guestFair() });
-          else if (owner) patch({ save: mergeFair(stateRef.current.save, restoreFair(parseStored(`${fairPrefix(owner)}snapshot`))), pending: queuedFair(owner).length });
+          else if (owner) {
+            const archived = archivedFairCopies(fairPrefix(owner));
+            patch({ save: mergeFair(stateRef.current.save, restoreFair(parseStored(`${fairPrefix(owner)}snapshot`))), pending: queuedFair(owner).length, archived, conflicts: stateRef.current.conflicts.filter(conflict => !archived.some(copy => copy.queuedRaw === conflict.queuedRaw && copy.queued.runId === conflict.queued.runId)) });
+          }
         } catch { patch({ warning: "The scrapbook changed in another tab but could not be read. Please retry." }); }
       }
     };
@@ -143,6 +210,6 @@ export function FairProgressProvider({ children }: { children: ReactNode }) {
   }, [confirmed, current, patch, sync]);
 
   const courses=useMemo(()=>availableCourses(state.save,state.owner),[state.save,state.owner,state.pending]);
-  return <FairContext.Provider value={{ ...state, courses, refresh, begin, complete }}>{children}</FairContext.Provider>;
+  return <FairContext.Provider value={{ ...state, courses, refresh, resolveConflict, begin, complete }}>{children}</FairContext.Provider>;
 }
 export function useFairProgress() { const value = useContext(FairContext); if (!value) throw new Error("FairProgressProvider is missing"); return value; }

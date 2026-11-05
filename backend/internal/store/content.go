@@ -57,13 +57,7 @@ func (s *Store) GetUser(ctx context.Context, userID string) (model.User, error) 
 
 func (s *Store) ListLessons(ctx context.Context, includeDraft bool) ([]model.Lesson, error) {
 	if s.db != nil {
-		if err := s.ensureContentSchema(ctx); err != nil { return nil, err }
-		query := `SELECT slug FROM lessons`
-		if !includeDraft { query += ` WHERE status='published'` }
-		query += ` ORDER BY updated_at DESC`
-		rows, err := s.db.QueryContext(ctx, query); if err != nil { return nil, err }; defer rows.Close()
-		var slugs []string; for rows.Next() { var slug string; if err := rows.Scan(&slug); err != nil { return nil, err }; slugs = append(slugs, slug) }; if err := rows.Err(); err != nil { return nil, err }
-		out := make([]model.Lesson, 0, len(slugs)); for _, slug := range slugs { lesson, err := s.GetLesson(ctx, slug, includeDraft); if err != nil { return nil, err }; out = append(out, lesson) }; return out, nil
+		return s.listLessonsPostgres(ctx, includeDraft)
 	}
 	state := s.contentMemory(); state.mu.RLock(); defer state.mu.RUnlock(); out := make([]model.Lesson, 0, len(state.lessons)); for _, lesson := range state.lessons { if includeDraft || lesson.Status == "published" { out = append(out, cloneLesson(lesson)) } }; sort.Slice(out, func(i,j int) bool { return out[i].UpdatedAt.After(out[j].UpdatedAt) }); return out,nil
 }
