@@ -47,6 +47,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Đăng nhập và lựa chọn chơi khách | [ADR 021: chỉ ghi token khi ý định đăng nhập còn hiệu lực](decisions/021-auth-intent-fencing.md) |
 | Cấp và thu hồi quyền giáo viên/quản trị | [ADR 022: operator xác nhận tài khoản theo user ID](decisions/022-explicit-account-roles.md) |
 | Hai tab hoàn thành cùng lượt Fair | [ADR 023: receipt đúng owner, giữ queued copy và đối chiếu kết quả đã lưu](decisions/023-fair-conflict-recovery.md) |
+| Puzzle Bridge mới và checkpoint cũ | [ADR 024: topology v2 xác định theo seed, đọc nguyên v1](decisions/024-bridge-topology-versions.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 | Hiệu năng và giới hạn số đo | [PERFORMANCE: query budget, benchmark CI và outbound AI pool](PERFORMANCE.md) |
 

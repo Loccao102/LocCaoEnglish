@@ -35,11 +35,37 @@ only in `_test.go`; it cannot be called by the API binary. Timings include the
 test counter and loopback PostgreSQL/container conditions. Report measured values
 with the run/head and corpus, never as production p95, capacity or a universal
 speedup. Benchmarks are evidence alongside the correctness/race checks, not a
-flaky timing threshold. Recorded results will be added after CI completes.
+flaky timing threshold.
 
-ListCourses has a similar loop and is a separate follow-up. Pagination, query
-indexes, payload size and client rendering need their own measured scopes;
-this change does not claim the entire application is optimized.
+Backend measurements on source `94998a8`,
+[CI 225](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41994506828),
+used 26 published lessons (23 owned fixtures plus three seeds), loopback PostgreSQL,
+the test counter and a 250ms minimum benchmark window:
+
+| Path | Database calls/op | Time/op | Bytes/op | Allocations/op |
+| --- | ---: | ---: | ---: | ---: |
+| Legacy test baseline | 80 | 14.312 ms | 185451 | 3178 |
+| Joined catalog | 2 | 0.672 ms | 101284 | 2373 |
+
+The backend's PostgreSQL/race/vet and benchmark step passed; the entire source
+still awaits the remaining browser gate. These are measurements for that run,
+not production percentiles or a universal speed guarantee. Later source changes
+require their own checks; no local benchmark was executed.
+
+The course catalog follow-up replaces ListCourses' `1 + 2N` reads and the found
+GetCourse lookup's two reads with one LEFT JOIN snapshot each. Published course
+and lesson filters remain separate so a course with no visible lessons is still
+returned with `Lessons: []`. Nil lookup means list, while a lookup for empty slug
+still returns not found. Metadata, authored lesson position, enrollment/progress,
+owner, bookmarks and memory behavior remain unchanged. There is no cache/schema
+change; publication edits are visible to the next request.
+
+Course PostgreSQL regressions reuse the test-only counter for small/larger
+catalogs, compare the genuine legacy response, check draft/hidden/empty cases,
+republishing and concurrent course/lesson revisions. A separate CI-only benchmark
+compares both paths on the same fixture; numbers remain pending for this new
+source. Pagination, query indexes and payload size need their own measured
+scopes; this does not claim the entire application is optimized.
 
 ## Outbound AI connections
 
@@ -56,6 +82,27 @@ Writing/acoustic integrations using separate clients are outside this slice.
 The actual server imports the same main FastAPI app, so its lifespan is active.
 The combined source must pass CI after integration with newer main/Fair changes;
 an older standalone branch's checks are not a substitute.
+
+## Repeated label layout
+
+PERF-003 targets FestivalArena's actual updateView loop. It previously recreated
+and sorted collision-layout candidates and assigned label DOM attributes every
+animation frame, even when the projection/input had not changed. The new key
+contains viewport/camera framing/zoom, moving target coordinates, followed hero
+position, object visibility and the selection/round/input state. Identical inputs
+skip only label layout/DOM writes. Resize/rebuild's metrics-dirty flag still
+forces a fresh measurement; graphics rendering, animation, physics and session
+timing continue unchanged. Nothing in the renderer grants a reward.
+
+Browser tests use MutationObserver on the real label layer to count attribute
+writes over explicit 250ms samples for paused and running stationary scenes,
+verify invalidation after resize/selection, and require moving targets to keep
+updating. CI retains JSON samples. This metric describes redundant DOM work;
+it does not establish FPS, GPU utilization, battery savings or device-wide
+latency. Source `935e029` passed all 38 focused checks in run 42000126798 (2.5m).
+Both Adventure/Challenge 250ms samples recorded pausedWrites=0 and runningWrites=0;
+live countdown, selection, resize and moving-box checks also passed. The complete
+source gate and final re-captured 3D screenshots remain separate.
 
 ## Visual verification found during recovery review
 

@@ -18,14 +18,15 @@ export function shuffled<T>(values:readonly T[],seed:number):T[]{
   for(let i=result.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;const j=seed%(i+1);[result[i],result[j]]=[result[j],result[i]];}
   return result;
 }
-export type ChallengeState={version:1;level:"adventure"|"expert";seed:number;remaining:number;moves:number;assists:number;step:number;hint:boolean};
+export type ChallengeState={version:1;level:"adventure"|"expert";seed:number;remaining:number;moves:number;assists:number;step:number;hint:boolean;bridgeTopologyVersion?:1|2};
 export const roundSeconds=(kind:FestivalKind,level:ChallengeState["level"])=>({bubble:[24,16],garden:[45,35],echo:[18,12],tea:[45,30],parcel:[60,45],hop:[0,0],colour:[45,30],bridge:[90,60]}[kind][level==="expert"?1:0]);
 export function newChallenge(level:ChallengeState["level"],runId:string):ChallengeState{return {version:1,level,seed:seedNumber(runId),remaining:0,moves:0,assists:0,step:0,hint:false};}
 export function validChallenge(value:unknown):value is ChallengeState{
   const c=value as ChallengeState|null;
   return !!c&&c.version===1&&["adventure","expert"].includes(c.level)&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=0xffffffff&&
     Number.isFinite(c.remaining)&&c.remaining>=0&&c.remaining<=90&&Number.isInteger(c.moves)&&c.moves>=0&&c.moves<=100&&
-    Number.isInteger(c.assists)&&c.assists>=0&&c.assists<=99&&Number.isInteger(c.step)&&c.step>=0&&c.step<=5&&typeof c.hint==="boolean";
+    Number.isInteger(c.assists)&&c.assists>=0&&c.assists<=99&&Number.isInteger(c.step)&&c.step>=0&&c.step<=5&&typeof c.hint==="boolean"&&
+    (c.bridgeTopologyVersion===undefined||c.bridgeTopologyVersion===1||c.bridgeTopologyVersion===2);
 }
 
 type WordClue={clue:string;words:string[];answer:number};

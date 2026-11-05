@@ -32,12 +32,12 @@ func (s *Store) EnsureCourses(ctx context.Context) error {
 }
 
 func (s *Store) ListCourses(ctx context.Context)([]model.Course,error){
-	if s.db!=nil{rows,err:=s.db.QueryContext(ctx,`SELECT slug FROM courses WHERE status='published' ORDER BY updated_at DESC`);if err!=nil{return nil,err};defer rows.Close();var slugs []string;for rows.Next(){var slug string;if err:=rows.Scan(&slug);err!=nil{return nil,err};slugs=append(slugs,slug)};out:=make([]model.Course,0,len(slugs));for _,slug:=range slugs{c,err:=s.GetCourse(ctx,slug);if err!=nil{return nil,err};out=append(out,c)};return out,rows.Err()}
+	if s.db!=nil{return s.listCoursesPostgres(ctx)}
 	return s.publishedMemoryCourses(),nil
 }
 
 func (s *Store) GetCourse(ctx context.Context,slug string)(model.Course,error){
-	if s.db!=nil{c:=model.Course{Lessons:[]model.CourseLesson{}};err:=s.db.QueryRowContext(ctx,`SELECT id,slug,title,description,level,status,created_at,updated_at FROM courses WHERE slug=$1 AND status='published'`,slug).Scan(&c.ID,&c.Slug,&c.Title,&c.Description,&c.Level,&c.Status,&c.CreatedAt,&c.UpdatedAt);if errors.Is(err,sql.ErrNoRows){return c,ErrNotFound};if err!=nil{return c,err};rows,err:=s.db.QueryContext(ctx,`SELECT l.slug,l.title,l.skill,l.level,cl.position,l.estimated_mins FROM course_lessons cl JOIN lessons l ON l.id=cl.lesson_id WHERE cl.course_id=$1 AND l.status='published' ORDER BY cl.position`,c.ID);if err!=nil{return c,err};defer rows.Close();for rows.Next(){var item model.CourseLesson;if err:=rows.Scan(&item.Slug,&item.Title,&item.Skill,&item.Level,&item.Position,&item.EstimatedMins);err!=nil{return c,err};c.Lessons=append(c.Lessons,item)};return c,rows.Err()}
+	if s.db!=nil{return s.getCoursePostgres(ctx,slug)}
 	return s.publishedMemoryCourse(slug)
 }
 

@@ -31,6 +31,13 @@ on:
       - backend/internal/store/fair_receipt*.go
       - backend/internal/httpapi/fair*.go
       - tests/e2e/fair-conflict.spec.ts
+      - lib/game/bridge-topology.ts
+      - lib/game/challenge.ts
+      - lib/game/festival-session.ts
+      - lib/game/fair-checkpoints.ts
+      - lib/game/three/festival-arena.ts
+      - tests/e2e/bridge-topology.spec.ts
+      - tests/e2e/fair-label-cost.spec.ts
 
 permissions:
   contents: read
@@ -66,8 +73,8 @@ jobs:
           done
           docker compose logs web api
           exit 1
-      - name: Check authentication, course, content, colour and Fair recovery
-        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/course-owner.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts tests/e2e/fair-conflict.spec.ts --max-failures=1
+      - name: Check recovery, versioned bridge input and label updates
+        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/course-owner.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts tests/e2e/fair-conflict.spec.ts tests/e2e/bridge-topology.spec.ts tests/e2e/fair-label-cost.spec.ts --max-failures=1
         env:
           E2E_BASE_URL: http://127.0.0.1:3000
       - uses: actions/upload-artifact@v4
@@ -85,6 +92,8 @@ jobs:
             .cache/content-owner-*.png
             .cache/course-owner-*.png
             .cache/fair-conflict-*.png
+            .cache/bridge-topology-*.png
+            .cache/fair-label-cost-*.json
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

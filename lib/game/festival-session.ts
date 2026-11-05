@@ -1,4 +1,5 @@
 import { bridgePath } from "./bridge-path";
+import { BRIDGE_TOPOLOGY_VERSION, bridgeTopologyPuzzle, type BridgeTopologyPuzzle } from "./bridge-topology";
 import type { FestivalGame } from "./festival";
 import type { Expression } from "./personalities";
 import { courseById, type Course } from "./fair-courses";
@@ -22,7 +23,9 @@ const addresses=[{place:"Library",clue:"Deliver this book to the library."},{pla
 const mixes=[{name:"orange",pair:[0,1]},{name:"green",pair:[1,2]},{name:"purple",pair:[0,2]},{name:"pink",pair:[0,3]}];
 const sequence=[0,2,1,3,0,1,2];
 // N/E/S/W = 0/1/2/3. Solved paths have a reciprocal connection at every edge.
-const puzzles=[
+type LegacyBridgePuzzle={entry:number;exit:number;ports:number[][];turns:number[]};
+type FestivalBridgePuzzle=LegacyBridgePuzzle|BridgeTopologyPuzzle;
+const puzzles:LegacyBridgePuzzle[]=[
   {entry:1,exit:1,ports:[[0,1],[0,2],[1,2],[1,3],[1,3],[1,3],[0,1],[0,2],[0,3]],turns:[1,1,2,1,1,1,2,0,2]},
   {entry:2,exit:0,ports:[[1,2],[1,3],[1,3],[0,2],[0,1],[0,2],[0,3],[0,2],[0,1]],turns:[1,1,1,1,2,1,1,1,2]},
   {entry:0,exit:2,ports:[[1,3],[2,3],[0,1],[1,2],[0,3],[0,2],[0,1],[1,3],[1,3]],turns:[1,1,2,2,1,1,1,1,1]},
@@ -44,7 +47,7 @@ export class FestivalSession {
   private lastHazard=0;
   constructor(public game:FestivalGame,private changed:(state:FairState)=>void,public tone:(index:number)=>void=()=>{},courseId?:string){this.course=game.kind==="hop"?courseById(courseId||"cloud-01"):undefined;}
   private emit(){this.state={...this.state,challenge:this.state.challenge?{...this.state.challenge}:undefined,selection:[...this.state.selection],tea:this.state.tea?{...this.state.tea,guests:[...this.state.tea.guests]}:undefined,revision:this.state.revision+1};this.changed(this.state);}
-  start(teaRunId?:string,challenge?:{level:ChallengeState["level"];runId:string}){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[],tea:this.game.kind==="tea"&&(teaRunId||challenge)?createTeaService(teaRunId||challenge!.runId):undefined,challenge:challenge?newChallenge(challenge.level,challenge.runId):undefined};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
+  start(teaRunId?:string,challenge?:{level:ChallengeState["level"];runId:string}){this.state={phase:"play",round:0,hearts:3,score:0,prompt:"",feedback:"",selection:[],carrying:null,lit:-1,listening:false,emotion:"happy",revision:0,elapsed:0,feathers:[],tea:this.game.kind==="tea"&&(teaRunId||challenge)?createTeaService(teaRunId||challenge!.runId):undefined,challenge:challenge?newChallenge(challenge.level,challenge.runId):undefined};if(this.game.kind==="bridge"&&this.state.challenge)this.state.challenge={...this.state.challenge,bridgeTopologyVersion:BRIDGE_TOPOLOGY_VERSION};this.wait=0;this.nextRound=false;this.lastHazard=0;this.bridgePath=[];this.prepare();}
   snapshot():FairCheckpoint|null {
     if(this.state.phase!=="play"&&this.state.phase!=="win")return null;
     return {version:1,gameId:this.game.id,courseId:this.course?.id||"",state:{...this.state,challenge:this.state.challenge?{...this.state.challenge}:undefined,tea:this.state.tea?{...this.state.tea,guests:[...this.state.tea.guests]}:undefined,selection:[...this.state.selection],feathers:[...this.state.feathers]},rotations:[...this.rotations],wait:Math.max(0,this.wait),nextRound:this.nextRound,echoClock:this.echoClock,echoStep:this.echoStep,echoAnswer:this.echoAnswer,lastHazard:this.lastHazard};
@@ -63,6 +66,7 @@ export class FestivalSession {
       !ids(c.rotations,3)||c.rotations.length>9||!finite(c.wait,0,3)||typeof c.nextRound!=="boolean"||
       !finite(c.echoClock,-1,86400)||!integer(c.echoStep,-1,8)||!integer(c.echoAnswer,0,8)||!finite(c.lastHazard,0,1.6))return false;
     if(s.challenge!==undefined&&(!validChallenge(s.challenge)||s.challenge.remaining>roundSeconds(this.game.kind,s.challenge.level)||this.game.kind==="tea"&&!s.tea))return false;
+    if(s.challenge?.bridgeTopologyVersion!==undefined&&this.game.kind!=="bridge")return false;
     const stars=Math.max(1,s.hearts-Math.min(2,s.challenge?.assists||0));
     if(s.score!==(s.round+Number(c.nextRound))*100+(s.phase==="win"?stars*25:0)||c.nextRound&&c.wait<=0||this.game.kind==="bridge"&&c.rotations.length!==9)return false;
     if(s.tea!==undefined&&(this.game.kind!=="tea"||!validTeaService(s.tea)||s.tea.stage!=="mixing"&&s.selection.length!==3||!ids(s.selection,3)))return false;
@@ -109,15 +113,18 @@ export class FestivalSession {
   get deliveryRoute(){return this.state.challenge?parcelRoute(this.state.challenge,Math.min(this.state.round,2)):[this.state.round];}
   get paintOrder(){return this.state.challenge?colourOrder(this.state.challenge,Math.min(this.state.round,3)):{name:mixes[Math.min(this.state.round,3)].name,recipe:mixes[Math.min(this.state.round,3)].pair,hex:""};}
   get puzzleIndex(){return this.state.challenge?shuffled([0,1,2],this.state.challenge.seed)[Math.min(this.state.round,2)]:Math.min(this.state.round,2);}
-  get puzzle(){return puzzles[this.puzzleIndex];}
+  get bridgeTopologyVersion(){return this.game.kind==="bridge"&&this.state.challenge?.bridgeTopologyVersion===BRIDGE_TOPOLOGY_VERSION?BRIDGE_TOPOLOGY_VERSION:1;}
+  get puzzle():FestivalBridgePuzzle{const round=Math.min(this.state.round,this.game.rounds-1);return this.bridgeTopologyVersion===BRIDGE_TOPOLOGY_VERSION?bridgeTopologyPuzzle(this.state.challenge!.seed,round,this.state.challenge!.level):puzzles[this.puzzleIndex];}
   get initialRotations(){
     const c=this.state.challenge,p=this.puzzle;if(!c)return [...p.turns];
-    const turns=p.turns.map((_,id)=>shuffled([0,1,2,3],c.seed+this.state.round*47+id*19)[0]);
+    const round=this.bridgeTopologyVersion===BRIDGE_TOPOLOGY_VERSION?Math.min(this.state.round,this.game.rounds-1):this.state.round;
+    const turns=p.turns.map((_,id)=>shuffled([0,1,2,3],c.seed+round*47+id*19)[0]);
     // A fresh puzzle must not already contain a solved crossing.
     while(bridgePath(p.ports,turns,p.entry,p.exit).length)turns[p.entry*3]=(turns[p.entry*3]+1)%4;
     return turns;
   }
-  get turnBudget(){const path=[[3,4,5],[6,3,0,1,2],[0,1,4,3,6,7,8]][this.puzzleIndex];return path.reduce((sum,id)=>sum+(4-this.initialRotations[id])%4,0)+(this.state.challenge?.level==="expert"?2:5);}
+  get canonicalBridgeRoute(){if(this.game.kind!=="bridge")return [];const puzzle=this.puzzle;if("solution" in puzzle)return [...puzzle.solution];return [[3,4,5],[6,3,0,1,2],[0,1,4,3,6,7,8]][this.puzzleIndex];}
+  get turnBudget(){const path=this.canonicalBridgeRoute;return path.reduce((sum,id)=>sum+(4-this.initialRotations[id])%4,0)+(this.state.challenge?.level==="expert"?2:5);}
   get feathersRequired(){return this.state.challenge?.level==="expert"?3:this.state.challenge?1:0;}
   get brewingBand(){
     if(!this.customer)return undefined;const base=teaStrengths[this.customer.strength],width=this.state.challenge?.level==="expert"?.6:this.state.challenge?1:base.to-base.from,mid=(base.from+base.to)/2;

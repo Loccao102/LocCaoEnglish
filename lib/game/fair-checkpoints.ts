@@ -7,6 +7,7 @@ export const fairCheckpointPrefix=(owner:string)=>`loccao.fair.checkpoint.v1.${o
 
 export type SavedFairRun = { version:1; run:FairRun; session:FairCheckpoint; position:{x:number;z:number}; savedAt:number };
 const key = (owner:string,gameId:string,courseId="") => `${fairCheckpointPrefix(owner)}${gameId}.${courseId||"classic"}`;
+export function readRawFairCheckpoint(owner:string,gameId:string,courseId=""){try{return localStorage.getItem(key(owner,gameId,courseId));}catch{return null;}}
 export function readFairCheckpoint(owner:string,gameId:string,courseId=""):SavedFairRun|null {
   try {
     const saved=JSON.parse(localStorage.getItem(key(owner,gameId,courseId))||"null") as SavedFairRun|null;

@@ -2,6 +2,69 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Course catalog snapshot follow-up — 2026-11-05
+
+PERF-001, `codex/perf001-course-projection`, parent Bridge fix `935e029`.
+Both ListCourses and a found GetCourse lookup now use one joined read, replacing
+`1 + 2N`/two database calls. Published courses survive an empty/all-hidden lesson
+list as [], while draft courses/lessons remain excluded. Lookup of empty slug
+still returns ErrNotFound. Course/lesson ordering and fields, memory behavior,
+owner/enrollment/progress/bookmarks/XP and schema are unchanged.
+
+New PostgreSQL tests count queries through the existing test-only connector,
+compare the original legacy result at small/larger corpora, verify empty/hidden/
+republished content and require one committed course/lesson revision under
+concurrent writes. The CI benchmark compares both catalogs under the same
+limits and reports database calls/op, latency and allocations. New-head runtime
+checks/results and final 3D captures are pending; only static checks ran locally.
+
+PR 49 source `94998a8` passed all six jobs/256 E2E (40.7m) in CI 225, plus31
+focused cases (47.9s). Both dark-text Fair recovery images were inspected.
+Reviews/threads were empty and combined main tree equalled tested source before
+merge `ff7ef88`, preserving PR47/48 ancestry. This resolves parent acceptance;
+it does not accept the new course/topology/label source. No production deploy.
+
+## Bridge topology v2 and unchanged label projections — 2026-11-05
+
+Follow-up evidence on `935e029`: focused run 13 (42000126798) passed all 38 cases
+in 2.5m. Both retained label samples measured zero repeated attribute writes in
+250ms paused and running stationary scenes, with independent live-timer/input/
+moving-target assertions passing. Four Bridge phone images were inspected; one
+Adventure 844 capture showed labels before the WebGL scene's first presentation
+after reload. The capture now explicitly advances a rendering frame and permits
+the compositor to paint. This changes evidence timing, not gameplay/renderer
+rules. Final new-head images still require inspection; that earlier blank image
+is not accepted as visual proof. Full head CI remains separate.
+
+CORE-007/PERF-003, `codex/core007-bridge-topology`, parent `94998a8`. Fresh
+advanced Bridge runs select distinct seeded topology templates, preserving v1
+checkpoint/puzzle/rotation/budget behavior for old and Practice runs. ADR 024
+defines the optional marker, snapshot compatibility, solvable canonical route
+budget and safe unknown-version refusal without data deletion. This source also
+skips repeated DOM label layout only when all projection/input fields are stable;
+moving targets, following camera, resize/zoom/rebuild and input still invalidate.
+Simulation/rendering/animation clocks remain unchanged.
+
+New unit/browser scenarios, phone captures and MutationObserver samples are
+pending new-head CI. Fast run 12 on `92ab5b0` stopped at one Bridge checkpoint
+poll failure (six cases passed). The inspected failure image shows round 3,
+200 points and three hearts while the last periodic checkpoint still says
+round 2: fake time had frozen before the next one-second save tick. The test
+now first requires the actual visible round, then permits that next tick before
+asserting the saved round. No gameplay, difficulty, budget or star assertion is
+changed. New head must pass independently. No local app/build/tests/services
+or human playtest results.
+Parent run 41994506696 passed 31 focused checks (47.9s); both Fair conflict phone
+images were inspected and confirm the dark text follow-up. That narrow result
+does not establish acceptance of this new topology/renderer code.
+
+Backend CI 225 run 41994506828 on `94998a8` passed PostgreSQL/race/vet and measured
+the 26-lesson catalog: legacy 80 database calls/14.312ms/185451 bytes/3178 allocs
+per operation; joined path 2 calls/0.672ms/101284 bytes/2373 allocs. Test-only
+connector and a 250ms minimum benchmark window were used for both paths. See
+[PERFORMANCE](PERFORMANCE.md); these are isolated CI measurements, not production
+p95 or a universal speed guarantee. Full parent browser gate remains separate.
+
 ## PERF-001 catalog and PERF-002 AI pool — 2026-11-05
 
 `codex/perf001-lesson-catalog`, parent Fair source `bb6ab4c`. Lesson lists replace
