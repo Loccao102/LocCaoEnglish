@@ -12,6 +12,52 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 - `POST /v1/auth/register`
 - `POST /v1/auth/login`
 
+## Content Studio account boundary
+
+Admin lesson reads/writes retain their existing teacher/admin authorization.
+The browser now captures its token for role, list, save and delete requests and
+replaces the editor tree when identity changes. A learner/guest does not request
+the admin catalog. Late reads/writes cannot repopulate another account's form.
+401/403 seals the editor; unavailable reads and unconfirmed writes have explicit
+recovery. List refresh preserves the current owner's unsaved form until the
+user chooses a saved entry. No draft import, lesson/schema migration or new
+permission is introduced. [ADR 020](decisions/020-content-studio-owner-fence.md)
+records the UI contract; API authorization remains the server boundary.
+
+## Review scheduling and recovery
+
+`GET /v1/review?dueOnly=true&limit=30` requires an account and returns
+`{items,rulesVersion:"review-schedule.v1",dueOnly:true}`; it filters due dates
+before applying the limit. The legacy GET without `dueOnly=true` retains its
+demo-compatible all-items behavior. New clients require the versioned marker
+before offering scheduling, rather than treat a missing API/queue as empty.
+
+`POST /v1/review/{itemKey}/grades` requires an account and
+`{requestId,quality,expectedDueAt,rulesVersion:"review-schedule.v1"}`. Quality
+must be an explicitly supplied integer 0–5 and expectedDueAt the item's saved
+due timestamp. A receipt contains those inputs, itemKey, scheduledAt, dueAt,
+intervalDays, ease and failures. It contains no prompt/answer. Exact retries
+return the immutable receipt; changing the request's payload or submitting a
+stale due snapshot returns 409 without a second SRS transition. The schedule
+and receipt commit atomically. Missing/foreign items return 404 with no receipt.
+The legacy POST `/v1/review/{itemKey}` is retired with 409; a new client against
+an older server uses a distinct child path and cannot silently grade twice.
+
+`GET /v1/review/grades/{requestId}` recovers only the signed-in owner's receipt;
+missing/foreign receipts are 404. A receipt survives removal of its queue item.
+No XP, confidence or mastery is awarded. Scheduling remains a learner self-rating,
+independent of checked answer evidence. See [ADR 019](decisions/019-review-schedule-receipts.md).
+
+The browser keeps only owner/request/item/rating/version/due-snapshot metadata
+in `loccao.review-grade.v1.<owner>`. It reads back a pending receipt on reload
+before offering new ratings, and never replays it automatically under another
+account. Network failures retain the reference and item; only a matching receipt
+confirms scheduling. Old/corrupt references remain until explicit recovery choice.
+If storage is blocked, the current tab keeps the reference, with no full-reload
+durability claim. Migration 023/startup DDL creates the additive receipt table;
+old review rows are preserved, not backfilled. API before web; rollback retains
+the receipt route/schema, version and legacy rejection. No queue reset is needed.
+
 ## Teacher practice reporting
 
 `GET /v1/admin/analytics` requires a signed-in teacher or admin; guests receive
@@ -37,6 +83,19 @@ are kept separate and labelled learner reports. This read does not change any
 rewards, saves or grants. The browser captures its token for both role and report
 reads, hides prior data during refresh/account changes and ignores late responses.
 No raw learner answers, essays or audio are added to the aggregate response.
+
+## Courses and personal enrollment
+
+`GET /v1/courses` and `GET /v1/courses/{slug}` expose published course content.
+`POST /v1/courses/{slug}/enroll` requires a real signed-in account, including
+when anonymous demo reads are enabled. Enrollment is an idempotent upsert keyed
+by owner/course and awards no XP. Retry after a lost reply cannot add another
+enrollment; `GET /v1/courses/{slug}/progress` confirms its saved state. Progress
+contains personal reported lesson completion, not checked mastery. Its legacy
+demo-read compatibility remains, but the browser requests personal progress
+only while signed in and captures the same owner for read/write operations.
+Catalog browsing remains available if progress fails. No schema/save migration,
+guest import or enrollment reset. See [ADR 018](decisions/018-course-owner-recovery.md).
 
 ## Learner state
 

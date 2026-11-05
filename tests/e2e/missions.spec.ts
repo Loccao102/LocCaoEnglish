@@ -372,6 +372,12 @@ test("v3 accepts natural time proposals and misunderstanding replies through act
   for (const height of [551, 844]) {
     await page.setViewportSize({ width: 390, height });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.locator(".mission-progress").evaluate(progress => {
+      const frame = progress.getBoundingClientRect(), ring = Number.parseFloat(getComputedStyle(progress).borderLeftWidth);
+      const range = document.createRange(); range.selectNodeContents(progress.querySelector("strong")!);
+      const text = range.getBoundingClientRect();
+      return text.left >= frame.left + ring && text.right <= frame.right - ring + 1;
+    })).toBe(true);
     await page.screenshot({ path: `.cache/mission-v3-saved-${height}.png`, fullPage: true });
   }
 });

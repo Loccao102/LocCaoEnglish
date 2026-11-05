@@ -1,4 +1,8 @@
 .shell { min-width: 0; }
+.shell :global(.mission-header) { flex-wrap: wrap; gap: 1.5rem; }
+.shell :global(.mission-header > div:first-child) { flex: 1 1 20rem; min-width: 0; }
+.shell :global(.mission-header h1) { overflow-wrap: anywhere; }
+.shell :global(.mission-progress) { flex: 0 0 98px; }
 .shell p { overflow-wrap: anywhere; }
 .explanation { font-size: 1rem; line-height: 1.6; color: #4b626c; padding: 0 1.25rem; }
 .log { max-height: 28rem; overflow-y: auto; }
@@ -13,4 +17,12 @@
 .form textarea { box-sizing: border-box; width: 100%; min-height: 120px; padding: 1rem; font: inherit; font-size: 19px; line-height: 1.5; border: 2px solid #a2bab5; border-radius: 16px; resize: vertical; color: #163a40; background: #fff; }
 .shell button, .actions a { min-height: 48px; white-space: normal; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; padding: 1rem; }
-@media (max-width: 600px) { .shell :global(.npc-panel-head) { flex-wrap: wrap; gap: 1rem; } .shell :global(.mission-header) { gap: 1rem; } .shell :global(.boss-win) { flex-wrap: wrap; } }
+@media (max-width: 600px) {
+  .shell :global(.npc-panel-head) { flex-wrap: wrap; gap: 1rem; }
+  .shell :global(.mission-header) { gap: 1rem; padding: 1.5rem; }
+  .shell :global(.mission-header h1) { font-size: 1.875rem; line-height: 1.25; }
+  .shell :global(.mission-progress) { flex-basis: 88px; width: 88px; height: 88px; }
+  .shell :global(.mission-progress strong) { font-size: 22px; }
+  .shell :global(.mission-progress small) { font-size: 12px; }
+  .shell :global(.boss-win) { flex-wrap: wrap; }
+}

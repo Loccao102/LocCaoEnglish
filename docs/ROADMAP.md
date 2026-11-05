@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-11-03, main `2e6379c` (PR #25). Đây là nguồn duy nhất của danh sách việc
+Cập nhật nền: 2026-11-05, main `7805b50` (đã gồm PR #25–#30 và #32). Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
 trước khi các contract core liên quan đã vững.
@@ -21,11 +21,25 @@ trước khi các contract core liên quan đã vững.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
   giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
   audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
-- Nền PR #23 đã qua 50 logic cases, 173 browser/API cases và đủ sáu CI jobs,
+- Runtime PR #30 `a679850` đã qua 210 browser/API cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
 ## Thứ tự mặc định
+
+Đợt GitHub-only 2026-11-05: [PR #31](https://github.com/Loccao102/LocCaoEnglish/pull/31)
+(hero nhiệm vụ), [#32](https://github.com/Loccao102/LocCaoEnglish/pull/32)
+(teacher practice), [#33](https://github.com/Loccao102/LocCaoEnglish/pull/33)
+(Adventure actual answers), [#34](https://github.com/Loccao102/LocCaoEnglish/pull/34)
+(course ownership) đã có source/regression; #32 đã merge sau CI 187, các phần
+còn lại tiếp tục `in_review`. Branch
+`codex/roadmap-integration-20261105` giữ toàn bộ commit của bốn PR, chỉ giải
+conflict docs và hợp nhất hai nhóm hàm captured-token ở `lib/platform.ts`.
+Phải có CI đủ sáu jobs và xem ảnh trên bản tổng hợp trước tích hợp main; không
+suy kết quả CI của từng nhánh thành đã kiểm tra tổ hợp. Không chạy local/deploy.
+CI 190 trên `3230a73` đã qua sáu jobs và 225 E2E. Xem ảnh phát hiện nút khôi
+phục khóa học thiếu tương phản; bản tổng hợp tiếp theo giữ thêm mission refinement,
+review receipts (#36), Content Studio (#37) và sửa nút này. Phải kiểm tra head mới.
 
 CORE-001 → CORE-002 → CORE-003/CORE-004 → CORE-005 → CORE-006 → CORE-007 → CONTENT-001.
 DEP-001 và GOV-002 có thể làm khi đủ điều kiện độc lập, không cần chờ thêm nội dung.
@@ -509,7 +523,7 @@ không tạo điểm giả, XP hoặc band. Chưa deploy hay hiệu chuẩn prov
 CORE-004 vẫn `in_progress`. Chi tiết tại
 [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#acoustic-receipts--2026-10-21).
 
-### CORE-004 — Paraphrase có phiên bản (`in_review`, 2026-11-03)
+### CORE-004 — Paraphrase có phiên bản (`done` trong phạm vi, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core004-mission-paraphrases`; từ runtime PR #28
 `84fe2b2` trong lúc đồng bộ các merge được nghiệm thu. Phạm vi: nhận đúng ba
@@ -519,8 +533,21 @@ Không đổi gate, first-clear reward hoặc schema; không chấm lại receip
 Contract/rollout ở [ADR 005](decisions/005-mission-evidence.md).
 Nghiệm thu: đúng/sai/phủ định/spam/thứ tự, version/owner, retry/concurrency,
 v2 draft recovery và browser v3/receipt/reload; PG/vet/build và CI cuối.
-Code và regression đã có; kiểm tra cuối chuyển sang GitHub Actions theo yêu cầu
-người dùng không chạy trên máy. Chưa nghiệm thu; toàn CORE-004 vẫn `in_progress`.
+Head `a679850` đạt đủ sáu jobs tại [CI 181](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41617269155),
+gồm PostgreSQL/race/vet và 210 E2E (37.4m), không flaky/retry. Đã xem hai ảnh
+receipt mobile từ CI; lỗi hero dài được tách xử lý bên dưới. [PR #30](https://github.com/Loccao102/LocCaoEnglish/pull/30)
+đã merge thành `5170415`. Không chạy lại local theo yêu cầu người dùng, chưa
+deploy production; toàn CORE-004 vẫn `in_progress`.
+
+### CORE-004 — Tiêu đề nhiệm vụ trên điện thoại (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core004-mission-mobile`, nền main `54273c3`.
+Ảnh receipt từ CI 181 cho thấy tiêu đề “Repair the misunderstanding.” bị cắt
+trong hero ở chiều rộng 390px; kiểm tra scroll toàn trang chưa bắt được phần chữ
+bị `overflow:hidden` che. Phạm vi: cho nội dung hero co/xuống dòng và giữ vòng
+tiến độ trong khung; kiểm tra chín tiêu đề đang dùng ở 390×551/844, cả chiều rộng
+chữ thực và vị trí badge, lưu ảnh để xem. Không thay rubric, API, save hay thưởng.
+Chỉ chạy kiểm tra trên GitHub Actions theo yêu cầu người dùng; chưa nghiệm thu.
 
 ### Tiêu chí hoàn tất toàn CORE-004
 
@@ -542,7 +569,7 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
-### Báo cáo giáo viên từ checked practice (`in_progress`, 2026-11-05)
+### Báo cáo giáo viên từ checked practice (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core005-teacher-practice` / `codex/core005-teacher-ui`,
 nền main `54273c3`. Route `/admin/analytics` vẫn tính accuracy từ bảng attempts
@@ -557,7 +584,23 @@ là learner reports, không hiển thị score/confidence cũ thành kết quả
 và fallback API cũ an toàn. Không thay schema, save, XP hay chính sách cấp quyền.
 Nghiệm thu memory/PG/race/HTTP role, browser tài khoản thật + render lifecycle,
 mobile 390×551/844 và đủ CI trên head cuối. Chỉ kiểm tra trên GitHub Actions
-theo yêu cầu người dùng; chưa nghiệm thu. Contract: ADR 017.
+theo yêu cầu người dùng. Head `695b3ad` đã qua sáu jobs tại
+[CI 187](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41959011220),
+216 E2E (41.6m), không flaky. Hai ảnh mobile đã xem, review không có blocker;
+[PR #32](https://github.com/Loccao102/LocCaoEnglish/pull/32) đã merge thành
+`7805b50`. Lát cắt đã nghiệm thu; toàn CORE-005 vẫn in_progress. Contract: ADR 017.
+
+### Câu trả lời gốc và provenance của Adventure (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core005-adventure-provenance`, nền main `54273c3`.
+Rà store cho thấy first-clear Adventure ghi đáp án chuẩn vào `attempts.answer`
+kể cả câu người chơi trả lời sai, đồng thời để source/version thành legacy mặc
+định. Sửa ghi đúng câu trả lời đã nộp, source story-guided riêng, hash catalog và
+phiên bản luật đang dùng. Không đổi chấm điểm, reward/first-clear transaction,
+save/API hoặc review answer chuẩn; không sửa/backfill lịch sử cũ. Không đưa quest
+Adventure vào shared learning practice, mastery hoặc checked-practice rank.
+Nghiệm thu PostgreSQL đúng/sai/first-clear concurrent/retry/replay/restart và
+giữ lịch sử legacy; chỉ qua GitHub Actions theo yêu cầu, chưa nghiệm thu.
 
 ### Đã nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`done`, xác nhận 2026-11-03)
 
@@ -654,7 +697,44 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Đang nghiệm thu — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`in_review`, 2026-10-25)
+### Content Studio đúng phiên đăng nhập (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-content-ui`, nền review `e9a881a`.
+Teacher mở `/admin/content` rồi chuyển sang learner/guest vẫn thấy danh sách
+draft và form cũ. Token-keyed editor và captured-token role/list/save/delete
+loại view/phản hồi cũ, không gọi admin API cho guest/learner. Quyền API giữ nguyên.
+401/403 khóa view; lỗi mạng giữ bản sửa của owner hiện tại, có refresh/read-back,
+không báo saved/deleted từ lỗi. Không đổi schema, dữ liệu lesson hay nhập draft.
+Nghiệm thu role/account/logout, late reads/writes, retry/lost response, busy,
+empty catalog/nullable options và mobile 390×551/844 qua GitHub Actions.
+Contract: [ADR 020](decisions/020-content-studio-owner-fence.md). Chưa nghiệm thu.
+
+### Khôi phục lịch ôn và owner của Review queue (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-review-owner` / `codex/core006-review-receipts`,
+nền integration `3230a73`. `/review` đang bỏ lỗi ghi lịch, xóa câu khỏi UI rồi báo
+đã lên lịch; queue chỉ tải lúc mount và POST dùng token mới nhất. Thay bằng
+owner-scoped queue và operation `review-schedule.v1` có request ID, receipt và
+pending metadata qua reload; không bỏ câu khi chưa xác nhận. API yêu cầu account,
+exact retry không nhân interval, đổi payload conflict, receipt owner riêng và
+giao dịch nguyên tử; giữ SRS formula, không XP/mastery. Không tự nhập guest queue.
+Migration additive và rollback giữ receipts; contract ADR 019 trước rollout.
+Nghiệm thu đúng/sai retry/lost response/reload/concurrency/owner/auth/old contract,
+PG/restart/rollback, storage lỗi/corrupt, browser thật và mobile. Chỉ GitHub Actions.
+
+### Tiến độ và đăng ký khóa học đúng tài khoản (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-course-owner`, nền main `54273c3`.
+Route `/courses/[slug]` đọc demo progress cho guest và giữ tiến độ A sau đổi
+tài khoản; thao tác enroll dùng token tại lúc gửi thay vì owner của màn hình.
+Tách catalog công khai khỏi progress cá nhân, captured-token read/write và bỏ
+phản hồi cũ. Guest chỉ đọc catalog; POST enroll yêu cầu đăng nhập, GET demo cũ
+giữ tương thích. Enrollment theo owner/course đã idempotent, không đổi XP/save.
+Nghiệm thu auth/owner/retry, lost response, account/logout/late reads+writes,
+catalog vẫn đọc khi progress lỗi, browser tài khoản thật và mobile 390×551/844.
+Chỉ kiểm tra qua GitHub Actions; chưa nghiệm thu. Contract: ADR 018.
+
+### Đã nghiệm thu — Tiến độ chiến dịch và thẻ học Journey đúng tài khoản (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-campaign-owner`, từ head SEC-001
 `d8ac8b3`. [ADR 016](decisions/016-campaign-owner-reads.md) chốt captured-token
@@ -673,7 +753,7 @@ notice/action 390×551/844. Fixture chỉ xác minh hiển thị/read lifecycle,
 giả nhận backend gate/thưởng; ca tài khoản thật thứ 11 và đủ sáu CI jobs còn chờ.
 Xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#campaign-and-journey-read-ownership--2026-10-25).
 
-### Đang nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`in_review`, 2026-10-24)
+### Đã nghiệm thu — Thiết lập mục tiêu đúng owner và phục hồi lưu (`done`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-profile-owner`, phụ thuộc ADR 014 đang
 nghiệm thu ở PR #25. [ADR 015](decisions/015-profile-owner-recovery.md) chốt
@@ -756,7 +836,7 @@ Challenge riêng; retry không lặp; queue cũ/new payload tồn tại qua reco
 PostgreSQL giữ kết quả sau restart; có commit/schema version, bằng chứng và kế
 hoạch rollback giữ dữ liệu. Đây chưa phải ủy quyền tự deploy production.
 
-## SEC-001 — Vá dependency frontend (`in_review`, P0, 2026-10-24)
+## SEC-001 — Vá dependency frontend (`done`, P0, 2026-11-05)
 
 Audit thực tế trên lockfile Next 16.3.4 ghi 3 dependency bị cảnh báo: Next
 critical, sharp và source-map-js high. Đây là dependency advisory, chưa là bằng
@@ -795,6 +875,12 @@ Phạm vi done là các file/quy tắc trong repo, không bao gồm cấu hình 
 
 ## GOV-002 — Rào chắn merge thực tế
 
+Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
+required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
+branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
+Chưa có công cụ/quyền áp dụng policy, chưa làm phép thử PR lỗi bị chặn.
+Mục chưa hoàn tất; không dùng checklist/CI xanh để thay bằng chứng enforcement.
+
 Đã đọc trạng thái 2026-10-21 (main `8ce2260`): GitHub branch API trả
 `protected:false`, required status checks ở chế độ off; danh sách repository
 rulesets rỗng. Nguồn: [branch main](https://api.github.com/repos/Loccao102/LocCaoEnglish/branches/main),
@@ -827,11 +913,31 @@ Phần chưa xác minh / blocker / điều kiện gỡ:
 Bước tiếp theo:
 ```
 
-## Đối chiếu nghiệm thu GitHub — 2026-11-03
+## Nghiệm thu và merge GitHub — 2026-11-05
+
+Các ghi chú chờ nghiệm thu trong lịch sử bên dưới đã được giải quyết cho từng
+lát cắt, không có nghĩa toàn CORE-004/005/006 đã hoàn tất:
+
+| PR / phạm vi | Head kiểm tra / CI đủ sáu jobs | E2E | Merge vào main |
+| --- | --- | --- | --- |
+| [#26](https://github.com/Loccao102/LocCaoEnglish/pull/26) profile owner | `17cecb9`, [CI 174](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40202949527) | 196 (31.7m) | `ec44478` |
+| [#27](https://github.com/Loccao102/LocCaoEnglish/pull/27) SEC-001 | `20a3180`, [CI 179](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41615325501) | 196 (37.7m) | `a2f311b` |
+| [#28](https://github.com/Loccao102/LocCaoEnglish/pull/28) campaign owner | `e924a57`, [CI 180](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41615453324) | 207 (36.9m) | `92ba90b` |
+| [#30](https://github.com/Loccao102/LocCaoEnglish/pull/30) mission v2/v3 | `a679850`, [CI 181](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41617269155) | 210 (37.4m) | `5170415` |
+
+Đã đối chiếu sáu jobs và log E2E trên từng head; không flaky/retry. PR #27/#28
+được kiểm tra lại sau reconciliation, không lấy kết quả CI 175/176 thay cho head
+mới. PR #29 tài liệu đã merge thành `54273c3`. Các merge ghim expected head,
+giữ ancestry và không force push. Reviews/threads không có yêu cầu đang mở;
+review tĩnh độc lập không có blocker contract, không tự coi là human approval.
+Từ yêu cầu dừng local, chỉ sửa source/Git và kiểm tra qua GitHub Actions; không
+chạy app, build hoặc test trên máy người dùng. Chưa deploy production.
+
+## Lịch sử đối chiếu nghiệm thu GitHub — 2026-11-03
 
 Owner/task: Codex, branch `codex/roadmap-acceptance-20261103`; phạm vi
 CORE-005/006 và SEC-001. Đối chiếu GitHub thay cho bản nháp local CORE-003 cũ;
-không đưa lại code đã được merge. Main hiện là PR #25, `2e6379c`.
+không đưa lại code đã được merge. Main tại thời điểm rà là PR #25, `2e6379c`.
 
 - Word Network/Wordsmith đã merge qua [PR #25](https://github.com/Loccao102/LocCaoEnglish/pull/25).
   Head `3c462a0` đạt đủ sáu jobs tại [CI 170](https://github.com/Loccao102/LocCaoEnglish/actions/runs/40163608508),
@@ -859,7 +965,7 @@ yêu cầu phải xử lý tại thời điểm đọc. Trên runtime tổng h�
 trong đợt đối chiếu này; commit tài liệu không thay runtime được CI xác minh.
 Bằng chứng và giới hạn ở [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#github-final-head-acceptance-audit--2026-11-03).
 
-Bước P0 tiếp theo, `planned` trong CORE-004: chỉnh rubric hội thoại cho những
+Bước P0 được đề xuất tại thời điểm rà, `planned` trong CORE-004: chỉnh rubric hội thoại cho những
 paraphrase tự nhiên đang bị bỏ sót, trước khi mở rộng nội dung. Ví dụ cần test:
 “Could you tell me the departure time?” (city-transit), “How about Sunday
 afternoon?” (weekend-plans) và “I misunderstood your cancellation message.”

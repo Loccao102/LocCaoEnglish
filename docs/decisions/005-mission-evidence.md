@@ -100,7 +100,7 @@ Prerequisite playback events are fixtures, not evidence of a human listening.
 See [validation](../SYSTEM-VALIDATION.md) for results and [roadmap](../ROADMAP.md)
 for status; no playtest or general semantic accuracy is claimed.
 
-## CORE-004 follow-up — Versioned mission paraphrases (implemented, pending CI; 2026-11-03)
+## CORE-004 follow-up — Versioned mission paraphrases (accepted 2026-11-05)
 
 Accept three narrowly authored conversational alternatives without changing the
 saved v2 rubric: departure-time questions in city-transit, a day/time proposal

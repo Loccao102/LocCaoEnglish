@@ -43,7 +43,7 @@ export default function TeacherAnalytics() {
             : data.practice.skills.map(skill => <article key={skill.skill} aria-label={`${skill.skill} checked practice`}>
               <h3>{skill.skill}</h3>
               <p><strong>{skill.correct} correct · {skill.attempts} checked</strong></p>
-              <p>{skill.learners} learners · {skill.evidenceKind === "transcript-match" ? "Transcript matching · does not assess pronunciation" : "Guided practice · help may be available"}</p>
+              <p>{skill.learners} {skill.learners === 1 ? "learner" : "learners"} · {skill.evidenceKind === "transcript-match" ? "Transcript matching · does not assess pronunciation" : "Guided practice · help may be available"}</p>
             </article>)}
         </section>
         <section aria-label="Reported lesson activity" className={styles.lessons}>

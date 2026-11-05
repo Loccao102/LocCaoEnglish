@@ -31,10 +31,11 @@ type account struct {
 }
 
 type memoryState struct {
-	users   map[string]account
-	emails  map[string]string
-	skills  map[string]map[string]model.Skill
-	reviews map[string]map[string]model.ReviewItem
+	users          map[string]account
+	emails         map[string]string
+	skills         map[string]map[string]model.Skill
+	reviews        map[string]map[string]model.ReviewItem
+	reviewReceipts map[string]map[string]model.ReviewScheduleReceipt
 }
 
 type Store struct {
@@ -56,7 +57,7 @@ type Store struct {
 }
 
 func New(databaseURL string) (*Store, error) {
-	s := &Store{mem: memoryState{users: map[string]account{}, emails: map[string]string{}, skills: map[string]map[string]model.Skill{}, reviews: map[string]map[string]model.ReviewItem{}}, learningAttempts: map[string]LearningAttemptRecord{}}
+	s := &Store{mem: memoryState{users: map[string]account{}, emails: map[string]string{}, skills: map[string]map[string]model.Skill{}, reviews: map[string]map[string]model.ReviewItem{}, reviewReceipts: map[string]map[string]model.ReviewScheduleReceipt{}}, learningAttempts: map[string]LearningAttemptRecord{}}
 	if databaseURL != "" {
 		db, err := sql.Open("postgres", databaseURL)
 		if err != nil {
@@ -91,6 +92,11 @@ func New(databaseURL string) (*Store, error) {
 			_ = tx.Rollback()
 			db.Close()
 			return nil, fmt.Errorf("apply learning attempt schema: %w", err)
+		}
+		if _, err := tx.ExecContext(ctx, reviewScheduleSchemaSQL); err != nil {
+			_ = tx.Rollback()
+			db.Close()
+			return nil, fmt.Errorf("apply review schedule schema: %w", err)
 		}
 		if err := tx.Commit(); err != nil {
 			db.Close()
@@ -157,6 +163,10 @@ func (s *Store) EnsureDemo(ctx context.Context) (model.User, error) {
 	s.mem.emails[u.Email] = u.ID
 	s.mem.skills[u.ID] = seedSkills()
 	s.mem.reviews[u.ID] = map[string]model.ReviewItem{}
+	if s.mem.reviewReceipts == nil {
+		s.mem.reviewReceipts = map[string]map[string]model.ReviewScheduleReceipt{}
+	}
+	s.mem.reviewReceipts[u.ID] = map[string]model.ReviewScheduleReceipt{}
 	s.demoID = u.ID
 	return u, nil
 }
@@ -204,6 +214,10 @@ func (s *Store) CreateUser(ctx context.Context, email, passwordHash, displayName
 	s.mem.emails[email] = u.ID
 	s.mem.skills[u.ID] = seedSkills()
 	s.mem.reviews[u.ID] = map[string]model.ReviewItem{}
+	if s.mem.reviewReceipts == nil {
+		s.mem.reviewReceipts = map[string]map[string]model.ReviewScheduleReceipt{}
+	}
+	s.mem.reviewReceipts[u.ID] = map[string]model.ReviewScheduleReceipt{}
 	return u, nil
 }
 
@@ -339,6 +353,47 @@ func (s *Store) ReviewQueue(ctx context.Context, userID string, limit int) ([]mo
 	return out, nil
 }
 
+// DueReviewQueue is the explicit due-only projection for authenticated
+// clients. ReviewQueue remains intentionally compatible with older callers
+// that use the full saved queue for planning and recovery.
+func (s *Store) DueReviewQueue(ctx context.Context, userID string, limit int) ([]model.ReviewItem, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	if s.db != nil {
+		rows, err := s.db.QueryContext(ctx, `SELECT item_key,kind,prompt,answer,due_at,interval_days,ease,failures FROM review_items WHERE user_id=$1 AND due_at<=NOW() ORDER BY due_at ASC LIMIT $2`, userID, limit)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		var out []model.ReviewItem
+		for rows.Next() {
+			var r model.ReviewItem
+			if err := rows.Scan(&r.ItemKey, &r.Kind, &r.Prompt, &r.Answer, &r.DueAt, &r.IntervalDays, &r.Ease, &r.Failures); err != nil {
+				return nil, err
+			}
+			r.DueAt = r.DueAt.UTC()
+			out = append(out, r)
+		}
+		return out, rows.Err()
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	now := time.Now()
+	var out []model.ReviewItem
+	for _, r := range s.mem.reviews[userID] {
+		if !r.DueAt.After(now) {
+			r.DueAt = r.DueAt.UTC()
+			out = append(out, r)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].DueAt.Before(out[j].DueAt) })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
 func (s *Store) GradeReview(ctx context.Context, userID, itemKey string, quality int) error {
 	if quality < 0 {
 		quality = 0
@@ -445,4 +500,22 @@ CREATE TABLE IF NOT EXISTS attempts(id TEXT PRIMARY KEY,user_id TEXT NOT NULL RE
 CREATE INDEX IF NOT EXISTS idx_attempts_user_created ON attempts(user_id,created_at DESC);
 CREATE TABLE IF NOT EXISTS review_items(user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,item_key TEXT NOT NULL,kind TEXT NOT NULL,prompt TEXT NOT NULL DEFAULT '',answer TEXT NOT NULL DEFAULT '',due_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),interval_days INTEGER NOT NULL DEFAULT 1,ease DOUBLE PRECISION NOT NULL DEFAULT 2.5,failures INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(user_id,item_key));
 CREATE INDEX IF NOT EXISTS idx_reviews_user_due ON review_items(user_id,due_at);
+`
+
+const reviewScheduleSchemaSQL = `
+CREATE TABLE IF NOT EXISTS review_schedule_receipts(
+ owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ request_id TEXT NOT NULL,
+ item_key TEXT NOT NULL,
+ quality INTEGER NOT NULL CHECK(quality >= 0 AND quality <= 5),
+ rules_version TEXT NOT NULL,
+ expected_due_at TIMESTAMPTZ NOT NULL,
+ scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ due_at TIMESTAMPTZ NOT NULL,
+ interval_days INTEGER NOT NULL,
+ ease DOUBLE PRECISION NOT NULL,
+ failures INTEGER NOT NULL,
+ PRIMARY KEY(owner_id,request_id)
+);
+CREATE INDEX IF NOT EXISTS idx_review_schedule_receipts_owner ON review_schedule_receipts(owner_id,scheduled_at DESC);
 `

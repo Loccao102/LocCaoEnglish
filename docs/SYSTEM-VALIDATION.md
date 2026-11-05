@@ -2,6 +2,114 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Final combined follow-up — 2026-11-05
+
+PR #35's initial head `3230a73` passed all six jobs in
+[CI 190](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41961041186),
+including PostgreSQL/race/vet and **225 E2E (36.8m)** with no flaky summary.
+Course, teacher and mission artifacts from that exact run were inspected.
+The course recovery/refresh buttons inherited white text over a pale default
+button background. This visual defect was not caught by the earlier size checks.
+The follow-up sets explicit scoped colours and readable action text; the existing
+phone case now checks computed foreground/background contrast for both actions.
+Teacher singular learner copy is also corrected. No API/reward/save change.
+
+The updated combination retains the original commits of PR #31–#34, refined
+mission typography, review scheduling (#36), and Content Studio ownership (#37).
+It needs a fresh six-job CI and image inspection; CI 190 does not validate these
+later changes. No local tests/build/services and no production deployment.
+
+## Content Studio owner boundary — 2026-11-05
+
+CORE-006, branch `codex/core006-content-ui`, base review `e9a881a`; ADR 020.
+The active admin editor previously retained teacher drafts after a token change.
+Role/list and mutation continuations now capture/check identity, and the token
+keys the editor tree. Guests/learners do not read the admin list; 401/403 hides
+protected content. Network failures preserve current-owner edits while the view
+is sealed for reauthorization, with explicit list refresh after uncertain writes.
+No API permissions, saved lessons or schema changed.
+
+Synthetic browser fixtures cover role/owner/logout, held reads/writes, captured
+tokens, retry/expiry and save/delete failures; they never write real content.
+Phone captures use 390×551/844 with scoped font/hit-target/overflow assertions.
+Root static review corrected fixture routes, async gates, response shapes and
+selector scope without weakening the intended behavior. Existing HTTP/role
+checks remain. No local build/test/service execution, per user request; final-head
+CI and image inspection pending. Status: in_review, not deployed.
+
+CI 195 on `c5b9811` passed five jobs but E2E reported **7 failed, 235 passed
+(40.4m)**. All seven failures were strict locator collisions: an unscoped
+`getByRole('alert')` matched both the intended access notice and Next's route
+announcer. The access notices now have a stable accessible name; those assertions
+target that named alert. Expected messages and all ownership/privacy assertions
+are retained. This is not an accepted run and no failed head is merged; the
+corrected feature and all dependent combinations require fresh CI.
+
+## Review schedule receipts and recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-review-owner`, based on combined `3230a73`.
+The active review UI previously swallowed a scheduling error, removed the item
+and reported completion anyway, while account switches retained the old queue.
+New authenticated receipt scheduling, owner-keyed UI and metadata-only pending
+references preserve unconfirmed work. Read-back and exact retry do not advance
+the SRS interval twice. An expected-due precondition also rejects two tabs with
+different request IDs grading the same displayed snapshot. Self-ratings still
+award no XP or mastery. The legacy POST is retired; the new child route is safe
+against an old API that ignores unknown body fields.
+
+Store/HTTP regressions cover memory/PostgreSQL, real concurrent receipt claims,
+same-ID different items, different-ID stale snapshots, scoped insert-failure
+rollback, restart, missing/foreign ownership, receipt recovery after item removal,
+required fields and due filtering. Browser cases cover real lost committed
+responses, immutable retry, owner changes/late response, storage failures/corrupt
+references, older/unavailable APIs, stale snapshots and phone images.
+Source review corrected precision, race assertions and unreleased migration
+alignment. No local tests/build/services were run, per user instruction. Status:
+in_review pending final-head GitHub Actions and visual review. No deployment.
+
+## Combined roadmap verification — 2026-11-05
+
+Branch `codex/roadmap-integration-20261105` merges PR #31/#32/#33/#34 with
+their original commits preserved. Resolutions retain both added documentation
+sections and combine token-aware course/enrollment and analytics functions in
+`lib/platform.ts`. No grading or reward conflict was resolved by dropping a side.
+The full source combination requires its own six-job CI and retained-image
+inspection, independent of each feature branch's result. No local app/build/test
+was run. Status: in_review; not merged or deployed at this point.
+
+## Mission hero mobile correction — 2026-11-05
+
+CORE-004, branch `codex/core004-mission-mobile`, base main `54273c3`.
+CI 181's 390px saved-receipt images exposed a long heading clipped inside the
+mission hero. Page-level horizontal-scroll assertions did not detect the hidden
+text. The hero now wraps its flexible content/progress circle and permits long
+heading words to wrap. Added browser coverage of all nine actual mission routes
+at 390×551/844, checking text ranges and badge bounds as well as page overflow;
+the longest title gets retained screenshots. No grading/API/save/reward change.
+Source-only local review and diff checks; build/browser validation runs only in
+GitHub Actions per user request. Status: in_review pending final-head CI/images.
+
+CI 186 on `0cf5e1f` passed six jobs and 212 E2E (39.9m). Viewing its four
+mission images exposed an awkward emergency word break and tight 100% digits.
+Phone typography/progress sizing is refined, with per-word and inner-ring text
+bounds added to the browser checks. That earlier pass remains scoped to its
+own source; the refined head requires fresh CI and visual review.
+
+## GitHub merge acceptance — 2026-11-05
+
+All six jobs passed on each final source head: PR #27 `20a3180` / CI 179
+(196 E2E, 37.7m), PR #28 `e924a57` / CI 180 (207 E2E, 36.9m), and PR #30
+`a679850` / CI 181 (210 E2E, 37.4m). Job logs contain no flaky summary or retry
+execution. PostgreSQL/race/vet, frontend/asset checks, AI, compose, integration
+and the standalone native image transform passed. Links and merged revisions
+are recorded in [ROADMAP](ROADMAP.md#nghiệm-thu-và-merge-github--2026-11-05).
+PR #26 was already merged as `ec44478` using CI 174; PR #27/#28/#30 now merged
+as `a2f311b`/`92ba90b`/`5170415`, followed by docs PR #29 as `54273c3`.
+Both mission receipt captures from CI 181 were downloaded and viewed; readable
+receipt/actions, with the pre-existing clipped hero tracked separately above.
+No new local execution and no production deployment. Whole-core completion,
+provider calibration or human playtesting is not implied by these CI results.
+
 ## Teacher checked-practice analytics — 2026-11-05
 
 CORE-005, branches `codex/core005-teacher-practice` and `codex/core005-teacher-ui`,
@@ -20,6 +128,37 @@ Only the disposable E2E container configures its synthetic teacher email; no
 production role setting changes. Local work is source/diff review only, per
 the user's instruction. Status: in_review pending final-head GitHub Actions,
 independent review and visual inspection; no local build/browser pass claimed.
+
+## Adventure actual-answer provenance — 2026-11-05
+
+CORE-005, branch `codex/core005-adventure-provenance`, base main `54273c3`.
+The PostgreSQL first-clear writer previously recorded the catalog's correct
+answer even for a wrong submitted answer, with default legacy source/version.
+It now stores the original answer and distinct guided-story provenance, catalog
+hash and unchanged rule version. Review corrections, grading, first-clear
+reward, save/API shape and historical rows are preserved. No migration or
+promotion into shared practice/rank. Existing whole-story PostgreSQL coverage
+now verifies all 42 original answers after partial clears and improved replays.
+Concurrent first-clear, restart and legacy retention checks are included in CI.
+No local build/test/service run per user request; status in_review pending the
+final-head GitHub Actions gate. No deployment.
+
+## Course enrollment ownership and recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-course-owner`, base main `54273c3`; ADR 018.
+The active course page now separates public catalog from captured-owner personal
+progress/enrollment. Guest views do not consume demo progress. Late reads and
+writes cannot replace the current account, network errors retain lesson links,
+and lost enrollment replies can be confirmed by a read. The API disallows guest
+enrollment while preserving existing progress reads and idempotent account writes.
+No reward/schema/save change, and no guest-data import/reset.
+
+HTTP auth/isolation/retry/no-XP coverage, a real-account browser enrollment/reload,
+render fixtures for late read/error/write, lost response/expired identity and
+390×551/844 images are included. Fixtures exercise presentation only and never
+claim earned lesson progress. Only source/diff review ran locally, per user
+request; final-head CI and image inspection remain pending. Status: in_review,
+not production-deployed.
 
 ## Versioned mission paraphrases — 2026-11-03
 
@@ -51,7 +190,8 @@ API, AI and browser workers were stopped on request; subsequent validation is
 GitHub Actions only. Later source edits, including the direct departure question
 and true concurrent-first-claim regression, require that fresh CI gate.
 
-Status: in_review, pending final-head six-job CI and review. No deployment.
+Accepted 2026-11-05: current head `a679850` passed six-job CI 181 and 210 E2E;
+see the merge acceptance above. No deployment.
 
 ## Campaign and Journey read ownership — 2026-10-25
 

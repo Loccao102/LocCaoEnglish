@@ -141,6 +141,7 @@ func adventureSkill(q adventure.Question) string {
 	return "Vocabulary"
 }
 func recordAdventureEvidence(ctx context.Context, tx *sql.Tx, userID string, quest adventure.Quest, answers []string) error {
+	contentVersion := adventure.ContentVersion()
 	for i, q := range quest.Questions {
 		accuracy := 0.0
 		if adventure.Normalize(answers[i]) == adventure.Normalize(q.Answer) {
@@ -156,7 +157,7 @@ func recordAdventureEvidence(ctx context.Context, tx *sql.Tx, userID string, que
 		if _, err := tx.ExecContext(ctx, `UPDATE user_skills SET confidence=$3,level=$4,updated_at=NOW() WHERE user_id=$1 AND skill=$2`, userID, skill, next, levelFor(next)); err != nil {
 			return err
 		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,created_at) VALUES($1,$2,$3,'adventure',$4,$5,$6,$7,0,NOW())`, newID(), userID, skill, key, q.Prompt, q.Answer, accuracy); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO attempts(id,user_id,skill,activity,item_key,prompt,answer,accuracy,duration_sec,created_at,grading_source,content_version,rules_version) VALUES($1,$2,$3,'adventure',$4,$5,$6,$7,0,NOW(),$8,$9,$10)`, newID(), userID, skill, key, q.Prompt, answers[i], accuracy, adventure.EvidenceSource, contentVersion, adventure.RulesVersion); err != nil {
 			return err
 		}
 		if accuracy == 0 {

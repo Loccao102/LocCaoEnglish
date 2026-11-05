@@ -37,6 +37,10 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Quyền Word Network và Wordsmith | [ADR 014: ledger nguồn cấp quyền, cutover và giữ đồ cũ](decisions/014-vocabulary-unlock-grants.md) |
 | Thiết lập mục tiêu và đổi tài khoản | [ADR 015: profile owner, guest local-only và phục hồi draft](decisions/015-profile-owner-recovery.md) |
 | Đọc tiến độ chiến dịch và Journey đúng tài khoản | [ADR 016: captured-token reads, guest browsing và phục hồi](decisions/016-campaign-owner-reads.md) |
+| Báo cáo giáo viên từ checked practice | [ADR 017: nguồn dữ liệu, quyền và cửa sổ bảy ngày](decisions/017-teacher-practice-analytics.md) |
+| Tiến độ và đăng ký khóa học | [ADR 018: tài khoản sở hữu và đọc lại sau lỗi](decisions/018-course-owner-recovery.md) |
+| Lịch ôn và khôi phục thao tác chấm | [ADR 019: receipt, retry và snapshot lịch đến hạn](decisions/019-review-schedule-receipts.md) |
+| Soạn bài theo phiên đăng nhập | [ADR 020: role, draft và captured-token editor](decisions/020-content-studio-owner-fence.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

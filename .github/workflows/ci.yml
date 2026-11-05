@@ -216,6 +216,14 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          name: course-owner-mobile-review
+          path: .cache/course-owner-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
           name: campaign-mobile-review
           path: |
             test-results/**/travel-unavailable-*.png
@@ -228,7 +236,9 @@ jobs:
         if: always()
         with:
           name: mission-v3-mobile-review
-          path: .cache/mission-v3-saved-*.png
+          path: |
+            .cache/mission-v3-saved-*.png
+            .cache/mission-mobile-title-*.png
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7
@@ -237,6 +247,22 @@ jobs:
         with:
           name: teacher-practice-mobile-review
           path: .cache/teacher-practice-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: review-recovery-mobile-review
+          path: .cache/review-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: content-owner-mobile-review
+          path: .cache/content-owner-*.png
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

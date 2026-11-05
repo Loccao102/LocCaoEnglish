@@ -8,4 +8,13 @@ export type CheckedTeacherPractice = {
   skills: { skill: string; attempts: number; correct: number; learners: number; evidenceKind: "guided-practice" | "transcript-match" }[];
 };
 export type TeacherAnalytics = Analytics & { method?: "teacher-practice.v1"; practice?: CheckedTeacherPractice };
-export function getCourses(){return apiFetch<{items:Course[]}>("/v1/courses")}export function getCourse(slug:string){return apiFetch<Course>(`/v1/courses/${encodeURIComponent(slug)}`)}export function enrollCourse(slug:string){return apiFetch<CourseProgress>(`/v1/courses/${encodeURIComponent(slug)}/enroll`,{method:"POST",body:"{}"})}export function getCourseProgress(slug:string){return apiFetch<CourseProgress>(`/v1/courses/${encodeURIComponent(slug)}/progress`)}export function getAnalytics(token?: string){return apiFetch<TeacherAnalytics>("/v1/admin/analytics", token === undefined ? {} : { headers: { Authorization: token ? `Bearer ${token}` : "" } })}
+export function getCourses(){return apiFetch<{items:Course[]}>("/v1/courses")}export function getCourse(slug:string){return apiFetch<Course>(`/v1/courses/${encodeURIComponent(slug)}`)}
+export function enrollCourse(slug: string, token?: string) {
+  return apiFetch<CourseProgress>(`/v1/courses/${encodeURIComponent(slug)}/enroll`, {
+    method: "POST", body: "{}", ...(token === undefined ? {} : { headers: { Authorization: token ? `Bearer ${token}` : "" } }),
+  });
+}
+export function getCourseProgress(slug: string, token?: string) {
+  return apiFetch<CourseProgress>(`/v1/courses/${encodeURIComponent(slug)}/progress`, token === undefined ? {} : { headers: { Authorization: token ? `Bearer ${token}` : "" } });
+}
+export function getAnalytics(token?: string){return apiFetch<TeacherAnalytics>("/v1/admin/analytics", token === undefined ? {} : { headers: { Authorization: token ? `Bearer ${token}` : "" } })}
