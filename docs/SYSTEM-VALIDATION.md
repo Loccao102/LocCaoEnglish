@@ -2,6 +2,30 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Bridge topology v2 and unchanged label projections — 2026-11-05
+
+CORE-007/PERF-003, `codex/core007-bridge-topology`, parent `94998a8`. Fresh
+advanced Bridge runs select distinct seeded topology templates, preserving v1
+checkpoint/puzzle/rotation/budget behavior for old and Practice runs. ADR 024
+defines the optional marker, snapshot compatibility, solvable canonical route
+budget and safe unknown-version refusal without data deletion. This source also
+skips repeated DOM label layout only when all projection/input fields are stable;
+moving targets, following camera, resize/zoom/rebuild and input still invalidate.
+Simulation/rendering/animation clocks remain unchanged.
+
+New unit/browser scenarios, phone captures and MutationObserver samples are
+pending new-head CI. No local app/build/tests/services or human playtest results.
+Parent run 41994506696 passed 31 focused checks (47.9s); both Fair conflict phone
+images were inspected and confirm the dark text follow-up. That narrow result
+does not establish acceptance of this new topology/renderer code.
+
+Backend CI 225 run 41994506828 on `94998a8` passed PostgreSQL/race/vet and measured
+the 26-lesson catalog: legacy 80 database calls/14.312ms/185451 bytes/3178 allocs
+per operation; joined path 2 calls/0.672ms/101284 bytes/2373 allocs. Test-only
+connector and a 250ms minimum benchmark window were used for both paths. See
+[PERFORMANCE](PERFORMANCE.md); these are isolated CI measurements, not production
+p95 or a universal speed guarantee. Full parent browser gate remains separate.
+
 ## PERF-001 catalog and PERF-002 AI pool — 2026-11-05
 
 `codex/perf001-lesson-catalog`, parent Fair source `bb6ab4c`. Lesson lists replace

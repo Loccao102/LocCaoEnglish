@@ -35,7 +35,22 @@ only in `_test.go`; it cannot be called by the API binary. Timings include the
 test counter and loopback PostgreSQL/container conditions. Report measured values
 with the run/head and corpus, never as production p95, capacity or a universal
 speedup. Benchmarks are evidence alongside the correctness/race checks, not a
-flaky timing threshold. Recorded results will be added after CI completes.
+flaky timing threshold.
+
+Backend measurements on source `94998a8`,
+[CI 225](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41994506828),
+used 26 published lessons (23 owned fixtures plus three seeds), loopback PostgreSQL,
+the test counter and a 250ms minimum benchmark window:
+
+| Path | Database calls/op | Time/op | Bytes/op | Allocations/op |
+| --- | ---: | ---: | ---: | ---: |
+| Legacy test baseline | 80 | 14.312 ms | 185451 | 3178 |
+| Joined catalog | 2 | 0.672 ms | 101284 | 2373 |
+
+The backend's PostgreSQL/race/vet and benchmark step passed; the entire source
+still awaits the remaining browser gate. These are measurements for that run,
+not production percentiles or a universal speed guarantee. Later source changes
+require their own checks; no local benchmark was executed.
 
 ListCourses has a similar loop and is a separate follow-up. Pagination, query
 indexes, payload size and client rendering need their own measured scopes;
@@ -56,6 +71,24 @@ Writing/acoustic integrations using separate clients are outside this slice.
 The actual server imports the same main FastAPI app, so its lifespan is active.
 The combined source must pass CI after integration with newer main/Fair changes;
 an older standalone branch's checks are not a substitute.
+
+## Repeated label layout
+
+PERF-003 targets FestivalArena's actual updateView loop. It previously recreated
+and sorted collision-layout candidates and assigned label DOM attributes every
+animation frame, even when the projection/input had not changed. The new key
+contains viewport/camera framing/zoom, moving target coordinates, followed hero
+position, object visibility and the selection/round/input state. Identical inputs
+skip only label layout/DOM writes. Resize/rebuild's metrics-dirty flag still
+forces a fresh measurement; graphics rendering, animation, physics and session
+timing continue unchanged. Nothing in the renderer grants a reward.
+
+Browser tests use MutationObserver on the real label layer to count attribute
+writes over explicit 250ms samples for paused and running stationary scenes,
+verify invalidation after resize/selection, and require moving targets to keep
+updating. CI retains JSON samples. This metric describes redundant DOM work;
+it does not establish FPS, GPU utilization, battery savings or device-wide
+latency. New-head checks and visual review remain pending.
 
 ## Visual verification found during recovery review
 

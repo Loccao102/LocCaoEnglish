@@ -17,6 +17,7 @@ export class FestivalArena {
   private view={width:1,height:1,centerX:0,centerY:0,unitsPerPixel:1};
   private zoom=1;
   private labelMetricsDirty=true;
+  private labelViewKey="";
   private hero:CompanionRig;
   private hostRig:CompanionRig;
   private hostArt=new ArtResources();
@@ -130,6 +131,16 @@ export class FestivalArena {
   setZoom(value:number){this.zoom=THREE.MathUtils.clamp(value,1,1.8);this.updateView();}
   private updateView(){
     const {width,height,unitsPerPixel}=this.view;
+    const state=this.session.state,followView=this.session.mobile&&this.zoom!==1;
+    // Animation/countdown revisions alone do not move these DOM labels. Keep
+    // camera, moving targets and input state in the key so those still update
+    // immediately; resize/rebuild's dirty flag also forces fresh measurements.
+    const key=[width,height,unitsPerPixel,this.view.centerX,this.view.centerY,this.zoom,
+      followView?this.hero.root.position.x:0,followView?this.hero.root.position.z:0,
+      this.session.canChoose,state.round,state.lit,state.carrying,state.selection.join(","),
+      ...this.props.map(prop=>`${prop.data.id}:${prop.data.shape}:${prop.data.x}:${prop.data.z}:${prop.root.visible}`)].join("|");
+    if(!this.labelMetricsDirty&&key===this.labelViewKey)return;
+    this.labelViewKey=key;
     const focus=new THREE.Vector3(this.hero.root.position.x,.8,this.hero.root.position.z).applyMatrix4(this.camera.matrixWorldInverse);
     const follow=this.session.mobile?(this.zoom-1)/.8:0;
     const x=THREE.MathUtils.lerp(this.view.centerX,focus.x,follow),y=THREE.MathUtils.lerp(this.view.centerY,focus.y,follow);

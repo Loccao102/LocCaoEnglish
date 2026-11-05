@@ -17,7 +17,7 @@ function solve(s:FestivalSession){
       case "hop":for(let i=0;i<s.feathersRequired;i++)s.collectFeather(i,.6);s.touchRing(s.state.round,2);break;
       case "colour":s.paintOrder.recipe.forEach(id=>s.choose(id));s.submit();break;
       case "bridge":{
-        const route=[[3,4,5],[6,3,0,1,2],[0,1,4,3,6,7,8]][s.puzzleIndex];
+        const route=s.canonicalBridgeRoute;
         for(const id of route)while(s.rotations[id]!==0)s.choose(id);
         s.submit();break;
       }
@@ -57,7 +57,7 @@ test("bridge budgets always permit an authored route, start unsolved and recover
   for(let seed=0;seed<30;seed++){
     const s=new FestivalSession(festivalById("bridge-builder")!,()=>{});s.start(undefined,{level:"expert",runId:String(seed)});
     expect(bridgePath(s.puzzle.ports,s.rotations,s.puzzle.entry,s.puzzle.exit)).toEqual([]);
-    const route=[[3,4,5],[6,3,0,1,2],[0,1,4,3,6,7,8]][s.puzzleIndex];
+    const route=s.canonicalBridgeRoute;
     for(const id of route)while(s.rotations[id]!==0)s.choose(id);
     expect(s.state.challenge!.moves).toBeLessThanOrEqual(s.turnBudget);s.submit();
     const restored=new FestivalSession(s.game,()=>{});expect(restored.restore(s.snapshot())).toBe(true);expect(restored.bridgePath).toEqual(s.bridgePath);
