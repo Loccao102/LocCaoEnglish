@@ -1,6 +1,6 @@
 # Roadmap thực thi
 
-Cập nhật nền: 2026-11-05, main `ff7ef88` (các merge đã nghiệm thu tới PR #49).
+Cập nhật nền: 2026-11-05, main `59cf031` (các merge đã nghiệm thu tới PR #51).
 PR #43 là probe thất bại có kiểm soát, đã đóng và không merge. Đây là nguồn duy nhất của danh sách việc
 cần làm và trạng thái. Chẩn đoán chi tiết ở [GAMEPLAY-AUDIT](GAMEPLAY-AUDIT.md);
 quy định ở [PROJECT-RULES](PROJECT-RULES.md). Không bắt đầu mở rộng số lượng game
@@ -22,7 +22,7 @@ trước khi các contract core liên quan đã vững.
   Writing đã lưu nháp tài khoản, từng lần nộp và phản hồi provider có dẫn chứng,
   giữ lịch sử sửa bài. Speaking đã lưu acoustic feedback theo mẫu, không giữ raw
   audio; ngữ nghĩa sâu và calibrated overall tiếp tục theo CORE-004.
-- Runtime PR #35 `651c946` đã qua 242 browser/API cases và đủ sáu CI jobs,
+- Runtime PR #51 `82871ea` đã qua 263 E2E cases và đủ sáu CI jobs,
   gồm PostgreSQL/race/vet; xem [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) để biết
   revision và giới hạn. Chưa deploy production; không suy rộng sang revision sau.
 
@@ -46,8 +46,11 @@ expected head và merged tree giữ đúng source đã kiểm tra. Không suy sa
 nhánh phát triển tiếp theo.
 PR #49 `94998a8` đã đạt CI 225 đủ sáu jobs/256 E2E (40.7m), focused 31 (47.9s),
 hai ảnh recovery đã xem; merge `ff7ef88` giữ ancestry #47/#48. Catalog bài học,
-AI HTTP pool và Fair conflict recovery đã được nghiệm thu trong phạm vi; Bridge
-v2/label layout và catalog course tiếp tục cần source gate mới.
+AI HTTP pool và Fair conflict recovery đã được nghiệm thu trong phạm vi. Bridge
+v2/label layout và catalog course tiếp nối đạt CI 229 đủ sáu jobs/263 E2E
+(46.1m), focused 38 (2.0m) trên `82871ea`; cả bốn ảnh Bridge đã xem. PR #51
+merge `59cf031`, giữ ancestry #50. CORE-006 và ba lát cắt PERF đã nghiệm thu;
+CORE-004/007 vẫn giữ phần provider/calibration/playtest chưa xác minh.
 Không chạy local/deploy. [Audit reward](REWARD-BOUNDARY-AUDIT.md) chốt phạm vi
 CORE-005 trên main đã merge; các mục core khác giữ tiêu chí độc lập.
 
@@ -63,16 +66,16 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | CORE-003 | P0 | Di chuyển 9 hoạt động khách quan, sửa lộ đáp án/chấm sai | CORE-001, CORE-002 | done |
 | CORE-004 | P0 | Nguồn gốc bằng chứng cho conversation/speaking/IELTS | CORE-001, CORE-002 | in_progress |
 | CORE-005 | P0 | Reward/rank chỉ dùng kết quả được xác thực | CORE-003, CORE-004 contract | done |
-| CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | in_progress |
+| CORE-006 | P1 | Khôi phục và tương thích xuyên hệ thống | CORE-002, CORE-005 | done |
 | CORE-007 | P1 | Đo và cân bằng độ khó, kiểm tra chiều sâu | Các luồng core liên quan | in_progress |
 | CONTENT-001 | P2 | Mở rộng nội dung có mục đích, không tăng số lượng hình thức | CORE-005, CORE-007 | planned |
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
 | GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
 | SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | done |
-| PERF-001 | P1 | Đo và giảm truy vấn catalog lặp, giữ đúng dữ liệu công khai/owner | Contract core hiện có | in_progress |
+| PERF-001 | P1 | Đo và giảm truy vấn catalog lặp, giữ đúng dữ liệu công khai/owner | Contract core hiện có | done |
 | PERF-002 | P1 | Tái sử dụng outbound HTTP connection cho LLM/TTS | AI lifespan/provider contract | done |
-| PERF-003 | P1 | Tránh bố trí/ghi lại nhãn 3D khi input projection không đổi | Fair renderer/input hiện có | in_progress |
+| PERF-003 | P1 | Tránh bố trí/ghi lại nhãn 3D khi input projection không đổi | Fair renderer/input hiện có | done |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
@@ -116,11 +119,11 @@ CI báo số đo đúng điều kiện, không suy p95 production từ fixture n
 app/build/test/benchmark trên máy người dùng. ListCourses là follow-up sau khi
 lát cắt đầu đã được xác minh; không tự tuyên bố toàn app đã tối ưu.
 
-### PERF-001 tiếp nối — Catalog course trong một snapshot (`in_progress`)
+### PERF-001 tiếp nối — Catalog course trong một snapshot (`done`)
 
 Owner/task: Codex, `codex/perf001-course-projection`, 2026-11-05. Source bài học
-đã đạt PostgreSQL/race/vet và benchmark CI 225; browser/integration acceptance
-tiếp tục riêng. Catalog course hiện vẫn lấy slug rồi GetCourse cho từng course:
+đã đạt đủ sáu jobs/256 E2E trong CI 225 và merge PR #49 `ff7ef88`.
+Catalog course trước đây lấy slug rồi GetCourse cho từng course:
 `1 + 2N` calls, detail hai calls. Lát cắt tiếp nối đọc gộp published courses và
 published lesson metadata trong một query/snapshot, giữ đúng course và authored
 lesson order, empty Lessons `[]`, ErrNotFound/slug rỗng, memory path và owner/
@@ -128,6 +131,14 @@ enrollment/bookmark/progress hiện có. Không đổi API/schema/cache/reward.
 Nghiệm thu query budget List/Get bằng test-only counter, so sánh baseline cũ,
 draft/hidden/empty/option order, publication snapshot và benchmark cô lập trên
 GitHub; không chạy local hoặc dùng timing fixture để suy production p95.
+
+Source `82871ea` đạt đủ sáu jobs tại [CI 229](https://github.com/Loccao102/LocCaoEnglish/actions/runs/42002431910),
+gồm PostgreSQL/race/vet, query-budget/baseline/snapshot regressions và 263 E2E
+(46.1m); [PR #51](https://github.com/Loccao102/LocCaoEnglish/pull/51) merge
+`59cf031`. Cùng fixture đo courses 49→1 calls/op, 23.791→0.858ms; lessons
+80→2 calls/op, 27.459→1.127ms. Hai lát cắt catalog hoàn tất trong phạm vi đã
+định; [PERFORMANCE](PERFORMANCE.md) giữ corpus/allocations và giới hạn đo.
+Không suy thành toàn app đã tối ưu hoặc production p95; không chạy local/deploy.
 
 ## PERF-002 — HTTP pool cho AI
 
@@ -159,6 +170,12 @@ sau resize/zoom/input, giữ labels đúng/kích thước nhỏ; so sánh đư�
 cùng scene qua phép đo có kiểm soát nếu thực hiện được. Không tuyên bố FPS/GPU
 hay battery được cải thiện khi chưa đo, không chạy local. Label metrics dirty
 vẫn buộc tính lại; hỗ trợ font/DOM thay đổi theo cơ chế hiện có.
+
+Đã nghiệm thu source `82871ea`: CI 229 đủ sáu jobs/263 E2E (46.1m), focused
+run 14 đủ 38 cases (2.0m); cả hai mẫu Adventure/Challenge 250ms đo
+pausedWrites=0/runningWrites=0. Resize, selection, countdown và moving-box
+assertions độc lập đạt; cả bốn ảnh Bridge điện thoại đã xem. PR #51 merge
+`59cf031`. Done áp dụng bỏ DOM layout/write dư thừa, không phải FPS/GPU/battery.
 
 ## CORE-001 — Server-owned attempt
 
@@ -823,6 +840,23 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Nghiệm thu tổng hợp phần mềm (`done`, 2026-11-05)
+
+Đã đối chiếu toàn bộ tiêu chí với route/source/tests đang dùng, không chỉ từ một
+build hoặc một màn hình. [Ma trận khôi phục](ADVANCED-ACCEPTANCE.md#core-006-cross-system-recovery-coverage)
+gắn lost-response/reload, page exit, account/guest/offline/expired, PostgreSQL
+reopening, rules/content versions, corrupt/unsupported copies và reward replay
+với kiểm tra cụ thể. Giữ atlas Cloud Hop dùng chung badges/times giữa modes theo
+contract hiện tại; chỉ cần ADR/migration mới nếu sau này quyết định tách.
+
+Parent PR #49 `94998a8` đạt CI 225 đủ sáu jobs/256 E2E; source cuối `82871ea`
+đạt [CI 229](https://github.com/Loccao102/LocCaoEnglish/actions/runs/42002431910)
+đủ sáu jobs/263 E2E (46.1m), PG/race/vet và 38 focused cases. PR #51 merge
+`59cf031`, giữ ancestry. Không còn blocker code cụ thể trong phạm vi recovery
+hiện hành. Done là nghiệm thu software/contract và PostgreSQL CI, không phải
+restart/migration trên production; DEP-001 vẫn riêng. Các ghi chú in_progress
+trong lịch sử lát cắt bên dưới được chốt bởi nghiệm thu tổng hợp này.
+
 ### Fair: hai tab hoàn thành cùng checkpoint (`done`, 2026-11-05)
 
 Owner/task: Codex, `codex/core006-fair-conflict`, nền `9638dec`. Hai tab resume
@@ -973,11 +1007,13 @@ cuối gồm PostgreSQL/race/vet, container integration và **170/170 E2E (29.9m
 `a0ae3be` sau kiểm tra reviews/threads và expected head. Lỗi fixture assets cũ và
 sự cố cập nhật kết quả GitHub được ghi tại
 [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md#stable-daily-practice-recovery--2026-10-22).
-Chưa deploy production; toàn CORE-006 và CORE-005 vẫn `in_progress`.
+Tại thời điểm nghiệm thu lát cắt Daily này, chưa deploy production và toàn
+CORE-006/005 còn `in_progress`. Trạng thái hiện tại theo nghiệm thu tổng hợp
+ở đầu từng mục, không theo ghi chú lịch sử này.
 
-**Cần làm:** mở rộng quy tắc khôi phục sang shared learning attempts; rà các ranh
-giới guest/account/offline/tài khoản hết hạn. Đánh giá nhu cầu records Cloud Hop
-theo difficulty trước khi thay atlas: hiện atlas vẫn tổng hợp các mức.
+**Phạm vi đã đối chiếu:** shared learning attempts và các ranh giới
+guest/account/offline/tài khoản hết hạn đã có kiểm tra trong ma trận trên.
+Atlas hiện giữ tổng hợp các mức theo contract; không đổi định dạng records.
 
 **Hoàn tất khi:** reload giữa submit và response, rời tab, đổi tài khoản, server
 restart và upgrade rules đều có kết quả dự kiến/được kiểm tra; không replay một
@@ -986,7 +1022,7 @@ phá dữ liệu. Nếu quyết định tách atlas theo mức, phải có ADR/m
 
 ## CORE-007 — Độ khó và chiều sâu có bằng chứng
 
-### Bridge: topology có phiên bản (`in_progress`, 2026-11-05)
+### Bridge: topology có phiên bản (`done` trong phạm vi phần mềm, 2026-11-05)
 
 Owner/task: Codex, `codex/core007-bridge-topology`, nền performance `94998a8`.
 Người dùng yêu cầu tiếp tục chức năng nâng cao và tối ưu hiệu năng. Ba puzzle
@@ -1009,6 +1045,11 @@ unknown version phục hồi không phá dữ liệu; ảnh/controls màn điệ
 trên source tổ hợp. Đây chưa phải số liệu playtest hay bằng chứng cân bằng cho
 người thật; toàn CORE-007 tiếp tục giữ yêu cầu riêng bên dưới.
 
+Source `82871ea` đạt CI 229 đủ sáu jobs/263 E2E (46.1m), focused run 14
+38 cases (2.0m), genuine v1 resume và unknown-version raw-copy recovery. Cả
+bốn ảnh Adventure/Challenge 390×551/844 đã xem với board 3D/labels/controls;
+PR #51 merge `59cf031`. Không có playtest người thật hoặc dữ liệu cân bằng mới.
+
 Owner/task: Codex, branch `codex/core007-playtest-protocol`, 2026-11-05.
 Lát cắt đầu tiên: kế hoạch quan sát thủ công cho tám Fair games và ba mức khó,
 phân biệt kỹ năng ngôn ngữ với trí nhớ/vận động; chưa thu telemetry hoặc bịa kết
@@ -1019,8 +1060,9 @@ Không đổi seed, puzzle, thời gian, save hay luật chấm. Nghiệm thu br
 thật, pause/help/reload/assistance, ba mode và ảnh 390×551/844 trên GitHub.
 Lát cắt hướng dẫn/kế hoạch đã nghiệm thu: `ff91a41` đạt CI 208 đủ sáu jobs/245
 E2E (42.2m), cả tám ảnh hướng dẫn/actions đã xem; tổ hợp `2c2550a` đạt CI 216 và
-merge qua PR #44. Chưa có người chơi thật, số liệu cân bằng hay topology bridge
-mới; toàn CORE-007 tiếp tục in_progress.
+merge qua PR #44. Lát cắt hướng dẫn không bao gồm topology Bridge; phần đó đã
+nghiệm thu riêng ở trên. Chưa có người chơi thật hoặc số liệu cân bằng;
+toàn CORE-007 tiếp tục in_progress.
 Chơi thử với người thật và điều chỉnh dựa trên kết quả vẫn chưa được thực hiện;
 toàn CORE-007 không done từ tài liệu hoặc kiểm tra tự động.
 
