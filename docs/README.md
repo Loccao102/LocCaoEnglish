@@ -42,6 +42,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Tiến độ và đăng ký khóa học | [ADR 018: tài khoản sở hữu và đọc lại sau lỗi](decisions/018-course-owner-recovery.md) |
 | Lịch ôn và khôi phục thao tác chấm | [ADR 019: receipt, retry và snapshot lịch đến hạn](decisions/019-review-schedule-receipts.md) |
 | Soạn bài theo phiên đăng nhập | [ADR 020: role, draft và captured-token editor](decisions/020-content-studio-owner-fence.md) |
+| Đăng nhập và lựa chọn chơi khách | [ADR 021: chỉ ghi token khi ý định đăng nhập còn hiệu lực](decisions/021-auth-intent-fencing.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 
 ## Cách giữ tài liệu nhất quán

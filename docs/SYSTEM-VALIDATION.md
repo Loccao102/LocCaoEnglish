@@ -2,6 +2,21 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Authentication intent recovery — 2026-11-05
+
+CORE-006, branch `codex/core006-auth-intent`, base `37234f8`; ADR 021.
+The active login/register UI now commits a validated response only while the
+same mounted form intent and starting token remain current. Guest selection,
+external account changes and navigation invalidate old requests before token
+writes. A pending reference prevents duplicate submissions; failed or blocked
+storage never displays a saved sign-in. Account profile visibility follows the
+shared token subscription. Server auth API, account creation and data stay intact.
+
+Six browser cases distinguish synthetic held-response/shape/storage fixtures
+from real dedicated-account registration/sign-out/login/reload. No new layout,
+server permissions, schema, token lifetime or credential persistence. Source/diff
+review only locally; final-head GitHub CI remains pending. No deployment.
+
 ## Colour ratio teaching and playtest preparation — 2026-11-05
 
 CORE-007, branch `codex/core007-playtest-protocol`, based on `ae0eec9`.

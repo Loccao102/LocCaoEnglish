@@ -697,6 +697,17 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Ý định đăng nhập và phản hồi đến muộn (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core006-auth-intent`, nền `37234f8`.
+AuthPanel gọi helper tự ghi token ngay khi POST trả về; chọn Play as guest,
+rời trang hoặc đổi tài khoản lúc request chờ vẫn có thể bị đăng nhập lại bởi
+phản hồi cũ. Tách request khỏi ghi token, chỉ commit nếu form còn mount và ý định
+hiện tại/token nền chưa đổi; logout/storage/auth event hủy ý định trước. Không
+đổi auth API, credentials, thời hạn token hay nhập dữ liệu guest. Nghiệm thu late
+login/register sau logout/unmount/account-switch, lặp submit, lỗi/storage và
+đăng nhập thật trên GitHub. Không tuyên bố toàn recovery hoàn tất từ lát cắt này.
+
 ### Content Studio đúng phiên đăng nhập (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-content-ui`, nền review `e9a881a`.
