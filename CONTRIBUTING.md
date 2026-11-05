@@ -96,6 +96,8 @@ chứng, báo rõ phần chưa xác minh; không thử vượt chính sách môi
 cho đăng nhập, Content Studio và Colour Studio khi những file liên quan đổi.
 Lượt nhanh dùng stack CI riêng, dừng ở lỗi đầu tiên và giữ strict flaky gate.
 Đây là phản hồi sớm; vẫn phải chờ đủ ma trận đầy đủ cho thay đổi runtime.
+Workflow đầy đủ cũng nhóm theo PR/ref để dừng revision đã bị thay thế; kiểm tra
+head hiện tại tiếp tục chạy đủ, PR và push main không hủy lẫn nhau.
 E2E trên CI dùng `failOnFlakyTests`: một test chỉ qua nhờ retry vẫn làm job lỗi
 và giữ failure artifacts. Không coi job xanh cũ có flaky là nghiệm thu sạch.
 
