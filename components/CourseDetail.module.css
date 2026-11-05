@@ -1,0 +1,13 @@
+.shell { min-width: 0; overflow-wrap: anywhere; }
+.shell :global(.course-lessons small), .shell :global(.course-lessons b) { font-size: 14px; line-height: 1.5; }
+.shell :global(.course-lessons strong), .shell > header p { font-size: 16px; line-height: 1.6; }
+.personal { margin-top: 1.5rem; border-top: 1px solid #87b8a4; padding-top: 1rem; }
+.personal p { font-size: 16px; line-height: 1.6; }
+.personal strong { font-size: 1.5rem; }
+.personal button { min-height: 44px; white-space: normal; margin: .5rem .5rem 0 0; }
+.personal a { display: inline-flex; align-items: center; min-height: 44px; color: #fff; text-decoration: underline; }
+@media (max-width: 500px) {
+  .shell > header { padding: 1.5rem; }
+  .shell :global(.course-lessons a) { grid-template-columns: 36px minmax(0, 1fr); }
+  .shell :global(.course-lessons b) { grid-column: 2; }
+}
