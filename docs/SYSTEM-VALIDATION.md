@@ -2,6 +2,17 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Dashboard overall-band boundary — 2026-11-05
+
+CORE-004, branch `codex/core004-overall-boundary`, base `4fa1b77`.
+The current server returns null for dashboard overall IELTS band, but the active
+camp snapshot could display a non-null legacy API value as an overall estimate.
+The widget now links separate skill results without using that legacy field;
+the user's target remains separately labelled. No overall calculation, history,
+schema, API or provider change. The existing old-dashboard browser regression
+now injects 8.5, verifies it is not shown while target 7.0 remains, and captures
+390×551/844. Source/diff review only locally; final-head CI/images pending.
+
 ## Authentication intent recovery — 2026-11-05
 
 CORE-006, branch `codex/core006-auth-intent`, base `37234f8`; ADR 021.

@@ -36,8 +36,8 @@ export default function LiveSnapshot() {
     </div>
     <div className="snapshot-band">
       <small>IELTS PRACTICE</small>
-      <strong>{data.ieltsBand?.toFixed(1) ?? "—"}</strong>
-      <span>{data.ieltsBand == null ? "No overall estimate yet" : "Overall practice estimate"}</span>
+      <strong>By skill</strong>
+      <span>No combined band is calculated</span>
       {data.targetBand != null && <span>target {data.targetBand.toFixed(1)}</span>}
       <Link href="/ielts">View practice history →</Link>
     </div>

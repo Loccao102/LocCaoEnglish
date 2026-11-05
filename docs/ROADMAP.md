@@ -315,6 +315,16 @@ CONTENT-001. Không suy ra game đã cân bằng hoặc toàn hệ thống an to
 
 ## CORE-004 — Speaking, mission và IELTS evidence
 
+### Không suy overall từ dashboard cũ (`in_review`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core004-overall-boundary`, nền `4fa1b77`.
+`/camp` dùng LiveSnapshot, vẫn render `dashboard.ieltsBand` thành overall dù
+backend hiện tại luôn trả null và API cũ có thể gửi estimate thiếu nguồn gốc.
+Thẻ IELTS chỉ dẫn tới kết quả từng kỹ năng, giữ target do người dùng chọn và
+không tính/hiện combined band từ trường legacy. Không đổi API/schema/history.
+Nghiệm thu fixture API cũ có band khác null, target riêng và ảnh mobile qua CI.
+Overall đã hiệu chuẩn và provider thật tiếp tục là phần chưa nghiệm thu.
+
 Lát cắt mission: Codex, `codex/core004-mission-evidence`, 2026-10-11,
 `done` trong phạm vi guided rubric, nghiệm thu 2026-10-12. Bỏ fixed accuracy theo lượt và chặn API legacy NPC. Thay bộ tìm
 từ khóa toàn transcript bằng rubric theo thứ tự, có ngữ cảnh, bỏ qua spam/lặp
