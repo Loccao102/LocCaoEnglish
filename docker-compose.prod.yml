@@ -35,8 +35,6 @@ services:
       CORS_ORIGINS: https://${DOMAIN}
       TRUST_PROXY: "true"
       ALLOW_ANONYMOUS_DEMO: "false"
-      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
-      TEACHER_EMAILS: ${TEACHER_EMAILS:-}
     depends_on:
       postgres: {condition: service_healthy}
       redis: {condition: service_healthy}

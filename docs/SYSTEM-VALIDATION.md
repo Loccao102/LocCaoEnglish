@@ -2,6 +2,34 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## SEC-002 explicit account roles — 2026-11-05
+
+Branch `codex/sec002-explicit-roles`, parent course revision `2c2550a`.
+Static review confirmed public registration accepted unverified email while
+RoleForUser could elevate an address from environment configuration. The fix
+removes that promotion and preserves existing stored assignments; ADR 022 records
+the private operator procedure and required review of legacy privileged rows.
+No automatic production grants, revocations or user data cleanup were performed.
+
+Added memory/PostgreSQL role, grant/demotion, first-read concurrency/restart,
+HTTP signup and command validation/error tests. The disposable CI teacher is now
+created by registration plus the operator command and logs in for the existing
+real analytics E2E. Local checks are limited to source review, gofmt, internal
+links and git diff --check. Runtime CI is pending on the new head; this is not
+a passing test claim or production deployment.
+
+Earlier related evidence: CI 208 on `ff91a41` passed all six jobs and 245 E2E
+(42.2m); CI 209 on `502bae3` passed all six and 251 E2E (44.5m). CI 210 on
+`b520592` had 250 passing and one failing E2E: Reading history still expected the
+old snapshot label/dash. Revision `2c2550a` updates that assertion to require
+“By skill” and “No combined band is calculated”, retaining the server null-band
+and no-6.0 assertions. The full new revision must pass independently.
+
+The course helper at `73d4de4` passed 27 focused cases in GitHub Actions run
+41975808110. Its course-empty phone captures at 390×551/844 were inspected:
+the empty published catalog is explicit, readable and does not imply enrollment.
+This narrow result does not substitute for the full suite.
+
 ## Published course catalog and coherent progress — 2026-11-05
 
 CORE-006, branch `codex/core006-course-catalog`, base `9dc252c`; ADR 018.

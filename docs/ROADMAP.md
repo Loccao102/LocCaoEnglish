@@ -59,11 +59,31 @@ hoạt động. Nếu chủ dự án chỉ định task khác, ghi lý do và gi
 | DEP-001 | P0 | Triển khai/xác minh API và migration độ khó Fair | Backend/schema mới, môi trường đích | planned |
 | GOV-001 | P0 | Quy tắc, docs index, backlog, DoD và PR template | — | done |
 | GOV-002 | P1 | Xác minh và cấu hình rào chắn merge trên GitHub | Quyền repo, CI ổn định | done |
+| SEC-002 | P0 | Cấp quyền theo tài khoản được quản trị xác nhận, không tự khai email | Auth/role hiện có | in_progress |
 
 Các mục planned chưa có người nhận hoặc hạn giao được ấn định. Người nhận chuyển
 `in_progress` kèm tên/task/PR và ngày; không tự gán người khác. Mục done cần ghi
 commit/PR + bằng chứng ngay tại mục đó. Không giữ “pending CI” vô thời hạn trong
 trạng thái done khi CI là điều kiện nghiệm thu của task.
+
+## SEC-002 — Quyền được cấp cho tài khoản cụ thể
+
+Owner/task: Codex, branch `codex/sec002-explicit-roles`, 2026-11-05.
+Bug P0: đăng ký chưa xác minh email nhưng `RoleForUser` tự nâng quyền theo
+`ADMIN_EMAILS`/`TEACHER_EMAILS`. Email cấu hình chưa đăng ký có thể bị chiếm
+để nhận quyền mới; unique email không chứng minh quyền sở hữu địa chỉ.
+
+Phạm vi: bỏ cấp quyền từ email/env; tài khoản chưa có role luôn là learner.
+Giữ role đã lưu, dùng công cụ operator gắn user ID để cấp/thu hồi role; không
+thêm endpoint công khai. CI chuyển sang fixture được operator cấp quyền trên
+database dùng một lần. Không tự thu hồi role cũ hoặc sửa dữ liệu người dùng.
+
+Nghiệm thu: signup bằng email nằm trong hai biến cũ vẫn là learner và bị từ
+chối admin/teacher routes; quyền được operator cấp tồn tại sau restart và hạ
+quyền không bị tự nâng lại; first read đồng thời không ghi đè quyết định operator.
+Kiểm tra memory, PostgreSQL/race, HTTP, CLI và teacher E2E trên GitHub. Schema/API
+response không đổi; phải có hướng dẫn audit role cũ, rollout/retry theo user ID.
+Chưa chạy local hoặc deploy; chưa đánh dấu done khi CI head mới chưa đạt.
 
 ## CORE-001 — Server-owned attempt
 

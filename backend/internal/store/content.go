@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -55,41 +54,6 @@ func (s *Store) ensureContentSchema(ctx context.Context) error {
 }
 
 func (s *Store) GetUser(ctx context.Context, userID string) (model.User, error) { return s.user(ctx, userID) }
-
-func (s *Store) RoleForUser(ctx context.Context, userID string) (string, error) {
-	u, err := s.user(ctx, userID); if err != nil { return "", err }
-	bootstrap := configuredRole(u.Email)
-	if s.db != nil {
-		if err := s.ensureContentSchema(ctx); err != nil { return "", err }
-		var role string
-		err := s.db.QueryRowContext(ctx, `SELECT role FROM user_roles WHERE user_id=$1`, userID).Scan(&role)
-		if errors.Is(err, sql.ErrNoRows) {
-			role = bootstrap
-			_, err = s.db.ExecContext(ctx, `INSERT INTO user_roles(user_id,role,updated_at) VALUES($1,$2,NOW()) ON CONFLICT(user_id) DO NOTHING`, userID, role)
-		}
-		if err != nil { return "", err }
-		if bootstrap != "learner" && bootstrap != role {
-			role = bootstrap
-			_, _ = s.db.ExecContext(ctx, `UPDATE user_roles SET role=$2,updated_at=NOW() WHERE user_id=$1`, userID, role)
-		}
-		return role, nil
-	}
-	state := s.contentMemory(); state.mu.Lock(); defer state.mu.Unlock()
-	if bootstrap != "learner" { state.roles[userID] = bootstrap; return bootstrap, nil }
-	if role := state.roles[userID]; role != "" { return role, nil }
-	state.roles[userID] = "learner"; return "learner", nil
-}
-
-func (s *Store) SetUserRole(ctx context.Context, userID, role string) error {
-	if role != "learner" && role != "teacher" && role != "admin" { return errors.New("invalid role") }
-	if _, err := s.user(ctx, userID); err != nil { return err }
-	if s.db != nil {
-		if err := s.ensureContentSchema(ctx); err != nil { return err }
-		_, err := s.db.ExecContext(ctx, `INSERT INTO user_roles(user_id,role,updated_at) VALUES($1,$2,NOW()) ON CONFLICT(user_id) DO UPDATE SET role=EXCLUDED.role,updated_at=NOW()`, userID, role)
-		return err
-	}
-	state := s.contentMemory(); state.mu.Lock(); defer state.mu.Unlock(); state.roles[userID] = role; return nil
-}
 
 func (s *Store) ListLessons(ctx context.Context, includeDraft bool) ([]model.Lesson, error) {
 	if s.db != nil {
@@ -148,8 +112,6 @@ func (s *Store) SaveLessonProgress(ctx context.Context,userID,lessonID string,co
 	state:=s.contentMemory();state.mu.Lock();defer state.mu.Unlock();if state.progress[userID]==nil{state.progress[userID]=map[string]model.LessonProgress{}};state.progress[userID][lessonID]=p;return p,nil
 }
 
-func configuredRole(email string) string { email=strings.ToLower(strings.TrimSpace(email)); if emailInEnv("ADMIN_EMAILS",email){return "admin"}; if emailInEnv("TEACHER_EMAILS",email){return "teacher"}; return "learner" }
-func emailInEnv(key,email string)bool{for _,value:=range strings.FieldsFunc(os.Getenv(key),func(r rune)bool{return r==','||r==';'||r==' '||r=='\n'}){if strings.ToLower(strings.TrimSpace(value))==email{return true}};return false}
 func normalizeSlug(slug,title string)string{slug=strings.ToLower(strings.TrimSpace(slug));if slug==""{slug=strings.ToLower(strings.TrimSpace(title))};slug=regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(slug,"-");return strings.Trim(slug,"-")}
 func idOrNew(id string)string{if id!=""{return id};return newID()}
 func maxInt(a,b int)int{if a>b{return a};return b}
