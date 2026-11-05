@@ -50,6 +50,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Puzzle Bridge mới và checkpoint cũ | [ADR 024: topology v2 xác định theo seed, đọc nguyên v1](decisions/024-bridge-topology-versions.md) |
 | Bằng chứng kiểm tra theo đợt | [SYSTEM-VALIDATION](SYSTEM-VALIDATION.md) |
 | Hiệu năng và giới hạn số đo | [PERFORMANCE: query budget, benchmark CI và outbound AI pool](PERFORMANCE.md) |
+| Nghiệm thu chức năng nâng cao và phần chưa xác minh | [ADVANCED-ACCEPTANCE: route thật, contract, bằng chứng và giới hạn](ADVANCED-ACCEPTANCE.md) |
 
 ## Cách giữ tài liệu nhất quán
 

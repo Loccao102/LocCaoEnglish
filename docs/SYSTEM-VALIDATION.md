@@ -2,6 +2,49 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Accepted advanced software and performance — 2026-11-05
+
+[PR 51](https://github.com/Loccao102/LocCaoEnglish/pull/51) source
+`82871ead81d9ebf53b0d217f1af0732e34bf374f` passed all six required jobs in
+[CI 229](https://github.com/Loccao102/LocCaoEnglish/actions/runs/42002431910):
+frontend/game/assets/build, backend PostgreSQL/race/vet, AI, Compose, real API
+integration and **263 E2E cases (46.1m)**. The E2E log has no failed/flaky summary
+or test retry execution. Reviews/threads were empty, the expected head was
+unchanged, and the combined main tree equalled the tested tree
+`ae9fb4fe5a9b413dac254fa36fd12c62663f59f6`. An ordinary expected-head merge
+created main `59cf031e4c28a6809c5eb159106c7d5929df4d75`, preserving PR 50 ancestry.
+
+[Focused run 14](https://github.com/Loccao102/LocCaoEnglish/actions/runs/42002431903)
+on that exact source passed **38 cases (2.0m)** under the strict flaky gate.
+Bridge Adventure/Challenge each completed all three rounds via actual tile input
+at 390×551 and 390×844. All four final screenshots were inspected with the full
+3D board, bank labels, HUD and reachable controls. Genuine v1 resume and an
+unsupported marker's unchanged raw download passed. The earlier blank WebGL
+capture remains rejected; final capture explicitly permits render/composition.
+
+Both stationary label samples measured **0 paused / 0 running repeated attribute
+writes in 250ms**, while independent timer/selection/resize/moving-box checks
+passed. This accepts PERF-003's bounded DOM-work optimization, not an FPS/GPU
+or battery claim. PostgreSQL measured courses **49→1 calls/op**,
+23.791→0.858ms on 24 published courses, and lessons **80→2 calls/op**,
+27.459→1.127ms on 26 published lessons. [PERFORMANCE](PERFORMANCE.md) records
+same-fixture methods, allocations and timing limits; there is no production p95
+or universal speed claim.
+
+The [cross-system recovery matrix](ADVANCED-ACCEPTANCE.md#core-006-cross-system-recovery-coverage)
+maps each CORE-006 criterion to active implementation/tests, including
+PostgreSQL reopening, owner changes, expiry, exact retry, old rules and
+non-destructive invalid-copy recovery. No concrete code blocker remains in that
+software/contract scope. CORE-006, PERF-001 and PERF-003 are accepted; the Bridge
+software slice is accepted while whole CORE-007 still needs real playtests.
+CORE-004's live provider/calibration and DEP-001's target rollout remain separate.
+
+All app/test/build/benchmark execution for this work occurred on GitHub Actions.
+Only source/Git/static link/diff review ran locally; no local services, production
+deployment or user save/queue/database reset. Historical pending notes below
+record earlier revisions and are resolved by this final-head acceptance where
+their scope overlaps; they are not the current status source.
+
 ## Course catalog snapshot follow-up — 2026-11-05
 
 PERF-001, `codex/perf001-course-projection`, parent Bridge fix `935e029`.

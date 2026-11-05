@@ -46,7 +46,15 @@ bank or the difficulty curve is sufficient for long-term play.
 | Parcel Trail | Two clue-based stops per parcel | Remember three stops; order disappears after 7 s |
 | Cloud Hop | At least one feather before final ring | All feathers, stronger wind and drifting rings |
 | Colour Studio | Three measured drops; repeated pigments matter | Four drops for pastel mixtures, 30 s/mix |
-| Bridge Builder | Seeded rotations and turn budget | Smaller allowance, 60 s/crossing |
+| Bridge Builder | Versioned seeded layouts, canonical 5–6 tile routes and route-derived turn budget | Canonical 7–9 tile routes, smaller turn allowance, 60 s/crossing |
+
+Bridge topology v2 applies to fresh advanced runs. Missing/1 checkpoint markers
+retain the original three puzzles and their original rotation/budget behavior;
+unknown versions are declined without rewriting the checkpoint. The raw copy is
+downloadable before explicit replacement. Generation selection, ports, turn
+budget and result remain in FestivalSession, not a renderer-specific rule.
+[ADR 024](decisions/024-bridge-topology-versions.md) defines compatibility and
+the distinction between a canonical solution length and a minimum solution.
 
 ## Save contract and rollout
 

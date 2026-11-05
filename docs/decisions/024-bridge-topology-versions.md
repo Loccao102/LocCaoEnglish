@@ -1,6 +1,7 @@
 # ADR 024 — Version Bridge Builder topology without changing old checkpoints
 
-Date: 2026-11-05. Roadmap: CORE-007. New source CI/playthrough review pending.
+Date: 2026-11-05. Roadmap: CORE-007. Software scope accepted on `82871ea`,
+CI 229 / PR 51, main `59cf031`; human difficulty playtests remain separate.
 
 ## Decision
 

@@ -12,8 +12,16 @@ The fair is an original southern island in Sunlit Village. Eight neighbours each
 | Tea Time | Moca | Practise ordered recipes or serve a varied queue of friends with timed tea strengths | 3 recipes or guest orders |
 | Parcel Trail | Quýt | Collect a parcel and walk it to the library, bakery or greenhouse named in the address | 3 deliveries |
 | Cloud Hop | Mây | Six sequential courses with double jumps, wind, drifting rings and optional feathers | 6 rings per course |
-| Colour Studio | Dâu | Combine two primary/white paint pots into a requested colour; see the mix on a flower sculpture | 4 mixes |
-| Bridge Builder | Sỏi | Rotate nine path tiles, connect reciprocal edges from entrance to exit, and send a boat | 3 layouts |
+| Colour Studio | Dâu | Measure 2/3/4 paint drops by difficulty to match a requested shade; repeated pigments matter | 4 mixes |
+| Bridge Builder | Sỏi | Rotate nine path tiles, connect reciprocal edges from entrance to exit, and send a boat | 3 layouts per run |
+
+Fresh advanced Bridge runs use topology v2: a seeded permutation of authored
+routes and bank reflections gives three distinct layouts, with off-route decoys.
+Adventure has canonical 5–6 tile routes and Challenge 7–9; alternative valid
+reciprocal routes also work. Move budgets come from a known solvable route plus
+the existing allowance, while Practice and old checkpoints keep their exact v1
+layouts/budgets. An unsupported saved version stays intact and can be downloaded
+before explicitly starting a replacement. See [ADR 024](decisions/024-bridge-topology-versions.md).
 
 Each session starts with three hearts. Mistakes show specific feedback and remove one heart. A successful round awards 100 points. Practice has no countdown and adds 25 points per remaining heart on completion. Advanced modes account for assistance in result stars and have game-specific countdowns; Cloud Hop uses route goals without a countdown. See [GAMEPLAY-FOUNDATION](GAMEPLAY-FOUNDATION.md) for the current difficulty contract. A finished game unlocks its host's friendship memory. Replays can improve personal scores and stars. There is no payment, energy gate or account-currency reward.
 
