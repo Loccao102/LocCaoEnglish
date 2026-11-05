@@ -93,7 +93,7 @@ workflow chỉ để né lỗi. Khi một kiểm tra bị môi trường chặn,
 chứng, báo rõ phần chưa xác minh; không thử vượt chính sách môi trường.
 
 [Recovery UI feedback](.github/workflows/recovery-ui.yml) chạy thêm các ca đã có
-cho đăng nhập, Content Studio và Colour Studio khi những file liên quan đổi.
+cho đăng nhập, khóa học, Content Studio và Colour Studio khi những file liên quan đổi.
 Lượt nhanh dùng stack CI riêng, dừng ở lỗi đầu tiên và giữ strict flaky gate.
 Đây là phản hồi sớm; vẫn phải chờ đủ ma trận đầy đủ cho thay đổi runtime.
 Workflow đầy đủ cũng nhóm theo PR/ref để dừng revision đã bị thay thế; kiểm tra

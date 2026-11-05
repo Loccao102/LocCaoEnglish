@@ -97,6 +97,13 @@ only while signed in and captures the same owner for read/write operations.
 Catalog browsing remains available if progress fails. No schema/save migration,
 guest import or enrollment reset. See [ADR 018](decisions/018-course-owner-recovery.md).
 
+Course members/metadata reflect currently published lessons. Progress counts
+visible completions and visible total in one storage snapshot; hiding a lesson
+keeps its bookmark for republish and cannot inflate the percentage above 100%.
+The legacy average remains a self-reported visible-started-bookmark field, not
+checked evidence. Empty catalogs return `lessons: []`; the browser also handles
+the older empty `null` representation. Invalid catalog shapes remain errors.
+
 ## Learner state
 
 - `GET /v1/dashboard`

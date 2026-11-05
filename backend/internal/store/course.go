@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sort"
 	"sync"
 	"time"
 
@@ -34,12 +33,12 @@ func (s *Store) EnsureCourses(ctx context.Context) error {
 
 func (s *Store) ListCourses(ctx context.Context)([]model.Course,error){
 	if s.db!=nil{rows,err:=s.db.QueryContext(ctx,`SELECT slug FROM courses WHERE status='published' ORDER BY updated_at DESC`);if err!=nil{return nil,err};defer rows.Close();var slugs []string;for rows.Next(){var slug string;if err:=rows.Scan(&slug);err!=nil{return nil,err};slugs=append(slugs,slug)};out:=make([]model.Course,0,len(slugs));for _,slug:=range slugs{c,err:=s.GetCourse(ctx,slug);if err!=nil{return nil,err};out=append(out,c)};return out,rows.Err()}
-	state:=s.courseMemory();state.mu.RLock();defer state.mu.RUnlock();out:=make([]model.Course,0,len(state.courses));for _,c:=range state.courses{if c.Status=="published"{out=append(out,c)}};sort.Slice(out,func(i,j int)bool{return out[i].UpdatedAt.After(out[j].UpdatedAt)});return out,nil
+	return s.publishedMemoryCourses(),nil
 }
 
 func (s *Store) GetCourse(ctx context.Context,slug string)(model.Course,error){
-	if s.db!=nil{var c model.Course;err:=s.db.QueryRowContext(ctx,`SELECT id,slug,title,description,level,status,created_at,updated_at FROM courses WHERE slug=$1 AND status='published'`,slug).Scan(&c.ID,&c.Slug,&c.Title,&c.Description,&c.Level,&c.Status,&c.CreatedAt,&c.UpdatedAt);if errors.Is(err,sql.ErrNoRows){return c,ErrNotFound};if err!=nil{return c,err};rows,err:=s.db.QueryContext(ctx,`SELECT l.slug,l.title,l.skill,l.level,cl.position,l.estimated_mins FROM course_lessons cl JOIN lessons l ON l.id=cl.lesson_id WHERE cl.course_id=$1 AND l.status='published' ORDER BY cl.position`,c.ID);if err!=nil{return c,err};defer rows.Close();for rows.Next(){var item model.CourseLesson;if err:=rows.Scan(&item.Slug,&item.Title,&item.Skill,&item.Level,&item.Position,&item.EstimatedMins);err!=nil{return c,err};c.Lessons=append(c.Lessons,item)};return c,rows.Err()}
-	state:=s.courseMemory();state.mu.RLock();defer state.mu.RUnlock();c,ok:=state.courses[slug];if!ok||c.Status!="published"{return model.Course{},ErrNotFound};return c,nil
+	if s.db!=nil{c:=model.Course{Lessons:[]model.CourseLesson{}};err:=s.db.QueryRowContext(ctx,`SELECT id,slug,title,description,level,status,created_at,updated_at FROM courses WHERE slug=$1 AND status='published'`,slug).Scan(&c.ID,&c.Slug,&c.Title,&c.Description,&c.Level,&c.Status,&c.CreatedAt,&c.UpdatedAt);if errors.Is(err,sql.ErrNoRows){return c,ErrNotFound};if err!=nil{return c,err};rows,err:=s.db.QueryContext(ctx,`SELECT l.slug,l.title,l.skill,l.level,cl.position,l.estimated_mins FROM course_lessons cl JOIN lessons l ON l.id=cl.lesson_id WHERE cl.course_id=$1 AND l.status='published' ORDER BY cl.position`,c.ID);if err!=nil{return c,err};defer rows.Close();for rows.Next(){var item model.CourseLesson;if err:=rows.Scan(&item.Slug,&item.Title,&item.Skill,&item.Level,&item.Position,&item.EstimatedMins);err!=nil{return c,err};c.Lessons=append(c.Lessons,item)};return c,rows.Err()}
+	return s.publishedMemoryCourse(slug)
 }
 
 func (s *Store) EnrollCourse(ctx context.Context,userID,slug string)(model.CourseProgress,error){
@@ -48,10 +47,38 @@ func (s *Store) EnrollCourse(ctx context.Context,userID,slug string)(model.Cours
 	state:=s.courseMemory();state.mu.Lock();if state.enrolled[userID]==nil{state.enrolled[userID]=map[string]bool{}};state.enrolled[userID][c.ID]=true;state.mu.Unlock();return s.CourseProgress(ctx,userID,slug)
 }
 
-func (s *Store) CourseProgress(ctx context.Context,userID,slug string)(model.CourseProgress,error){
-	c,err:=s.GetCourse(ctx,slug);if err!=nil{return model.CourseProgress{},err};p:=model.CourseProgress{CourseID:c.ID,CourseSlug:c.Slug,TotalLessons:len(c.Lessons)}
-	if s.db!=nil{_ = s.db.QueryRowContext(ctx,`SELECT EXISTS(SELECT 1 FROM course_enrollments WHERE user_id=$1 AND course_id=$2)`,userID,c.ID).Scan(&p.Enrolled);var avg sql.NullFloat64;err=s.db.QueryRowContext(ctx,`SELECT COUNT(*) FILTER(WHERE lp.total_exercises>0 AND lp.completed_exercises>=lp.total_exercises),AVG(lp.last_score) FILTER(WHERE lp.completed_exercises>0) FROM course_lessons cl LEFT JOIN lesson_progress lp ON lp.lesson_id=cl.lesson_id AND lp.user_id=$2 WHERE cl.course_id=$1`,c.ID,userID).Scan(&p.CompletedLessons,&avg);if err!=nil{return p,err};if avg.Valid{p.AverageScore=avg.Float64};if p.TotalLessons>0{p.Percent=p.CompletedLessons*100/p.TotalLessons};return p,nil}
-	state:=s.courseMemory();state.mu.RLock();p.Enrolled=state.enrolled[userID][c.ID];state.mu.RUnlock();content:=s.contentMemory();content.mu.RLock();progress:=content.progress[userID];for _,lesson:=range c.Lessons{for lessonID,item:=range progress{_ = lessonID;if item.TotalExercises>0&&item.CompletedExercises>=item.TotalExercises{if source,ok:=content.lessons[lesson.Slug];ok&&source.ID==item.LessonID{p.CompletedLessons++;p.AverageScore+=item.LastScore}}}};content.mu.RUnlock();if p.CompletedLessons>0{p.AverageScore/=float64(p.CompletedLessons)};if p.TotalLessons>0{p.Percent=p.CompletedLessons*100/p.TotalLessons};return p,nil
+func (s *Store) CourseProgress(ctx context.Context, userID, slug string) (model.CourseProgress, error) {
+	if s.db == nil {
+		return s.memoryCourseProgress(userID, slug)
+	}
+	course, err := s.GetCourse(ctx, slug)
+	if err != nil {
+		return model.CourseProgress{}, err
+	}
+	p := model.CourseProgress{CourseID: course.ID, CourseSlug: course.Slug}
+	err = s.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM course_enrollments WHERE user_id=$1 AND course_id=$2)`, userID, course.ID).Scan(&p.Enrolled)
+	if err != nil {
+		return p, err
+	}
+	var average sql.NullFloat64
+	// The numerator and denominator must use one published-catalog snapshot.
+	// Hidden lesson bookmarks stay stored for a later republish.
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(*),
+ COUNT(*) FILTER(WHERE lp.total_exercises>0 AND lp.completed_exercises>=lp.total_exercises),
+ AVG(lp.last_score) FILTER(WHERE lp.completed_exercises>0)
+ FROM course_lessons cl JOIN lessons l ON l.id=cl.lesson_id AND l.status='published'
+ LEFT JOIN lesson_progress lp ON lp.lesson_id=cl.lesson_id AND lp.user_id=$2
+ WHERE cl.course_id=$1`, course.ID, userID).Scan(&p.TotalLessons, &p.CompletedLessons, &average)
+	if err != nil {
+		return p, err
+	}
+	if average.Valid {
+		p.AverageScore = average.Float64
+	}
+	if p.TotalLessons > 0 {
+		p.Percent = p.CompletedLessons * 100 / p.TotalLessons
+	}
+	return p, nil
 }
 
 const courseSchemaSQL=`

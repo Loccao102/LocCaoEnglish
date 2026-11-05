@@ -7,6 +7,11 @@ on:
       - components/AuthPanel.tsx
       - app/account/page.tsx
       - lib/account-auth.ts
+      - components/CourseDetail.tsx
+      - components/CourseDetail.module.css
+      - lib/platform.ts
+      - backend/internal/store/course*.go
+      - tests/e2e/course-owner.spec.ts
       - components/ContentStudio.tsx
       - components/ContentStudio.module.css
       - lib/content-admin.ts
@@ -52,8 +57,8 @@ jobs:
           done
           docker compose logs web api
           exit 1
-      - name: Check current authentication, content and colour interactions
-        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts --max-failures=1
+      - name: Check current authentication, course, content and colour interactions
+        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/course-owner.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts --max-failures=1
         env:
           E2E_BASE_URL: http://127.0.0.1:3000
       - uses: actions/upload-artifact@v4
@@ -69,6 +74,7 @@ jobs:
           path: |
             .cache/colour-guide-*.png
             .cache/content-owner-*.png
+            .cache/course-owner-*.png
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

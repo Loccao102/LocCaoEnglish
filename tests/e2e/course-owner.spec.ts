@@ -70,6 +70,31 @@ test("guests browse course lessons without demo progress or enrollment writes", 
   expect(seen.reads).toEqual([]); expect(seen.writes).toEqual([]);
 });
 
+test("empty published courses accept legacy null lists without masking an invalid catalog", async ({ page }) => {
+  const seen = await fixtures(page);
+  let shape: "empty" | "null" | "invalid" = "empty";
+  await page.route(`**/v1/courses/${slug}`, route => route.fulfill({ json: { ...course, lessons: shape === "empty" ? [] : shape === "null" ? null : "invalid" } }));
+  await open(page, "");
+  for (const current of ["empty", "null"] as const) {
+    shape = current; await page.reload();
+    const lessons = page.getByRole("region", { name: "Course lessons", exact: true });
+    await expect(lessons).toContainText("No published lessons in this course yet");
+    await expect(lessons.getByRole("link")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Sign in for course progress" })).toBeVisible();
+    for (const height of [551, 844]) {
+      await page.setViewportSize({ width: 390, height });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      if (current === "empty") await page.screenshot({ path: `.cache/course-owner-empty-${height}.png`, fullPage: true });
+    }
+  }
+  shape = "invalid"; await page.reload();
+  await expect(page.getByText("This course could not load.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Course lessons" })).toHaveCount(0);
+  shape = "empty"; await page.getByRole("button", { name: "Retry course", exact: true }).click();
+  await expect(page.getByText("No published lessons in this course yet.", { exact: true })).toBeVisible();
+  expect(seen.reads).toEqual([]); expect(seen.writes).toEqual([]);
+});
+
 test("course progress hides the old account and rejects late errors after logout", async ({ page }) => {
   const seen = await fixtures(page); await open(page, first);
   await expect(panel(page)).toContainText("2/3");

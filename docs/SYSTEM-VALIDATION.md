@@ -2,6 +2,27 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## Published course catalog and coherent progress — 2026-11-05
+
+CORE-006, branch `codex/core006-course-catalog`, base `9dc252c`; ADR 018.
+Source review found PostgreSQL's denominator filtered published lessons while
+its numerator included hidden bookmarks. Memory used stale seeded lesson metadata.
+Both projections now use current published members; counts share one SQL snapshot
+or memory read lock. Bookmarks survive unpublish/republish, owner isolation and
+idempotent enrollment remain. Empty catalogs return [], with explicit browser
+copy and safe compatibility for the old null list. Invalid shapes are not an
+empty successful response. No persistence migration, rewards or history rewrites.
+
+Memory/PostgreSQL regressions use isolated owned fixtures, sequential visibility
+changes, refreshed metadata, owner/enrollment, returned-slice isolation, concurrent
+publication/count reads and a second PostgreSQL store after republish. Existing
+rows and user data are not reset; dedicated loccao_system_test is mandatory.
+The browser's new catalog-empty/null/invalid/retry case uses labelled fixtures,
+in addition to the existing genuine-account enrollment/reload checks. Phone
+captures are retained. The helper now runs 27 existing/new focused cases; full
+252-case E2E and six jobs remain required. No local tests/build/services, only
+source/diff review and Go formatting; all execution pending GitHub Actions.
+
 ## GitHub required-check enforcement — 2026-11-05
 
 GOV-002. The reviewed JSON request was applied through GitHub REST using existing

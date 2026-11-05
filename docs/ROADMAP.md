@@ -707,6 +707,17 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
+### Khóa học theo catalog đang công khai (`in_review`, 2026-11-05)
+
+Owner/task: Codex, `codex/core006-course-catalog`, nền `9dc252c`.
+Rà nguồn xác nhận PostgreSQL dùng total của bài published nhưng đếm cả bookmark
+của bài đã ẩn, có thể vượt 100%; memory giữ catalog seed cũ sau sửa/unpublish.
+Đồng bộ catalog/metadata và đếm published trong cùng snapshot đọc, giữ bookmark
+khi ẩn và phục hồi khi publish lại. Course không còn bài trả mảng rỗng và UI có
+thông báo, tương thích API cũ trả null; lỗi catalog không bị coi là rỗng hợp lệ.
+Không đổi API shape/schema, XP hay xóa lịch sử. Nghiệm thu memory/PG, owner,
+publish/unpublish/republish, catalog rỗng và browser qua GitHub Actions.
+
 ### Ý định đăng nhập và phản hồi đến muộn (`in_progress`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-auth-intent`, nền `37234f8`.
