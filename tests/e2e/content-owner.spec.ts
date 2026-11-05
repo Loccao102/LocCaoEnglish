@@ -16,14 +16,14 @@ async function openStudio(page: Page, token: string, role: "teacher" | "admin" |
 test("guest sees sign-in boundary", async ({ page }) => {
   const reads: string[] = []; page.on("request", request => { if (request.url().includes("/v1/admin/lessons")) reads.push(request.url()); });
   await page.goto("/admin/content");
-  await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Sign in with a teacher or admin account");
   expect(reads).toEqual([]);
 });
 
 test("learner cannot open teacher content", async ({ page }) => {
   const reads: string[] = []; page.on("request", request => { if (request.url().includes("/v1/admin/lessons")) reads.push(request.url()); });
   await openStudio(page, "learner-b", "learner");
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await expect(page.getByText("Teacher A draft")).toHaveCount(0);
   expect(reads).toEqual([]);
 });
@@ -45,7 +45,7 @@ test("late teacher response cannot repopulate after account switch", async ({ pa
   await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
   release();
   await navigation;
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await expect(page.getByText("Teacher A draft")).toHaveCount(0);
 });
 
@@ -59,10 +59,10 @@ test("loaded teacher content is cleared for learner and logout", async ({ page }
   await page.goto("/admin/content");
   await expect(page.getByText("Teacher A draft")).toBeVisible();
   await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await expect(page.getByText("Teacher A draft")).toHaveCount(0);
   await page.evaluate(() => { localStorage.removeItem("loccao_token"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
-  await expect(page.getByRole("alert")).toContainText("Sign in with a teacher or admin account");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Sign in with a teacher or admin account");
   await expect(page.getByText("Teacher A draft")).toHaveCount(0);
 });
 
@@ -85,7 +85,7 @@ test("save sends the captured owner token", async ({ page }) => {
   await expect.poll(() => seen).toBe("Bearer teacher-a");
   await page.evaluate(() => { localStorage.setItem("loccao_token", "learner-b"); window.dispatchEvent(new StorageEvent("storage", { key: "loccao_token" })); });
   release();
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await expect(page.getByText("Saved title")).toHaveCount(0);
 });
 
@@ -111,7 +111,7 @@ test("unauthorized list failure offers an explicit retry", async ({ page }) => {
     return route.fulfill(attempts === 1 ? { status: 401, contentType: "application/json", body: JSON.stringify({ error: "sign in required" }) } : { status: 200, contentType: "application/json", body: JSON.stringify({ items: [lesson] }) });
   });
   await page.goto("/admin/content");
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await page.getByRole("button", { name: "Retry Content Studio" }).click();
   await expect(page.getByText("Teacher A draft")).toBeVisible();
 });
@@ -131,7 +131,7 @@ test("an unconfirmed save keeps edits through list refresh and hides them on acc
   await page.getByRole("button", { name: "Refresh lesson list" }).click();
   await expect(page.getByLabel("Title", { exact: true })).toHaveValue("My pending edit");
   expired = true; await page.getByRole("button", { name: "Save lesson", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Teacher/admin role required");
+  await expect(page.getByRole("alert", { name: "Content Studio access", exact: true })).toContainText("Teacher/admin role required");
   await expect(page.getByLabel("Title", { exact: true })).toHaveCount(0);
 });
 

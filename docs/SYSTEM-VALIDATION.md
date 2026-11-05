@@ -69,6 +69,14 @@ selector scope without weakening the intended behavior. Existing HTTP/role
 checks remain. No local build/test/service execution, per user request; final-head
 CI and image inspection pending. Status: in_review, not deployed.
 
+CI 195 on `c5b9811` passed five jobs but E2E reported **7 failed, 235 passed
+(40.4m)**. All seven failures were strict locator collisions: an unscoped
+`getByRole('alert')` matched both the intended access notice and Next's route
+announcer. The access notices now have a stable accessible name; those assertions
+target that named alert. Expected messages and all ownership/privacy assertions
+are retained. This is not an accepted run and no failed head is merged; the
+corrected feature and all dependent combinations require fresh CI.
+
 ## Review schedule receipts and recovery — 2026-11-05
 
 CORE-006, branch `codex/core006-review-owner`, based on combined `3230a73`.
