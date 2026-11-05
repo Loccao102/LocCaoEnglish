@@ -91,6 +91,11 @@ python -m unittest discover -s tests -v
 CI chạy ma trận đầy đủ trong [workflow](.github/workflows/ci.yml). Không chỉnh
 workflow chỉ để né lỗi. Khi một kiểm tra bị môi trường chặn, giữ nguyên lỗi/bằng
 chứng, báo rõ phần chưa xác minh; không thử vượt chính sách môi trường.
+
+[Recovery UI feedback](.github/workflows/recovery-ui.yml) chạy thêm các ca đã có
+cho đăng nhập, Content Studio và Colour Studio khi những file liên quan đổi.
+Lượt nhanh dùng stack CI riêng, dừng ở lỗi đầu tiên và giữ strict flaky gate.
+Đây là phản hồi sớm; vẫn phải chờ đủ ma trận đầy đủ cho thay đổi runtime.
 E2E trên CI dùng `failOnFlakyTests`: một test chỉ qua nhờ retry vẫn làm job lỗi
 và giữ failure artifacts. Không coi job xanh cũ có flaky là nghiệm thu sạch.
 

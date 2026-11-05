@@ -1,0 +1,76 @@
+name: Recovery UI feedback
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/recovery-ui.yml
+      - components/AuthPanel.tsx
+      - app/account/page.tsx
+      - lib/account-auth.ts
+      - components/ContentStudio.tsx
+      - components/ContentStudio.module.css
+      - lib/content-admin.ts
+      - components/game/ColourMixGuide.tsx
+      - components/game/ColourMixGuide.module.css
+      - components/game/FairChallengeStatus.tsx
+      - components/game/FestivalGame.tsx
+      - tests/e2e/auth-intent.spec.ts
+      - tests/e2e/content-owner.spec.ts
+      - tests/e2e/colour-guide.spec.ts
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-ui-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  recovery-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build and start the disposable application stack
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose up -d --build; then exit 0; fi
+            docker compose down -v --remove-orphans || true
+            sleep $((attempt * 5))
+          done
+          exit 1
+      - name: Wait for web
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs web api
+          exit 1
+      - name: Check current authentication, content and colour interactions
+        run: npm run test:e2e -- tests/e2e/auth-intent.spec.ts tests/e2e/content-owner.spec.ts tests/e2e/colour-guide.spec.ts --max-failures=1
+        env:
+          E2E_BASE_URL: http://127.0.0.1:3000
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: recovery-ui-failure-evidence
+          path: test-results/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-ui-mobile-review
+          path: |
+            .cache/colour-guide-*.png
+            .cache/content-owner-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - if: always()
+        run: docker compose down -v

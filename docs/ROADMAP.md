@@ -914,6 +914,12 @@ Rà UI chỉ đọc mở được settings/form, chưa xác nhận quyền ghi h
 không có thao tác ghi administration; chưa tạo probe hay thử bypass. Mục còn thiếu
 cấu hình thật và bằng chứng chặn merge, không done từ proposal hoặc CI xanh.
 
+GitHub-only feedback: `codex/github-recovery-ui-check` bổ sung workflow riêng
+chạy 19 ca đăng nhập/soạn bài/pha màu trên stack dùng một lần để phát hiện lỗi
+sớm. Bộ sáu jobs/full E2E hiện có giữ nguyên và vẫn cần trước tích hợp runtime.
+Workflow không áp dụng policy, không thay required check names hay hạ assertion;
+thất bại đầu tiên dừng lượt nhanh để sửa, flaky vẫn làm lỗi. Chưa nghiệm thu.
+
 Đối chiếu lại 2026-11-05, main `54273c3`: branch API vẫn `protected:false`,
 required checks off và rulesets `[]`. Connector GitHub hiện chỉ có GET cho
 branch protection/rulesets; máy không có CLI GitHub được cấu hình để quản trị.
