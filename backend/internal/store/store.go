@@ -372,6 +372,7 @@ func (s *Store) DueReviewQueue(ctx context.Context, userID string, limit int) ([
 			if err := rows.Scan(&r.ItemKey, &r.Kind, &r.Prompt, &r.Answer, &r.DueAt, &r.IntervalDays, &r.Ease, &r.Failures); err != nil {
 				return nil, err
 			}
+			r.DueAt = r.DueAt.UTC()
 			out = append(out, r)
 		}
 		return out, rows.Err()
@@ -382,6 +383,7 @@ func (s *Store) DueReviewQueue(ctx context.Context, userID string, limit int) ([
 	var out []model.ReviewItem
 	for _, r := range s.mem.reviews[userID] {
 		if !r.DueAt.After(now) {
+			r.DueAt = r.DueAt.UTC()
 			out = append(out, r)
 		}
 	}

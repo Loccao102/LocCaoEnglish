@@ -59,6 +59,11 @@ non-idempotent grade. The API ships before the web client; rollback keeps v1
 receipt reads and scheduling available, while clients must continue using
 request IDs for writes.
 
+Versioned queue timestamps and receipts use UTC, with newly scheduled times
+at PostgreSQL microsecond precision so the first reply and retries agree.
+Retain the receipt-aware review UI on rollback as well as the API: the legacy
+browser swallowed errors and must not be restored as a fallback scheduling flow.
+
 ## Consequences
 
 Review scheduling can be safely retried after a timeout and the UI can recover

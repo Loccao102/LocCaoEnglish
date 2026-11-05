@@ -43,6 +43,7 @@ func sameReviewScheduleRequest(receipt model.ReviewScheduleReceipt, itemKey stri
 }
 
 func (s *Store) ScheduleReview(ctx context.Context, userID, itemKey string, in ReviewScheduleRequest) (model.ReviewScheduleReceipt, error) {
+	in.ExpectedDueAt = in.ExpectedDueAt.UTC()
 	if err := validateReviewScheduleRequest(in); err != nil {
 		return model.ReviewScheduleReceipt{}, err
 	}
@@ -200,5 +201,8 @@ func scanReviewScheduleReceipt(row reviewScheduleScanner) (model.ReviewScheduleR
 	} else if err != nil {
 		return model.ReviewScheduleReceipt{}, false, err
 	}
+	receipt.ExpectedDueAt = receipt.ExpectedDueAt.UTC()
+	receipt.ScheduledAt = receipt.ScheduledAt.UTC()
+	receipt.DueAt = receipt.DueAt.UTC()
 	return receipt, true, nil
 }

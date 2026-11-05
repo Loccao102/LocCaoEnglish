@@ -64,7 +64,9 @@ func TestReviewScheduleReceiptIsIdempotentAndOwnerScoped(t *testing.T) {
 			t.Fatalf("seed review: %v %#v", err, before)
 		}
 		in := ReviewScheduleRequest{RequestID: "receipt-request-1", Quality: 5, RulesVersion: ReviewScheduleRulesVersion, ExpectedDueAt: before[0].DueAt}
-		first, err := s.ScheduleReview(ctx, u.ID, "receipt-item", in)
+		offsetInput := in
+		offsetInput.ExpectedDueAt = in.ExpectedDueAt.In(time.FixedZone("UTC+7", 7*60*60))
+		first, err := s.ScheduleReview(ctx, u.ID, "receipt-item", offsetInput)
 		if err != nil {
 			t.Fatal(err)
 		}

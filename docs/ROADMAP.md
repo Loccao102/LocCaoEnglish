@@ -689,7 +689,7 @@ lại bình thường, không nhầm lẫn chống thưởng lặp với cấm l
 
 ## CORE-006 — Khôi phục và tương thích
 
-### Khôi phục lịch ôn và owner của Review queue (`in_progress`, 2026-11-05)
+### Khôi phục lịch ôn và owner của Review queue (`in_review`, 2026-11-05)
 
 Owner/task: Codex, branch `codex/core006-review-owner` / `codex/core006-review-receipts`,
 nền integration `3230a73`. `/review` đang bỏ lỗi ghi lịch, xóa câu khỏi UI rồi báo

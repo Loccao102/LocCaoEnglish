@@ -50,7 +50,7 @@ export default function useReviewSession(token: string) {
   function failure(reason: unknown, message: string) {
     const auth = reason instanceof APIError && (reason.status === 401 || reason.status === 403);
     patch({ phase: reference.current ? "pending" : "error", needsSignIn: auth,
-      missing: reason instanceof APIError && reason.status === 404,
+      missing: false, outdated: false,
       error: auth ? "Sign in again to confirm this saved response. Its recovery reference is kept." : message });
   }
   async function read(seq: number) {
@@ -77,6 +77,11 @@ export default function useReviewSession(token: string) {
       try {
         const receipt = await fetchReviewGrade(pending.requestId, token);
         if (!current(seq)) return;
+        if (!matches(receipt, pending)) {
+          corrupt.current = true;
+          patch({ phase: "corrupt", error: "The local review reference differs from the saved response. It is kept; no new schedule has been sent. Leave the local reference to reload your current queue." });
+          return;
+        }
         confirm(receipt, pending);
       } catch (reason) {
         if (!(reason instanceof APIError && reason.status === 404)) throw reason;
@@ -121,9 +126,14 @@ export default function useReviewSession(token: string) {
       const receipt = await submitReviewGrade({ requestId, itemKey, quality, expectedDueAt, rulesVersion }, token);
       if (current(seq)) confirm(receipt, pending);
     } catch (reason) {
-      if (current(seq)) failure(reason, reason instanceof APIError && reason.status === 404
-        ? "This item is no longer available. Refresh saved status before leaving its recovery reference."
-        : "The scheduling reply was interrupted. This response is still waiting for confirmation; retry keeps the same identity and rating.");
+      if (current(seq)) {
+        failure(reason, reason instanceof APIError && reason.status === 404
+          ? "This item is no longer available. Refresh saved status before leaving its recovery reference."
+          : reason instanceof APIError && reason.status === 409
+            ? "This review snapshot or saved response has changed. Refresh the saved queue to resolve it before rating again."
+            : "The scheduling reply was interrupted. This response is still waiting for confirmation; retry keeps the same identity and rating.");
+        if (reason instanceof APIError && reason.status === 409) { supported.current = false; patch({ canSchedule: false }); }
+      }
     } finally { if (current(seq)) { locked.current = false; setBusy(false); } }
   }
   function grade(quality: number) {
