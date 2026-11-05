@@ -555,6 +555,23 @@ mức cần thiết. Áp dụng cho Shadow Me, TravelMission/Airport Boss và IE
 
 ## CORE-005 — Reward và competitive integrity
 
+### Báo cáo giáo viên từ checked practice (`in_progress`, 2026-11-05)
+
+Owner/task: Codex, branch `codex/core005-teacher-practice` / `codex/core005-teacher-ui`,
+nền main `54273c3`. Route `/admin/analytics` vẫn tính accuracy từ bảng attempts
+trộn legacy và hiển thị confidence khởi tạo như “Skill health”. Thêm projection
+chỉ đọc `teacher-practice.v1`: tổng lượt hoàn tất/câu đúng/người học hoạt động
+trong bảy ngày, lọc shared receipt đúng activity/rules/skill và loại demo/guest,
+legacy/story/IELTS. Fresh replay là công luyện mới; exact retry không thêm lượt.
+Tách guided practice với transcript matching, không suy mastery/phát âm/CEFR.
+Giữ trường cũ tương thích, UI chỉ hiển thị method mới; lesson counts được ghi rõ
+là learner reports, không hiển thị score/confidence cũ thành kết quả đã kiểm tra.
+Đổi tài khoản/logout hoặc phản hồi cũ phải ẩn báo cáo ngay; có retry/guest/role
+và fallback API cũ an toàn. Không thay schema, save, XP hay chính sách cấp quyền.
+Nghiệm thu memory/PG/race/HTTP role, browser tài khoản thật + render lifecycle,
+mobile 390×551/844 và đủ CI trên head cuối. Chỉ kiểm tra trên GitHub Actions
+theo yêu cầu người dùng; chưa nghiệm thu. Contract: ADR 017.
+
 ### Đã nghiệm thu — Ledger Word Network/Wordsmith và giữ quyền cũ (`done`, xác nhận 2026-11-03)
 
 Owner/task: Codex, branch `codex/core005-vocabulary-grants`, nền main `e8d9371`.

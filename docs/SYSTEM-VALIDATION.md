@@ -29,6 +29,25 @@ receipt/actions, with the pre-existing clipped hero tracked separately above.
 No new local execution and no production deployment. Whole-core completion,
 provider calibration or human playtesting is not implied by these CI results.
 
+## Teacher checked-practice analytics — 2026-11-05
+
+CORE-005, branches `codex/core005-teacher-practice` and `codex/core005-teacher-ui`,
+base main `54273c3`. The teacher dashboard previously rendered mixed legacy
+accuracy and seeded confidence as current skill health. ADR 017 adds read-only
+seven-day checked-practice aggregates and preserves legacy fields for compatibility.
+The UI uses only the versioned aggregate, separates transcript matching and
+reported lesson activity, and captures identity for both role/report reads.
+Account switches, logout, old responses, unavailability and old API methods
+must not expose stale or invented results. No schema/reward/save policy change.
+
+Coverage is being added for memory/PostgreSQL eligibility and time boundaries,
+exact retries, demo/legacy exclusion, HTTP teacher/admin roles, a real teacher
+browser/API round, owner/lifecycle render fixtures and 390×551/844 captures.
+Only the disposable E2E container configures its synthetic teacher email; no
+production role setting changes. Local work is source/diff review only, per
+the user's instruction. Status: in_review pending final-head GitHub Actions,
+independent review and visual inspection; no local build/browser pass claimed.
+
 ## Versioned mission paraphrases — 2026-11-03
 
 CORE-004, branch codex/core004-mission-paraphrases, based on PR #28 runtime
