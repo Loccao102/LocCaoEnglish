@@ -153,8 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [frontend, backend, ai-service, compose]
     env:
-      # Only this disposable CI stack bootstraps the analytics test teacher.
-      TEACHER_EMAILS: e2e-analytics-teacher@example.test
+      # A trusted operator step grants this disposable account by its returned ID.
       E2E_TEACHER_EMAIL: e2e-analytics-teacher@example.test
     steps:
       - uses: actions/checkout@v4
@@ -200,6 +199,10 @@ jobs:
             })
             .catch(error => { console.error(error); process.exit(1); });
           NODE
+      - name: Prepare dedicated teacher through the operator command
+        run: node scripts/setup-e2e-teacher.mjs
+        env:
+          E2E_API_URL: http://127.0.0.1:8080
       - run: npm run test:e2e
         env:
           E2E_BASE_URL: http://127.0.0.1:3000

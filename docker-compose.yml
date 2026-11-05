@@ -24,8 +24,6 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       TRUST_PROXY: ${TRUST_PROXY:-false}
       ALLOW_ANONYMOUS_DEMO: ${ALLOW_ANONYMOUS_DEMO:-true}
-      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
-      TEACHER_EMAILS: ${TEACHER_EMAILS:-}
     depends_on:
       postgres: {condition: service_healthy}
       redis: {condition: service_healthy}

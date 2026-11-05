@@ -154,11 +154,11 @@ test("teacher report distinguishes transcript practice and remains readable on p
 
 test("a real teacher reads completed practice and exact retry adds no checked round", async ({ page, request }) => {
   const teacherEmail = process.env.E2E_TEACHER_EMAIL || "e2e-analytics-teacher@example.test";
-  const teacher = await request.post(`${API}/v1/auth/register`, { data: { email: teacherEmail, password: "SunlitTest123!", displayName: "CI analytics teacher" } });
+  const teacher = await request.post(`${API}/v1/auth/login`, { data: { email: teacherEmail, password: "SunlitTest123!" } });
   expect(teacher.ok(), await teacher.text()).toBe(true);
   const { token } = await teacher.json(), headers = { Authorization: `Bearer ${token}` };
   const me = await request.get(`${API}/v1/me`, { headers });
-  expect((await me.json()).role, "E2E stack must configure its isolated teacher email").toBe("teacher");
+  expect((await me.json()).role, "CI must grant the dedicated teacher by account ID before E2E").toBe("teacher");
   const learner = await request.post(`${API}/v1/auth/register`, { data: { email: `analytics-learner-${randomUUID()}@example.test`, password: "SunlitTest123!", displayName: "CI practice learner" } });
   expect(learner.ok(), await learner.text()).toBe(true);
   const student = await learner.json(), studentHeaders = { Authorization: `Bearer ${student.token}` };

@@ -14,7 +14,12 @@ do not assume every endpoint accepts anonymous requests. Registered users send
 
 ## Content Studio account boundary
 
-Admin lesson reads/writes retain their existing teacher/admin authorization.
+Admin lesson reads/writes require a stored teacher/admin assignment. Public
+registration always starts as learner, even if its unverified email appears in
+obsolete ADMIN_EMAILS/TEACHER_EMAILS configuration. Privileged roles are assigned
+to an independently verified existing user ID through the private operator
+command, never through public registration; existing role rows are preserved.
+See [ADR 022](decisions/022-explicit-account-roles.md) for rollout and revocation.
 The browser now captures its token for role, list, save and delete requests and
 replaces the editor tree when identity changes. A learner/guest does not request
 the admin catalog. Late reads/writes cannot repopulate another account's form.
