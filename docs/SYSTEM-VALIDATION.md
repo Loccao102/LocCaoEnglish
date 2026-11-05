@@ -2,6 +2,26 @@
 
 Implementation was completed before running the suites below. Failures found during validation were fixed and the affected suites were rerun.
 
+## CORE-005 software boundary acceptance — 2026-11-05
+
+Branch `codex/roadmap-core005-acceptance`; active-route audit on source `dd0f05f`,
+with reward behavior already merged in main `c601292` through PR #35. That merge
+preserves source `651c946` and passed all six required jobs in
+[CI 201](https://github.com/Loccao102/LocCaoEnglish/actions/runs/41970949503):
+242 E2E (44.3m), PostgreSQL/race/vet, build/assets, AI, Compose and integration.
+The Adventure actual-answer/provenance fix and memory/PostgreSQL legacy policies
+are included. [REWARD-BOUNDARY-AUDIT](REWARD-BOUNDARY-AUDIT.md) maps every active
+reward/score ingress and the relevant existing regressions to CORE-005 criteria.
+
+The gate closes arbitrary client score/accuracy, uses atomic claim/receipt
+ledgers and derives checked rank only from eligible shared practice. Legacy,
+Fair keepsakes, story rewards, self-reported lessons and provider estimates keep
+their separate meanings. Internal obsolete score helpers are unreachable from
+the active HTTP route, which remains retired; they do not establish a validated
+competition mode. No rerun is claimed for this documentation-only audit.
+No production deployment, independent human approval, real provider calibration
+or completed CORE-004/006/007 is inferred. SEC-002 new-head checks remain separate.
+
 ## SEC-002 explicit account roles — 2026-11-05
 
 Branch `codex/sec002-explicit-roles`, parent course revision `2c2550a`.
@@ -98,7 +118,10 @@ The widget now links separate skill results without using that legacy field;
 the user's target remains separately labelled. No overall calculation, history,
 schema, API or provider change. The existing old-dashboard browser regression
 now injects 8.5, verifies it is not shown while target 7.0 remains, and captures
-390×551/844. Source/diff review only locally; final-head CI/images pending.
+390×551/844. Those two CI 210 images were inspected and show the separate skill
+label/target without 8.5. CI 210 had one unrelated stale Reading label assertion
+failure, so images do not establish full-suite acceptance. Revision `2c2550a`
+updates that assertion; CI 216/217 are pending. Source/diff review only locally.
 
 ## Authentication intent recovery — 2026-11-05
 

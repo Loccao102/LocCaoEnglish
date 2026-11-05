@@ -33,6 +33,7 @@ miền trước khi code; các loại tiến độ/phần thưởng không có c
 | Writing và phản hồi theo phiên bản bài | [ADR 008: bản nháp, lần nộp và kết quả chấm](decisions/008-writing-receipts.md) |
 | Lịch sử phản hồi phát âm | [ADR 009: receipt gắn với mẫu, không lưu raw audio](decisions/009-acoustic-receipts.md) |
 | Reward và bảng thành tích | [ADR 010: nghỉ điểm tự báo, tính XP từ receipt](decisions/010-checked-practice-ranking.md) |
+| Nghiệm thu ranh giới reward đang hoạt động | [REWARD-BOUNDARY-AUDIT: routes, ledgers, tests và giới hạn CORE-005](REWARD-BOUNDARY-AUDIT.md) |
 | Nhiệm vụ hằng ngày và khôi phục rương | [ADR 011: kế hoạch cố định, bằng chứng đúng ngày, claim nguyên tử](decisions/011-daily-practice-recovery.md) |
 | Điều kiện chuẩn bị cho chín chương | [ADR 012: bài đúng, freshness, preparation receipt và giữ clear cũ](decisions/012-campaign-practice-gates.md) |
 | Hồ sơ kỹ năng và gợi ý luyện tập | [ADR 013: summary từ bài đã kiểm tra, bỏ mastery mẫu và XP dự đoán](decisions/013-skill-practice-summary.md) |
