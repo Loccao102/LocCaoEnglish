@@ -7,5 +7,5 @@ section.guide p { font-size: 16px; line-height: 1.5; color: #294d40; margin: 12p
 .examples span { display: flex; flex-wrap: wrap; gap: 8px; }
 .examples i { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border: 1px solid #6a6b55; border-radius: 50%; font-size: 16px; font-style: normal; font-weight: 700; color: #302c20; }
 .red { background: #ee947d; }
-.yellow { background: #f2cc71; }
+.white { background: #fdf4d7; }
 .status p.recipe { font-size: 16px; line-height: 1.4; color: #294d40; }
